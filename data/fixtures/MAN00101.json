@@ -1,0 +1,16 @@
+{
+  "_note": "Offline fixture. Value copied from the organizers' 28 Oct slides; title and codes are placeholders.",
+  "meta": {
+    "id": "MAN00101",
+    "title": "Population of Iceland on 1 January, key figures",
+    "path": "Ibuar/mannfjoldi/1_yfirlit/Yfirlit_mannfjolda",
+    "variables": [
+      {"code": "Ár", "text": "Year", "values": ["2026"], "value_texts": ["2026"], "time": true},
+      {"code": "Kyn", "text": "Sex", "values": ["0"], "value_texts": ["Total"], "elimination": true}
+    ]
+  },
+  "unit": "people",
+  "rows": [
+    {"key": {"Ár": "2026", "Kyn": "0"}, "value": 394324}
+  ]
+}

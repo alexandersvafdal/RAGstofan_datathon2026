@@ -1,0 +1,499 @@
+{
+ "label": "baseline",
+ "results": [
+  {
+   "id": "pop-rvk-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many people live in Reykjavík?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    139804
+   ],
+   "table_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 45.97,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "In 2025, the population of Reykjavík was 138,772 people. In 2026, it increased to 139,804 people. Data from Statistics Iceland (Hagstofa Íslands), table MAN02005.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 25787,
+     "detail": "What is the population of Reykjavík?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 5500,
+     "detail": "MAN02005 from [MAN00101, MAN02005, MAN10001, MAN02008, MAN09000, MAN030102, MAN030101]"
+    },
+    {
+     "name": "select",
+     "ms": 8733,
+     "detail": "value {'Municipality': ['Reykjavíkurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 5947,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "pop-rvk-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hvað búa margir í Reykjavík?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    139804
+   ],
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 6.62,
+   "llm_calls": 2,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. No fixture data for table MAN030101",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2745,
+     "detail": "How many people live in Reykjavik?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3875,
+     "detail": "MAN030101 from [MAN00101, MAN10001, MAN02008, MAN09000, MAN030102, MAN030101, MAN02005]"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "SourceError: No fixture data for table MAN030101"
+    }
+   ]
+  },
+  {
+   "id": "pop-ice-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What is the population of Iceland?",
+   "expected_tables": [
+    "MAN00101",
+    "MAN02005"
+   ],
+   "expected_values": [
+    394324
+   ],
+   "table_ok": false,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 12.68,
+   "llm_calls": 4,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "The population of Iceland on 1 January 2026 was 394,324 people. Source: Statistics Iceland (Hagstofa Íslands), Table MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2515,
+     "detail": "What is the total population of Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3785,
+     "detail": "MAN00101 from [MAN00101, MAN02005, MAN10001, MAN02008, MAN09000, MAN030102, MAN030101]"
+    },
+    {
+     "name": "select",
+     "ms": 2849,
+     "detail": "value {'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 3528,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "unemp-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was the unemployment rate in August 2026?",
+   "expected_tables": [
+    "VIN00001"
+   ],
+   "expected_values": [
+    6.0
+   ],
+   "table_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 12.88,
+   "llm_calls": 4,
+   "tables": [
+    "VIN00001"
+   ],
+   "text": "The unemployment rate in August 2026 was 6.0%. This information is from Table VIN00001 provided by Statistics Iceland (Hagstofa Íslands).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3103,
+     "detail": "What was the unemployment rate in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3250,
+     "detail": "VIN00001 from [VIN00001, MAN02005, MAN10001, MAN030102, MAN030101]"
+    },
+    {
+     "name": "select",
+     "ms": 3264,
+     "detail": "value {'Month': ['2026M08'], 'Series': ['Measured']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 3256,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "unemp-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hvert var atvinnuleysið í ágúst 2026?",
+   "expected_tables": [
+    "VIN00001"
+   ],
+   "expected_values": [
+    6.0
+   ],
+   "table_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 14.27,
+   "llm_calls": 4,
+   "tables": [
+    "VIN00001"
+   ],
+   "text": "Atvinnuleysið í ágúst 2026 var 6,0%. Source: Statistics Iceland (Hagstofa Íslands), table VIN00001.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3093,
+     "detail": "What was the employment rate in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3343,
+     "detail": "VIN00001 from [VIN00001, MAN02005, MAN10001, MAN030102, MAN030101]"
+    },
+    {
+     "name": "select",
+     "ms": 3332,
+     "detail": "value {'Month': ['2026M08'], 'Series': ['Measured']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4503,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "growth-rvk-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How much did Reykjavík grow from 2025 to 2026?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    1032
+   ],
+   "table_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 19.97,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Reykjavíkurborg, 2025: 138,772; Reykjavíkurborg, 2026: 139,804. Source: Statistics Iceland, MAN02005.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 4330,
+     "detail": "What was the population of Reykjavík in 2025 and 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4142,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN030102, MAN030101, MAN00101, MAN02008, MAN09000]"
+    },
+    {
+     "name": "select",
+     "ms": 6703,
+     "detail": "value {'Municipality': ['Reykjavíkurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']} notes: [\"Age: dropped unknown values ['-=Total']\", \"Age: defaulted to ['Total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4791,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "growth-rvk-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hversu mikið fjölgaði í Reykjavík frá 2025 til 2026?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    1032
+   ],
+   "table_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 26.52,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Í Reykjavík fjölgaði 138.772 menn og kvennar frá 2025 til 2026 að 139.804, sem sést úr Hagstofu Íslands (Hagstofa Íslands) table MAN02005.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 5337,
+     "detail": "How many people were employed in Reykjavík from 2025 to 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4099,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN030102, MAN030101]"
+    },
+    {
+     "name": "select",
+     "ms": 7644,
+     "detail": "value {'Municipality': ['Reykjavíkurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']} notes: [\"Age: dropped unknown values ['-=Total']\", \"Age: defaulted to ['Total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 9434,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "share-rvk-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What share of Iceland's people live in Reykjavík?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    35.5
+   ],
+   "tolerance": 0.01,
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 12.56,
+   "llm_calls": 2,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. No fixture data for table MAN02008",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 5641,
+     "detail": "What is the population share of Reykjavík in Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 6913,
+     "detail": "MAN02008 from [MAN00101, MAN02005, MAN10001, MAN02008, MAN09000, MAN030102, MAN030101]"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "SourceError: No fixture data for table MAN02008"
+    }
+   ]
+  },
+  {
+   "id": "pop-unemp-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many people live in Iceland, and what is the unemployment rate?",
+   "expected_tables": [
+    "MAN00101|MAN02005",
+    "VIN00001"
+   ],
+   "expected_values": [
+    394324,
+    6.0
+   ],
+   "table_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 46.69,
+   "llm_calls": 6,
+   "tables": [
+    "MAN00101",
+    "VIN00001"
+   ],
+   "text": "As of January 1, 2026, the population of Iceland was 394,324 people (Statistics Iceland, MAN00101). The unemployment rate for August 2026 varied depending on the method: measured at 6.0%, seasonally adjusted at 6.8%, and trend at 5.8% (Statistics Iceland, VIN00001).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 8252,
+     "detail": "How many people live in Iceland? | What is the unemployment rate in Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4403,
+     "detail": "VIN00001 from [VIN00001, MAN00101]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 12432,
+     "detail": "MAN00101 from [MAN00101, MAN10001, MAN02008, MAN09000, MAN030102, MAN030101, MAN02005]"
+    },
+    {
+     "name": "select",
+     "ms": 15473,
+     "detail": "value {'Month': ['2026M08'], 'Series': ['Measured', 'Seasonally adjusted', 'Trend']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "3 rows"
+    },
+    {
+     "name": "select",
+     "ms": 12763,
+     "detail": "value {'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 13241,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "pop-unemp-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hvað búa margir á Íslandi og hvert er atvinnuleysið?",
+   "expected_tables": [
+    "MAN00101|MAN02005",
+    "VIN00001"
+   ],
+   "expected_values": [
+    394324,
+    6.0
+   ],
+   "table_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 44.37,
+   "llm_calls": 6,
+   "tables": [
+    "MAN00101",
+    "VIN00001"
+   ],
+   "text": "Í ár 2026 búa 394.324 menn og kvennar á Íslandi. Á miðjan á gær 2026 var atvinnuleysin um 6,0% (margliða), 6,8% (seasonally adjusted) og 5,8% (trend). Source: Statistics Iceland (Hagstofa Íslands), Table MAN00101 and VIN00001.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 7773,
+     "detail": "How many people live in Iceland? | What is the employment rate in Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4146,
+     "detail": "VIN00001 from [VIN00001, MAN00101]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 10643,
+     "detail": "MAN00101 from [MAN00101, MAN10001, MAN02008, MAN09000, MAN030102, MAN030101, MAN02005]"
+    },
+    {
+     "name": "select",
+     "ms": 11898,
+     "detail": "value {'Month': ['2026M08'], 'Series': ['Measured', 'Seasonally adjusted', 'Trend']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "3 rows"
+    },
+    {
+     "name": "select",
+     "ms": 9567,
+     "detail": "value {'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 16382,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}

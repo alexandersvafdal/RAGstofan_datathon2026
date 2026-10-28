@@ -1,0 +1,18 @@
+{
+  "_note": "Offline fixture. Values copied from the organizers' 28 Oct slides; title and codes are placeholders.",
+  "meta": {
+    "id": "VIN00001",
+    "title": "Labour market: unemployment rate, monthly figures",
+    "path": "Samfelag/vinnumarkadur/vinnumarkadsrannsokn/1_manadartolur",
+    "variables": [
+      {"code": "Mánuður", "text": "Month", "values": ["2026M08"], "value_texts": ["2026M08"], "time": true},
+      {"code": "Röð", "text": "Series", "values": ["measured", "sa", "trend"], "value_texts": ["Measured", "Seasonally adjusted", "Trend"]}
+    ]
+  },
+  "unit": "%",
+  "rows": [
+    {"key": {"Mánuður": "2026M08", "Röð": "measured"}, "value": 6.0},
+    {"key": {"Mánuður": "2026M08", "Röð": "sa"}, "value": 6.8},
+    {"key": {"Mánuður": "2026M08", "Röð": "trend"}, "value": 5.8}
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "_note": "Offline fixture. Values copied from the organizers' 28 Oct slides; codes are placeholders, not the live API's.",
+  "meta": {
+    "id": "MAN02005",
+    "title": "Population by municipality, age and sex 1998-2026 - Division into municipalities as of 1 January 2026",
+    "path": "Ibuar/mannfjoldi/2_byggdir/sveitarfelog",
+    "variables": [
+      {"code": "Sveitarfélag", "text": "Municipality", "values": ["-", "0000"], "value_texts": ["Total", "Reykjavíkurborg"], "elimination": true},
+      {"code": "Aldur", "text": "Age", "values": ["-"], "value_texts": ["Total"], "elimination": true},
+      {"code": "Ár", "text": "Year", "values": ["2025", "2026"], "value_texts": ["2025", "2026"], "time": true},
+      {"code": "Kyn", "text": "Sex", "values": ["0"], "value_texts": ["Total"], "elimination": true}
+    ]
+  },
+  "unit": "people",
+  "rows": [
+    {"key": {"Sveitarfélag": "-", "Aldur": "-", "Ár": "2026", "Kyn": "0"}, "value": 394324},
+    {"key": {"Sveitarfélag": "0000", "Aldur": "-", "Ár": "2025", "Kyn": "0"}, "value": 138772},
+    {"key": {"Sveitarfélag": "0000", "Aldur": "-", "Ár": "2026", "Kyn": "0"}, "value": 139804}
+  ]
+}

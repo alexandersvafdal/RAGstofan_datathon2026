@@ -1,0 +1,67 @@
+# Hagbot — Gagnaþon 2026 prototype
+
+Ask about Icelandic statistics in English or Icelandic. You get the number, its unit, the official table it came from, a chart, and the steps that produced it.
+
+## Run
+
+```bash
+python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt
+cp .env.example .env            # pick model endpoint and data source
+ollama pull qwen2.5:7b          # same model family as the shared LUMI one
+.venv/bin/uvicorn hagbot.api:app --reload
+```
+
+Open http://localhost:8000. API: `POST /api/ask {"question": "...", "language": null, "table_id": null}`.
+
+## How a question becomes an answer
+
+```
+question
+  └─ plan        LLM   split into 1–3 sub-questions, one table each; English search query
+      └─ per sub-question, in parallel:
+         retrieve  BM25 over the catalog → LLM picks a table, or asks back when two fit equally
+         select    LLM picks dimension codes + operation; code validates codes, fills defaults,
+                   and overrides "value" when the wording clearly asks for a change
+         fetch     data source returns tidy rows
+         compute   Python does every calculation (difference, pct_change, share)
+         chart     rules pick kpi / line / bar from the data shape
+  └─ compose     LLM writes 1–3 sentences from the facts; every number is checked against the facts,
+                 and a template answer replaces it if anything was invented
+```
+
+Every LLM step has a Pydantic output schema (`hagbot/steps/*.py`). The model never does arithmetic and never chooses chart code.
+
+| Path | What |
+|---|---|
+| `hagbot/schemas.py` | The answer contract the frontend renders from |
+| `hagbot/llm.py` | Client for any OpenAI-compatible endpoint (Ollama, vLLM on LUMI, hosted) with JSON validation and retry |
+| `hagbot/sources.py` | `FixtureSource` (offline) and `PxApiSource` (live, throttled, cached). Add the kit's `data.px` reader here |
+| `hagbot/catalog.py` | Table catalog + BM25. Add vector search (kit's bge-m3 index) here and fuse scores |
+| `hagbot/steps/` | plan, retrieve, select, compute, chart, compose |
+| `frontend/` | No-build HTML/JS; Vega-Lite charts; clarification buttons; data table; step timings |
+| `eval/run_eval.py` | Scores right table / right answer by level × language, saves results, compares to a baseline |
+| `scripts/build_catalog.py` | Crawls the live PX-API into a catalog (slow on purpose, resumable) |
+
+## Evaluate after every change
+
+```bash
+.venv/bin/python -m eval.run_eval --label my-change --baseline eval/results/<previous>.json
+```
+
+The ten seed questions in `eval/questions.jsonl` only use numbers from the organizers' slides. On Friday, convert the kit's 52 questions into this format and record the baseline first.
+
+Current local result (qwen2.5:7b, fixtures): baseline 6/10 → 8/10 after passing the original question to `select` and the wording override. The two misses are table choice (MAN030101 / MAN02008 picked over MAN02005).
+
+## Known limits
+
+- **Fixtures** (`data/fixtures`) hold only the few values shown on the 28 Oct slides; codes are placeholders, not the live API's.
+- **PX-API** answered `429 Too Many Requests` to every call from this network on 28 Oct, so `PxApiSource` and `build_catalog.py` are written against the PxWeb v1 format but not yet tested live.
+- **Icelandic answers** from the 7B model are grammatically weak. Options: a bigger model on LUMI, or template sentences for Icelandic.
+- **Latency** on a laptop is 10–45 s per question (3–5 sequential model calls). vLLM on LUMI and parallel sub-questions should cut this.
+
+## Friday checklist
+
+1. Clone `gagnvist-starter`, run its `gagnvist evaluate` for the official baseline.
+2. Load the kit's `cards/` into `Catalog` and its `data.px` files into a `LocalPxSource`.
+3. Point `LLM_BASE_URL` at the LUMI tunnel.
+4. Port the 52 questions to `eval/questions.jsonl`; work on table choice first.

@@ -1,0 +1,10 @@
+{"id": "pop-rvk-en", "level": "easy", "language": "en", "question": "How many people live in Reykjavík?", "expected_tables": ["MAN02005"], "expected_values": [139804]}
+{"id": "pop-rvk-is", "level": "easy", "language": "is", "question": "Hvað búa margir í Reykjavík?", "expected_tables": ["MAN02005"], "expected_values": [139804]}
+{"id": "pop-ice-en", "level": "easy", "language": "en", "question": "What is the population of Iceland?", "expected_tables": ["MAN00101", "MAN02005"], "expected_values": [394324]}
+{"id": "unemp-en", "level": "easy", "language": "en", "question": "What was the unemployment rate in August 2026?", "expected_tables": ["VIN00001"], "expected_values": [6.0]}
+{"id": "unemp-is", "level": "easy", "language": "is", "question": "Hvert var atvinnuleysið í ágúst 2026?", "expected_tables": ["VIN00001"], "expected_values": [6.0]}
+{"id": "growth-rvk-en", "level": "medium", "language": "en", "question": "How much did Reykjavík grow from 2025 to 2026?", "expected_tables": ["MAN02005"], "expected_values": [1032]}
+{"id": "growth-rvk-is", "level": "medium", "language": "is", "question": "Hversu mikið fjölgaði í Reykjavík frá 2025 til 2026?", "expected_tables": ["MAN02005"], "expected_values": [1032]}
+{"id": "share-rvk-en", "level": "medium", "language": "en", "question": "What share of Iceland's people live in Reykjavík?", "expected_tables": ["MAN02005"], "expected_values": [35.5], "tolerance": 0.01}
+{"id": "pop-unemp-en", "level": "hard", "language": "en", "question": "How many people live in Iceland, and what is the unemployment rate?", "expected_tables": ["MAN00101|MAN02005", "VIN00001"], "expected_values": [394324, 6.0]}
+{"id": "pop-unemp-is", "level": "hard", "language": "is", "question": "Hvað búa margir á Íslandi og hvert er atvinnuleysið?", "expected_tables": ["MAN00101|MAN02005", "VIN00001"], "expected_values": [394324, 6.0]}

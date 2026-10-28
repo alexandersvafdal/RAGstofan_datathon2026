@@ -1,0 +1,138 @@
+{
+ "label": "original-question",
+ "results": [
+  {
+   "id": "growth-rvk-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How much did Reykjavík grow from 2025 to 2026?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    1032
+   ],
+   "table_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 17.72,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Reykjavíkurborg, 2025: 138,772; Reykjavíkurborg, 2026: 139,804. Source: Statistics Iceland, MAN02005.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 4408,
+     "detail": "What was the population of Reykjavík in 2025 and 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3551,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN030102, MAN030101, MAN00101, MAN02008, MAN09000]"
+    },
+    {
+     "name": "select",
+     "ms": 5331,
+     "detail": "value {'Municipality': ['Reykjavíkurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4425,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "growth-rvk-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hversu mikið fjölgaði í Reykjavík frá 2025 til 2026?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    1032
+   ],
+   "table_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 30.37,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Í Reykjavík fjölgaði 1.032 menn frá 2025 til 2026. Þessi upplýsingar eru afhendingar frá Hagstofu Íslands, tölvupróf MAN02005: Population by municipality, age and sex 1998-2026 - Division into municipalities as of 1 January 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 5313,
+     "detail": "How many people were employed in Reykjavík from 2025 to 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3986,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN030102, MAN030101]"
+    },
+    {
+     "name": "select",
+     "ms": 8353,
+     "detail": "difference {'Municipality': ['Reykjavíkurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 12715,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "share-rvk-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What share of Iceland's people live in Reykjavík?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    35.5
+   ],
+   "tolerance": 0.01,
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 12.16,
+   "llm_calls": 2,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. No fixture data for table MAN02008",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 5620,
+     "detail": "What is the population share of Reykjavík in Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 6539,
+     "detail": "MAN02008 from [MAN00101, MAN02005, MAN10001, MAN02008, MAN09000, MAN030102, MAN030101]"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "SourceError: No fixture data for table MAN02008"
+    }
+   ]
+  }
+ ]
+}
