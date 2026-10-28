@@ -76,7 +76,8 @@ class Pipeline:
 
     async def _answer_part(self, sq: SubQuestion, original: str, lang: str, forced_table: str | None, steps: list[Step]) -> AnswerPart:
         t = Timer()
-        r = await retrieve(self.llm, self.catalog, sq.question, sq.search_query, settings.retrieve_top_k, forced_table)
+        r = await retrieve(self.llm, self.catalog, sq.question, sq.search_query, settings.retrieve_top_k, forced_table,
+                           original)
         steps.append(Step(name="retrieve", ms=t.ms(),
                           detail=f"{r.table.id} from [{', '.join(r.candidates)}]" + (" (ambiguous)" if r.ambiguous else "")))
         if r.ambiguous:

@@ -50,12 +50,24 @@ Every LLM step has a Pydantic output schema (`hagbot/steps/*.py`). The model nev
 
 The ten seed questions in `eval/questions.jsonl` only use numbers from the organizers' slides. On Friday, convert the kit's 52 questions into this format and record the baseline first.
 
-Current local result (qwen2.5:7b, fixtures): baseline 6/10 → 8/10 after passing the original question to `select` and the wording override. The two misses are table choice (MAN030101 / MAN02008 picked over MAN02005).
+Results so far (qwen2.5:7b, live PX-API, full 1,857-table catalog):
+
+| Change | Right answers |
+|---|---|
+| Keyword search over titles only | 1/10 (right table among candidates: 0/10) |
+| + option labels, prefix matching, stopwords, recency, coverage boost, 15 candidates | 1/10 (right table among candidates: 5/10) |
+| + latest period when the question names none | 3/10 |
+
+Search now usually offers the right table; the 7B model then often picks a neighbour (e.g. the trend series
+VIN00003 over original VIN00001) or the wrong option (employment rate for *atvinnuleysi*). A larger model on LUMI
+is the next thing to test. On the 8-table offline sample the pipeline scored 8/10.
 
 ## Known limits
 
 - **Fixtures** (`data/fixtures`) hold only the few values shown on the 28 Oct slides; codes are placeholders, not the live API's.
-- **PX-API** answered `429 Too Many Requests` to every call from this network on 28 Oct, so `PxApiSource` and `build_catalog.py` are written against the PxWeb v1 format but not yet tested live.
+- **PX-API** rate-limits bursts (`429`). The source and crawler space calls 1 s apart, retry with back-off, and cache on disk.
+- **Catalog** `data/catalog_live.json` was crawled on 28 Oct 2026 (1,857 tables, option labels included); 1 table was skipped.
+- **"Current" answers move**: the latest unemployment month changed from 2026M08 to 2026M09 during development.
 - **Icelandic answers** from the 7B model are grammatically weak. Options: a bigger model on LUMI, or template sentences for Icelandic.
 - **Latency** on a laptop is 10–45 s per question (3–5 sequential model calls). vLLM on LUMI and parallel sub-questions should cut this.
 

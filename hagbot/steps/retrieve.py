@@ -28,22 +28,27 @@ Rules:
 - "How many people live in X" means population on 1 January, current municipality division, unless the question says otherwise.
 - Prefer the table whose period covers the year asked about; with no year, prefer the most recent data.
 - Prefer the most direct table over one that needs extra breakdowns.
+- Prefer original (unadjusted) figures unless the question asks for seasonally adjusted or trend figures.
+- Prefer monthly tables when a month is asked, yearly tables when only a year is asked.
+- A place or category the question names should be among the table's options ("Has options").
 Copy the table ID exactly."""
 
 
 async def retrieve(llm: LLM, catalog: Catalog, question: str, search_query: str, k: int,
-                   forced_table: str | None = None) -> Retrieved:
+                   forced_table: str | None = None, original: str = "") -> Retrieved:
     if forced_table and (entry := catalog.get(forced_table)):
         return Retrieved(table=entry, candidates=[entry.id])
-    hits = catalog.search(f"{search_query} {question}", k)
+    # the original wording matches Icelandic titles even when the planner mistranslates it
+    hits = catalog.search(f"{search_query} {question} {original}", k)
     if not hits:
         raise LookupError(f"No table matches “{question}”")
     entries = [e for e, _ in hits]
     if len(entries) == 1:
         return Retrieved(table=entries[0], candidates=[entries[0].id])
 
-    cards = "\n".join(f"- {e.card()}" for e in entries)
-    pick = await llm.complete_json(SYSTEM, f"Question: {question}\n\nTables:\n{cards}", Pick)
+    cards = "\n".join(f"- {e.card(f'{question} {original}')}" for e in entries)
+    asked = f"User asked: {original}\nThis part: {question}" if original and original != question else f"Question: {question}"
+    pick = await llm.complete_json(SYSTEM, f"{asked}\n\nTables:\n{cards}", Pick)
     by_id = {e.id: e for e in entries}
     table = by_id.get(pick.table_id.strip(), entries[0])  # an invented ID falls back to the top search hit
     alts = [by_id[a] for a in pick.alternatives if a in by_id and a != table.id]

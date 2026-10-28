@@ -28,7 +28,7 @@ class Settings:
     fixtures_dir: Path = _path("FIXTURES_DIR", "data/fixtures")
     cache_dir: Path = _path("CACHE_DIR", ".cache")
 
-    retrieve_top_k: int = int(os.getenv("RETRIEVE_TOP_K", "8"))
+    retrieve_top_k: int = int(os.getenv("RETRIEVE_TOP_K", "15"))
 
 
 settings = Settings()

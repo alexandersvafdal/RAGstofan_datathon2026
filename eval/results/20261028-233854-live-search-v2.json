@@ -1,0 +1,525 @@
+{
+ "label": "live-search-v2",
+ "results": [
+  {
+   "id": "pop-rvk-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many people live in Reykjavík?",
+   "expected_tables": [
+    "MAN02005|MAN03270"
+   ],
+   "expected_values": [
+    139804
+   ],
+   "table_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 43.67,
+   "llm_calls": 4,
+   "tables": [
+    "MAN03270"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands), the population of Reykjavík in 2023 was 134,298. This data is from table MAN03270.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 17480,
+     "detail": "What is the population of Reykjavík?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 10358,
+     "detail": "MAN03270 from [MAN43006, MAN03270, MAN03301, MAN02007, MAN90004, MAN10001, MAN10289, MAN10290, MAN10291, MAN10292, MAN10293, MAN10294, MAN10296, MAN10297, MAN10298]"
+    },
+    {
+     "name": "select",
+     "ms": 11001,
+     "detail": "value {'Districts': ['Total'], 'Age': ['Total'], 'Year': ['2023'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4825,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "pop-rvk-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hvað búa margir í Reykjavík?",
+   "expected_tables": [
+    "MAN02005|MAN03270"
+   ],
+   "expected_values": [
+    139804
+   ],
+   "table_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 26.03,
+   "llm_calls": 4,
+   "tables": [
+    "MAN03270"
+   ],
+   "text": "Í ári 2026 búa til Reykjavík 139.804 margir. Source: Statistics Iceland (Hagstofa Íslands), table MAN03270.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2726,
+     "detail": "How many people live in Reykjavik?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 10113,
+     "detail": "MAN03270 from [MAN43006, MAN03270, MAN03301, MAN02007, MAN90004, MAN10001, MAN10289, MAN10290, MAN10291, MAN10292, MAN10293, MAN10294, MAN10296, MAN10297, MAN10298]"
+    },
+    {
+     "name": "select",
+     "ms": 8228,
+     "detail": "value {'Districts': ['Total'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4959,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "pop-ice-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What is the population of Iceland?",
+   "expected_tables": [
+    "MAN00101",
+    "MAN02005"
+   ],
+   "expected_values": [
+    394324
+   ],
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 25.36,
+   "llm_calls": 4,
+   "tables": [
+    "MAN00000"
+   ],
+   "text": "The population of Iceland as of January 1, 2023, was 375,218. This data is from Table MAN00000: Population - key figures 1703-2026 provided by Statistics Iceland (Hagstofa Íslands).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2628,
+     "detail": "What is the total population of Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 8729,
+     "detail": "MAN00000 from [HEI11501, MAN00000, HEI11100, MAN09012, VIN00900, VIN00901, CEN9905, MAN00102, MAN90003, MAN90004, MAN90001, MAN90002, MAN09010, MAN00101, MAN02120]"
+    },
+    {
+     "name": "select",
+     "ms": 7919,
+     "detail": "value {'Year': ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'], 'Unit': ['Population 1 January']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 55,
+     "detail": "9 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 6022,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "unemp-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was the unemployment rate in August 2026?",
+   "expected_tables": [
+    "VIN00001"
+   ],
+   "expected_values": [
+    6.0
+   ],
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 22.54,
+   "llm_calls": 4,
+   "tables": [
+    "VIN00003"
+   ],
+   "text": "The unemployment rate in August 2026 was 5.9%. This information is from Table VIN00003 provided by Statistics Iceland (Hagstofa Íslands).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3251,
+     "detail": "What was the unemployment rate in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 8572,
+     "detail": "VIN00003 from [VIN00910, VIN01004, VIN00920, VIN00003, VIN00001, VIN00002, VIN00911, VIN00951, VIN01002, VIN01206, VIN00930, VIN00921, SAM01104, FYR04102, FYR04101]"
+    },
+    {
+     "name": "select",
+     "ms": 7256,
+     "detail": "value {'Month': ['2026M08'], 'Sex/age': ['Total'], 'Unit': ['Unemployment rate']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 3462,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "unemp-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hvert var atvinnuleysið í ágúst 2026?",
+   "expected_tables": [
+    "VIN00001"
+   ],
+   "expected_values": [
+    6.0
+   ],
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 26.72,
+   "llm_calls": 4,
+   "tables": [
+    "VIN00003"
+   ],
+   "text": "Í ágúst 2026 var atvinnuleysið 74,5%. Source: Statistics Iceland (Hagstofa Íslands), table VIN00003.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3171,
+     "detail": "What was the employment rate in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 11981,
+     "detail": "VIN00003 from [VIN00910, VIN01004, VIN00911, VIN00004, VIN00930, VIN00951, VIN00003, VIN00001, VIN00002, FYR04101, THJ11001, VIN01002, FYR04111, VIN10032, VIN10022]"
+    },
+    {
+     "name": "select",
+     "ms": 7679,
+     "detail": "value {'Month': ['2026M08'], 'Sex/age': ['Total'], 'Unit': ['Employment rate']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 3886,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "growth-rvk-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How much did Reykjavík grow from 2025 to 2026?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    1032
+   ],
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 27.56,
+   "llm_calls": 4,
+   "tables": [
+    "MAN03270"
+   ],
+   "text": "Reykjavík grew by 54 people from 2025 to 2026. This information is sourced from Statistics Iceland (Hagstofa Íslands) table MAN03270.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 4372,
+     "detail": "What was the population of Reykjavík in 2025 and 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 10313,
+     "detail": "MAN03270 from [MAN02008, MAN43006, MAN03270, MAN00110, MAN02007, MAN02005, MAN10001, MAN04203, MAN04208, MAN07108, MAN12104, MAN03200, MAN07109, MAN030102, MAN030101]"
+    },
+    {
+     "name": "select",
+     "ms": 8468,
+     "detail": "difference {'Districts': ['99 Unspecific district'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4398,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "growth-rvk-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hversu mikið fjölgaði í Reykjavík frá 2025 til 2026?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    1032
+   ],
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 30.0,
+   "llm_calls": 4,
+   "tables": [
+    "VIN00931"
+   ],
+   "text": "2025, Capital region, Males and females, 16-74, Employed (Total): 146.100. Heimild: Hagstofa Íslands, VIN00931.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 4568,
+     "detail": "How many people were employed in Reykjavík from 2025 to 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 10503,
+     "detail": "VIN00931 from [THJ11001, VIN01104, THJ11002, MEN10102, VIN00930, VIN00003, VIN00001, VIN00002, VIN00931, SAM08010, VIN01006, VIN00910, VIN01105, VIN01110, CEN06070]"
+    },
+    {
+     "name": "select",
+     "ms": 8814,
+     "detail": "value {'Year': ['2025'], 'Region': ['Capital region'], 'Sex': ['Males and females'], 'Age': ['16-74'], 'Unit': ['Employed (Total)']} notes: [\"Year: dropped unknown values ['2026']\", 'difference needs two values to compare; reporting values instead']"
+    },
+    {
+     "name": "fetch",
+     "ms": 66,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 6046,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "share-rvk-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What share of Iceland's people live in Reykjavík?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    35.5
+   ],
+   "tolerance": 0.01,
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 23.87,
+   "llm_calls": 4,
+   "tables": [
+    "HEI11100"
+   ],
+   "text": "The data provided does not contain information about the share of Iceland's population living in Reykjavík. The table HEI11100 refers to marriages in 2011 and does not include population distribution statistics.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3410,
+     "detail": "What is the population share of Reykjavík in Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 10826,
+     "detail": "HEI11100 from [MAN43006, SJA08106, KOS03107, MAN03270, MAN03301, SKO00010, HEI11100, MAN02007, VIN01104, VIN00931, VIN02004, VIN02005, VIN02016, VIN02017, VIN02018]"
+    },
+    {
+     "name": "select",
+     "ms": 5729,
+     "detail": "value {'Division': ['Marriages 2011'], 'Sex': ['Total']} notes: ['share needs a part and a whole; reporting values instead']"
+    },
+    {
+     "name": "fetch",
+     "ms": 52,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 3848,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "pop-unemp-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many people live in Iceland, and what is the unemployment rate?",
+   "expected_tables": [
+    "MAN00101|MAN02005",
+    "VIN00001"
+   ],
+   "expected_values": [
+    394324,
+    5.1
+   ],
+   "note": "latest month; 5.1% for 2026M09 as of 28 Oct",
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 53.75,
+   "llm_calls": 6,
+   "tables": [
+    "VIN00001",
+    "VIN00910"
+   ],
+   "text": "In 2026, the estimated population of Iceland aged 16-74 years is 294,700. The unemployment rate for people aged 16-74 in 2023 was 3.2%, as reported by Statistics Iceland (Hagstofa Íslands) in tables VIN00001 and VIN00910.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 4472,
+     "detail": "How many people live in Iceland? | What is the unemployment rate in Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 11008,
+     "detail": "VIN00001 from [VIN00910, VIN00911, VIN00003, VIN00001, VIN00002, CEN05000, VIN01401, VIN01402, VIN01403, VIN01404, VIN01004, VIN00951, VIN01002, VIN00920, VIN00921]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 19963,
+     "detail": "VIN00910 from [VIN00910, VIN00911, VIN01004, VIN00951, VIN01002, VIN00920, VIN00921, VIN00003, VIN00001, VIN00002, VIN01003, THJ07000, VIN01104, THJ07100, CEN05000]"
+    },
+    {
+     "name": "select",
+     "ms": 17281,
+     "detail": "value {'Month': ['2026M09'], 'Sex/age': ['Total'], 'Unit': ['Estimated population (16-74 years)']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 56,
+     "detail": "1 rows"
+    },
+    {
+     "name": "select",
+     "ms": 21051,
+     "detail": "value {'Quarter': ['2023Q4'], 'Region': ['Total'], 'Sex': ['Males and females'], 'Age': ['16-74'], 'Rate': ['Unemployment rate, % (of labour force)']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 8229,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "pop-unemp-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hvað búa margir á Íslandi og hvert er atvinnuleysið?",
+   "expected_tables": [
+    "MAN00101|MAN02005",
+    "VIN00001"
+   ],
+   "expected_values": [
+    394324,
+    5.1
+   ],
+   "note": "latest month; 5.1% for 2026M09 as of 28 Oct",
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 63.46,
+   "llm_calls": 6,
+   "tables": [
+    "HEI11501",
+    "HEI11504"
+   ],
+   "text": "Population, thous., 1995, Men: 134; Population, thous., 2005, Women: 146; Population, thous., 2005, Men: 147. Heimild: Hagstofa Íslands, HEI11501. Percent of employed full-time (35+ hours per week), 2005, Women: 63; Percent of employed full-time (35+ hours per week), 2005, Men: 90. Heimild: Hagstofa Íslands, HEI11504.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 5334,
+     "detail": "How many people live in Iceland? | What is the employment rate in Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 10410,
+     "detail": "HEI11501 from [VIN00910, VIN00911, HEI11501, MAN00000, HEI11100, MAN09012, VIN00900, VIN00901, VIN01002, CEN9905, VIN01004, VIN00951, VIN01701, MAN00102, MAN90003]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 20772,
+     "detail": "HEI11504 from [VIN00910, VIN00911, VIN01004, VIN00951, VIN01002, FYR04111, VIN00004, FYR04101, VIN00930, VIN00003, VIN00001, VIN00002, HEI11504, VIN01701, VIN01003]"
+    },
+    {
+     "name": "select",
+     "ms": 19118,
+     "detail": "value {'population': ['Population, thous.'], 'year': ['1975', '1985', '1995', '2005'], 'sex': ['Women', 'Men']} notes: [\"year: dropped unknown values ['latest']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 52,
+     "detail": "8 rows"
+    },
+    {
+     "name": "select",
+     "ms": 15069,
+     "detail": "value {'employment': ['Percent of employed full-time (35+ hours per week)'], 'year': ['2005'], 'sex': ['Women', 'Men']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 56,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 22197,
+     "detail": "template"
+    }
+   ]
+  }
+ ]
+}

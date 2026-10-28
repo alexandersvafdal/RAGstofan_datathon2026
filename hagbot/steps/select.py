@@ -110,6 +110,13 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "") -> Resolved:
             notes.append(f"{var.text}: defaulted to {[var.label_of(c) for c in codes]}")
         out[var.code] = sorted(set(codes), key=var.values.index)
 
+    # No year or period in the question: the latest period, whatever the model chose
+    if not re.search(r"\b(?:18|19|20)\d\d\b", question) and sel.operation == "value":
+        for var in meta.variables:
+            if var.time and out.get(var.code) != [var.values[-1]]:
+                notes.append(f"{var.text}: no period asked, using latest {var.values[-1]}")
+                out[var.code] = [var.values[-1]]
+
     compare = sel.compare_dimension if sel.compare_dimension in out else None
     op = sel.operation
     hint = guess_op(question)
