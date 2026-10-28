@@ -39,6 +39,9 @@ class Client:
 def walk(c: Client, lang: str, path: str = ""):
     url = f"{BASE}/px{lang}/api/v1/{lang}/{path}".rstrip("/")
     for item in c.get(url):
+        if "dbid" in item:  # the root lists databases, not folders
+            yield from walk(c, lang, item["dbid"])
+            continue
         sub = f"{path}/{item['id']}".strip("/")
         if item["type"] == "l":
             yield from walk(c, lang, sub)

@@ -1,0 +1,246 @@
+{
+ "label": "live-prefix-match",
+ "results": [
+  {
+   "id": "pop-rvk-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many people live in Reykjavík?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    139804
+   ],
+   "table_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 37.83,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN02005, as of January 1, 2026, the population of Reykjavík is projected to be 139,804 people.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2984,
+     "detail": "What is the population of Reykjavík?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3888,
+     "detail": "MAN02005 from [MAN00101, MAN02005, MAN10001, MAN02008, MAN09000, MAN030102, MAN030101]"
+    },
+    {
+     "name": "select",
+     "ms": 16323,
+     "detail": "value {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 10119,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4515,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "pop-rvk-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hvað búa margir í Reykjavík?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    139804
+   ],
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 21.95,
+   "llm_calls": 4,
+   "tables": [
+    "MAN030101"
+   ],
+   "text": "Í Reykjavík búa 138.753 margir 1 janúar 2026. Source: Statistics Iceland (Hagstofa Íslands), table MAN030101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2828,
+     "detail": "How many people live in Reykjavik?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3971,
+     "detail": "MAN030101 from [MAN00101, MAN10001, MAN02008, MAN09000, MAN030102, MAN030101, MAN02005]"
+    },
+    {
+     "name": "select",
+     "ms": 10900,
+     "detail": "value {'Urban Nuclei': ['Reykjavik'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4248,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "growth-rvk-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How much did Reykjavík grow from 2025 to 2026?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    1032
+   ],
+   "table_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 29.97,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Reykjavík grew by 1,032 people from 2025 to 2026. This information is sourced from Statistics Iceland (Hagstofa Íslands) table MAN02005: Population by municipality, age and sex 1998-2026 - Division into municipalities as of 1 January 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 4394,
+     "detail": "What was the population of Reykjavík in 2025 and 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4138,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN030102, MAN030101, MAN00101, MAN02008, MAN09000]"
+    },
+    {
+     "name": "select",
+     "ms": 13434,
+     "detail": "difference {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']} notes: [\"Age: defaulted to ['Total']\", \"Sex: defaulted to ['Total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 54,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 7946,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "growth-rvk-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hversu mikið fjölgaði í Reykjavík frá 2025 til 2026?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    1032
+   ],
+   "table_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 41.48,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Í Reykjavík fjölgaði 1.032 menn frá 2025 til 2026. Þessi upplýsingar eru afhendingar frá Hagstofu Íslands, tölvupróf MAN02005: Population by municipality, age and sex 1998-2026 - Division into municipalites as of 1 January 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 5919,
+     "detail": "How many people were employed in Reykjavík from 2025 to 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4267,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN030102, MAN030101]"
+    },
+    {
+     "name": "select",
+     "ms": 20329,
+     "detail": "difference {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']} notes: [\"Age: defaulted to ['Total']\", \"Sex: defaulted to ['Total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 10958,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "share-rvk-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What share of Iceland's people live in Reykjavík?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    35.5
+   ],
+   "tolerance": 0.01,
+   "table_ok": false,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 49.55,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02008"
+   ],
+   "text": "In 2025, 35.5% of Iceland's population lived in Reykjavíkurborg according to Statistics Iceland (Hagstofa Íslands) table MAN02008.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 5047,
+     "detail": "What is the population share of Reykjavík in Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 6421,
+     "detail": "MAN02008 from [MAN00101, MAN02005, MAN10001, MAN02008, MAN09000, MAN030102, MAN030101]"
+    },
+    {
+     "name": "select",
+     "ms": 31927,
+     "detail": "share {'Municipality': ['Total', 'Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2025'], 'Sex': ['Total']} notes: [\"Year: dropped unknown values ['Alls']\", \"Year: defaulted to ['2025']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 61,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 6093,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}

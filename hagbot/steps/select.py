@@ -46,16 +46,21 @@ _INTENT = [  # cheap keyword check; overrides a "value" answer when the question
     ("difference", re.compile(r"(grow|grew|increase|decrease|declin|change|differ|fjolg|faekk|breyt|aukn|munur)", re.I)),
 ]
 _TOTAL = re.compile(r"\b(total|alls|samtals|all)\b", re.I)
-_MAX_OPTIONS = 40
+_MAX_OPTIONS = 80
+
+
+def _mentions(question_tokens: set[str], label: str) -> bool:
+    """True if a question word starts a label word or vice versa: "reykjavik" ~ "reykjavikurborg"."""
+    return any(a.startswith(b) or b.startswith(a) for a in tokens(label) if len(a) >= 4 for b in question_tokens)
 
 
 def _options_for_prompt(var: Variable, question: str) -> list[tuple[str, str]]:
     pairs = list(zip(var.values, var.value_texts))
     if len(pairs) <= _MAX_OPTIONS:
         return pairs
-    q = set(tokens(question))
+    q = {t for t in tokens(question) if len(t) >= 4}
     years = set(re.findall(r"\b(?:19|20)\d\d\b", question))
-    keep = [p for p in pairs if _TOTAL.search(p[1]) or q & set(tokens(p[1])) or any(y in p[0] for y in years)]
+    keep = [p for p in pairs if _TOTAL.search(p[1]) or _mentions(q, p[1]) or any(y in p[0] for y in years)]
     if var.time:
         keep += pairs[-12:]
     seen, out = set(), []

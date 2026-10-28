@@ -1,0 +1,246 @@
+{
+ "label": "live-pxapi-small",
+ "results": [
+  {
+   "id": "pop-rvk-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many people live in Reykjavík?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    139804
+   ],
+   "table_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 16.46,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "In 2026, the population of Reykjavík is projected to be 394,324 people according to Statistics Iceland (Hagstofa Íslands) table MAN02005.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3058,
+     "detail": "What is the population of Reykjavík?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1614,
+     "detail": "MAN02005 from [MAN00101, MAN02005, MAN10001, MAN02008, MAN09000, MAN030102, MAN030101]"
+    },
+    {
+     "name": "select",
+     "ms": 7803,
+     "detail": "value {'Municipality': ['Total'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 139,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 3845,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "pop-rvk-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hvað búa margir í Reykjavík?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    139804
+   ],
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 21.02,
+   "llm_calls": 4,
+   "tables": [
+    "MAN030101"
+   ],
+   "text": "Í Reykjavík búa 138.753 margir 1 janúar 2026. Source: Statistics Iceland (Hagstofa Íslands), table MAN030101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2792,
+     "detail": "How many people live in Reykjavik?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3932,
+     "detail": "MAN030101 from [MAN00101, MAN10001, MAN02008, MAN09000, MAN030102, MAN030101, MAN02005]"
+    },
+    {
+     "name": "select",
+     "ms": 9118,
+     "detail": "value {'Urban Nuclei': ['Reykjavik'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 69,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 5102,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "growth-rvk-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How much did Reykjavík grow from 2025 to 2026?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    1032
+   ],
+   "table_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 22.51,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Reykjavík grew by 4,880 people from 2025 to 2026. This information is sourced from Statistics Iceland (Hagstofa Íslands) table MAN02005: Population by municipality, age and sex 1998-2026 - Division into municipalities as of 1 January 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 4206,
+     "detail": "What was the population of Reykjavík in 2025 and 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3880,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN030102, MAN030101, MAN00101, MAN02008, MAN09000]"
+    },
+    {
+     "name": "select",
+     "ms": 8022,
+     "detail": "difference {'Municipality': ['Total'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 56,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 6340,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "growth-rvk-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hversu mikið fjölgaði í Reykjavík frá 2025 til 2026?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    1032
+   ],
+   "table_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 23.13,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Í Reykjavík fjölgaði 4.880 menn frá 2025 til 2026. Þessi upplýsingar eru afhendingar frá Hagstofu Íslands, table MAN02005: Population by municipality, age and sex 1998-2026 - Division into municipalites as of 1 January 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 4511,
+     "detail": "How many people were employed in Reykjavík from 2025 to 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3122,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN030102, MAN030101]"
+    },
+    {
+     "name": "select",
+     "ms": 8110,
+     "detail": "difference {'Municipality': ['Total'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 7384,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "share-rvk-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What share of Iceland's people live in Reykjavík?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    35.5
+   ],
+   "tolerance": 0.01,
+   "table_ok": false,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 20.25,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02008"
+   ],
+   "text": "In 2022, according to Statistics Iceland (Hagstofa Íslands) table MAN02008, Reykjavík had a population of 370,067.5 people.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3235,
+     "detail": "What is the population share of Reykjavík in Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4425,
+     "detail": "MAN02008 from [MAN00101, MAN02005, MAN10001, MAN02008, MAN09000, MAN030102, MAN030101]"
+    },
+    {
+     "name": "select",
+     "ms": 8395,
+     "detail": "value {'Municipality': ['Total'], 'Age': ['Total'], 'Year': ['2022'], 'Sex': ['Total']} notes: ['share needs a part and a whole; reporting values instead']"
+    },
+    {
+     "name": "fetch",
+     "ms": 51,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4145,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}
