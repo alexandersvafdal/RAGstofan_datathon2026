@@ -57,10 +57,13 @@ Results so far (qwen2.5:7b, live PX-API, full 1,857-table catalog):
 | Keyword search over titles only | 1/10 (right table among candidates: 0/10) |
 | + option labels, prefix matching, stopwords, recency, coverage boost, 15 candidates | 1/10 (right table among candidates: 5/10) |
 | + latest period when the question names none | 3/10 |
+| Same pipeline, qwen2.5:14b instead of 7b | 4/10 (right table among candidates: 5/10; median 62 s, max 122 s) |
 
 Search now usually offers the right table; the 7B model then often picks a neighbour (e.g. the trend series
-VIN00003 over original VIN00001) or the wrong option (employment rate for *atvinnuleysi*). A larger model on LUMI
-is the next thing to test. On the 8-table offline sample the pipeline scored 8/10.
+VIN00003 over original VIN00001) or the wrong option (employment rate for *atvinnuleysi*). The 14B model fixed two of
+those and broke one (whole-country population went to a projection table): +1 net, at about twice the latency
+on a laptop. Model size alone is not the fix; the bigger gain is getting the right table into the candidates
+(5/10) and adding table-choice rules or few-shot examples. On the 8-table offline sample the pipeline scored 8/10.
 
 ## Known limits
 

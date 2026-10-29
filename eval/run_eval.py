@@ -12,6 +12,7 @@ Question format (one JSON object per line):
 import argparse
 import asyncio
 import json
+import re
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -31,7 +32,14 @@ def score(q: dict, a: Answer) -> dict:
     def found(v: float) -> bool:
         return any(abs(n - v) <= max(abs(v) * tol, 1e-9) for n in numbers)
     values_ok = a.status == "answered" and all(found(v) for v in q["expected_values"])
-    return {"table_ok": table_ok, "answer_ok": values_ok}
+    # was the right table among the search candidates the model chose from? (search vs. model failure)
+    offered = set()
+    for st in a.steps:
+        m = re.match(r"\S+ from \[(.*?)\]", st.detail) if st.name == "retrieve" else None
+        if m:
+            offered |= set(m.group(1).split(", "))
+    offered_ok = all(any(t in offered for t in want.split("|")) for want in q["expected_tables"])
+    return {"table_ok": table_ok, "offered_ok": offered_ok, "answer_ok": values_ok}
 
 
 async def run(questions: list[dict]) -> list[dict]:
@@ -67,7 +75,8 @@ def report(results: list[dict]):
         print(f"{lvl:8}" + "".join(f"{c:>12}" for c in row))
     n = len(results)
     secs = sorted(r["seconds"] for r in results)
-    print(f"\nright table: {sum(r['table_ok'] for r in results)}/{n}   right answer: "
+    print(f"\nright table offered: {sum(r.get('offered_ok', False) for r in results)}/{n}   "
+          f"right table: {sum(r['table_ok'] for r in results)}/{n}   right answer: "
           f"{sum(r['answer_ok'] for r in results)}/{n}   median {secs[n // 2]:.1f}s   max {secs[-1]:.1f}s")
 
 
