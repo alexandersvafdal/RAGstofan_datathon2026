@@ -11,7 +11,17 @@ ollama pull qwen2.5:14b         # 7b works too; 14b scored better
 .venv/bin/uvicorn hagbot.api:app --reload
 ```
 
-Open http://localhost:8000. API: `POST /api/ask {"question": "...", "language": null, "table_id": null}`.
+Open http://localhost:8000. API: `POST /api/ask {"question": "...", "language": null, "table_id": null}`, or the Track 2 brief's `POST /spyrja_px_api {"prompt": "..."}`.
+
+The default data source (`DATA_SOURCE=local`) reads the organizers' snapshot of every table (data release of 18 October 2026, 250 MB zipped, 5.3 GB unpacked) and asks the live PX-API only for what the snapshot lacks. Get it once:
+
+```bash
+mkdir -p data/release && cd data/release
+for i in 01 02 03 04 05 06; do curl -L -O https://raw.githubusercontent.com/SyedMuhammadAzhar/gagnvist-starter/HEAD/data-release/gagnvist-pxweb-data-2026-10-18.zip.part$i; done
+cat gagnvist-pxweb-data-2026-10-18.zip.part* > release.zip && unzip -q release.zip && rm release.zip *.part*
+```
+
+Without it, set `DATA_SOURCE=pxapi` to use the live API only.
 
 ## How a question becomes an answer
 

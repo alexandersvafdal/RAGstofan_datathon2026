@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from .config import ROOT, settings
 from .pipeline import Pipeline
@@ -36,6 +37,17 @@ async def health():
 @app.post("/api/ask", response_model=Answer)
 async def ask(req: AskRequest) -> Answer:
     return await pipeline.answer(req)
+
+
+class PromptRequest(BaseModel):
+    prompt: str
+
+
+@app.post("/spyrja_px_api", response_model=Answer)
+async def spyrja_px_api(req: PromptRequest) -> Answer:
+    """The Track 2 brief's endpoint and body: curl -d '{"prompt": "..."}'. Several questions in one prompt are split
+    by the planner and answered together."""
+    return await pipeline.answer(AskRequest(question=req.prompt))
 
 
 app.mount("/", StaticFiles(directory=ROOT / "frontend", html=True), name="frontend")

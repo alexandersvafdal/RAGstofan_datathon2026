@@ -1,6 +1,7 @@
 """Orchestrator: plan → (per sub-question, in parallel: retrieve → select → fetch → compute → chart) → compose."""
 
 import asyncio
+import re
 
 from .catalog import Catalog
 from .config import settings
@@ -97,7 +98,20 @@ class Pipeline:
 
         t = Timer()
         rows = await self.source.query(meta.id, res.selections)
-        steps.append(Step(name="fetch", ms=t.ms(), detail=f"{len(rows)} rows"))
+        detail = f"{len(rows)} rows"
+        # A table's time dimension often lists a period before its numbers exist ("2026" with ".." until the year
+        # ends). When the question named no period, the latest period with numbers is the answer.
+        time_var = next((v for v in meta.variables if v.time), None)
+        if (time_var and rows and all(r.value is None for r in rows) and res.selections.get(time_var.code) == [time_var.values[-1]]
+                and not re.search(r"\b(?:18|19|20)\d\d\b", f"{sq.question} {original}")):
+            wide = await self.source.query(meta.id, {**res.selections, time_var.code: time_var.values})
+            filled = [r.key[time_var.code] for r in wide if r.value is not None]
+            if filled:
+                last = max(filled, key=time_var.values.index)
+                res.selections[time_var.code] = [last]
+                rows = [r for r in wide if r.key[time_var.code] == last]
+                detail += f"; {time_var.values[-1]} has no numbers yet, using {last}"
+        steps.append(Step(name="fetch", ms=t.ms(), detail=detail))
 
         computation, facts = compute(meta, rows, res, lang)
         return AnswerPart(

@@ -2,14 +2,21 @@
 
 - FixtureSource: small offline tables in data/fixtures, for building before data access.
 - PxApiSource: live Statistics Iceland PX-API (PxWeb v1), throttled and cached on disk.
-A LocalPxSource reading the kit's data.px files slots in here once the kit is released.
+- LocalPxSource: the organizers' snapshot of every table (data release of 18 October 2026) read from disk; no network,
+  no rate limit, and the same numbers the official questions were checked against. Tables missing from the snapshot,
+  and categories it does not have yet (a month published after 18 October), go to the live API.
 """
 
 import asyncio
+import csv
 import hashlib
 import itertools
 import json
+import re
 import time
+from collections import OrderedDict
+from math import prod
+from pathlib import Path
 from typing import Protocol
 
 import httpx
@@ -131,13 +138,7 @@ class PxApiSource:
 
     async def meta(self, table_id: str) -> TableMeta:
         d = await self._request("GET", self._api_url(table_id))
-        entry = self.catalog.get(table_id)
-        variables = [
-            Variable(code=v["code"], text=v["text"], values=v["values"], value_texts=v["valueTexts"],
-                     time=v.get("time", False), elimination=v.get("elimination", False))
-            for v in d["variables"]
-        ]
-        return TableMeta(id=table_id, title=d["title"], path=entry.path, unit=entry.unit, variables=variables)
+        return _meta_from_api(table_id, d, self.catalog)
 
     async def query(self, table_id: str, selection: dict[str, list[str]]) -> list[Row]:
         body = {
@@ -147,6 +148,147 @@ class PxApiSource:
         d = await self._request("POST", self._api_url(table_id), body)
         meta = await self.meta(table_id)
         return _rows_from_cells(meta, parse_jsonstat2(d))
+
+
+def _meta_from_api(table_id: str, d: dict, catalog: Catalog) -> TableMeta:
+    """TableMeta from the API's GET answer (the snapshot's metadata.json is the same document)."""
+    entry = catalog.get(table_id)
+    variables = [
+        Variable(code=v["code"], text=v["text"], values=v["values"], value_texts=v["valueTexts"],
+                 time=v.get("time", False), elimination=v.get("elimination", False))
+        for v in d["variables"]
+    ]
+    return TableMeta(id=table_id, title=d.get("title") or (entry.title_en if entry else table_id),
+                     path=entry.path if entry else "", unit=entry.unit if entry else "",
+                     variables=variables)
+
+
+_STATEMENT = re.compile(r'([A-Z][A-Z0-9-]*)((?:\[[a-z]{2}\])?(?:\((?:"[^"]*"|[^)"])*\))?)\s*=')
+_CODEPAGES = {"windows-1252": "cp1252", "ansi": "cp1252"}
+
+
+def _px_items(value: str) -> list[str]:
+    """Entries of a px list: "a","b",...; a long entry may be split into quoted pieces on several lines."""
+    items, pieces = [], []
+    for m in re.finditer(r'"([^"]*)"|,', value):
+        if m.group(0) == ",":
+            items.append("".join(pieces))
+            pieces = []
+        else:
+            pieces.append(m.group(1))
+    if pieces:
+        items.append("".join(pieces))
+    return items
+
+
+class PxTable:
+    """One data.px read into memory: its numbers, and for each dimension (in file order) its code and category codes.
+
+    The numbers run row-major over STUB then HEADING dimensions, last dimension fastest. The file names dimensions by
+    their Icelandic labels; VARIABLECODE, the other language's names and CODES tie them to the API's codes."""
+
+    MISSING = {"..", ".", "...", "....", ":"}
+
+    def __init__(self, path: Path, meta: TableMeta):
+        raw = path.read_bytes()
+        m = re.search(rb"(?m)^DATA=\s*", raw)
+        if not m:
+            raise SourceError(f"{path}: no DATA section")
+        head = raw[: m.start()].removeprefix(b"\xef\xbb\xbf")
+        enc = re.search(rb'CODEPAGE="([^"]+)"', head)
+        enc = _CODEPAGES.get(enc.group(1).decode().lower(), enc.group(1).decode()) if enc else "utf-8"
+        header = head.decode(enc, errors="replace")
+        st: dict[str, str] = {}
+        pos = 0
+        while (sm := _STATEMENT.search(header, pos)):
+            end, quoted = sm.end(), False
+            while end < len(header) and (quoted or header[end] != ";"):
+                quoted ^= header[end] == '"'
+                end += 1
+            st.setdefault(sm.group(1) + sm.group(2), header[sm.end():end].strip())
+            pos = end + 1
+        names = _px_items(st.get("STUB", "")) + _px_items(st.get("HEADING", ""))
+        other = [[] for _ in names]
+        for lang in {k[4:8] for k in st if k.startswith("STUB[")}:
+            tr = _px_items(st.get(f"STUB{lang}", "")) + _px_items(st.get(f"HEADING{lang}", ""))
+            if len(tr) == len(names):
+                for i, n in enumerate(tr):
+                    other[i].append(n)
+        self.layout: list[tuple[str, list[str]]] = []
+        for i, name in enumerate(names):
+            declared = _px_items(st.get(f'VARIABLECODE("{name}")', ""))
+            codes = _px_items(st.get(f'CODES("{name}")', ""))
+            clues = (lambda v: bool(declared) and v.code == declared[0],
+                     lambda v: v.text in {name, *other[i]} or v.code in {name, *other[i]},
+                     lambda v: bool(codes) and v.values == codes)
+            var = None
+            for clue in clues:
+                fits = [v for v in meta.variables if clue(v)]
+                if len(fits) == 1:
+                    var = fits[0]
+                    break
+            if var is None:
+                raise SourceError(f"{path}: cannot match dimension {name!r} to the table description")
+            self.layout.append((var.code, codes or var.values))
+        tokens = raw[m.end():].decode("ascii", errors="replace").replace(";", " ").split()
+        if len(tokens) != prod(len(c) for _, c in self.layout):
+            raise SourceError(f"{path}: {len(tokens)} numbers, expected {prod(len(c) for _, c in self.layout)}")
+        self.tokens = tokens
+
+    def value(self, key: dict[str, str]) -> float | None:
+        i = 0
+        for code, cats in self.layout:
+            i = i * len(cats) + cats.index(key[code])
+        t = self.tokens[i].strip('"')
+        return 0.0 if t == "-" else None if t in self.MISSING else float(t)
+
+
+class LocalPxSource:
+    """The snapshot on disk, with the live API behind it for anything the snapshot lacks."""
+
+    def __init__(self, catalog: Catalog, root: Path | None = None, lang: str = "en", keep: int = 16):
+        self.catalog, self.root, self.lang = catalog, root or settings.local_data_dir, lang
+        self.live = PxApiSource(catalog, lang)
+        self._folders: dict[str, Path] = {}  # "<API path>/<table id>" -> folder holding metadata.json and data.px
+        with (self.root / "catalogue.csv").open(encoding="utf-8-sig") as f:
+            for r in csv.DictReader(f):
+                if r["language"] == lang:
+                    key = r["api_url"].split(f"/api/v1/{lang}/", 1)[1].removesuffix(".px")
+                    self._folders[key] = self.root / r["folder"]
+        self._tables: OrderedDict[str, PxTable] = OrderedDict()  # the last few tables read, newest last
+        self.keep = keep
+
+    def _folder(self, table_id: str) -> Path | None:
+        entry = self.catalog.get(table_id)
+        return self._folders.get(f"{entry.path}/{table_id}") if entry else None
+
+    async def meta(self, table_id: str) -> TableMeta:
+        folder = self._folder(table_id)
+        if not folder:
+            return await self.live.meta(table_id)
+        return _meta_from_api(table_id, json.loads((folder / "metadata.json").read_text(encoding="utf-8-sig")),
+                              self.catalog)
+
+    def _table(self, table_id: str, meta: TableMeta) -> PxTable:
+        if table_id in self._tables:
+            self._tables.move_to_end(table_id)
+        else:
+            self._tables[table_id] = PxTable(self._folder(table_id) / "data.px", meta)
+            if len(self._tables) > self.keep:
+                self._tables.popitem(last=False)
+        return self._tables[table_id]
+
+    async def query(self, table_id: str, selection: dict[str, list[str]]) -> list[Row]:
+        if not self._folder(table_id):
+            return await self.live.query(table_id, selection)
+        meta = await self.meta(table_id)
+        if any(c not in meta.var(code).values for code, vals in selection.items() for c in vals):
+            return await self.live.query(table_id, selection)  # e.g. a month published after the snapshot
+        table = await asyncio.to_thread(self._table, table_id, meta)
+        codes = [v.code for v in meta.variables]
+        sel = [selection.get(c) or meta.var(c).values for c in codes]
+        cells = [(dict(zip(codes, combo)), table.value(dict(zip(codes, combo)))) for combo in itertools.product(*sel)]
+        return _rows_from_cells(meta, cells)
 
 
 def parse_jsonstat2(d: dict) -> list[tuple[dict[str, str], float | None]]:
@@ -165,6 +307,8 @@ def parse_jsonstat2(d: dict) -> list[tuple[dict[str, str], float | None]]:
 
 
 def make_source(catalog: Catalog) -> DataSource:
+    if settings.data_source == "local":
+        return LocalPxSource(catalog)
     if settings.data_source == "pxapi":
         return PxApiSource(catalog)
     return FixtureSource()

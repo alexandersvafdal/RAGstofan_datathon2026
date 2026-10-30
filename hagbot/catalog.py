@@ -1,9 +1,10 @@
 """Table catalog and keyword search.
 
-BM25 over two fields: the title/dimension text, and the tables' option labels (municipalities, categories),
-weighted lower. Query words match by prefix ("reykjavik" ~ "reykjavikurborg", "atvinnuleysid" ~ "atvinnuleysi"),
+BM25 over three fields: the title/dimension text; the tables' option labels (municipalities, categories),
+weighted lower; and, when the catalog has them, a model-written description and everyday search words per table
+(scripts/enrich_catalog.py), weighted lower again. Query words match by prefix ("reykjavik" ~ "reykjavikurborg", "atvinnuleysid" ~ "atvinnuleysi"),
 words every question shares ("Iceland", "how many") are ignored, and recent tables rank above old ones.
-Vector search over the kit's bge-m3 index can be added next to `search` and the score lists fused.
+When vectors lie beside the catalog (hagbot/vectors.py), vector search runs too and the two rankings are fused.
 """
 
 import json
@@ -14,7 +15,9 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
+from .config import settings
 from .text import tokens
+from .vectors import Vectors
 
 STOPWORDS = {
     # English question words and words that fit every table
@@ -34,8 +37,10 @@ SYNONYMS = {w: "population" for w in (
 )} | {w: "consumer price index" for w in ("inflation", "verdbolga", "verdbolgan", "verdbolgu")} \
   | {w: "gross domestic product" for w in ("economic", "economy", "hagvoxtur", "hagvexti", "landsframleidsla")}
 VALUES_WEIGHT = 0.6
+ABOUT_WEIGHT = 0.5
 PREFIX_WEIGHT = 0.8
 MIN_PREFIX = 4
+RRF_K = 60  # reciprocal rank fusion: a table's fused score is the sum of 1 / (RRF_K + rank) over the rankings
 
 
 class CatalogEntry(BaseModel):
@@ -48,6 +53,10 @@ class CatalogEntry(BaseModel):
     first_period: str = ""
     last_period: str = ""
     unit: str = ""
+    about_en: str = ""
+    about_is: str = ""
+    keywords_en: list[str] = []
+    keywords_is: list[str] = []
 
     def card(self, question: str = "") -> str:
         """The short description the reranker reads, with the options that match words in the question."""
@@ -109,17 +118,21 @@ class _Field:
 
 
 class Catalog:
-    def __init__(self, entries: list[CatalogEntry]):
+    def __init__(self, entries: list[CatalogEntry], vectors: "Vectors | None" = None):
         self.entries = entries
+        self.vectors = vectors
         self._by_id = {e.id: e for e in entries}
         self._main = _Field([tokens(f"{e.title_en} {e.title_is} {' '.join(e.dimensions)} {e.path}") for e in entries])
         self._values = _Field([tokens(" ".join(e.values)) for e in entries], presence_only=True)
-        self._vocab = set(self._main.idf) | set(self._values.idf)
+        self._about = _Field([tokens(" ".join([e.about_en, e.about_is, *e.keywords_en, *e.keywords_is])) for e in entries],
+                             presence_only=True)
+        self._vocab = set(self._main.idf) | set(self._values.idf) | set(self._about.idf)
         self._recency = [recency_factor(e.last_period, e.title_en) for e in entries]
 
     @classmethod
     def load(cls, path: Path) -> "Catalog":
-        return cls([CatalogEntry(**e) for e in json.loads(path.read_text())])
+        return cls([CatalogEntry(**e) for e in json.loads(path.read_text())],
+                   Vectors.load(path) if settings.use_vectors else None)
 
     def get(self, table_id: str) -> CatalogEntry | None:
         return self._by_id.get(table_id)
@@ -132,6 +145,19 @@ class Catalog:
         return out
 
     def search(self, query: str, k: int = 8) -> list[tuple[CatalogEntry, float]]:
+        keyword = self.keyword_search(query, 4 * k)
+        dense = self.vectors.search(query, 4 * k) if self.vectors else []
+        if not dense:
+            return keyword[:k]
+        fused: dict[str, float] = {}
+        for ranking in ([e.id for e, _ in keyword], [i for i, _ in dense]):
+            for rank, table_id in enumerate(ranking, 1):
+                fused[table_id] = fused.get(table_id, 0.0) + 1 / (RRF_K + rank)
+        index = {e.id: i for i, e in enumerate(self.entries)}
+        scored = [(self.entries[index[t]], s * self._recency[index[t]]) for t, s in fused.items() if t in index]
+        return sorted(scored, key=lambda x: -x[1])[:k]
+
+    def keyword_search(self, query: str, k: int = 8) -> list[tuple[CatalogEntry, float]]:
         words = list(dict.fromkeys(w for t in tokens(query) if t not in STOPWORDS for w in SYNONYMS.get(t, t).split()))
         expansions = [x for x in (self._expand(w) for w in words) if x]
         if not expansions:
@@ -139,9 +165,10 @@ class Catalog:
         scored = []
         for i, entry in enumerate(self.entries):
             main, vals = self._main.scores(i, expansions), self._values.scores(i, expansions)
-            s = sum(main) + VALUES_WEIGHT * sum(vals)
+            about = self._about.scores(i, expansions)
+            s = sum(main) + VALUES_WEIGHT * sum(vals) + ABOUT_WEIGHT * sum(about)
             if s > 0:
-                # tables matching every query word (in title or options) beat tables matching one word strongly
-                coverage = sum(1 for m, v in zip(main, vals) if m or v) / len(expansions)
+                # tables matching every query word (in any field) beat tables matching one word strongly
+                coverage = sum(1 for m, v, a in zip(main, vals, about) if m or v or a) / len(expansions)
                 scored.append((entry, s * coverage ** 2 * self._recency[i]))
         return sorted(scored, key=lambda x: -x[1])[:k]

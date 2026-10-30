@@ -26,9 +26,14 @@ class Settings:
 
     catalog_path: Path = _path("CATALOG_PATH", "data/catalog.json")
     fixtures_dir: Path = _path("FIXTURES_DIR", "data/fixtures")
+    local_data_dir: Path = _path("LOCAL_DATA_DIR", "data/release/data")  # the organizers' snapshot, for DATA_SOURCE=local
     cache_dir: Path = _path("CACHE_DIR", ".cache")
 
     retrieve_top_k: int = int(os.getenv("RETRIEVE_TOP_K", "15"))
+    # Vector search beside keyword search, used when vectors built by scripts/build_vectors.py lie beside the catalog
+    embed_base_url: str = os.getenv("EMBED_BASE_URL", "http://localhost:11434/v1")
+    embed_model: str = os.getenv("EMBED_MODEL", "bge-m3")
+    use_vectors: bool = os.getenv("USE_VECTORS", "0") == "1"  # off: on bare titles it lowered recall
 
 
 settings = Settings()
