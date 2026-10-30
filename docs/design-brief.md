@@ -1,4 +1,4 @@
-# Design brief: Hagbot web interface and dashboard
+# Design brief: RAGstofan web interface and dashboard
 
 Loose functional requirements for redesigning the frontend. Say *what* it must do; the look is yours to decide.
 

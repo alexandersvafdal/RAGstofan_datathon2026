@@ -1,4 +1,4 @@
-# Hagbot — Gagnaþon 2026 prototype
+# RAGstofan — Gagnaþon 2026 prototype
 
 Ask about Icelandic statistics in English or Icelandic. You get the number, its unit, the official table it came from, a chart, and the steps that produced it.
 

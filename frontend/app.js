@@ -8,7 +8,10 @@ const I18N = {
     steps: ["Understanding the question", "Finding the right table", "Choosing the categories", "Reading the numbers", "Writing the answer"],
     working: "Working on it", how: "How I got this", data: "Data", source: "Source", checked: "Numbers checked against the table",
     calc: "Calculated", failed: "Something went wrong", retry: "Try again", seconds: "s", calls: "model calls",
-    pts: "pts", more: "Ask next",
+    pts: "pts", more: "Ask next", palette: "Colour", appearance: "Appearance",
+    live: { plan: q => `Read as: ${q}`, split: n => `Split into ${n} questions`, searched: n => `Searched ${n} tables`,
+            picked: "picked", numbers: n => `${n} ${n === 1 ? "number" : "numbers"} read`, checked: "Numbers checked against the table",
+            template: "Written from the numbers directly", error: "Hit a problem" },
   },
   is: {
     eyebrow: "Hagstofa Íslands · Gagnaþon 2026", hello: "Ísland í tölum.",
@@ -17,7 +20,10 @@ const I18N = {
     steps: ["Skil spurninguna", "Finn réttu töfluna", "Vel flokkana", "Les tölurnar", "Skrifa svarið"],
     working: "Augnablik", how: "Hvernig svarið varð til", data: "Gögn", source: "Heimild", checked: "Tölur bornar saman við töfluna",
     calc: "Reiknað", failed: "Eitthvað fór úrskeiðis", retry: "Reyna aftur", seconds: "s", calls: "köll í líkan",
-    pts: "pst.", more: "Spyrðu næst",
+    pts: "pst.", more: "Spyrðu næst", palette: "Litir", appearance: "Útlit",
+    live: { plan: q => `Skilið sem: ${q}`, split: n => `Skipt í ${n} spurningar`, searched: n => `Leitaði í ${n} töflum`,
+            picked: "valdi", numbers: n => `${n} ${n === 1 ? "tala lesin" : "tölur lesnar"}`, checked: "Tölur bornar saman við töfluna",
+            template: "Skrifað beint upp úr tölunum", error: "Vandamál kom upp" },
   },
 };
 
@@ -237,22 +243,105 @@ function showChat() {
   setTimeout(() => { home.hidden = true; $("#chat").classList.add("on"); }, reduceMotion ? 0 : 350);
 }
 
-function progressView(L) {
-  const steps = t("steps", L);
-  const items = steps.map(s => el("li", {}, s));
-  const time = el("span", { class: "p-time" }, "0 s");
-  const view = el("div", { class: "progress" }, el("div", { class: "p-head" }, el("span", {}, `${t("working", L)}…`), time), el("ol", {}, items));
-  const marks = [0, 7, 17, 34, 36];  // rough seconds at which each step starts on a laptop
+// Live progress: each step lights up when the server reports it done, with what it actually found.
+const STEP_ORDER = ["plan", "retrieve", "select", "fetch", "compose"];
+
+function readSelection(detail, L) {
+  // "value {'Month': ['2026M09'], 'Item': ['Annual change, %']} notes: [...]" -> "Month: Sep 2026 · Item: Annual change, %"
+  const pairs = [...detail.matchAll(/'([^']+)': \[([^\]]*)\]/g)].map(([, k, v]) => {
+    const vals = [...v.matchAll(/'([^']*)'/g)].map(m => prettyPeriods(m[1], L));
+    return `${k}: ${vals.length > 3 ? `${vals[0]} … ${vals[vals.length - 1]} (${vals.length})` : vals.join(", ")}`;
+  });
+  return pairs.slice(0, 4).join(" · ");
+}
+
+function liveView(L) {
+  const words = t("live", L);
+  const rows = {};
+  const list = el("ol", { class: "live-steps" }, STEP_ORDER.map((name, i) => {
+    const row = el("li", { class: "ls" },
+      el("span", { class: "ls-icon", "aria-hidden": "true" },
+        el("svg", { svg: 1, viewBox: "0 0 24 24" }, el("path", { svg: 1, class: "tick", d: "M6 12.5l4 4 8-9" }))),
+      el("div", { class: "ls-body" },
+        el("div", { class: "ls-title" }, el("span", {}, t("steps", L)[i]), el("span", { class: "ls-ms" })),
+        el("div", { class: "ls-detail" })));
+    rows[name] = row;
+    return row;
+  }));
+  const bar = el("div", { class: "live-bar" }, el("i"));
+  const time = el("span", { class: "live-time" }, "0.0 s");
+  const view = el("div", { class: "live" },
+    bar, el("div", { class: "live-head" }, el("span", { class: "live-orb", "aria-hidden": "true" }), el("span", {}, `${t("working", L)}…`), time),
+    list);
   const t0 = performance.now();
-  const tick = () => {
-    const s = (performance.now() - t0) / 1000;
-    time.textContent = `${Math.floor(s)} s`;
-    const now = marks.filter(m => s >= m).length - 1;
-    items.forEach((li, i) => { li.className = i < now ? "done" : i === now ? "now" : ""; });
+  const done = new Set();
+  let parts = 1;
+  const refresh = () => {
+    const current = STEP_ORDER.find(n => !done.has(n));
+    STEP_ORDER.forEach(n => rows[n].classList.toggle("now", n === current));
+    bar.firstChild.style.width = `${Math.max(4, (done.size / STEP_ORDER.length) * 100)}%`;
   };
-  tick();
-  view._timer = setInterval(tick, 250);
+  view._timer = setInterval(() => { time.textContent = `${((performance.now() - t0) / 1000).toFixed(1)} s`; }, 100);
+  refresh();
+
+  view.step = st => {
+    const row = rows[st.name];
+    if (!row) {                                     // an error step: show it on the step in progress
+      const cur = STEP_ORDER.find(n => !done.has(n));
+      if (cur) rows[cur].classList.add("bad"), (rows[cur].querySelector(".ls-detail").textContent = words.error);
+      return;
+    }
+    const detail = row.querySelector(".ls-detail");
+    const add = node => { detail.append(node); row.classList.add("has-detail"); };
+    if (st.name === "plan") {
+      const qs = st.detail.split(" | ");
+      parts = qs.length;
+      add(el("span", { class: "ls-text" }, qs.length > 1 ? words.split(qs.length) : words.plan(qs[0])));
+    } else if (st.name === "retrieve") {
+      const m = /^(\S+) from \[(.*)\]/.exec(st.detail);
+      const cands = m ? m[2].split(", ") : [];
+      add(el("span", { class: "ls-text" }, `${words.searched(document.querySelector("#status").dataset.tables || "1,857")} → ${words.picked} `, el("b", {}, m ? m[1] : st.detail)));
+      add(el("span", { class: "cands" }, cands.slice(0, 8).map((c, i) =>
+        el("span", { class: "cand" + (m && c === m[1] ? " hit" : ""), style: `animation-delay:${i * 60}ms` }, c))));
+    } else if (st.name === "select") {
+      add(el("span", { class: "ls-text" }, readSelection(st.detail, L)));
+    } else if (st.name === "fetch") {
+      const n = +(/^(\d+) rows/.exec(st.detail) || [0, 0])[1];
+      const note = st.detail.split("; ")[1];
+      add(el("span", { class: "ls-text" }, words.numbers(n) + (note ? ` · ${prettyPeriods(note, L)}` : "")));
+    } else if (st.name === "compose") {
+      add(el("span", { class: "ls-text" }, st.detail === "model" ? words.checked : words.template));
+    }
+    const ms = row.querySelector(".ls-ms");
+    ms.textContent = st.ms >= 1000 ? `${(st.ms / 1000).toFixed(1)} s` : `${st.ms} ms`;
+    row._count = (row._count || 0) + 1;
+    // retrieve, select and fetch run once per sub-question
+    if (st.name === "plan" || st.name === "compose" || row._count >= parts) { done.add(st.name); row.classList.add("done"); }
+    refresh();
+  };
   return view;
+}
+
+async function askStream(body, onStep) {
+  const r = await fetch("/api/ask/stream", { method: "POST", headers: { "Content-Type": "application/json" }, body });
+  if (!r.ok || !r.body) throw new Error(`${r.status} ${r.ok ? "" : await r.text()}`);
+  const reader = r.body.getReader(), dec = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let nl;
+    while ((nl = buf.indexOf("\n")) >= 0) {
+      const line = buf.slice(0, nl).trim();
+      buf = buf.slice(nl + 1);
+      if (!line) continue;
+      const msg = JSON.parse(line);
+      if (msg.type === "step") onStep(msg);
+      else if (msg.type === "answer") return msg.answer;
+    }
+  }
+  throw new Error("the answer stream ended early");
 }
 
 async function ask(question, tableId = null) {
@@ -261,19 +350,20 @@ async function ask(question, tableId = null) {
   const guess = lang === "auto" ? (/[þðæöáéíóúý]/i.test(question) ? "is" : "en") : lang;
   if (!tableId) chat.append(el("div", { class: "msg user" }, el("div", { class: "bubble" }, question)));
   const card = el("div", { class: "card" });
-  const progress = progressView(guess);
+  const progress = liveView(guess);
   card.append(progress);
   const bot = el("div", { class: "msg bot" }, card);
   chat.append(bot);
   setTimeout(() => bot.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "end" }), 380);
   $("#send").disabled = true;
   try {
-    const r = await fetch("/api/ask", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, language: lang === "auto" ? null : lang, table_id: tableId }),
-    });
-    if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
-    renderAnswer(card, await r.json());
+    const body = JSON.stringify({ question, language: lang === "auto" ? null : lang, table_id: tableId });
+    const answer = await askStream(body, st => progress.step(st));
+    clearInterval(progress._timer);
+    progress.classList.add("finishing");
+    await new Promise(r => setTimeout(r, reduceMotion ? 0 : 450));   // let the last tick land before the answer replaces it
+    renderAnswer(card, answer);
+    card.classList.add("arrive");
   } catch (e) {
     card.replaceChildren(
       el("p", { class: "answer-text error" }, `${t("failed", guess)}. ${e.message}`),
@@ -373,6 +463,8 @@ function stepsView(a, L) {
 const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
 function drawChart(holder, c, L) {
+  holder._chart = [c, L];
+  holder.replaceChildren();
   const data = c.data.map(d => ({ ...d, label: fmtPeriod(d.x, L) }));
   const series = [...new Set(data.map(d => d.series).filter(Boolean))];
   const multi = series.length > 1;
@@ -438,6 +530,7 @@ async function health() {
   try {
     const h = await (await fetch("/api/health")).json();
     $("#status").textContent = `${h.model} · ${h.data_source} data · ${h.tables_in_catalog} tables`;
+    $("#status").dataset.tables = h.tables_in_catalog.toLocaleString("en-US");
   } catch { $("#status").textContent = "backend offline"; }
 }
 
@@ -448,9 +541,32 @@ $("#ask").addEventListener("submit", e => {
   $("#q").value = "";
   ask(q);
 });
-document.querySelectorAll(".segmented button").forEach(b => b.addEventListener("click", () => {
+/* theme picker: palette and light/dark, remembered in this browser */
+const themeBox = $("#theme");
+function applyTheme(palette, mode) {
+  const root = document.documentElement;
+  if (palette === "warm") delete root.dataset.palette; else root.dataset.palette = palette;
+  if (mode === "auto") delete root.dataset.theme; else root.dataset.theme = mode;
+  themeBox.querySelectorAll(".swatch").forEach(b => b.classList.toggle("on", b.dataset.palette === palette));
+  themeBox.querySelectorAll("[data-mode]").forEach(b => b.classList.toggle("on", b.dataset.mode === mode));
+  try { localStorage.setItem("ragstofan-theme", JSON.stringify({ palette, mode })); } catch {}
+  requestAnimationFrame(() => document.querySelectorAll(".chart").forEach(h => h._chart && drawChart(h, ...h._chart)));
+}
+const currentTheme = () => [document.documentElement.dataset.palette || "warm", document.documentElement.dataset.theme || "auto"];
+themeBox.querySelector(".theme-btn").addEventListener("click", e => {
+  e.stopPropagation();
+  const open = themeBox.classList.toggle("open");
+  e.currentTarget.setAttribute("aria-expanded", open);
+});
+document.addEventListener("click", e => { if (!themeBox.contains(e.target)) themeBox.classList.remove("open"); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") themeBox.classList.remove("open"); });
+themeBox.querySelectorAll(".swatch").forEach(b => b.addEventListener("click", () => applyTheme(b.dataset.palette, currentTheme()[1])));
+themeBox.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () => applyTheme(currentTheme()[0], b.dataset.mode)));
+applyTheme(...currentTheme());
+
+document.querySelectorAll(".segmented [data-lang]").forEach(b => b.addEventListener("click", () => {
   lang = b.dataset.lang;
-  document.querySelectorAll(".segmented button").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".segmented [data-lang]").forEach(x => x.classList.toggle("on", x === b));
   applyLanguage();
 }));
 document.addEventListener("visibilitychange", () => { if (!$("#home").hidden) document.hidden ? pills.stop() : pills.start(); });

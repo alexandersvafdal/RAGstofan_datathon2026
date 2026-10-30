@@ -1,8 +1,11 @@
 """HTTP API and static frontend. Run: uvicorn hagbot.api:app --reload"""
 
+import asyncio
+import json
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -22,7 +25,7 @@ async def lifespan(_: FastAPI):
     await pipeline.llm.aclose()
 
 
-app = FastAPI(title="Hagbot", lifespan=lifespan)
+app = FastAPI(title="RAGstofan", lifespan=lifespan)
 
 
 @app.get("/api/health")
@@ -44,6 +47,31 @@ async def get_indicators() -> Indicators:
 @app.post("/api/ask", response_model=Answer)
 async def ask(req: AskRequest) -> Answer:
     return await pipeline.answer(req)
+
+
+@app.post("/api/ask/stream")
+async def ask_stream(req: AskRequest) -> StreamingResponse:
+    """The same answer as /api/ask, with each pipeline step sent the moment it finishes. One JSON object per line:
+    {"type": "step", "name": ..., "ms": ..., "detail": ...} for each step, then {"type": "answer", "answer": {...}}."""
+    queue: asyncio.Queue = asyncio.Queue()
+
+    async def run():
+        answer = await pipeline.answer(req, on_step=lambda st: queue.put_nowait({"type": "step", **st.model_dump()}))
+        queue.put_nowait({"type": "answer", "answer": answer.model_dump()})
+
+    async def lines():
+        task = asyncio.create_task(run())
+        try:
+            while True:
+                item = await queue.get()
+                yield json.dumps(item, ensure_ascii=False) + "\n"
+                if item["type"] == "answer":
+                    break
+        finally:
+            if not task.done():
+                task.cancel()
+
+    return StreamingResponse(lines(), media_type="application/x-ndjson")
 
 
 class PromptRequest(BaseModel):

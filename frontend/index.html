@@ -3,20 +3,41 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Hagbot</title>
-  <link rel="stylesheet" href="style.css?v=8">
+  <title>RAGstofan</title>
+  <script>try { const t = JSON.parse(localStorage.getItem("ragstofan-theme") || "{}");
+    if (t.palette && t.palette !== "warm") document.documentElement.dataset.palette = t.palette;
+    if (t.mode && t.mode !== "auto") document.documentElement.dataset.theme = t.mode; } catch {}</script>
+  <link rel="stylesheet" href="style.css?v=12">
   <script src="https://cdn.jsdelivr.net/npm/vega@5.30.0/build/vega.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.21.0/build/vega-lite.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0/build/vega-embed.min.js"></script>
 </head>
 <body>
   <header class="nav">
-    <a class="brand" href="/" aria-label="Hagbot home">
+    <a class="brand" href="/" aria-label="RAGstofan home">
       <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="12" width="4" height="9" rx="2"/><rect x="10" y="7" width="4" height="14" rx="2"/><rect x="17" y="3" width="4" height="18" rx="2"/></svg>
-      Hagbot
+      RAGstofan
     </a>
     <div class="nav-right">
       <span id="status" class="status" title="Model and data source">…</span>
+      <div class="theme" id="theme">
+        <button class="theme-btn" type="button" aria-label="Theme" aria-haspopup="true" aria-expanded="false"><span></span></button>
+        <div class="theme-pop" role="dialog" aria-label="Theme">
+          <h3 data-i18n="palette">Colour</h3>
+          <div class="swatches">
+            <button class="swatch" data-palette="warm" style="--sw-bg:#f6f3ee;--sw-accent:#3f6b4d"><i></i>Warm</button>
+            <button class="swatch" data-palette="graphite" style="--sw-bg:#f5f5f7;--sw-accent:#3a3a3c"><i></i>Graphite</button>
+            <button class="swatch" data-palette="blue" style="--sw-bg:#f5f5f7;--sw-accent:#0071e3"><i></i>Blue</button>
+            <button class="swatch" data-palette="navy" style="--sw-bg:#f3f6f8;--sw-accent:#0d4f74"><i></i>Navy</button>
+          </div>
+          <h3 data-i18n="appearance">Appearance</h3>
+          <div class="segmented" role="group" aria-label="Appearance">
+            <button data-mode="auto" class="on">Auto</button>
+            <button data-mode="light">Light</button>
+            <button data-mode="dark">Dark</button>
+          </div>
+        </div>
+      </div>
       <div class="segmented" role="group" aria-label="Answer language">
         <button data-lang="auto" class="on">Auto</button>
         <button data-lang="is">IS</button>
@@ -53,6 +74,6 @@
     </div>
   </form>
 
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>

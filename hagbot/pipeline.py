@@ -2,6 +2,7 @@
 
 import asyncio
 import re
+from collections.abc import Callable
 
 from .catalog import Catalog
 from .config import settings
@@ -27,15 +28,28 @@ class NeedsClarification(Exception):
         self.clarification = clarification
 
 
+class StepLog(list):
+    """The answer's step list, which also reports each step the moment it is recorded (for live progress)."""
+
+    def __init__(self, on_step: Callable[[Step], None] | None = None):
+        super().__init__()
+        self.on_step = on_step
+
+    def append(self, step: Step) -> None:
+        super().append(step)
+        if self.on_step:
+            self.on_step(step)
+
+
 class Pipeline:
     def __init__(self, llm: LLM | None = None, catalog: Catalog | None = None, source: DataSource | None = None):
         self.llm = llm or LLM()
         self.catalog = catalog or Catalog.load(settings.catalog_path)
         self.source = source or make_source(self.catalog)
 
-    async def answer(self, req: AskRequest) -> Answer:
+    async def answer(self, req: AskRequest, on_step: Callable[[Step], None] | None = None) -> Answer:
         lang = req.language or detect_language(req.question)
-        total, steps = Timer(), []
+        total, steps = Timer(), StepLog(on_step)
         calls_before = self.llm.calls
         ans = Answer(question=req.question, language=lang, status="error", text="", model=self.llm.model)
         try:
@@ -74,7 +88,7 @@ class Pipeline:
             ans.text = _no_answer(lang, [e])
             return ans
         finally:
-            ans.steps, ans.total_ms, ans.llm_calls = steps, total.ms(), self.llm.calls - calls_before
+            ans.steps, ans.total_ms, ans.llm_calls = list(steps), total.ms(), self.llm.calls - calls_before
 
     async def _answer_part(self, sq: SubQuestion, original: str, lang: str, forced_table: str | None, steps: list[Step],
                            alone: bool = True) -> AnswerPart:
