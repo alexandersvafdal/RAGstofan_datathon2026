@@ -29,15 +29,15 @@ class Retrieved(BaseModel):
 QUALIFIERS = [
     (r"\btrend\b", r"trend|leitni"),
     (r"seasonally adjusted", r"seasonal|arstidaleidr"),
-    (r"projection", r"projection|forecast|future|spa\b|mannfjoldaspa"),
+    (r"projection|forecast", r"projection|forecast|future|spa\b|mannfjoldaspa|thjodhagsspa"),
     (r"average annual", r"average|medal"),
     (r"^census\b|\bcensus\b", r"census|manntal"),
     (r"change of method|overestimation", r"method|overestimat|ofmat"),
     (r"as of (?:18|19)\d\d", r"\b(?:18|19)\d\d\b"),  # old municipality divisions
 ]
-MONTHS = (r"\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b|"
-          r"\b(?:januar|februar|mars|april|mai|juni|juli|agust|september|oktober|november|desember)\b|"
-          r"\b(?:monthly|manud\w*|manadar\w*)\b")
+MONTHS = (r"\b(?:january|february|march|april|may|june|july|august|september|october|november|december|"
+          r"jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec|"
+          r"januar|februar|mars|mai|juni|juli|agust|oktober|desember|monthly|manudi|manadarlega)\b")
 
 
 def named_places(text: str) -> list[str]:
@@ -60,12 +60,12 @@ def narrow(entries: list[CatalogEntry], question: str) -> list[CatalogEntry]:
 
     q = normalize(question)
     keep_if(lambda e: not any(re.search(t, e.title_en.lower()) and not re.search(w, q) for t, w in QUALIFIERS))
-    # a named place must be one of the table's options (the whole municipality), else at least in its title
+    # a named place must be in the table's title or options; checked only when one of the top search hits has it,
+    # so a capitalised word that is not a place ("American") does not throw out the right tables
     for place in named_places(question):
-        before = entries
-        keep_if(lambda e: bool(e.matching_values(place)))
-        if entries is before:
-            keep_if(lambda e: _title_has(e, place))
+        has = lambda e: bool(e.matching_values(place)) or _title_has(e, place)
+        if any(has(e) for e in entries[:3]):
+            keep_if(has)
     # a month asked needs a monthly table
     if re.search(MONTHS, q):
         keep_if(lambda e: "M" in e.last_period)

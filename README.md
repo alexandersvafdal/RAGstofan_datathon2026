@@ -63,11 +63,24 @@ Results so far (live PX-API, full 1,857-table catalog):
 | + with no period asked, swap to the most recent table of the same survey; reject answers in another script | 14b | 9/10 |
 | + "Iceland" means the whole country, not Icelandic citizens | 14b | 10/10 (median 42 s) |
 
+| + annual-change options, multi-word synonyms, forecast filter, share completion (fixes from the second set) | 14b | 10/10 (median 49 s) |
+
+Second question set, `eval/questions_heldout.jsonl`: 20 questions on inflation, wages, exports, hotel stays,
+Keflavík passengers, house prices, births, GDP, migration, mean age and cars (13 English, 7 Icelandic), answers
+read from the live API on 30 Oct 2026.
+
+| Change | Model | Right answers |
+|---|---|---|
+| First run, rules from the first set only | 14b | 11/20 (4 of the misses: PX-API 429) |
+| + "inflation"/"12 months"/"growth" use the table's own annual-change option; month regex fix; place filter only when a top hit has the place; glossary | 14b | 16/20 |
+| + inflation/hagvöxtur search synonyms, forecast tables dropped unless asked, *verðmæti* in glossary | 14b | 20/20 (median 44 s) |
+
 What moved the score was turning table-choice rules into code (`narrow` and `freshest_sibling` in
-`hagbot/steps/retrieve.py`), not a bigger model: the same rules written in the prompt were followed unreliably.
-Ten questions is a small set and these rules were written against it, so expect a lower score on the kit's 52.
-"Right table" stays at 7/10 because answers from equivalent tables (MAN04203 for Reykjavík population) are not
-on the accepted list; the numbers match.
+`hagbot/steps/retrieve.py`, the annual-change and share rules in `hagbot/steps/select.py`), not a bigger model:
+the same rules written in the prompt were followed unreliably. 11/20 is the honest score on unseen questions;
+both sets have since been fixed against, so neither is held out any more. The kit's 52 questions are the next
+unseen test. "Right table" is below "right answer" because equivalent tables (MAN04203 for Reykjavík population)
+are not on the accepted lists; the numbers match.
 
 ## Known limits
 

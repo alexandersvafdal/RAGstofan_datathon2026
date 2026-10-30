@@ -26,11 +26,13 @@ STOPWORDS = {
     "hvad", "hve", "hversu", "hvert", "hver", "hvada", "margir", "margar", "morg", "i", "a", "og", "er", "var",
     "voru", "eru", "um", "fra", "til", "vid", "sem", "thad", "island", "islandi", "islands", "hagstofa", "fjoldi",
 }
-# "how many people live in X" is a population question; "live" alone would match "live births"
+# Question words that name a table's topic differently than its title does. "How many people live in X" is a
+# population question, and "live" alone would match "live births".
 SYNONYMS = {w: "population" for w in (
     "people", "live", "lives", "living", "persons", "inhabitants", "residents",
     "bua", "byr", "bjuggu", "ibuar", "ibua", "ibuum", "fjolgadi", "fjolgun", "faekkadi",
-)}
+)} | {w: "consumer price index" for w in ("inflation", "verdbolga", "verdbolgan", "verdbolgu")} \
+  | {w: "gross domestic product" for w in ("economic", "economy", "hagvoxtur", "hagvexti", "landsframleidsla")}
 VALUES_WEIGHT = 0.6
 PREFIX_WEIGHT = 0.8
 MIN_PREFIX = 4
@@ -130,7 +132,7 @@ class Catalog:
         return out
 
     def search(self, query: str, k: int = 8) -> list[tuple[CatalogEntry, float]]:
-        words = list(dict.fromkeys(SYNONYMS.get(t, t) for t in tokens(query) if t not in STOPWORDS))
+        words = list(dict.fromkeys(w for t in tokens(query) if t not in STOPWORDS for w in SYNONYMS.get(t, t).split()))
         expansions = [x for x in (self._expand(w) for w in words) if x]
         if not expansions:
             return []

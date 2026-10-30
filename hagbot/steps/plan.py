@@ -25,7 +25,10 @@ Icelandic words that are easy to mistranslate:
 - fjölga, fjölgaði, fjölgun: population increase; fækka, fækkaði: population decrease
 - atvinnuleysi, atvinnuleysið: unemployment rate (not employment)
 - atvinnuþátttaka: activity rate; starfandi: employed
-- vísitala neysluverðs, verðbólga: consumer price index, inflation
+- verðbólga: inflation (annual % change of the consumer price index); vísitala neysluverðs: consumer price index
+- hagvöxtur: economic growth (GDP volume change); landsframleiðsla: GDP
+- verðmæti: value in ISK (not a price index); útflutningur, útflutt: exports
+- gistinætur: overnight stays; farþegar: passengers; fólksbílar: passenger cars; sjávarafurðir: marine products
 - laun: wages; innflutningur: imports; útflutningur: exports
 Do not answer the question."""
 
