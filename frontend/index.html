@@ -2,19 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Hagbot</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=6">
   <script src="https://cdn.jsdelivr.net/npm/vega@5.30.0/build/vega.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.21.0/build/vega-lite.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0/build/vega-embed.min.js"></script>
 </head>
 <body>
-  <header class="top">
-    <div class="brand">Hagbot <span class="muted">· Statistics Iceland data</span></div>
-    <div class="controls">
-      <span id="status" class="pill muted">…</span>
-      <div class="lang" role="group" aria-label="Answer language">
+  <header class="nav">
+    <a class="brand" href="/" aria-label="Hagbot home">
+      <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="12" width="4" height="9" rx="2"/><rect x="10" y="7" width="4" height="14" rx="2"/><rect x="17" y="3" width="4" height="18" rx="2"/></svg>
+      Hagbot
+    </a>
+    <div class="nav-right">
+      <span id="status" class="status" title="Model and data source">…</span>
+      <div class="segmented" role="group" aria-label="Answer language">
         <button data-lang="auto" class="on">Auto</button>
         <button data-lang="is">IS</button>
         <button data-lang="en">EN</button>
@@ -22,35 +25,34 @@
     </div>
   </header>
 
-  <main id="chat" aria-live="polite">
-    <section class="empty" id="empty">
-      <h1 data-i18n="hello">Ask about Iceland in numbers</h1>
-      <p class="muted" data-i18n="sub">Answers come with the figure, its unit and the official table it came from.</p>
-      <div class="examples">
-        <button class="example">How many people live in Reykjavík?</button>
-        <button class="example">How much did Reykjavík grow from 2025 to 2026?</button>
-        <button class="example">What share of Iceland's people live in Reykjavík?</button>
-        <button class="example">How many people live in Iceland, and what is the unemployment rate?</button>
-        <button class="example">Hvað búa margir í Reykjavík?</button>
-      </div>
-    </section>
-  </main>
+  <section id="home" class="home">
+    <div class="hero">
+      <p class="eyebrow" data-i18n="eyebrow">Statistics Iceland · Gagnaþon 2026</p>
+      <h1 data-i18n="hello">Iceland, in numbers.</h1>
+      <p class="lede" data-i18n="sub">Ask anything about Iceland's official statistics. Every answer comes with the figure, its unit and the table it came from.</p>
+      <div id="pills" class="pill-field" aria-label="Example questions"></div>
+    </div>
 
-  <form id="ask" class="ask">
-    <input id="q" autocomplete="off" placeholder="Ask about Icelandic statistics…" aria-label="Question">
-    <button type="submit" id="send">Ask</button>
+    <div class="dash">
+      <div class="dash-head">
+        <h2 data-i18n="today">The latest numbers</h2>
+        <span id="asof" class="asof"></span>
+      </div>
+      <div id="tiles" class="tiles"></div>
+    </div>
+  </section>
+
+  <main id="chat" class="chat" aria-live="polite"></main>
+
+  <form id="ask" class="composer">
+    <div class="composer-inner">
+      <input id="q" autocomplete="off" placeholder="Ask about Icelandic statistics" aria-label="Question">
+      <button type="submit" id="send" aria-label="Ask">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </button>
+    </div>
   </form>
 
-  <template id="tpl-user"><div class="msg user"><div class="bubble"></div></div></template>
-  <template id="tpl-bot">
-    <div class="msg bot">
-      <div class="card">
-        <div class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-          <span class="muted loading-text">Finding the right table…</span></div>
-      </div>
-    </div>
-  </template>
-
-  <script src="app.js"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>

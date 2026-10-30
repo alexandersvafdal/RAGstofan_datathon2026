@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from .config import ROOT, settings
+from .indicators import Indicators, indicators
 from .pipeline import Pipeline
 from .schemas import Answer, AskRequest
 
@@ -32,6 +33,12 @@ async def health():
         "data_source": settings.data_source,
         "tables_in_catalog": len(pipeline.catalog.entries),
     }
+
+
+@app.get("/api/indicators", response_model=Indicators)
+async def get_indicators() -> Indicators:
+    """Headline numbers for the dashboard, read straight from the data (no model): instant from the local snapshot."""
+    return await indicators(pipeline.source)
 
 
 @app.post("/api/ask", response_model=Answer)
