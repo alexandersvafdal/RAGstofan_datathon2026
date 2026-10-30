@@ -46,7 +46,10 @@ def compute(meta: TableMeta, rows: list[Row], res: Resolved, lang: str) -> tuple
             present = sorted(group, key=order.index)
             if len(present) < 2:
                 continue
-            a, b = group[present[-1]], group[present[0]]
+            if res.order and all(c in group for c in res.order):
+                a, b = group[res.order[0]], group[res.order[1]]   # "more men than women": men − women
+            else:
+                a, b = group[present[-1]], group[present[0]]      # periods: later − earlier
             if res.operation == "difference":
                 result, op_unit = a.value - b.value, unit
                 expr = f"{fmt_number(a.value, lang)} − {fmt_number(b.value, lang)}"

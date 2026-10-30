@@ -24,10 +24,11 @@ STOPWORDS = {
     "what", "how", "many", "much", "the", "of", "in", "is", "was", "are", "were", "did", "does", "do", "and", "a",
     "an", "to", "from", "for", "by", "on", "at", "it", "its", "there", "this", "that", "with", "as", "be", "has",
     "have", "which", "who", "iceland", "icelandic", "icelands", "statistics", "number", "total", "s", "current",
-    "currently", "now", "latest",
+    "currently", "now", "latest", "more", "than", "less", "fewer", "together", "combined",
     # Icelandic
     "hvad", "hve", "hversu", "hvert", "hver", "hvada", "margir", "margar", "morg", "i", "a", "og", "er", "var",
     "voru", "eru", "um", "fra", "til", "vid", "sem", "thad", "island", "islandi", "islands", "hagstofa", "fjoldi",
+    "fleiri", "faerri", "en", "samtals", "morgum",
 }
 # Question words that name a table's topic differently than its title does. "How many people live in X" is a
 # population question, and "live" alone would match "live births".
@@ -36,6 +37,10 @@ SYNONYMS = {w: "population" for w in (
     "bua", "byr", "bjuggu", "ibuar", "ibua", "ibuum", "fjolgadi", "fjolgun", "faekkadi",
 )} | {w: "consumer price index" for w in ("inflation", "verdbolga", "verdbolgan", "verdbolgu")} \
   | {w: "gross domestic product" for w in ("economic", "economy", "hagvoxtur", "hagvexti", "landsframleidsla")}
+# Tables label the sexes "Males"/"Females" (Karlar/Konur in Icelandic tables are matched through the Icelandic titles);
+# "men"/"women" literally only appear in odd categories such as "Majority men" on company boards.
+SYNONYMS |= {w: "males" for w in ("men", "man", "male", "karlar", "karla", "karl", "karlmenn", "karlmanna")} \
+  | {w: "females" for w in ("women", "woman", "female", "konur", "kvenna", "kona", "konum")}
 VALUES_WEIGHT = 0.6
 ABOUT_WEIGHT = 0.5
 PREFIX_WEIGHT = 0.8

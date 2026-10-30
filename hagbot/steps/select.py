@@ -5,6 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from ..catalog import SYNONYMS
 from ..llm import LLM
 from ..sources import TableMeta, Variable
 from ..text import normalize, tokens
@@ -29,7 +30,22 @@ class Resolved(BaseModel):
     compare_dimension: str | None = None
     part: str | None = None
     whole: str | None = None
+    order: list[str] | None = None  # for a difference between categories: [first, second], result = first − second
     notes: list[str] = []
+
+
+def _mention_order(var: Variable, codes: list[str], question: str) -> list[str] | None:
+    """The order the question names these categories in ("more men than women" -> Males, Females), or None.
+    Question words go through the search synonyms, so "karlar" and "men" both find "Males"."""
+    words = [w for t in tokens(question) for w in SYNONYMS.get(t, t).split()]
+    def first_mention(code: str) -> int | None:
+        label = [t for t in tokens(var.label_of(code)) if len(t) >= 3]
+        hits = [i for i, w in enumerate(words) for t in label if w == t or (len(w) >= 4 and len(t) >= 4 and (w.startswith(t) or t.startswith(w)))]
+        return min(hits) if hits else None
+    pos = {c: first_mention(c) for c in codes}
+    if any(v is None for v in pos.values()) or len(set(pos.values())) < len(codes):
+        return None
+    return sorted(codes, key=pos.get)
 
 
 SYSTEM = """You fill in a query against one Statistics Iceland table.
@@ -189,6 +205,17 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "") -> Resolved:
     if op in ("difference", "pct_change") and (not compare or len(out[compare]) < 2):
         notes.append(f"{op} needs two values to compare; reporting values instead")
         op = "value"
+    order = None
+    if op in ("difference", "pct_change") and compare and not meta.var(compare).time and len(out[compare]) == 2:
+        # comparing categories, not periods: the latest period unless one is named, and the question's own order
+        if not re.search(r"\b(?:18|19|20)\d\d\b", question):
+            for var in meta.variables:
+                if var.time and out.get(var.code) != [var.values[-1]]:
+                    notes.append(f"{var.text}: no period asked, using latest {var.values[-1]}")
+                    out[var.code] = [var.values[-1]]
+        order = _mention_order(meta.var(compare), out[compare], question)
+        if order:
+            notes.append(f"{op}: {meta.var(compare).label_of(order[0])} minus {meta.var(compare).label_of(order[1])}, as asked")
     part = whole = None
     if op == "share":
         var = meta.var(compare) if compare else None
@@ -207,7 +234,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "") -> Resolved:
         if not (part and whole and part in out[compare] and whole in out[compare]):
             notes.append("share needs a part and a whole; reporting values instead")
             op, part, whole = "value", None, None
-    return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, notes=notes)
+    return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes)
 
 
 async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None) -> Resolved:

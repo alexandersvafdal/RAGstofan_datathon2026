@@ -74,8 +74,8 @@ def narrow(entries: list[CatalogEntry], question: str) -> list[CatalogEntry]:
         has = lambda e: bool(e.matching_values(place)) or _title_has(e, place)
         if any(has(e) for e in entries[:3]):
             keep_if(has)
-    # a month asked needs a monthly table
-    if re.search(MONTHS, q):
+    # a month asked needs a monthly table; "1 January" is the date yearly population figures refer to, not a month
+    if re.search(MONTHS, re.sub(r"\b1\.? ?(january|januar|jan)\b", " ", q)):
         keep_if(lambda e: "M" in e.last_period)
     # tables without a known period cannot answer "latest" or a given year reliably
     keep_if(lambda e: bool(e.last_period))

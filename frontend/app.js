@@ -543,7 +543,8 @@ function viewsFor(c, comp) {
   const monthly = isTime && c.data.every(d => /M\d\d$/.test(d.x));
   const quarterly = isTime && c.data.every(d => /Q\d$/.test(d.x));
   if (comp?.op === "share" && c.data.length === 2) return ["donut", "waffle", "bars"];
-  if (["difference", "pct_change"].includes(comp?.op) && c.data.length === 2) return ["slope", "bars"];
+  // a slope reads left to right, so it suits two periods; two categories (men vs women) are compared as bars
+  if (["difference", "pct_change"].includes(comp?.op) && c.data.length === 2) return isTime ? ["slope", "bars"] : ["bars"];
   if (c.type === "line") {
     if (multi) return ["line", "stacked", "bars"];
     if ((monthly && c.data.length >= 18) || (quarterly && c.data.length >= 8)) return ["line", "heatmap", "bars"];
