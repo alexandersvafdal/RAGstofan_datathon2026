@@ -7,7 +7,7 @@
   <script>try { const t = JSON.parse(localStorage.getItem("ragstofan-theme") || "{}");
     if (t.palette && t.palette !== "warm") document.documentElement.dataset.palette = t.palette;
     if (t.mode && t.mode !== "auto") document.documentElement.dataset.theme = t.mode; } catch {}</script>
-  <link rel="stylesheet" href="style.css?v=12">
+  <link rel="stylesheet" href="style.css?v=13">
   <script src="https://cdn.jsdelivr.net/npm/vega@5.30.0/build/vega.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.21.0/build/vega-lite.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0/build/vega-embed.min.js"></script>
@@ -29,6 +29,10 @@
             <button class="swatch" data-palette="graphite" style="--sw-bg:#f5f5f7;--sw-accent:#3a3a3c"><i></i>Graphite</button>
             <button class="swatch" data-palette="blue" style="--sw-bg:#f5f5f7;--sw-accent:#0071e3"><i></i>Blue</button>
             <button class="swatch" data-palette="navy" style="--sw-bg:#f3f6f8;--sw-accent:#0d4f74"><i></i>Navy</button>
+            <button class="swatch" data-palette="glacier" style="--sw-bg:#f2f7f8;--sw-accent:#137c8b"><i></i>Glacier</button>
+            <button class="swatch" data-palette="aurora" style="--sw-bg:#f6f4fa;--sw-accent:#5b3fb8"><i></i>Aurora</button>
+            <button class="swatch" data-palette="lava" style="--sw-bg:#f7f2ef;--sw-accent:#b4532a"><i></i>Lava</button>
+            <button class="swatch" data-palette="amber" style="--sw-bg:#f8f5ec;--sw-accent:#9a6a00"><i></i>Amber</button>
           </div>
           <h3 data-i18n="appearance">Appearance</h3>
           <div class="segmented" role="group" aria-label="Appearance">
@@ -74,6 +78,6 @@
     </div>
   </form>
 
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>
