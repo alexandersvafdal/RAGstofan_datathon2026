@@ -9,6 +9,7 @@ import re
 
 from pydantic import BaseModel, Field
 
+from ..catalog import STOPWORDS
 from ..llm import LLM
 from ..schemas import Turn
 from ..text import normalize, tokens
@@ -20,6 +21,15 @@ _FOLLOW = re.compile(
     r"i fyrra|arid adur|arinu adur|sama ar|thad|thar|theim|thvi|thessu|thessi)\b"
 )
 _MAX_WORDS = 3  # "In 2024?", "Og konur?": too short to stand on its own
+# Words that say how to look at something but not what: a question made only of these (and stopwords, years, months)
+# has no subject of its own, e.g. "how has the trend been the last few years?" or "hvernig hefur þróunin verið?"
+_NO_SUBJECT = re.compile(
+    r"(trend|been|last|few|years?|recent|recently|past|over|time|chang|develop|evolv|going|look|like|data|numbers?|"
+    r"figures?|show|tell|me|about|it|details?|compar|breakdown|since|then|before|ago|per|month|monthly|quarter|"
+    r"throun|throast|sidustu|undanfarin|ar|arin|ara|arum|breyst|breyting|tolur|tolurnar|gogn|syndu|segdu|mer|"
+    r"verid|hefur|hafa|hvernig|manud|manadarlega|arsfjord|sidan|adur)\w*$")
+_MONTH_OR_YEAR = re.compile(r"^((18|19|20)\d\d|jan\w*|feb\w*|mar\w*|apr\w*|may|mai|jun\w*|jul\w*|aug\w*|agu\w*|"
+                            r"sep\w*|oct\w*|okt\w*|nov\w*|dec\w*|des\w*)$")
 
 
 class Rewritten(BaseModel):
@@ -37,7 +47,9 @@ def looks_like_followup(question: str, history: list[Turn]) -> bool:
     if not history:
         return False
     q = normalize(question).strip()
-    return len(tokens(question)) <= _MAX_WORDS or bool(_FOLLOW.search(q))
+    subject = [t for t in tokens(question)
+               if t not in STOPWORDS and not _NO_SUBJECT.match(t) and not _MONTH_OR_YEAR.match(t)]
+    return len(tokens(question)) <= _MAX_WORDS or bool(_FOLLOW.search(q)) or not subject
 
 
 async def rewrite(llm: LLM, question: str, history: list[Turn]) -> str:

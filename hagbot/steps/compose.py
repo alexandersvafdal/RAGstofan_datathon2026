@@ -1,6 +1,7 @@
 """Step 7: write the answer from the facts, then check it did not invent numbers."""
 
 import re
+from datetime import date
 
 from pydantic import BaseModel
 
@@ -19,7 +20,8 @@ SYSTEM = {
 }
 RULES = """Use ONLY the facts given, with numbers written exactly as formatted, including units.
 Say which period the numbers are for. Name the source as Statistics Iceland (Hagstofa Íslands) and the table ID.
-If facts come from different tables or dates, say so. Do not add numbers that are not in the facts."""
+If facts come from different tables or dates, say so. Do not add numbers that are not in the facts.
+Do not call a figure a projection, forecast or estimate unless the table title says so: these are recorded statistics."""
 
 
 def _facts_block(parts: list[AnswerPart]) -> str:
@@ -84,9 +86,14 @@ def template(parts: list[AnswerPart], lang: str) -> str:
 
 async def compose(llm: LLM, question: str, parts: list[AnswerPart], lang: str) -> tuple[str, str]:
     """Returns (text, "model" | "template"). The template only restates facts, so both are number-checked."""
-    user = f"Question: {question}\n\nFacts:\n{_facts_block(parts)}"
+    # a long series: hand the model its endpoints and peak, or it tends to describe only part of the period
+    summary = [x for x in (_series_sentence(p, lang) for p in parts) if x]
+    user = f"Question: {question}\n\nFacts:\n{_facts_block(parts)}" + \
+           (f"\n\nSummary of the series (cover the whole period):\n" + "\n".join(summary) if summary else "")
     try:
-        written = await llm.complete_json(SYSTEM[lang] + "\n" + RULES, user, Written, retries=1)
+        # the model's training ends before the data does, so 2026 looks like the future to it ("projected to reach")
+        today = f"Today is {date.today().isoformat()}. Every period up to today is in the past: the figures are recorded, not forecast."
+        written = await llm.complete_json(SYSTEM[lang] + "\n" + RULES + "\n" + today, user, Written, retries=1)
         text = re.sub(r"\s+", " ", written.text).strip()
         # the model sometimes drifts into another script mid-sentence (seen: Chinese inside Icelandic)
         if verify(text, parts) and not re.search(r"[\u0400-\u04ff\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]", text):
