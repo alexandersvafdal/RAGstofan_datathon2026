@@ -49,6 +49,11 @@ _INTENT = [  # cheap keyword check; overrides a "value" answer when the question
 ]
 _ANNUAL_ASK = r"12 month|twelve month|\bannual|year on year|inflation|verdbolg|\bgrowth|hagvoxt|arsbreyt|tolf manud"
 _CHANGE_OPTION = r"annual change|12.month|change on previous year|change from previous year|arsbreyting|fra fyrra ari"
+# "How has X changed", "since 2020", "over the years", "þróun": a trend, shown as a series, not one difference
+_TREND = (r"how (has|have|did) .{0,60}(chang|develop|evolv|grow|gone)|\bsince (18|19|20)\d\d\b|over the (last |past )?"
+          r"(years|decade|months)|over time|\btrend|\bdevelopment|hvernig (hefur|hafa) .{0,60}(throast|breyst|thrast)|"
+          r"\bthroun|\bthroast|fra (18|19|20)\d\d(?! til)|undanfarin|sidustu (ar|aratug)")
+_TREND_DEFAULT = {"M": 60, "Q": 20, "": 15}  # periods shown when the question names no start
 _TOTAL = re.compile(r"\b(total|alls|samtals|all)\b", re.I)
 _MAX_OPTIONS = 80
 
@@ -145,6 +150,24 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "") -> Resolved:
         notes.append(f"operation {op} -> value (the table already gives the change)")
         op = "value"
 
+    # A trend question: every period from the year asked (or a default span) to the latest, as a series
+    # "how much has it grown since 2020" asks for one number, not a trend
+    trend = bool(re.search(_TREND, q)) and op != "share" and not re.search(r"how much|how many|by how|hve mik|um hve|hve marg", q)
+    if trend:
+        for var in meta.variables:
+            if not var.time:
+                continue
+            years = re.findall(r"\b(?:18|19|20)\d\d\b", question)
+            step = "M" if "M" in var.values[-1] else "Q" if "Q" in var.values[-1] else ""
+            start = next((i for i, c in enumerate(var.values) if years and c.startswith(min(years))), None)
+            if start is None:
+                start = max(0, len(var.values) - _TREND_DEFAULT[step])
+            out[var.code] = var.values[start:]
+            notes.append(f"{var.text}: a trend, {var.values[start]} to {var.values[-1]}")
+        if op != "series":
+            notes.append(f"operation {op} -> series (trend wording)")
+        op = "series"
+
     # No year or period in the question: the latest period, whatever the model chose
     if not re.search(r"\b(?:18|19|20)\d\d\b", question) and op in ("value", "share"):
         for var in meta.variables:
@@ -154,7 +177,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "") -> Resolved:
 
     compare = sel.compare_dimension if sel.compare_dimension in out else None
     hint = guess_op(question)
-    if op in ("value", "series") and hint in ("difference", "pct_change") and any(len(v) == 2 for v in out.values()):
+    if op in ("value", "series") and not trend and hint in ("difference", "pct_change") and any(len(v) == 2 for v in out.values()):
         notes.append(f"operation {op} -> {hint} (question wording)")
         op = hint
     if op == "value" and hint == "share":

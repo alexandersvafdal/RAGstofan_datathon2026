@@ -287,7 +287,7 @@ async function ask(question, tableId = null) {
 
 function renderAnswer(card, a) {
   const L = a.language;
-  card.replaceChildren(el("p", { class: "answer-text" + (a.status === "error" ? " error" : "") }, a.text));
+  card.replaceChildren(el("p", { class: "answer-text" + (a.status === "error" ? " error" : "") }, prettyPeriods(a.text, L)));
 
   if (a.status === "clarify" && a.clarification) {
     card.append(el("div", { class: "clarify" },
@@ -298,7 +298,9 @@ function renderAnswer(card, a) {
 
   const figures = el("div", { class: "figures" });
   for (const p of a.parts) {
-    const facts = p.computation ? [p.facts[p.facts.length - 1]] : p.facts.slice(0, 3);
+    // a calculation: its result; a series: where it started and where it is now; otherwise up to three numbers
+    const facts = p.computation ? [p.facts[p.facts.length - 1]]
+      : p.facts.length > 3 ? [p.facts[0], p.facts[p.facts.length - 1]] : p.facts.slice(0, 3);
     for (const f of facts) {
       const unit = f.unit && f.unit !== "%" ? f.unit : "";
       figures.append(el("div", { class: "figure" },
@@ -376,7 +378,7 @@ function drawChart(holder, c, L) {
   const multi = series.length > 1;
   const accent = cssVar("--series-1");
   const palette = [cssVar("--series-1"), cssVar("--series-2"), cssVar("--series-3")];
-  const fmt = c.unit === "%" ? ",.1f" : ",.0f";
+  const fmt = c.unit === "%" || data.some(d => !Number.isInteger(d.y)) ? ",.1f" : ",.0f";
   const y = { field: "y", type: "quantitative", title: null, axis: { format: "~s", tickCount: 4 }, scale: { zero: c.type === "bar" } };
   const color = multi ? { field: "series", type: "nominal", title: null, scale: { domain: series, range: palette },
     legend: { orient: "top", direction: "horizontal", symbolType: "circle" } } : { value: accent };

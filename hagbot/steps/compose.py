@@ -47,11 +47,30 @@ def verify(text: str, parts: list[AnswerPart]) -> bool:
     return all(any(abs(n - a) < 0.051 for a in allowed) for n in numbers_in(text))
 
 
+_PERIOD = re.compile(r"\b(?:18|19|20)\d\d(?:M\d\d|Q\d)?\b")
+
+
+def _series_sentence(p: AnswerPart, lang: str) -> str | None:
+    """A trend in one sentence: where it started, where it is now, and its highest point."""
+    periods = [_PERIOD.search(f.label) for f in p.facts]
+    if len(p.facts) <= 3 or not all(periods):
+        return None
+    measure = _PERIOD.sub("", p.facts[0].label).strip(" ,")
+    first, last = p.facts[0], p.facts[-1]
+    peak = max(p.facts, key=lambda f: f.value)
+    per = {id(f): m.group(0) for f, m in zip(p.facts, periods)}
+    if lang == "is":
+        return (f"{measure}: {first.formatted} ({per[id(first)]}), {last.formatted} ({per[id(last)]}); "
+                f"hæst {peak.formatted} ({per[id(peak)]})")
+    return (f"{measure}: {first.formatted} in {per[id(first)]}, {last.formatted} in {per[id(last)]}; "
+            f"highest {peak.formatted} in {per[id(peak)]}")
+
+
 def template(parts: list[AnswerPart], lang: str) -> str:
     src = "Heimild: Hagstofa Íslands" if lang == "is" else "Source: Statistics Iceland"
     out = []
     for p in parts:
-        facts = "; ".join(f"{f.label}: {f.formatted}" for f in p.facts[-3:])
+        facts = _series_sentence(p, lang) or "; ".join(f"{f.label}: {f.formatted}" for f in p.facts[-3:])
         out.append(f"{facts}. {src}, {p.table.id}.")
     return " ".join(out)
 
