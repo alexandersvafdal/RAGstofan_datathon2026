@@ -657,10 +657,28 @@ a { color: inherit; }
 .tile .t-value small { font-size: 20px; font-weight: 600; margin-left: 2px; color: var(--text-2); }
 .tile .t-meta { font-size: 13px; color: var(--text-3); display: flex; gap: 8px; align-items: center; }
 .delta { font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
-.tile svg.spark { width: 100%; height: 54px; margin-top: auto; overflow: visible; }
-.spark .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.spark .area { fill: url(#spark-fill); }
-.spark .end { fill: var(--accent); stroke: var(--card); stroke-width: 2; }
+.tile .mini { width: 100%; height: 56px; margin-top: auto; }
+.mini-svg { display: block; overflow: visible; }
+.mini-svg .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.mini-svg .line.draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.1s .25s var(--ease) forwards; }
+.mini-svg .area { fill: url(#spark-fill); }
+.mini-svg .dot { fill: var(--card); stroke: var(--accent); stroke-width: 2; }
+.mini-svg .dot.lead { fill: var(--accent); stroke: var(--card); }
+.mini-svg .lbl { font-size: 10px; font-weight: 600; fill: var(--text-3); font-variant-numeric: tabular-nums; }
+.mini-svg .bar { fill: var(--accent); fill-opacity: .45; transform-box: fill-box; transform-origin: bottom; animation: grow .6s calc(var(--i) * 35ms) var(--ease) backwards; }
+.mini-svg .bar.neg { fill: var(--series-2); transform-origin: top; }
+.mini-svg .bar.lead { fill-opacity: 1; }
+.mini-svg .zero { stroke: var(--text-3); stroke-width: 1; stroke-dasharray: 2 3; }
+.mini-svg .pop line { stroke: var(--accent); stroke-opacity: .35; stroke-width: 1.5; }
+.mini-svg .pop circle { fill: var(--accent); fill-opacity: .55; }
+.mini-svg .pop.lead circle { fill-opacity: 1; }
+.mini-svg .pop { animation: rise .5s calc(var(--i) * 40ms) var(--ease) backwards; }
+.mini-svg .cell { fill: var(--accent); animation: fade .5s calc(var(--i) * 25ms) var(--ease) backwards; }
+.mini-svg .cell.lead { stroke: var(--text); stroke-width: 1.5; }
+.mini-svg :is(rect, circle):hover { fill-opacity: 1; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes grow { from { transform: scaleY(0); } }
+@keyframes fade { from { opacity: 0; } }
 .tile .t-src { font-size: 11px; color: var(--text-3); letter-spacing: .02em; }
 .tile.skeleton { min-height: 196px; background: linear-gradient(90deg, var(--card) 0%, var(--grid) 50%, var(--card) 100%); background-size: 200% 100%; animation: shimmer 1.4s infinite linear; opacity: 1; }
 @keyframes shimmer { to { background-position: -200% 0; } }

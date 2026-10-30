@@ -70,7 +70,7 @@ class Pipeline:
                 ans.status, ans.clarification, ans.text = "clarify", clar.clarification, clar.clarification.message
                 return ans
             errors = [r for r in results if isinstance(r, Exception)]
-            parts = [r for r in results if isinstance(r, AnswerPart)]
+            parts = await self._merge_series([r for r in results if isinstance(r, AnswerPart)])
             for e in errors:
                 steps.append(Step(name="error", ms=0, detail=f"{type(e).__name__}: {e}"))
             if not parts:
@@ -89,6 +89,32 @@ class Pipeline:
             return ans
         finally:
             ans.steps, ans.total_ms, ans.llm_calls = list(steps), total.ms(), self.llm.calls - calls_before
+
+    async def _merge_series(self, parts: list[AnswerPart]) -> list[AnswerPart]:
+        """"How have stays by Icelanders and foreigners developed" is planned as two questions on the same table. Two
+        line charts of one table side by side say less than one chart with a line each, so such parts become one."""
+        out, by_table = [], {}
+        for p in parts:
+            if p.chart and p.chart.type == "line" and not p.computation:
+                by_table.setdefault(p.table.id, []).append(p)
+            else:
+                out.append(p)
+        for table_id, group in by_table.items():
+            if len(group) == 1:
+                out.append(group[0])
+                continue
+            meta = await self.source.meta(table_id)
+            rows = list({tuple(sorted(r.key.items())): r for p in group for r in p.rows}.values())
+            selections = {v.code: [c for c in v.values if any(r.key.get(v.code) == c for r in rows)] for v in meta.variables}
+            first = group[0]
+            out.append(first.model_copy(update={
+                "sub_question": " | ".join(p.sub_question for p in group),
+                "rows": rows,
+                "facts": [f for p in group for f in p.facts],
+                "selection": {k: list(dict.fromkeys(v for p in group for v in p.selection.get(k, []))) for k in first.selection},
+                "chart": choose_chart(meta, rows, selections, None),
+            }))
+        return out
 
     async def _answer_part(self, sq: SubQuestion, original: str, lang: str, forced_table: str | None, steps: list[Step],
                            alone: bool = True) -> AnswerPart:

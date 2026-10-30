@@ -51,19 +51,22 @@ _PERIOD = re.compile(r"\b(?:18|19|20)\d\d(?:M\d\d|Q\d)?\b")
 
 
 def _series_sentence(p: AnswerPart, lang: str) -> str | None:
-    """A trend in one sentence: where it started, where it is now, and its highest point."""
+    """A trend in one sentence per line: where it started, where it is now, and its highest point."""
     periods = [_PERIOD.search(f.label) for f in p.facts]
     if len(p.facts) <= 3 or not all(periods):
         return None
-    measure = _PERIOD.sub("", p.facts[0].label).strip(" ,")
-    first, last = p.facts[0], p.facts[-1]
-    peak = max(p.facts, key=lambda f: f.value)
-    per = {id(f): m.group(0) for f, m in zip(p.facts, periods)}
-    if lang == "is":
-        return (f"{measure}: {first.formatted} ({per[id(first)]}), {last.formatted} ({per[id(last)]}); "
-                f"hæst {peak.formatted} ({per[id(peak)]})")
-    return (f"{measure}: {first.formatted} in {per[id(first)]}, {last.formatted} in {per[id(last)]}; "
-            f"highest {peak.formatted} in {per[id(peak)]}")
+    lines: dict[str, list] = {}  # one line per series: the label without its period
+    for f, m in zip(p.facts, periods):
+        lines.setdefault(re.sub(r"(\s*,)+", ",", _PERIOD.sub("", f.label)).strip(" ,"), []).append((m.group(0), f))
+    out = []
+    for measure, pts in lines.items():
+        (p0, first), (p1, last) = pts[0], pts[-1]
+        pk, peak = max(pts, key=lambda x: x[1].value)
+        if lang == "is":
+            out.append(f"{measure}: {first.formatted} ({p0}), {last.formatted} ({p1}); hæst {peak.formatted} ({pk})")
+        else:
+            out.append(f"{measure}: {first.formatted} in {p0}, {last.formatted} in {p1}; highest {peak.formatted} in {pk}")
+    return ". ".join(out)
 
 
 def template(parts: list[AnswerPart], lang: str) -> str:

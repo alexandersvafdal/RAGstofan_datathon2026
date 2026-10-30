@@ -121,10 +121,11 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "") -> Resolved:
 
     # "Iceland" in a question means the whole country, not Icelandic citizens or people born in Iceland
     q = normalize(question)
-    if not re.search(r"citizen|rikisborg|born|birth|faedd|faeding|origin|uppruna", q):
+    # ...unless the question compares groups ("Icelanders and foreigners") or the model chose several of them
+    if not re.search(r"citizen|rikisborg|born|birth|faedd|faeding|origin|uppruna|icelander|foreign|islending|utlending|erlend", q):
         for var in meta.variables:
             if re.search(r"citizen|birth|origin|country|rikisfang|faedingarland|uppruni", normalize(var.text)) and \
-                    any(normalize(var.label_of(c)) in ("iceland", "island") for c in out[var.code]):
+                    len(out[var.code]) == 1 and any(normalize(var.label_of(c)) in ("iceland", "island") for c in out[var.code]):
                 out[var.code] = _default(var)
                 notes.append(f"{var.text}: 'Iceland' means the whole country; using {[var.label_of(c) for c in out[var.code]]}")
 

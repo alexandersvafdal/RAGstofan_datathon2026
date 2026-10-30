@@ -205,16 +205,76 @@ async function loadIndicators() {
   renderTiles();
 }
 
-function sparkline(series) {
-  const W = 200, H = 54, pad = 4;
-  const ys = series.map(p => p.y), lo = Math.min(...ys), hi = Math.max(...ys), span = hi - lo || 1;
-  const pts = series.map((p, i) => [pad + (i / Math.max(1, series.length - 1)) * (W - 2 * pad), H - pad - ((p.y - lo) / span) * (H - 2 * pad)]);
-  const d = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join("");
-  const [ex, ey] = pts[pts.length - 1];
-  return el("svg", { svg: 1, class: "spark", viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: "none", "aria-hidden": "true" },
-    el("path", { svg: 1, class: "area", d: `${d}L${ex},${H}L${pts[0][0]},${H}Z` }),
-    el("path", { svg: 1, class: "line", d, "vector-effect": "non-scaling-stroke" }),
-    el("circle", { svg: 1, class: "end", cx: ex, cy: ey, r: 3.5, "vector-effect": "non-scaling-stroke" }));
+// Each tile shows its history in a different small chart, chosen for what the numbers are:
+// a count that grows (slope), a monthly rate (heatmap), a rate over time (line), a monthly change (lollipop),
+// a yearly total (bars), a growth rate that can go negative (diverging bars).
+const MINI_KIND = { population: "slope", inflation: "heatmap", unemployment: "line", wages: "lollipop",
+                    overnight_stays: "bars", gdp_growth: "diverging" };
+const svgEl = (tag, attrs = {}, ...kids) => el(tag, { svg: 1, ...attrs }, ...kids);
+const tip = (p, unit, L) => svgEl("title", {}, `${fmtPeriod(p.x, L)}: ${fmtNum(p.y, unit, L)}${unit === "%" ? "%" : ""}`);
+
+function drawMini(holder) {
+  const { ind, L } = holder._mini;
+  const unit = ind.unit.en, kind = MINI_KIND[ind.id] || "line";
+  const W = Math.max(120, Math.round(holder.clientWidth || 200)), H = 56, pad = 4;
+  const s = kind === "lollipop" ? ind.series.slice(-12) : ind.series;
+  const ys = s.map(p => p.y);
+  const lo = Math.min(...ys, kind === "bars" || kind === "diverging" ? 0 : Infinity), hi = Math.max(...ys, kind === "diverging" ? 0 : -Infinity);
+  const span = hi - lo || 1;
+  const X = i => pad + (i / Math.max(1, s.length - 1)) * (W - 2 * pad);
+  const bottom = kind === "slope" ? 16 : pad;   // the slope keeps room under it for its year labels
+  const Y = v => H - bottom - ((v - lo) / span) * (H - bottom - pad);
+  const svg = svgEl("svg", { class: `mini-svg ${kind}`, viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
+    "aria-label": `${ind.label[L]}: ${s.length} ${L === "is" ? "tímabil" : "periods"}` });
+  const last = s.length - 1;
+
+  if (kind === "line" || kind === "slope") {
+    const pts = s.map((p, i) => [X(i), Y(p.y)]);
+    const d = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join("");
+    if (kind === "line") svg.append(svgEl("path", { class: "area", d: `${d}L${pts[last][0]},${H}L${pts[0][0]},${H}Z` }));
+    svg.append(svgEl("path", { class: "line draw", d, pathLength: 1 }));
+    if (kind === "slope") {        // first and last point, labelled with their years
+      for (const i of [0, last]) svg.append(svgEl("circle", { class: i ? "dot lead" : "dot", cx: pts[i][0], cy: pts[i][1], r: i ? 4.5 : 3.5 }, tip(s[i], unit, L)));
+      svg.append(svgEl("text", { class: "lbl", x: pts[0][0], y: H - 1, "text-anchor": "start" }, fmtPeriod(s[0].x, L)));
+      svg.append(svgEl("text", { class: "lbl", x: pts[last][0], y: H - 1, "text-anchor": "end" }, fmtPeriod(s[last].x, L)));
+    } else {
+      svg.append(svgEl("circle", { class: "dot lead", cx: pts[last][0], cy: pts[last][1], r: 3.5 }, tip(s[last], unit, L)));
+    }
+
+  } else if (kind === "bars" || kind === "diverging" || kind === "lollipop") {
+    const n = s.length, gap = kind === "lollipop" ? 0 : Math.max(2, W / n * 0.22), bw = (W - 2 * pad - gap * (n - 1)) / n;
+    const zero = Y(Math.max(lo, Math.min(0, hi)));
+    s.forEach((p, i) => {
+      const x = pad + i * (bw + gap), yv = Y(p.y), top = Math.min(yv, zero), h = Math.max(1.5, Math.abs(zero - yv));
+      const cls = (p.y < 0 ? "neg " : "") + (i === last ? "lead" : "");
+      if (kind === "lollipop") {
+        const cx = x + bw / 2;
+        svg.append(svgEl("g", { class: `pop ${cls}`, style: `--i:${i}` }, svgEl("line", { x1: cx, x2: cx, y1: zero, y2: yv }),
+          svgEl("circle", { cx, cy: yv, r: i === last ? 4 : 3 }), tip(p, unit, L)));
+      } else {
+        svg.append(svgEl("rect", { class: `bar ${cls}`, x, y: top, width: bw, height: h, rx: Math.min(3, bw / 2), style: `--i:${i}` }, tip(p, unit, L)));
+      }
+    });
+    if (kind === "diverging") svg.append(svgEl("line", { class: "zero", x1: pad, x2: W - pad, y1: zero, y2: zero }));
+
+  } else if (kind === "heatmap") {   // a row per year, a column per month; darker means higher
+    const rows = [...new Set(s.map(p => p.x.slice(0, 4)))];
+    const cw = (W - 2 * pad - 28) / 12, ch = (H - 2 * pad - (rows.length - 1) * 3) / rows.length;
+    rows.forEach((yr, r) => svg.append(svgEl("text", { class: "lbl", x: pad, y: pad + r * (ch + 3) + ch / 2 + 3.5 }, yr)));
+    s.forEach((p, i) => {
+      const r = rows.indexOf(p.x.slice(0, 4)), m = +p.x.slice(5) - 1;
+      const t = (p.y - lo) / span;
+      svg.append(svgEl("rect", { class: "cell" + (i === last ? " lead" : ""), x: pad + 28 + m * cw + 1, y: pad + r * (ch + 3), width: cw - 2.5, height: ch,
+        rx: 3, style: `--i:${i};fill-opacity:${(0.18 + 0.82 * t).toFixed(2)}` }, tip(p, unit, L)));
+    });
+  }
+  holder.replaceChildren(svg);
+}
+
+function miniChart(ind, L) {
+  const holder = el("div", { class: "mini" });
+  holder._mini = { ind, L };
+  return holder;
 }
 
 function renderTiles() {
@@ -228,11 +288,14 @@ function renderTiles() {
       el("span", { class: "t-label" }, ind.label[L]),
       el("span", { class: "t-value" }, fmtNum(ind.value, unit, L), el("small", {}, unit === "%" ? "%" : "")),
       el("span", { class: "t-meta" }, fmtPeriod(ind.period, L), el("span", { class: "delta" }, fmtDelta(ind, L))),
-      sparkline(ind.series),
+      miniChart(ind, L),
       el("span", { class: "t-src" }, `${ind.table.id} · ${unit === "%" ? "" : unit}`.replace(/ · $/, "")));
     return tile;
   }));
+  requestAnimationFrame(() => document.querySelectorAll(".tile .mini").forEach(drawMini));  // sized to the tile, so dots stay round
 }
+let miniResize;
+addEventListener("resize", () => { clearTimeout(miniResize); miniResize = setTimeout(() => document.querySelectorAll(".tile .mini").forEach(drawMini), 150); });
 
 /* ---------- conversation ---------- */
 function showChat() {
@@ -387,7 +450,10 @@ function renderAnswer(card, a) {
   const figures = el("div", { class: "figures" });
   for (const p of a.parts) {
     // a calculation: its result; a series: where it started and where it is now; otherwise up to three numbers
+    const lines = new Map();   // several series: the latest value of each line
+    for (const f of p.facts) lines.set(f.label.replace(/\b\d{4}(M\d{2}|Q\d)?\b,?\s*/, ""), f);
     const facts = p.computation ? [p.facts[p.facts.length - 1]]
+      : p.facts.length > 3 && lines.size > 1 ? [...lines.values()].slice(0, 4)
       : p.facts.length > 3 ? [p.facts[0], p.facts[p.facts.length - 1]] : p.facts.slice(0, 3);
     for (const f of facts) {
       const unit = f.unit && f.unit !== "%" ? f.unit : "";

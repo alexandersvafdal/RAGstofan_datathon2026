@@ -28,6 +28,15 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="RAGstofan", lifespan=lifespan)
 
 
+@app.middleware("http")
+async def revalidate_frontend(request, call_next):
+    """Browsers must re-check the page and its files on every load, so nobody is shown an old copy of the interface."""
+    response = await call_next(request)
+    if not request.url.path.startswith("/api"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 @app.get("/api/health")
 async def health():
     return {
