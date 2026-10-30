@@ -56,8 +56,12 @@ def compute(meta: TableMeta, rows: list[Row], res: Resolved, lang: str) -> tuple
             else:
                 result, op_unit = (a.value - b.value) / b.value * 100, "%"
                 expr = f"({fmt_number(a.value, lang)} − {fmt_number(b.value, lang)}) ÷ {fmt_number(b.value, lang)}"
-            label = f"{'Change' if res.operation == 'difference' else 'Change (%)'} " \
-                    f"{a.labels[meta.var(dim).text]} vs {b.labels[meta.var(dim).text]}"
+            la, lb = a.labels[meta.var(dim).text], b.labels[meta.var(dim).text]
+            pct = " (%)" if res.operation == "pct_change" else ""
+            if meta.var(dim).time:   # over time: a change from the earlier period to the later one
+                label = f"{'Breyting' if lang == 'is' else 'Change'}{pct} {lb} → {la}"
+            else:                    # two groups at one point: a difference, in the order the question asked
+                label = f"{'Mismunur' if lang == 'is' else 'Difference'}{pct}: {la} − {lb}"
         else:
             if res.part not in group or res.whole not in group or not group[res.whole].value:
                 continue
