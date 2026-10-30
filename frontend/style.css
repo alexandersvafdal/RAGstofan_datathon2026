@@ -683,8 +683,12 @@ a { color: inherit; }
 .figure .f-label { margin-top: 4px; font-size: 14px; color: var(--text-2); }
 .figure .f-calc { margin-top: 8px; font-size: 13px; color: var(--text-3); font-variant-numeric: tabular-nums; }
 
-.chart { width: 100%; margin: 16px 0 4px; }
-.chart-title { font-size: 13px; font-weight: 600; color: var(--text-3); margin: 0 0 6px; }
+.chart-block { margin: 16px 0 4px; }
+.chart-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.chart { width: 100%; animation: rise .45s var(--ease); }
+.chart.square { display: flex; justify-content: center; }
+.chart-title { font-size: 13px; font-weight: 600; color: var(--text-3); margin: 0; }
+.segmented.mini button { font-size: 12px; padding: 2px 10px; }
 .chart .vega-embed { width: 100%; }
 .chart .vega-embed summary { display: none; }
 #vg-tooltip-element.vg-tooltip {

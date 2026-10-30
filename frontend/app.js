@@ -402,11 +402,7 @@ function renderAnswer(card, a) {
   if (figures.childElementCount) card.append(figures);
 
   for (const p of a.parts) {
-    if (p.chart && p.chart.type !== "kpi" && p.chart.data.length > 1) {
-      const holder = el("div", { class: "chart" });
-      card.append(el("p", { class: "chart-title" }, p.chart.title), holder);
-      drawChart(holder, p.chart, L);
-    }
+    if (p.chart && p.chart.type !== "kpi" && p.chart.data.length > 1) card.append(chartBlock(p, L));
   }
 
   const meta = el("div", { class: "meta-row" });
@@ -461,65 +457,208 @@ function stepsView(a, L) {
 
 /* ---------- charts ---------- */
 const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const IS_PERIOD = x => /^\d{4}([MQ]\d+)?$/.test(x);
+const IS_TOTAL = x => /^(total|alls|samtals|all)\b/i.test(x.trim());
+const VIEW_NAMES = {
+  en: { line: "Line", stacked: "Stacked", heatmap: "Heatmap", bars: "Bars", lollipop: "Lollipop", donut: "Donut", waffle: "Waffle", slope: "Slope" },
+  is: { line: "Lína", stacked: "Staflað", heatmap: "Hitakort", bars: "Súlur", lollipop: "Sleikjó", donut: "Kleinuhringur", waffle: "Vaffla", slope: "Halli" },
+};
 
-function drawChart(holder, c, L) {
-  holder._chart = [c, L];
+// Which views suit this answer, best first. The backend says line or bar; the shape of the data and the calculation decide the rest.
+function viewsFor(c, comp) {
+  const series = new Set(c.data.map(d => d.series).filter(Boolean));
+  const multi = series.size > 1;
+  const isTime = c.data.every(d => IS_PERIOD(d.x));
+  const monthly = isTime && c.data.every(d => /M\d\d$/.test(d.x));
+  const quarterly = isTime && c.data.every(d => /Q\d$/.test(d.x));
+  if (comp?.op === "share" && c.data.length === 2) return ["donut", "waffle", "bars"];
+  if (["difference", "pct_change"].includes(comp?.op) && c.data.length === 2) return ["slope", "bars"];
+  if (c.type === "line") {
+    if (multi) return ["line", "stacked", "bars"];
+    if ((monthly && c.data.length >= 18) || (quarterly && c.data.length >= 8)) return ["line", "heatmap", "bars"];
+    return ["line", "bars"];
+  }
+  if (isTime) return c.data.length === 2 ? ["slope", "bars"] : ["bars", "line"];
+  const parts = c.data.filter(d => !IS_TOTAL(d.x));
+  if (!multi && parts.length >= 2 && parts.length <= 7 && parts.every(d => d.y >= 0)) return ["bars", "donut", "lollipop"];
+  return multi ? ["bars"] : ["bars", "lollipop"];
+}
+
+function chartBlock(p, L) {
+  const views = viewsFor(p.chart, p.computation);
+  const holder = el("div", { class: "chart" });
+  const switcher = views.length > 1 ? el("div", { class: "segmented mini", role: "group", "aria-label": "Chart type" },
+    views.map((v, i) => el("button", { type: "button", class: i ? "" : "on", onclick: e => {
+      switcher.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === e.currentTarget));
+      drawChart(holder, p.chart, L, v, p.computation);
+    } }, VIEW_NAMES[L === "is" ? "is" : "en"][v]))) : null;
+  requestAnimationFrame(() => drawChart(holder, p.chart, L, views[0], p.computation));
+  return el("div", { class: "chart-block" }, el("div", { class: "chart-head" }, el("p", { class: "chart-title" }, p.chart.title), switcher), holder);
+}
+
+function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", comp = null) {
+  holder._chart = [c, L, view, comp];
   holder.replaceChildren();
+  delete holder.dataset.h;
+  holder.classList.toggle("square", ["donut", "waffle"].includes(view));
   const data = c.data.map(d => ({ ...d, label: fmtPeriod(d.x, L) }));
+  if (data.every(d => IS_PERIOD(d.x))) data.sort((a, b) => a.x.localeCompare(b.x));
   const series = [...new Set(data.map(d => d.series).filter(Boolean))];
   const multi = series.length > 1;
-  const accent = cssVar("--series-1");
-  const palette = [cssVar("--series-1"), cssVar("--series-2"), cssVar("--series-3")];
+  const accent = cssVar("--series-1"), card = cssVar("--card"), ink = cssVar("--text"), muted = cssVar("--text-3");
+  const palette = [cssVar("--series-1"), cssVar("--series-2"), cssVar("--series-3"), cssVar("--accent-2"), cssVar("--text-3"), cssVar("--text-2"), cssVar("--hairline")];
   const fmt = c.unit === "%" || data.some(d => !Number.isInteger(d.y)) ? ",.1f" : ",.0f";
-  const y = { field: "y", type: "quantitative", title: null, axis: { format: "~s", tickCount: 4 }, scale: { zero: c.type === "bar" } };
+  const unitSuffix = c.unit && c.unit !== "%" ? ` ${c.unit}` : c.unit === "%" ? "%" : "";
+  const y = { field: "y", type: "quantitative", title: null, axis: { format: "~s", tickCount: 4 }, scale: { zero: view !== "line" && view !== "slope" } };
   const color = multi ? { field: "series", type: "nominal", title: null, scale: { domain: series, range: palette },
     legend: { orient: "top", direction: "horizontal", symbolType: "circle" } } : { value: accent };
   const tooltip = [{ field: "label", title: c.x_label || " " }, ...(multi ? [{ field: "series", title: " " }] : []),
     { field: "y", title: c.unit || " ", format: fmt }];
-  let spec;
+  const hover = { name: "hover", select: { type: "point", on: "pointerover", clear: "pointerout" } };
+  let spec, width = "container", height = 260;
 
-  if (c.type === "line") {
+  if (view === "line" || view === "stacked") {
     const x = { field: "label", type: "ordinal", title: null, sort: null, axis: { labelAngle: 0, labelOverlap: "greedy", labelPadding: 8 } };
     const layers = [];
-    if (!multi) layers.push({ mark: { type: "area", interpolate: "monotone", line: false,
-      color: { gradient: "linear", x1: 0, y1: 1, x2: 0, y2: 0, stops: [{ offset: 0, color: "rgba(0,0,0,0)" }, { offset: 1, color: accent + "55" }] } },
-      encoding: { x, y } });
-    layers.push({ mark: { type: "line", interpolate: "monotone", strokeWidth: 2.5, strokeCap: "round" }, encoding: { x, y, color } });
-    layers.push({ params: [{ name: "hover", select: { type: "point", fields: ["label"], nearest: true, on: "pointerover", clear: "pointerout" } }],
-      mark: { type: "point", filled: true, size: 70, stroke: cssVar("--card"), strokeWidth: 2 },
-      encoding: { x, y, color, opacity: { condition: { param: "hover", empty: false, value: 1 }, value: 0 }, tooltip } });
-    layers.push({ transform: [{ filter: { param: "hover", empty: false } }], mark: { type: "rule", color: cssVar("--text-3"), strokeDash: [3, 3] },
-      encoding: { x } });
-    if (!multi) layers.push({ transform: [{ window: [{ op: "row_number", as: "i" }] }, { joinaggregate: [{ op: "max", field: "i", as: "n" }] },
-      { filter: "datum.i === datum.n" }],
-      mark: { type: "text", align: "right", dx: -4, dy: -12, fontWeight: 600, fontSize: 13, color: cssVar("--text") },
-      encoding: { x, y, text: { field: "y", type: "quantitative", format: fmt } } });
+    if (view === "stacked") {
+      layers.push({ mark: { type: "area", interpolate: "monotone", opacity: 0.85, line: { strokeWidth: 1.5, color: card } },
+        encoding: { x, y: { ...y, stack: "zero", scale: { zero: true } }, color, tooltip } });
+    } else {
+      if (!multi) layers.push({ mark: { type: "area", interpolate: "monotone", line: false,
+        color: { gradient: "linear", x1: 0, y1: 1, x2: 0, y2: 0, stops: [{ offset: 0, color: "rgba(0,0,0,0)" }, { offset: 1, color: accent + "55" }] } },
+        encoding: { x, y } });
+      layers.push({ mark: { type: "line", interpolate: "monotone", strokeWidth: 2.5, strokeCap: "round" }, encoding: { x, y, color } });
+      layers.push({ params: [{ name: "near", select: { type: "point", fields: ["label"], nearest: true, on: "pointerover", clear: "pointerout" } }],
+        mark: { type: "point", filled: true, size: 70, stroke: card, strokeWidth: 2 },
+        encoding: { x, y, color, opacity: { condition: { param: "near", empty: false, value: 1 }, value: 0 }, tooltip } });
+      layers.push({ transform: [{ filter: { param: "near", empty: false } }], mark: { type: "rule", color: muted, strokeDash: [3, 3] }, encoding: { x } });
+      if (!multi) layers.push({ transform: [{ window: [{ op: "row_number", as: "i" }] }, { joinaggregate: [{ op: "max", field: "i", as: "n" }] },
+        { filter: "datum.i === datum.n" }],
+        mark: { type: "text", align: "right", dx: -4, dy: -12, fontWeight: 600, fontSize: 13, color: ink },
+        encoding: { x, y, text: { field: "y", type: "quantitative", format: fmt } } });
+    }
     spec = { layer: layers };
-  } else {
-    const isTime = data.every(d => /^\d{4}([MQ]\d+)?$/.test(d.x));
-    if (isTime) data.sort((a, b) => a.x.localeCompare(b.x));
+
+  } else if (view === "heatmap") {
+    // one row per year, one column per month or quarter; the colour is the value
+    const cells = data.map(d => {
+      const m = /^(\d{4})(M(\d\d)|Q(\d))$/.exec(d.x);
+      const col = m[3] ? MONTHS[L === "is" ? "is" : "en"][+m[3] - 1] : `Q${m[4]}`;
+      return { ...d, year: m[1], col, ci: m[3] ? +m[3] : +m[4] };
+    });
+    const cols = [...new Map(cells.sort((a, b) => a.ci - b.ci).map(d => [d.col, d.ci])).keys()];
+    const years = [...new Set(cells.map(d => d.year))].sort();
+    height = Math.max(120, years.length * 34);
+    const lo = Math.min(...cells.map(d => d.y)), hi = Math.max(...cells.map(d => d.y));
+    spec = { data: { values: cells }, layer: [
+      { params: [hover], mark: { type: "rect", cornerRadius: 5, stroke: card, strokeWidth: 3 },
+        encoding: { x: { field: "col", type: "ordinal", sort: cols, title: null, axis: { orient: "top", labelAngle: 0, labelPadding: 6 } },
+          y: { field: "year", type: "ordinal", sort: years, title: null, axis: { labelPadding: 8 } },
+          color: { field: "y", type: "quantitative", title: null, scale: { range: [cssVar("--grid") === "" ? card : card, accent] },
+            legend: { orient: "bottom", direction: "horizontal", gradientLength: 180, format: fmt } },
+          tooltip: [{ field: "label", title: c.x_label || " " }, { field: "y", title: c.unit || " ", format: fmt }] } },
+      ...(cells.length <= 72 ? [{ mark: { type: "text", fontSize: 11, fontWeight: 600 },
+        encoding: { x: { field: "col", type: "ordinal", sort: cols }, y: { field: "year", type: "ordinal", sort: years },
+          text: { field: "y", type: "quantitative", format: fmt },
+          color: { condition: { test: `datum.y > ${lo + (hi - lo) * 0.55}`, value: cssVar("--accent-ink") }, value: ink } } }] : []),
+    ] };
+
+  } else if (view === "slope") {
+    // before → after, with the change written on the line
+    const [a, b] = data;
+    const delta = b.y - a.y, pct = a.y ? delta / a.y * 100 : null;
+    const sign = delta > 0 ? "+" : delta < 0 ? "−" : "";
+    const deltaText = `${sign}${fmtNum(Math.abs(delta), c.unit, L)}${unitSuffix}` + (pct != null && c.unit !== "%" ? `  (${sign}${fmtNum(Math.abs(pct), "%", L)}%)` : "");
+    height = 220;
+    const x = { field: "label", type: "ordinal", sort: null, title: null, axis: { labelAngle: 0, labelFontSize: 13, labelFontWeight: 600, labelPadding: 10 }, scale: { padding: 0.6 } };
+    const yy = { ...y, axis: null, scale: { zero: false, padding: 30 } };
+    spec = { layer: [
+      { mark: { type: "line", strokeWidth: 3, color: accent, strokeCap: "round" }, encoding: { x, y: yy } },
+      { mark: { type: "point", filled: true, size: 160, color: accent, stroke: card, strokeWidth: 3 }, encoding: { x, y: yy, tooltip } },
+      { mark: { type: "text", dy: -18, fontSize: 15, fontWeight: 700, color: ink }, encoding: { x, y: yy, text: { field: "y", type: "quantitative", format: fmt } } },
+      { data: { values: [{ t: deltaText }] }, mark: { type: "text", fontSize: 13, fontWeight: 600, color: accent, baseline: "top" },
+        encoding: { text: { field: "t" }, x: { value: "width" }, y: { value: 0 } } , transform: [] },
+    ] };
+    spec.layer[3].mark.align = "right";
+
+  } else if (view === "donut" || view === "waffle") {
+    // a share: the part against the rest; otherwise the categories against each other
+    let slices;
+    if (comp?.op === "share" && data.length === 2) {
+      const whole = data.find(d => IS_TOTAL(d.x)) || data.reduce((m, d) => (d.y > m.y ? d : m));
+      const part = data.find(d => d !== whole);
+      slices = [{ label: part.label, y: part.y }, { label: L === "is" ? "Annað" : "Everything else", y: Math.max(0, whole.y - part.y) }];
+    } else {
+      slices = data.filter(d => !IS_TOTAL(d.x)).sort((a, b) => b.y - a.y).map(d => ({ label: d.label, y: d.y }));
+    }
+    const total = slices.reduce((t, d) => t + d.y, 0) || 1;
+    slices.forEach(d => { d.pct = d.y / total * 100; });
+    const colors = slices.length === 2 && comp?.op === "share" ? [accent, cssVar("--grid") || muted] : palette.slice(0, slices.length);
+    const head = slices[0];
+    if (view === "donut") {
+      width = 300; height = 260;
+      spec = { data: { values: slices }, layer: [
+        { params: [hover], mark: { type: "arc", innerRadius: 78, outerRadius: 118, padAngle: 0.012, cornerRadius: 5 },
+          encoding: { theta: { field: "y", type: "quantitative", stack: true }, order: { field: "y", sort: "descending" },
+            color: { field: "label", type: "nominal", sort: null, title: null, scale: { domain: slices.map(d => d.label), range: colors },
+              legend: { orient: "right", labelLimit: 160, symbolType: "circle" } },
+            opacity: { condition: { param: "hover", value: 1 }, value: 0.88 },
+            tooltip: [{ field: "label", title: " " }, { field: "y", title: c.unit || " ", format: fmt }, { field: "pct", title: "%", format: ".1f" }] } },
+        { data: { values: [{ t: `${fmtNum(head.pct, "%", L)}%` }] }, mark: { type: "text", fontSize: 28, fontWeight: 700, color: ink, dy: -6 },
+          encoding: { text: { field: "t" } } },
+        { data: { values: [{ t: head.label.length > 22 ? head.label.slice(0, 21) + "…" : head.label }] },
+          mark: { type: "text", fontSize: 12, color: muted, dy: 18 }, encoding: { text: { field: "t" } } },
+      ] };
+    } else {
+      // 100 squares, filled in proportion
+      const cells = [];
+      let k = 0;
+      slices.forEach((d, si) => { const n = si === slices.length - 1 ? 100 - k : Math.round(d.pct); for (let i = 0; i < n && k < 100; i++, k++) cells.push({ i: k, label: d.label }); });
+      width = 260; height = 260;
+      spec = { data: { values: cells }, transform: [{ calculate: "datum.i % 10", as: "col" }, { calculate: "floor(datum.i / 10)", as: "row" }],
+        mark: { type: "rect", cornerRadius: 4, stroke: card, strokeWidth: 3 },
+        encoding: { x: { field: "col", type: "ordinal", axis: null }, y: { field: "row", type: "ordinal", axis: null },
+          color: { field: "label", type: "nominal", title: null, scale: { domain: slices.map(d => d.label), range: colors },
+            legend: { orient: "right", labelLimit: 160, symbolType: "square" } },
+          tooltip: [{ field: "label", title: " " }] } };
+      width = 380;
+    }
+
+  } else {  // bars and lollipop
+    const isTime = data.every(d => IS_PERIOD(d.x));
     const long = !isTime && (data.some(d => d.label.length > 12) || data.length > 8);
-    const cat = { field: "label", type: "nominal", title: null, sort: multi || isTime ? null : long ? "-x" : "-y", axis: { labelLimit: 180, labelPadding: 8 } };
-    const few = data.length <= 4 && !multi;
-    const bar = { type: "bar", cornerRadiusEnd: 6, ...(long ? { height: { band: 0.66 } } : few ? { width: 56 } : { width: { band: 0.62 } }) };
-    if (few && !long) holder.dataset.h = 200;
-    const enc = long ? { y: cat, x: { ...y, axis: { format: "~s", tickCount: 4 } } } : { x: { ...cat, axis: { labelAngle: 0 } }, y };
-    spec = { params: [{ name: "hover", select: { type: "point", on: "pointerover", clear: "pointerout" } }], mark: bar,
-      encoding: { ...enc, color, tooltip, opacity: { condition: { param: "hover", value: 1 }, value: 0.82 },
-        ...(multi ? (long ? { yOffset: { field: "series" } } : { xOffset: { field: "series" } }) : {}) } };
-    if (long) holder.dataset.h = Math.max(140, data.length * (multi ? 44 : 30));
+    const horizontal = long || view === "lollipop";
+    const cat = { field: "label", type: "nominal", title: null, sort: multi || isTime ? null : { field: "y", order: "descending" }, axis: { labelLimit: 180, labelPadding: 8 } };
+    const val = { ...y, axis: { format: "~s", tickCount: 4 } };
+    const enc = horizontal ? { y: cat, x: val } : { x: { ...cat, axis: { labelAngle: 0 } }, y };
+    if (horizontal) height = Math.max(140, data.length * (multi ? 44 : 32));
+    if (view === "lollipop") {
+      spec = { layer: [
+        { transform: [{ calculate: "0", as: "zero" }], mark: { type: "rule", strokeWidth: 2.5, color: accent, opacity: 0.45 },
+          encoding: { y: cat, x: { field: "zero", type: "quantitative" }, x2: { field: "y" } } },
+        { mark: { type: "point", filled: true, size: 150, color: accent, stroke: card, strokeWidth: 2 }, encoding: { ...enc, tooltip } },
+        { mark: { type: "text", align: "left", dx: 12, fontSize: 12, fontWeight: 600, color: ink }, encoding: { ...enc, text: { field: "y", type: "quantitative", format: fmt } } },
+      ] };
+    } else {
+      const few = data.length <= 4 && !multi;
+      const bar = { type: "bar", cornerRadiusEnd: 6, ...(horizontal ? { height: { band: 0.66 } } : few ? { width: 56 } : { width: { band: 0.62 } }) };
+      if (few && !horizontal) height = 200;
+      spec = { params: [hover], mark: bar,
+        encoding: { ...enc, color, tooltip, opacity: { condition: { param: "hover", value: 1 }, value: 0.82 },
+          ...(multi ? (horizontal ? { yOffset: { field: "series" } } : { xOffset: { field: "series" } }) : {}) } };
+    }
   }
 
-  const ink = cssVar("--text-3");
   vegaEmbed(holder, {
     $schema: "https://vega.github.io/schema/vega-lite/v5.json",
-    width: "container", height: +(holder.dataset.h || 260), autosize: { type: "fit-x", contains: "padding" },
+    width, height, autosize: { type: width === "container" ? "fit-x" : "pad", contains: "padding" },
     data: { values: data }, ...spec,
     config: {
       background: null, view: { stroke: null }, padding: { top: 12, right: 6, bottom: 4, left: 4 },
       font: "-apple-system, BlinkMacSystemFont, Inter, system-ui, sans-serif",
-      axis: { labelColor: ink, titleColor: ink, gridColor: cssVar("--grid"), domain: false, ticks: false, labelFontSize: 12 },
-      axisX: { grid: false }, axisY: { gridDash: [2, 3] }, legend: { labelColor: cssVar("--text-2"), labelFontSize: 12 },
+      axis: { labelColor: muted, titleColor: muted, gridColor: cssVar("--grid"), domain: false, ticks: false, labelFontSize: 12 },
+      axisX: { grid: false }, axisY: { gridDash: [2, 3] },
+      legend: { labelColor: cssVar("--text-2"), labelFontSize: 12, gradientThickness: 8 },
     },
   }, { actions: false, renderer: "svg", tooltip: { theme: "custom" } })
     .catch(e => holder.append(el("div", { class: "muted" }, `chart error: ${e.message}`)));
