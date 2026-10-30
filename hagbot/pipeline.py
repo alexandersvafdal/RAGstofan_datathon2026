@@ -13,6 +13,7 @@ from .steps.chart import choose_chart
 from .steps.compose import compose
 from .steps.compute import compute
 from .steps.plan import Plan, SubQuestion, plan
+from .steps.ratio import POPULATION_TABLE, detect_ratio, ratio_parts
 from .steps.retrieve import retrieve
 from .steps.select import select
 from .text import detect_language
@@ -53,16 +54,28 @@ class Pipeline:
         calls_before = self.llm.calls
         ans = Answer(question=req.question, language=lang, status="error", text="", model=self.llm.model)
         try:
+            ratio = None if req.table_id else detect_ratio(req.question)
+            forced: list[str | None]
             if req.table_id:  # the user already chose a table: skip planning
                 p = Plan(sub_questions=[SubQuestion(question=req.question, search_query=req.question)])
+                forced = [req.table_id]
+            elif ratio:  # "X per inhabitant": X from its own table, divided by the population in code
+                t = Timer()
+                num = (await plan(self.llm, ratio.numerator)).sub_questions[0]
+                pop = SubQuestion(question=ratio.population_question(lang), search_query="population 1 January")
+                p = Plan(sub_questions=[num, pop])
+                forced = [None, POPULATION_TABLE]
+                steps.append(Step(name="plan", ms=t.ms(), detail=f"{num.question} | {pop.question}"))
             else:
                 t = Timer()
                 p = await plan(self.llm, req.question)
+                forced = [None] * len(p.sub_questions)
                 steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(s.question for s in p.sub_questions)))
 
             results = await asyncio.gather(
-                *(self._answer_part(sq, req.question, lang, req.table_id, steps, alone=len(p.sub_questions) == 1)
-                  for sq in p.sub_questions),
+                *(self._answer_part(sq, ratio.numerator if ratio and i == 0 else req.question, lang, f, steps,
+                                    alone=len(p.sub_questions) == 1 or (ratio is not None and i == 0))
+                  for i, (sq, f) in enumerate(zip(p.sub_questions, forced))),
                 return_exceptions=True,
             )
             clar = next((r for r in results if isinstance(r, NeedsClarification)), None)
@@ -71,6 +84,9 @@ class Pipeline:
                 return ans
             errors = [r for r in results if isinstance(r, Exception)]
             parts = await self._merge_series([r for r in results if isinstance(r, AnswerPart)])
+            if ratio and len(parts) == 2 and (rp := ratio_parts(ratio, parts[0], parts[1], lang)):
+                parts = list(rp)
+                steps.append(Step(name="compute", ms=0, detail=rp[0].computation.expression))
             for e in errors:
                 steps.append(Step(name="error", ms=0, detail=f"{type(e).__name__}: {e}"))
             if not parts:

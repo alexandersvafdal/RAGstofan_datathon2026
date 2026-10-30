@@ -43,7 +43,9 @@ const POOL = [
   ["wages", "How much have wages risen in the last 12 months?", "Hve mikið hafa laun hækkað síðustu 12 mánuði?"],
   ["labour", "What is the unemployment rate?", "Hvert er atvinnuleysið?"],
   ["labour", "How many people live in Iceland, and what is the unemployment rate?", "Hve margir búa á Íslandi og hvert er atvinnuleysið?"],
+  ["tourism", "How many tourists came to Iceland in 2025?", "Hve margir ferðamenn komu til Íslands árið 2025?"],  // ambiguous on purpose: the bot asks which statistic
   ["tourism", "How many overnight stays were there in registered accommodation?", "Hve margar gistinætur voru á skráðum gististöðum?"],
+  ["tourism", "How many overnight stays were there in 2025 per inhabitant?", "Hve margar gistinætur voru árið 2025 á hvern íbúa?"],
   ["tourism", "How many foreign passengers came through Keflavík airport in August?", "Hve margir erlendir farþegar fóru um Keflavíkurflugvöll í ágúst?"],
   ["tourism", "What share of overnight stays were by foreigners in 2025?", "Hve stór hluti gistinátta var vegna útlendinga árið 2025?"],
   ["economy", "What was Iceland's economic growth last year?", "Hver var hagvöxturinn á síðasta ári?"],
@@ -120,7 +122,10 @@ const pills = (() => {
   function questions() {
     const pick = lang === "auto" ? POOL.flatMap(([, en, is], i) => (i % 3 === 2 ? [[is, "is"]] : [[en, "en"]]))
       : POOL.map(([, en, is]) => (lang === "is" ? [is, "is"] : [en, "en"]));
-    return pick.sort(() => Math.random() - 0.5);
+    pick.sort(() => Math.random() - 0.5);
+    const amb = pick.findIndex(([q]) => /tourists|ferðamenn/.test(q));   // the ambiguous example shows up early
+    if (amb > 2) pick.splice(2, 0, ...pick.splice(amb, 1));
+    return pick;
   }
   const later = (fn, ms) => { const id = setTimeout(fn, ms); timers.push(id); return id; };
 
@@ -331,18 +336,19 @@ function liveView(L) {
     rows[name] = row;
     return row;
   }));
-  const time = el("span", { class: "live-time" }, "0.0 s");
-  const view = el("div", { class: "live" },
-    el("div", { class: "live-head" }, el("span", { class: "live-orb", "aria-hidden": "true" }), el("span", {}, `${t("working", L)}…`), time),
+  const view = el("div", { class: "live", "aria-label": t("working", L) },
     list);
-  const t0 = performance.now();
+  let stepStart = performance.now();   // when the step in progress began; its row counts up from here
   const done = new Set();
   let parts = 1;
   const refresh = () => {
     const current = STEP_ORDER.find(n => !done.has(n));
     STEP_ORDER.forEach(n => rows[n].classList.toggle("now", n === current));
   };
-  view._timer = setInterval(() => { time.textContent = `${((performance.now() - t0) / 1000).toFixed(1)} s`; }, 100);
+  view._timer = setInterval(() => {
+    const cur = STEP_ORDER.find(n => !done.has(n));
+    if (cur) rows[cur].querySelector(".ls-ms").textContent = `${((performance.now() - stepStart) / 1000).toFixed(1)} s`;
+  }, 100);
   refresh();
 
   view.step = st => {
@@ -377,7 +383,9 @@ function liveView(L) {
     ms.textContent = st.ms >= 1000 ? `${(st.ms / 1000).toFixed(1)} s` : `${st.ms} ms`;
     row._count = (row._count || 0) + 1;
     // retrieve, select and fetch run once per sub-question
-    if (st.name === "plan" || st.name === "compose" || row._count >= parts) { done.add(st.name); row.classList.add("done"); }
+    if (st.name === "plan" || st.name === "compose" || row._count >= parts) {
+      done.add(st.name); row.classList.add("done"); stepStart = performance.now();
+    }
     refresh();
   };
   return view;
@@ -441,8 +449,7 @@ function renderAnswer(card, a) {
   card.replaceChildren(el("p", { class: "answer-text" + (a.status === "error" ? " error" : "") }, prettyPeriods(a.text, L)));
 
   if (a.status === "clarify" && a.clarification) {
-    card.append(el("div", { class: "clarify" },
-      el("div", {}, a.clarification.message),
+    card.append(el("div", { class: "clarify" },     // the question itself is already the answer text above
       el("div", { class: "opts" }, a.clarification.options.map(o =>
         el("button", { type: "button", onclick: () => ask(a.question, o.table_id) }, `${o.label} `, el("span", { class: "muted" }, o.table_id))))));
   }
@@ -744,6 +751,46 @@ $("#ask").addEventListener("submit", e => {
   $("#q").value = "";
   ask(q);
 });
+/* about: how it works and what it can't do yet */
+const ABOUT = {
+  en: { title: "About RAGstofan", how: "How it works", cant: "What it can't do yet",
+    steps: ["A language model reads your question and splits it if it asks for several things.",
+            "Keyword search over all 1,857 Statistics Iceland tables finds candidates; the model picks one.",
+            "The model chooses the categories (year, place, total…); code checks every choice against the table.",
+            "The numbers are read straight from the table. Any calculation is done in code, never by the model.",
+            "The model writes the answer, and every number in it is checked against the table before you see it."],
+    limits: ["Each part of a question is answered from one table. Ratios to the population (per inhabitant, per 1,000) are the exception.",
+             "The data is Statistics Iceland's snapshot of 18 October 2026. Newer periods come from the live API when the snapshot lacks them.",
+             "On a laptop an answer takes 30–90 seconds. On a GPU server it is several times faster.",
+             "Answers in Icelandic are worded less well than in English. The numbers are checked either way.",
+             "It does not forecast, give opinions or explain causes (\u201cwhy did inflation rise?\u201d).",
+             "When a word could mean different statistics (\u201ctourists\u201d), it asks which one you mean."] },
+  is: { title: "Um RAGstofuna", how: "Svona virkar þetta", cant: "Það sem hún getur ekki enn",
+    steps: ["Mállíkan les spurninguna og skiptir henni ef spurt er um fleira en eitt.",
+            "Leitarorðaleit í öllum 1.857 töflum Hagstofunnar finnur kandídata; líkanið velur eina.",
+            "Líkanið velur flokkana (ár, staður, alls…); kóði staðfestir hvert val gegn töflunni.",
+            "Tölurnar eru lesnar beint úr töflunni. Útreikningar eru gerðir í kóða, aldrei af líkaninu.",
+            "Líkanið skrifar svarið og hver tala í því er borin saman við töfluna áður en þú sérð það."],
+    limits: ["Hver hluti spurningar er svaraður úr einni töflu. Hlutföll af mannfjölda (á íbúa, á 1.000 íbúa) eru undantekning.",
+             "Gögnin eru afrit Hagstofunnar frá 18. október 2026. Nýrri tímabil koma úr lifandi vefþjónustu þegar afritið vantar þau.",
+             "Á fartölvu tekur svar 30–90 sekúndur. Á GPU-þjóni er það margfalt hraðara.",
+             "Svör á íslensku eru verr orðuð en á ensku. Tölurnar eru alltaf yfirfarnar.",
+             "Hún spáir ekki, hefur ekki skoðanir og útskýrir ekki orsakir („af hverju jókst verðbólgan?“).",
+             "Þegar orð getur átt við ólíka tölfræði („ferðamenn“) spyr hún hvort þú átt við."] },
+};
+function openAbout() {
+  const a = ABOUT[ui()];
+  const dlg = $("#about");
+  dlg.replaceChildren(el("div", { class: "about" },
+    el("button", { class: "about-close", type: "button", "aria-label": "Close", onclick: () => dlg.close() }, "×"),
+    el("h2", {}, a.title),
+    el("h3", {}, a.how), el("ol", { class: "about-steps" }, a.steps.map(x => el("li", {}, x))),
+    el("h3", {}, a.cant), el("ul", { class: "about-limits" }, a.limits.map(x => el("li", {}, x)))));
+  dlg.showModal();
+}
+$("#about-btn").addEventListener("click", openAbout);
+$("#about").addEventListener("click", e => { if (e.target.id === "about") e.target.close(); });   // click outside closes
+
 /* theme picker: palette and light/dark, remembered in this browser */
 const themeBox = $("#theme");
 function applyTheme(palette, mode) {

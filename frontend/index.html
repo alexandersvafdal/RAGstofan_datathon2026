@@ -8,7 +8,7 @@
     if (t.palette === "amber") t.palette = "hagstofan";  // Amber was replaced by Hagstofan
     if (t.palette && t.palette !== "warm") document.documentElement.dataset.palette = t.palette;
     if (t.mode && t.mode !== "auto") document.documentElement.dataset.theme = t.mode; } catch {}</script>
-  <link rel="stylesheet" href="style.css?v=21">
+  <link rel="stylesheet" href="style.css?v=24">
   <script src="https://cdn.jsdelivr.net/npm/vega@5.30.0/build/vega.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.21.0/build/vega-lite.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0/build/vega-embed.min.js"></script>
@@ -17,10 +17,12 @@
   <header class="nav">
     <a class="brand" href="/" aria-label="RAGstofan home">
       <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="12" width="4" height="9" rx="2"/><rect x="10" y="7" width="4" height="14" rx="2"/><rect x="17" y="3" width="4" height="18" rx="2"/></svg>
+      <svg class="logo-h" viewBox="0 0 12.6 17.45" aria-hidden="true"><path d="M2.295,2.894C1.661,2.679,0.634,2.679,0,2.894v5.403h2.295z"/><path d="M7.419,0.162c-0.634-0.216-1.661-0.216-2.295,0v8.136h2.295z"/><path d="M12.544,9.963c0.081-0.238,0.081-0.623,0-0.86H0v5.403c0.634,0.216,1.661,0.216,2.295,0V9.963h2.829v7.275c0.634,0.216,1.661,0.216,2.295,0V9.963z"/></svg>
       RAGstofan
     </a>
     <div class="nav-right">
       <span id="status" class="status" title="Model and data source">…</span>
+      <button id="about-btn" class="theme-btn about-btn" type="button" aria-label="About and limitations">i</button>
       <div class="theme" id="theme">
         <button class="theme-btn" type="button" aria-label="Theme" aria-haspopup="true" aria-expanded="false"><span></span></button>
         <div class="theme-pop" role="dialog" aria-label="Theme">
@@ -33,7 +35,7 @@
             <button class="swatch" data-palette="glacier" style="--sw-bg:#f2f7f8;--sw-accent:#137c8b"><i></i>Glacier</button>
             <button class="swatch" data-palette="aurora" style="--sw-bg:#f6f4fa;--sw-accent:#5b3fb8"><i></i>Aurora</button>
             <button class="swatch" data-palette="lava" style="--sw-bg:#f7f2ef;--sw-accent:#b4532a"><i></i>Lava</button>
-            <button class="swatch" data-palette="hagstofan" style="--sw-bg:#f3f7f8;--sw-accent:#246fa6"><i></i>Hagstofan</button>
+            <button class="swatch" data-palette="hagstofan" style="--sw-bg:#eef8fb;--sw-accent:#285971"><i></i>Hagstofan</button>
           </div>
           <h3 data-i18n="appearance">Appearance</h3>
           <div class="segmented" role="group" aria-label="Appearance">
@@ -68,6 +70,8 @@
     </div>
   </section>
 
+  <dialog id="about" aria-label="About RAGstofan"></dialog>
+
   <main id="chat" class="chat" aria-live="polite"></main>
 
   <form id="ask" class="composer">
@@ -79,6 +83,6 @@
     </div>
   </form>
 
-  <script src="app.js?v=21"></script>
+  <script src="app.js?v=24"></script>
 </body>
 </html>

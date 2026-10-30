@@ -73,6 +73,10 @@ def template(parts: list[AnswerPart], lang: str) -> str:
     src = "Heimild: Hagstofa Íslands" if lang == "is" else "Source: Statistics Iceland"
     out = []
     for p in parts:
+        if p.computation and p.computation.op == "ratio":  # "…, per inhabitant: 25.3 (9,850,428 / 389,444)"
+            r = p.facts[-1]
+            out.append(f"{r.label}: {r.formatted} ({p.computation.expression}). {src}, {p.table.id}.")
+            continue
         facts = _series_sentence(p, lang) or "; ".join(f"{f.label}: {f.formatted}" for f in p.facts[-3:])
         out.append(f"{facts}. {src}, {p.table.id}.")
     return " ".join(out)

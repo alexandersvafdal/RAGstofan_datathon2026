@@ -1,0 +1,293 @@
+{
+ "label": "ratios",
+ "results": [
+  {
+   "id": "stays-per-inhabitant-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many overnight stays in registered accommodation were there in Iceland in 2025 per inhabitant on 1 January 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    25.293567239
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 154.31,
+   "llm_calls": 5,
+   "tables": [
+    "SAM01601",
+    "MAN00101"
+   ],
+   "text": "2025, Overnight stays: 9,850,428; 2025: 389,444; 2025, Overnight stays, per inhabitant: 25.3. Source: Statistics Iceland, SAM01601. 2025: 389,444. Source: Statistics Iceland, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 25683,
+     "detail": "How many overnight stays in registered accommodation were there in Iceland in 2025? | How many people lived in Iceland on 1 January 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 0,
+     "detail": "MAN00101 from [MAN00101]"
+    },
+    {
+     "name": "select",
+     "ms": 22243,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 28,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 46833,
+     "detail": "SAM01601 from [SAM01601, SAM01603, SAM01501, SAM01502, SAM01451, SAM01453, SAM01103, SAM01102, SAM01201, SAM01400, SAM01411, SAM01441, SAM01401, SAM01431, SAM01442]"
+    },
+    {
+     "name": "select",
+     "ms": 37264,
+     "detail": "value {'Citizenship': ['Total'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 194,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compute",
+     "ms": 0,
+     "detail": "9,850,428 / 389,444"
+    },
+    {
+     "name": "compose",
+     "ms": 44284,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "stays-per-inhabitant-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve margar gistinætur á skráðum gististöðum voru á Íslandi árið 2025 á hvern íbúa 1. janúar 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    25.293567239
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 142.94,
+   "llm_calls": 5,
+   "tables": [
+    "SAM01601",
+    "MAN00101"
+   ],
+   "text": "2025, Overnight stays: 9.850.428; 2025: 389.444; 2025, Overnight stays, á hvern íbúa: 25,3. Heimild: Hagstofa Íslands, SAM01601. 2025: 389.444. Heimild: Hagstofa Íslands, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 30717,
+     "detail": "How many overnight stays were recorded at registered accommodation establishments in Iceland in 2025? | How many people lived in Iceland on 1 January 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4,
+     "detail": "MAN00101 from [MAN00101]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 39931,
+     "detail": "SAM01601 from [SAM01601, SAM01603, SAM01501, SAM01502, SAM01451, SAM01453, SAM08007, SAM01103, SAM01102, SAM01201, SAM01400, SAM01411, SAM01441, SAM01401, SAM01431]"
+    },
+    {
+     "name": "select",
+     "ms": 57865,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 4,
+     "detail": "1 rows"
+    },
+    {
+     "name": "select",
+     "ms": 45584,
+     "detail": "value {'Citizenship': ['Total'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compute",
+     "ms": 0,
+     "detail": "9.850.428 / 389.444"
+    },
+    {
+     "name": "compose",
+     "ms": 26684,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "births-per-1000-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many children were born in Iceland in 2025 per 1,000 inhabitants on 1 January 2025?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    11.264777478
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 129.58,
+   "llm_calls": 5,
+   "tables": [
+    "MAN05101",
+    "MAN00101"
+   ],
+   "text": "In 2025, the number of children born in Iceland per 1,000 inhabitants was 11.3. This figure is based on a population of 389,444 as of January 1, 2025. Source: Statistics Iceland (Hagstofa Íslands), Tables MAN05101 and MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 8992,
+     "detail": "How many children were born in Iceland in 2025? | How many people lived in Iceland on 1 January 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 0,
+     "detail": "MAN00101 from [MAN00101]"
+    },
+    {
+     "name": "select",
+     "ms": 17820,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 4,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 44016,
+     "detail": "MAN05101 from [MAN05101, MAN05102, MAN05100, MAN05204, MAN05104, MAN05321, MAN05111, SKO01101, MAN43004, MAN05203, MAN43002, MAN05103, HEI09300, SKO01001, MAN05110]"
+    },
+    {
+     "name": "select",
+     "ms": 45264,
+     "detail": "value {'Unit': ['All children'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 26,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compute",
+     "ms": 0,
+     "detail": "4,387 / 389,444 × 1,000"
+    },
+    {
+     "name": "compose",
+     "ms": 31269,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "births-per-1000-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve mörg börn fæddust á Íslandi árið 2025 á hverja 1.000 íbúa 1. janúar 2025?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    11.264777478
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 132.77,
+   "llm_calls": 5,
+   "tables": [
+    "MAN05100",
+    "MAN00101"
+   ],
+   "text": "Árið 2025 fæddust 11,3 börn á hverja 1.000 íbúa 1. janúar 2025 á Íslandi. (Hagstofa Íslands, talnakerfi: MAN05100)",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 7794,
+     "detail": "How many babies were born in Iceland in 2025? | How many people lived in Iceland on 1 January 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 0,
+     "detail": "MAN00101 from [MAN00101]"
+    },
+    {
+     "name": "select",
+     "ms": 18411,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 3,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 47326,
+     "detail": "MAN05100 from [MAN05204, MAN05321, MAN05101, MAN05102, MAN43004, MAN05203, FYR09002, MAN43002, MAN05100, MAN05104, MAN05103, MAN05111, MAN05110, MAN04120, SKO02108b]"
+    },
+    {
+     "name": "select",
+     "ms": 56179,
+     "detail": "value {'Sex': ['Total'], 'Year': ['2025'], 'Categories': ['Live births'], 'Number of children': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compute",
+     "ms": 0,
+     "detail": "4.387 / 389.444 × 1.000"
+    },
+    {
+     "name": "compose",
+     "ms": 21454,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}
