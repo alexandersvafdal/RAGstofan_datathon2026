@@ -25,6 +25,8 @@ Without it, set `DATA_SOURCE=pxapi` to use the live API only.
 
 ## How a question becomes an answer
 
+Diagram and design notes, including why Icelandic questions are reworded in English: [docs/architecture.md](docs/architecture.md).
+
 ```
 question
   └─ plan        LLM   split into 1–3 sub-questions, one table each; English search query
