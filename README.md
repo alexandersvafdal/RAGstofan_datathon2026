@@ -7,7 +7,7 @@ Ask about Icelandic statistics in English or Icelandic. You get the number, its 
 ```bash
 python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt
 cp .env.example .env            # pick model endpoint and data source
-ollama pull qwen2.5:7b          # same model family as the shared LUMI one
+ollama pull qwen2.5:14b         # 7b works too; 14b scored better
 .venv/bin/uvicorn hagbot.api:app --reload
 ```
 
@@ -50,20 +50,24 @@ Every LLM step has a Pydantic output schema (`hagbot/steps/*.py`). The model nev
 
 The ten seed questions in `eval/questions.jsonl` only use numbers from the organizers' slides. On Friday, convert the kit's 52 questions into this format and record the baseline first.
 
-Results so far (qwen2.5:7b, live PX-API, full 1,857-table catalog):
+Results so far (live PX-API, full 1,857-table catalog):
 
-| Change | Right answers |
-|---|---|
-| Keyword search over titles only | 1/10 (right table among candidates: 0/10) |
-| + option labels, prefix matching, stopwords, recency, coverage boost, 15 candidates | 1/10 (right table among candidates: 5/10) |
-| + latest period when the question names none | 3/10 |
-| Same pipeline, qwen2.5:14b instead of 7b | 4/10 (right table among candidates: 5/10; median 62 s, max 122 s) |
+| Change | Model | Right answers |
+|---|---|---|
+| Keyword search over titles only | 7b | 1/10 (right table among candidates: 0/10) |
+| + option labels, prefix matching, stopwords, recency, coverage boost, 15 candidates | 7b | 1/10 (candidates: 5/10) |
+| + latest period when the question names none | 7b | 3/10 |
+| Same pipeline | 14b | 4/10 (candidates: 5/10) |
+| + synonyms (people/live/búa → population), title-year recency, Icelandic glossary in the planner, each part of a multi-part question searched on its own | 14b | 3/10 (candidates: 9/10) |
+| + table rules in code: drop trend/seasonal/projection/census/old-division tables unless asked; a named place must be an option; a month needs a monthly table | 14b | 7/10 (candidates: 10/10) |
+| + with no period asked, swap to the most recent table of the same survey; reject answers in another script | 14b | 9/10 |
+| + "Iceland" means the whole country, not Icelandic citizens | 14b | 10/10 (median 42 s) |
 
-Search now usually offers the right table; the 7B model then often picks a neighbour (e.g. the trend series
-VIN00003 over original VIN00001) or the wrong option (employment rate for *atvinnuleysi*). The 14B model fixed two of
-those and broke one (whole-country population went to a projection table): +1 net, at about twice the latency
-on a laptop. Model size alone is not the fix; the bigger gain is getting the right table into the candidates
-(5/10) and adding table-choice rules or few-shot examples. On the 8-table offline sample the pipeline scored 8/10.
+What moved the score was turning table-choice rules into code (`narrow` and `freshest_sibling` in
+`hagbot/steps/retrieve.py`), not a bigger model: the same rules written in the prompt were followed unreliably.
+Ten questions is a small set and these rules were written against it, so expect a lower score on the kit's 52.
+"Right table" stays at 7/10 because answers from equivalent tables (MAN04203 for Reykjavík population) are not
+on the accepted list; the numbers match.
 
 ## Known limits
 

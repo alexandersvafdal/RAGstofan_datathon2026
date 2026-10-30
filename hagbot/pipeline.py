@@ -46,7 +46,8 @@ class Pipeline:
                 steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(s.question for s in p.sub_questions)))
 
             results = await asyncio.gather(
-                *(self._answer_part(sq, req.question, lang, req.table_id, steps) for sq in p.sub_questions),
+                *(self._answer_part(sq, req.question, lang, req.table_id, steps, alone=len(p.sub_questions) == 1)
+                  for sq in p.sub_questions),
                 return_exceptions=True,
             )
             clar = next((r for r in results if isinstance(r, NeedsClarification)), None)
@@ -74,10 +75,12 @@ class Pipeline:
         finally:
             ans.steps, ans.total_ms, ans.llm_calls = steps, total.ms(), self.llm.calls - calls_before
 
-    async def _answer_part(self, sq: SubQuestion, original: str, lang: str, forced_table: str | None, steps: list[Step]) -> AnswerPart:
+    async def _answer_part(self, sq: SubQuestion, original: str, lang: str, forced_table: str | None, steps: list[Step],
+                           alone: bool = True) -> AnswerPart:
         t = Timer()
+        # a multi-part question's full wording would pull every part toward the same tables
         r = await retrieve(self.llm, self.catalog, sq.question, sq.search_query, settings.retrieve_top_k, forced_table,
-                           original)
+                           original if alone else "")
         steps.append(Step(name="retrieve", ms=t.ms(),
                           detail=f"{r.table.id} from [{', '.join(r.candidates)}]" + (" (ambiguous)" if r.ambiguous else "")))
         if r.ambiguous:

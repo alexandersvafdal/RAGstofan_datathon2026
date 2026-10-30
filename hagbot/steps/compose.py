@@ -62,7 +62,8 @@ async def compose(llm: LLM, question: str, parts: list[AnswerPart], lang: str) -
     try:
         written = await llm.complete_json(SYSTEM[lang] + "\n" + RULES, user, Written, retries=1)
         text = re.sub(r"\s+", " ", written.text).strip()
-        if verify(text, parts):
+        # the model sometimes drifts into another script mid-sentence (seen: Chinese inside Icelandic)
+        if verify(text, parts) and not re.search(r"[\u0400-\u04ff\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]", text):
             return text, "model"
     except Exception:
         pass

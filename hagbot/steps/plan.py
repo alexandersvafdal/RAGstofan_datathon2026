@@ -20,6 +20,13 @@ Most questions need exactly one. Only split when the question asks about clearly
 (for example population AND unemployment).
 Write sub-questions and search queries in English even if the user wrote Icelandic.
 Keep place names in their Icelandic spelling (Reykjavík, Kópavogur, Akureyri).
+Icelandic words that are easy to mistranslate:
+- búa, íbúar, mannfjöldi, hvað búa margir: population (people living somewhere)
+- fjölga, fjölgaði, fjölgun: population increase; fækka, fækkaði: population decrease
+- atvinnuleysi, atvinnuleysið: unemployment rate (not employment)
+- atvinnuþátttaka: activity rate; starfandi: employed
+- vísitala neysluverðs, verðbólga: consumer price index, inflation
+- laun: wages; innflutningur: imports; útflutningur: exports
 Do not answer the question."""
 
 

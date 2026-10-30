@@ -20,13 +20,17 @@ STOPWORDS = {
     # English question words and words that fit every table
     "what", "how", "many", "much", "the", "of", "in", "is", "was", "are", "were", "did", "does", "do", "and", "a",
     "an", "to", "from", "for", "by", "on", "at", "it", "its", "there", "this", "that", "with", "as", "be", "has",
-    "have", "which", "who", "iceland", "icelandic", "icelands", "statistics", "number", "total", "s",
-    # "how many people live in X" is a population question; "live" would match "live births"
-    "people", "live", "lives", "living", "persons",
+    "have", "which", "who", "iceland", "icelandic", "icelands", "statistics", "number", "total", "s", "current",
+    "currently", "now", "latest",
     # Icelandic
     "hvad", "hve", "hversu", "hvert", "hver", "hvada", "margir", "margar", "morg", "i", "a", "og", "er", "var",
     "voru", "eru", "um", "fra", "til", "vid", "sem", "thad", "island", "islandi", "islands", "hagstofa", "fjoldi",
 }
+# "how many people live in X" is a population question; "live" alone would match "live births"
+SYNONYMS = {w: "population" for w in (
+    "people", "live", "lives", "living", "persons", "inhabitants", "residents",
+    "bua", "byr", "bjuggu", "ibuar", "ibua", "ibuum", "fjolgadi", "fjolgun", "faekkadi",
+)}
 VALUES_WEIGHT = 0.6
 PREFIX_WEIGHT = 0.8
 MIN_PREFIX = 4
@@ -45,13 +49,14 @@ class CatalogEntry(BaseModel):
 
     def card(self, question: str = "") -> str:
         """The short description the reranker reads, with the options that match words in the question."""
-        period = f" [{self.first_period}–{self.last_period}]" if self.first_period else ""
+        freq = "monthly" if "M" in self.last_period else "quarterly" if "Q" in self.last_period else "yearly"
+        period = f" [{freq}, {self.first_period}–{self.last_period}]" if self.first_period else ""
         card = f"{self.id}: {self.title_en}{period}. Dimensions: {', '.join(self.dimensions)}"
         hits = self.matching_values(question)
         return card + (f". Has options: {', '.join(hits)}" if hits else "")
 
     def matching_values(self, question: str, limit: int = 4) -> list[str]:
-        words = [w for w in tokens(question) if len(w) >= MIN_PREFIX and w not in STOPWORDS]
+        words = [w for w in tokens(question) if len(w) >= MIN_PREFIX and w not in STOPWORDS and w not in SYNONYMS]
         out = []
         for label in self.values:
             if any(t.startswith(w) or (w.startswith(t) and len(t) >= MIN_PREFIX) for t in tokens(label) for w in words):
@@ -61,11 +66,13 @@ class CatalogEntry(BaseModel):
         return out
 
 
-def recency_factor(last_period: str) -> float:
+def recency_factor(last_period: str, title: str = "") -> float:
+    """Recent tables first. Tables without a period (census, one-off tables) fall back to the last year in the title."""
     m = re.match(r"(\d{4})", last_period or "")
-    if not m:
-        return 1.0
-    year = int(m.group(1))
+    years = re.findall(r"\b(?:18|19|20)\d\d\b", title)
+    if not m and not years:
+        return 0.85
+    year = int(m.group(1)) if m else int(years[-1])
     return 1.1 if year >= 2025 else 1.0 if year >= 2020 else 0.85 if year >= 2015 else 0.7
 
 
@@ -106,7 +113,7 @@ class Catalog:
         self._main = _Field([tokens(f"{e.title_en} {e.title_is} {' '.join(e.dimensions)} {e.path}") for e in entries])
         self._values = _Field([tokens(" ".join(e.values)) for e in entries], presence_only=True)
         self._vocab = set(self._main.idf) | set(self._values.idf)
-        self._recency = [recency_factor(e.last_period) for e in entries]
+        self._recency = [recency_factor(e.last_period, e.title_en) for e in entries]
 
     @classmethod
     def load(cls, path: Path) -> "Catalog":
@@ -123,7 +130,7 @@ class Catalog:
         return out
 
     def search(self, query: str, k: int = 8) -> list[tuple[CatalogEntry, float]]:
-        words = list(dict.fromkeys(t for t in tokens(query) if t not in STOPWORDS))
+        words = list(dict.fromkeys(SYNONYMS.get(t, t) for t in tokens(query) if t not in STOPWORDS))
         expansions = [x for x in (self._expand(w) for w in words) if x]
         if not expansions:
             return []

@@ -1,11 +1,13 @@
 """Step 2: find the table. Keyword search gives candidates, the model picks one or asks back."""
 
+import re
 from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from ..catalog import Catalog, CatalogEntry
+from ..catalog import MIN_PREFIX, STOPWORDS, Catalog, CatalogEntry
 from ..llm import LLM
+from ..text import normalize, tokens
 
 
 class Pick(BaseModel):
@@ -23,10 +25,85 @@ class Retrieved(BaseModel):
     candidates: list[str] = []
 
 
+# Table variants nobody gets unless they ask: (pattern in the title, words in the question that ask for it)
+QUALIFIERS = [
+    (r"\btrend\b", r"trend|leitni"),
+    (r"seasonally adjusted", r"seasonal|arstidaleidr"),
+    (r"projection", r"projection|forecast|future|spa\b|mannfjoldaspa"),
+    (r"average annual", r"average|medal"),
+    (r"^census\b|\bcensus\b", r"census|manntal"),
+    (r"change of method|overestimation", r"method|overestimat|ofmat"),
+    (r"as of (?:18|19)\d\d", r"\b(?:18|19)\d\d\b"),  # old municipality divisions
+]
+MONTHS = (r"\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b|"
+          r"\b(?:januar|februar|mars|april|mai|juni|juli|agust|september|oktober|november|desember)\b|"
+          r"\b(?:monthly|manud\w*|manadar\w*)\b")
+
+
+def named_places(text: str) -> list[str]:
+    """Capitalised words that do not start a sentence: Reykjavík, Kópavogur, Akureyri …"""
+    words = re.findall(r"(?<![.?!]\s)(?<!^)\b([A-ZÁÐÉÍÓÚÝÞÆÖ][\wáðéíóúýþæö]+)", text.strip())
+    return list(dict.fromkeys(t for w in words for t in tokens(w)
+                              if len(t) >= MIN_PREFIX and t not in STOPWORDS and not re.fullmatch(MONTHS, t)))
+
+
+def _title_has(entry: CatalogEntry, word: str) -> bool:
+    return any(t.startswith(word) for t in tokens(entry.title_en))
+
+
+def narrow(entries: list[CatalogEntry], question: str) -> list[CatalogEntry]:
+    """Code-side table rules the model follows unreliably. Each rule only applies if some candidate survives it."""
+    def keep_if(pred):
+        nonlocal entries
+        kept = [e for e in entries if pred(e)]
+        entries = kept or entries
+
+    q = normalize(question)
+    keep_if(lambda e: not any(re.search(t, e.title_en.lower()) and not re.search(w, q) for t, w in QUALIFIERS))
+    # a named place must be one of the table's options (the whole municipality), else at least in its title
+    for place in named_places(question):
+        before = entries
+        keep_if(lambda e: bool(e.matching_values(place)))
+        if entries is before:
+            keep_if(lambda e: _title_has(e, place))
+    # a month asked needs a monthly table
+    if re.search(MONTHS, q):
+        keep_if(lambda e: "M" in e.last_period)
+    # tables without a known period cannot answer "latest" or a given year reliably
+    keep_if(lambda e: bool(e.last_period))
+    return entries
+
+
+def period_end(period: str) -> float:
+    """2026M09 -> 2026.75, 2026Q2 -> 2026.5, 2025 -> 2026.0: when the data ends."""
+    m = re.match(r"(\d{4})(?:([MQ])(\d+))?", period or "")
+    if not m:
+        return 0.0
+    year, kind, n = int(m.group(1)), m.group(2), int(m.group(3) or 0)
+    return year + (n / 12 if kind == "M" else n / 4 if kind == "Q" else 1.0)
+
+
+def freshest_sibling(table: CatalogEntry, entries: list[CatalogEntry], question: str) -> CatalogEntry:
+    """With no period asked, swap a yearly/quarterly pick for the same measure published more recently next door
+    (e.g. labour survey: 3_arstolur 2025 -> 1_manadartolur 2026M09)."""
+    if re.search(r"\b(?:18|19|20)\d\d\b", question) or re.search(MONTHS, normalize(question)):
+        return table
+    words = [w for w in tokens(question) if len(w) >= MIN_PREFIX and w not in STOPWORDS]
+    def text(e): return tokens(f"{e.title_en} {' '.join(e.values)}")
+    needed = [w for w in words if any(t.startswith(w) for t in text(table))]
+    parent = table.path.rsplit("/", 1)[0]
+    better = [e for e in entries
+              if e.path.rsplit("/", 1)[0] == parent and period_end(e.last_period) > period_end(table.last_period)
+              and all(any(t.startswith(w) for t in text(e)) for w in needed)]
+    return max(better, key=lambda e: period_end(e.last_period)) if better else table
+
+
 SYSTEM = """You choose which Statistics Iceland table answers a question.
 Rules:
 - "How many people live in X" means population on 1 January, current municipality division, unless the question says otherwise.
-- Prefer the table whose period covers the year asked about; with no year, prefer the most recent data.
+- Prefer the table whose period covers the year asked about; with no year, prefer the table whose data ends latest,
+  and monthly over quarterly over yearly tables.
+- "Population" means the registered population on 1 January, not average annual population or projections.
 - Prefer the most direct table over one that needs extra breakdowns.
 - Prefer original (unadjusted) figures unless the question asks for seasonally adjusted or trend figures.
 - Prefer monthly tables when a month is asked, yearly tables when only a year is asked.
@@ -39,10 +116,10 @@ async def retrieve(llm: LLM, catalog: Catalog, question: str, search_query: str,
     if forced_table and (entry := catalog.get(forced_table)):
         return Retrieved(table=entry, candidates=[entry.id])
     # the original wording matches Icelandic titles even when the planner mistranslates it
-    hits = catalog.search(f"{search_query} {question} {original}", k)
+    hits = catalog.search(f"{search_query} {question} {original}", 2 * k)
     if not hits:
         raise LookupError(f"No table matches “{question}”")
-    entries = [e for e, _ in hits]
+    entries = narrow([e for e, _ in hits], f"{question} {original}")[:k]
     if len(entries) == 1:
         return Retrieved(table=entries[0], candidates=[entries[0].id])
 
@@ -51,6 +128,7 @@ async def retrieve(llm: LLM, catalog: Catalog, question: str, search_query: str,
     pick = await llm.complete_json(SYSTEM, f"{asked}\n\nTables:\n{cards}", Pick)
     by_id = {e.id: e for e in entries}
     table = by_id.get(pick.table_id.strip(), entries[0])  # an invented ID falls back to the top search hit
+    table = freshest_sibling(table, entries, f"{question} {original}")
     alts = [by_id[a] for a in pick.alternatives if a in by_id and a != table.id]
     return Retrieved(
         table=table,

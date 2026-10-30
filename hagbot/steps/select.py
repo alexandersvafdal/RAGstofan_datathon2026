@@ -110,8 +110,17 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "") -> Resolved:
             notes.append(f"{var.text}: defaulted to {[var.label_of(c) for c in codes]}")
         out[var.code] = sorted(set(codes), key=var.values.index)
 
+    # "Iceland" in a question means the whole country, not Icelandic citizens or people born in Iceland
+    q = normalize(question)
+    if not re.search(r"citizen|rikisborg|born|birth|faedd|faeding|origin|uppruna", q):
+        for var in meta.variables:
+            if re.search(r"citizen|birth|origin|country|rikisfang|faedingarland|uppruni", normalize(var.text)) and \
+                    any(normalize(var.label_of(c)) in ("iceland", "island") for c in out[var.code]):
+                out[var.code] = _default(var)
+                notes.append(f"{var.text}: 'Iceland' means the whole country; using {[var.label_of(c) for c in out[var.code]]}")
+
     # No year or period in the question: the latest period, whatever the model chose
-    if not re.search(r"\b(?:18|19|20)\d\d\b", question) and sel.operation == "value":
+    if not re.search(r"\b(?:18|19|20)\d\d\b", question) and sel.operation in ("value", "share"):
         for var in meta.variables:
             if var.time and out.get(var.code) != [var.values[-1]]:
                 notes.append(f"{var.text}: no period asked, using latest {var.values[-1]}")
