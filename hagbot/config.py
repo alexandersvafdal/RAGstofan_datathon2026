@@ -18,7 +18,7 @@ class Settings:
     llm_base_url: str = os.getenv("LLM_BASE_URL", "http://localhost:11434/v1")
     llm_model: str = os.getenv("LLM_MODEL", "qwen2.5:7b")
     llm_api_key: str = os.getenv("LLM_API_KEY", "ollama")
-    llm_timeout_s: float = float(os.getenv("LLM_TIMEOUT_S", "120"))
+    llm_timeout_s: float = float(os.getenv("LLM_TIMEOUT_S", "300"))
 
     data_source: str = os.getenv("DATA_SOURCE", "fixtures")
     px_base_url: str = os.getenv("PX_BASE_URL", "https://px.hagstofa.is")

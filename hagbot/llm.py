@@ -35,8 +35,10 @@ class LLM:
         try:
             r = await self.client.post(f"{self.base_url}/chat/completions", json=body)
             r.raise_for_status()
+        except httpx.TimeoutException as e:  # its message is empty; say what happened
+            raise LLMError(f"the language model did not answer within {settings.llm_timeout_s:.0f} s") from e
         except httpx.HTTPError as e:
-            raise LLMError(f"LLM request failed: {e}") from e
+            raise LLMError(f"LLM request failed: {type(e).__name__} {e}".strip()) from e
         return r.json()["choices"][0]["message"]["content"]
 
     async def complete_json(self, system: str, user: str, schema: type[T], *, retries: int = 2) -> T:

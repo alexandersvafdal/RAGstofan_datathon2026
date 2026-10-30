@@ -2,19 +2,21 @@
 
 import asyncio
 import re
+from datetime import date
 from collections.abc import Callable
 
 from .catalog import Catalog
 from .config import settings
-from .llm import LLM, Timer
+from .llm import LLM, LLMError, Timer
 from .schemas import (Answer, AnswerPart, AskRequest, Clarification, ClarifyOption, Step, TableRef)
 from .sources import DataSource, make_source, table_url
 from .steps.chart import choose_chart
 from .steps.compose import compose
 from .steps.compute import compute
+from .steps.followup import looks_like_followup, rewrite
 from .steps.plan import Plan, SubQuestion, plan
 from .steps.ratio import POPULATION_TABLE, detect_ratio, ratio_parts
-from .steps.retrieve import retrieve
+from .steps.retrieve import period_end, retrieve
 from .steps.select import select
 from .text import detect_language
 
@@ -54,6 +56,13 @@ class Pipeline:
         calls_before = self.llm.calls
         ans = Answer(question=req.question, language=lang, status="error", text="", model=self.llm.model)
         try:
+            if not req.table_id and looks_like_followup(req.question, req.history):
+                # "what about last year?" becomes a full question from the previous turn; the rest of the pipeline
+                # then runs on it exactly as if the user had typed it
+                t = Timer()
+                full = await rewrite(self.llm, req.question, req.history)
+                steps.append(Step(name="context", ms=t.ms(), detail=full))
+                req = req.model_copy(update={"question": full})
             ratio = None if req.table_id else detect_ratio(req.question)
             forced: list[str | None]
             if req.table_id:  # the user already chose a table: skip planning
@@ -170,6 +179,7 @@ class Pipeline:
         steps.append(Step(name="fetch", ms=t.ms(), detail=detail))
 
         computation, facts = compute(meta, rows, res, lang)
+        note = self._freshness_note(meta, res.selections, r.candidates, f"{sq.question} {original}", lang)
         return AnswerPart(
             sub_question=sq.question,
             table=TableRef(id=meta.id, title=meta.title, url=table_url(meta.path, meta.id)),
@@ -179,11 +189,40 @@ class Pipeline:
             computation=computation,
             facts=facts,
             chart=choose_chart(meta, rows, res.selections, computation),
+            note=note,
         )
+
+    def _freshness_note(self, meta, selections: dict[str, list[str]], candidates: list[str], question: str, lang: str) -> str:
+        """When nobody asked for a period and the newest one here is from an earlier year, say so, and name a table
+        on the same subject with newer figures: same subject area in Statistics Iceland's folders, the same subfolder
+        first. It may measure or break things down differently, so it is only named."""
+        time_var = next((v for v in meta.variables if v.time), None)
+        if not time_var or re.search(r"\b(?:18|19|20)\d\d\b", question):
+            return ""
+        latest = selections.get(time_var.code, [""])[-1]
+        if not re.match(r"\d{4}", latest) or int(latest[:4]) >= date.today().year:
+            return ""
+        area = meta.path.split("/")[:3]
+        pool = [e for e in self.catalog.entries
+                if e.id != meta.id and e.path.split("/")[:3] == area and re.match(r"\d{4}", e.last_period or "")
+                and int(e.last_period[:4]) >= date.today().year and period_end(e.last_period) > period_end(latest)]
+        newer = min(pool, key=lambda e: (e.path != meta.path, e.id not in candidates, -period_end(e.last_period)), default=None)
+        if lang == "is":
+            note = f"{latest} er nýjasta tímabilið í þessari töflu."
+            if newer:
+                note += f" Nýrri tölur, til {newer.last_period}, eru í {newer.id} ({newer.title_is or newer.title_en}), sem kann að skipta þeim öðruvísi niður."
+        else:
+            note = f"{latest} is the latest period in this table."
+            if newer:
+                note += f" Newer figures, to {newer.last_period}, are in {newer.id} ({newer.title_en}), which may break them down differently."
+        return note
 
 
 def _no_answer(lang: str, errors: list[Exception]) -> str:
     reason = str(errors[0]) if errors else ""
+    if errors and isinstance(errors[0], LLMError) and "did not answer" in reason:   # a busy machine, not a missing table
+        return ("Mállíkanið svaraði ekki í tæka tíð; tölvan er upptekin. Reyndu aftur eftir smá stund." if lang == "is" else
+                "The language model took too long to answer; the computer is busy. Please try again in a moment.")
     if lang == "is":
         return f"Ég fann ekki svar við þessu í töflum Hagstofunnar. {reason}".strip()
     return f"I could not answer this from Statistics Iceland's tables. {reason}".strip()

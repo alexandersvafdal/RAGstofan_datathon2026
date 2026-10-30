@@ -738,6 +738,14 @@ a { color: inherit; }
 }
 #vg-tooltip-element.vg-tooltip td.key { color: var(--text-3); }
 
+.note {
+  display: flex; gap: 10px; align-items: flex-start; margin: 14px 0 0; padding: 12px 14px; border-radius: 14px;
+  background: var(--accent-soft); color: var(--text-2); font-size: 14px; line-height: 1.45;
+}
+.note::before {
+  content: "i"; flex: none; width: 18px; height: 18px; margin-top: 1px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--accent); color: var(--accent-ink); font: italic 700 11px/1 Georgia, serif;
+}
 .meta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
 .chip {
   display: inline-flex; align-items: center; gap: 6px; font-size: 13px; text-decoration: none; color: var(--text-2);

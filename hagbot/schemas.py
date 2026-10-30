@@ -7,10 +7,18 @@ from pydantic import BaseModel, Field
 Language = Literal["en", "is"]
 
 
+class Turn(BaseModel):
+    """An earlier question and its answer, sent back by the browser so follow-ups can refer to it."""
+    question: str
+    answer: str = ""
+    tables: list[str] = []
+
+
 class AskRequest(BaseModel):
     question: str
     language: Language | None = None  # None: detect from the question
     table_id: str | None = None  # set when the user picked a table in a clarification
+    history: list[Turn] = []  # the conversation so far, oldest first (the browser keeps the last few)
 
 
 class TableRef(BaseModel):
@@ -69,6 +77,7 @@ class AnswerPart(BaseModel):
     computation: Computation | None = None
     facts: list[Fact]
     chart: ChartSpec | None = None
+    note: str = ""  # e.g. why the latest figure is from an earlier year, and where newer figures are
 
 
 class ClarifyOption(BaseModel):

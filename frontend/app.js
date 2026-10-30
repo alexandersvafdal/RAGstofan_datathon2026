@@ -11,7 +11,7 @@ const I18N = {
     pts: "pts", more: "Ask next", palette: "Colour", appearance: "Appearance",
     live: { plan: q => `Read as: ${q}`, split: n => `Split into ${n} questions`, searched: n => `Searched ${n} tables`,
             picked: "picked", numbers: n => `${n} ${n === 1 ? "number" : "numbers"} read`, checked: "Numbers checked against the table",
-            template: "Written from the numbers directly", error: "Hit a problem" },
+            template: "Written from the numbers directly", error: "Hit a problem", followup: q => `Follow-up, read as: ${q}` },
   },
   is: {
     eyebrow: "Hagstofa Íslands · Gagnaþon 2026", hello: "Ísland í tölum.",
@@ -23,7 +23,7 @@ const I18N = {
     pts: "pst.", more: "Spyrðu næst", palette: "Litir", appearance: "Útlit",
     live: { plan: q => `Skilið sem: ${q}`, split: n => `Skipt í ${n} spurningar`, searched: n => `Leitaði í ${n} töflum`,
             picked: "valdi", numbers: n => `${n} ${n === 1 ? "tala lesin" : "tölur lesnar"}`, checked: "Tölur bornar saman við töfluna",
-            template: "Skrifað beint upp úr tölunum", error: "Vandamál kom upp" },
+            template: "Skrifað beint upp úr tölunum", error: "Vandamál kom upp", followup: q => `Framhaldsspurning, skilin sem: ${q}` },
   },
 };
 
@@ -352,6 +352,12 @@ function liveView(L) {
   refresh();
 
   view.step = st => {
+    if (st.name === "context") {   // a follow-up rewritten from the previous turn
+      const d = rows.plan.querySelector(".ls-detail");
+      d.append(el("span", { class: "ls-text" }, words.followup(st.detail)));
+      rows.plan.classList.add("has-detail");
+      return;
+    }
     const row = rows[st.name];
     if (!row) {                                     // an error step: show it on the step in progress
       const cur = STEP_ORDER.find(n => !done.has(n));
@@ -413,6 +419,10 @@ async function askStream(body, onStep) {
   throw new Error("the answer stream ended early");
 }
 
+// The last few answered turns go with each question, so "what about last year?" can be understood
+const history = [];
+const HISTORY_TURNS = 3;
+
 async function ask(question, tableId = null) {
   showChat();
   const chat = $("#chat");
@@ -426,13 +436,17 @@ async function ask(question, tableId = null) {
   setTimeout(() => bot.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "end" }), 380);
   $("#send").disabled = true;
   try {
-    const body = JSON.stringify({ question, language: lang === "auto" ? null : lang, table_id: tableId });
+    const body = JSON.stringify({ question, language: lang === "auto" ? null : lang, table_id: tableId,
+                                  history: history.slice(-HISTORY_TURNS) });
     const answer = await askStream(body, st => progress.step(st));
     clearInterval(progress._timer);
     progress.classList.add("finishing");
     await new Promise(r => setTimeout(r, reduceMotion ? 0 : 450));   // let the last tick land before the answer replaces it
     renderAnswer(card, answer);
     card.classList.add("arrive");
+    if (answer.status === "answered") history.push({
+      question: answer.steps.find(st => st.name === "context")?.detail || question,   // the full question, so follow-ups chain
+      answer: answer.text, tables: answer.sources.map(src => src.id) });
   } catch (e) {
     card.replaceChildren(
       el("p", { class: "answer-text error" }, `${t("failed", guess)}. ${e.message}`),
@@ -475,6 +489,8 @@ function renderAnswer(card, a) {
   for (const p of a.parts) {
     if (p.chart && p.chart.type !== "kpi" && p.chart.data.length > 1) card.append(chartBlock(p, L));
   }
+
+  for (const p of a.parts) if (p.note) card.append(el("p", { class: "note" }, prettyPeriods(p.note, L)));
 
   const meta = el("div", { class: "meta-row" });
   for (const s of a.sources) {
