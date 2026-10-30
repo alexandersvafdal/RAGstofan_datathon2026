@@ -268,10 +268,9 @@ function liveView(L) {
     rows[name] = row;
     return row;
   }));
-  const bar = el("div", { class: "live-bar" }, el("i"));
   const time = el("span", { class: "live-time" }, "0.0 s");
   const view = el("div", { class: "live" },
-    bar, el("div", { class: "live-head" }, el("span", { class: "live-orb", "aria-hidden": "true" }), el("span", {}, `${t("working", L)}…`), time),
+    el("div", { class: "live-head" }, el("span", { class: "live-orb", "aria-hidden": "true" }), el("span", {}, `${t("working", L)}…`), time),
     list);
   const t0 = performance.now();
   const done = new Set();
@@ -279,7 +278,6 @@ function liveView(L) {
   const refresh = () => {
     const current = STEP_ORDER.find(n => !done.has(n));
     STEP_ORDER.forEach(n => rows[n].classList.toggle("now", n === current));
-    bar.firstChild.style.width = `${Math.max(4, (done.size / STEP_ORDER.length) * 100)}%`;
   };
   view._timer = setInterval(() => { time.textContent = `${((performance.now() - t0) / 1000).toFixed(1)} s`; }, 100);
   refresh();
