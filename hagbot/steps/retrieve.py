@@ -63,6 +63,20 @@ def _title_has(entry: CatalogEntry, word: str) -> bool:
     return any(t.startswith(word) for t in tokens(entry.title_en))
 
 
+def _year_range(entry: CatalogEntry) -> tuple[int, int] | None:
+    """Some catalog entries lack time flags even though their titles state the observation years."""
+    title_years = [int(y) for y in re.findall(r"\b(?:18|19|20)\d\d\b", entry.title_en)]
+    first = re.match(r"(\d{4})", entry.first_period)
+    last = re.match(r"(\d{4})", entry.last_period)
+    if not first and not last and not title_years:
+        return None
+    start = int(first[1]) if first else min(title_years) if title_years else int(last[1])
+    end = int(last[1]) if last else max(title_years) if title_years else start
+    if not last and re.search(r"\b(?:18|19|20)\d\d\s*[-–]\s*(?:$|by\b)", entry.title_en):
+        end = 9999  # an explicitly open-ended title; category validation still checks the actual periods
+    return start, end
+
+
 def narrow(entries: list[CatalogEntry], question: str) -> list[CatalogEntry]:
     """Code-side table rules the model follows unreliably. Each rule only applies if some candidate survives it."""
     def keep_if(pred):
@@ -81,8 +95,12 @@ def narrow(entries: list[CatalogEntry], question: str) -> list[CatalogEntry]:
     # a month asked needs a monthly table; "1 January" is the date yearly population figures refer to, not a month
     if re.search(MONTHS, re.sub(r"\b1\.? ?(january|januar|jan)\b", " ", q)):
         keep_if(lambda e: "M" in e.last_period)
-    # tables without a known period cannot answer "latest" or a given year reliably
-    keep_if(lambda e: bool(e.last_period))
+    # Missing time flags must not discard a relevant dated table in favour of an unrelated one.
+    keep_if(lambda e: _year_range(e) is not None)
+    asked_years = set(int(y) for y in re.findall(r"\b(?:18|19|20)\d\d\b", question))
+    if len(asked_years) == 1:
+        year = next(iter(asked_years))
+        keep_if(lambda e: (span := _year_range(e)) is not None and span[0] <= year <= span[1])
     return entries
 
 

@@ -1,74 +1,7636 @@
 {
-  "_about": "Everyday words (English and Icelandic, written without accents, as the search normalises them) -> Statistics Iceland's own term for the topic -> tables. A term matches a word that starts with it, so 'verdbolg' matches verðbólga, verðbólgan, verðbólgu. 'search' is added to the keyword search; 'tables' are always offered first. Add concepts freely: the tiered table finder reads this file at start-up.",
+  "version": 2,
+  "description": "Bilingual search associations curated against catalog metadata. Roles distinguish statistical topics, demographic facets, weak hints and operations; associations are not interchangeable definitions.",
   "concepts": [
-    {"concept": "consumer price index", "search": "consumer price index",
-     "terms": ["inflation", "verdbolg", "consumer price", "cpi", "visitala neysluverds", "neysluverd", "price level"],
-     "tables": ["VIS01000"]},
-    {"concept": "wage index", "search": "wage index",
-     "terms": ["wage", "salar", "pay rise", "launavisital", "laun"],
-     "tables": ["LAU04000", "LAU04001"]},
-    {"concept": "unemployment", "search": "unemployment rate labour force survey",
-     "terms": ["unemploy", "jobless", "atvinnuleys", "atvinnulaus"],
-     "tables": ["VIN00001", "VIN00920"]},
-    {"concept": "employment", "search": "employment labour market",
-     "terms": ["employed", "employment", "labour force", "labor force", "starfandi", "vinnumarkad", "atvinnuthatttak"],
-     "tables": ["VIN10001", "VIN00001"]},
-    {"concept": "population", "search": "population",
-     "terms": ["population", "inhabitant", "people live", "people lived", "residents", "mannfjold", "ibua", "ibuar", "landsmenn", "bua ", "bjuggu"],
-     "tables": ["MAN00101", "MAN02005", "MAN10001"]},
-    {"concept": "mean age", "search": "mean age population",
-     "terms": ["mean age", "average age", "medalaldur"],
-     "tables": ["MAN00102"]},
-    {"concept": "live births", "search": "live births",
-     "terms": ["born", "birth", "babies", "faedd", "faeding", "fertility", "frjosemi"],
-     "tables": ["MAN05101", "MAN05100"]},
-    {"concept": "deaths", "search": "deaths crude death rate",
-     "terms": ["died", "death", "mortality", "letust", "lest", "latnir", "danir", "dauds", "andlat"],
-     "tables": ["MAN05210"]},
-    {"concept": "life expectancy", "search": "life expectancy",
-     "terms": ["life expectancy", "lifslikur"],
-     "tables": ["MAN05401"]},
-    {"concept": "migration", "search": "migration immigration emigration",
-     "terms": ["migration", "emigrat", "moved to", "moved from", "left the country", "flutt", "buferla", "adflutt", "brottflutt"],
-     "tables": ["MAN10003", "MAN10002"]},
-    {"concept": "immigrants", "search": "population by origin immigrants",
-     "terms": ["immigrant", "foreign citizen", "foreign-born", "innflytjend", "erlendir rikisborgar", "uppruni", "bakgrunn"],
-     "tables": ["MAN43000"]},
-    {"concept": "gross domestic product", "search": "gross domestic product",
-     "terms": ["gdp", "gross domestic", "economic growth", "economy", "hagvoxt", "landsframleidsl"],
-     "tables": ["THJ01000", "THJ01601"]},
-    {"concept": "overnight stays", "search": "overnight stays accommodation",
-     "terms": ["overnight", "accommodation", "hotel", "guesthouse", "gistinott", "gistinaet", "gististad", "hotel"],
-     "tables": ["SAM01601", "SAM01201"]},
-    {"concept": "passengers", "search": "passengers Keflavik airport",
-     "terms": ["passenger", "keflavik", "airport", "farthe", "flugvoll"],
-     "tables": ["SAM02001"]},
-    {"concept": "trade in goods", "search": "exports imports goods",
-     "terms": ["export", "import", "trade balance", "trade deficit", "utflutn", "innflutn", "voruvidskipt", "voruskipt"],
-     "tables": ["UTA06001"]},
-    {"concept": "fish catch", "search": "catch by species",
-     "terms": ["fish", "catch", "landed", "afli", "afla", "fiskur", "fiski"],
-     "tables": ["SJA01101"]},
-    {"concept": "house prices", "search": "residential property prices",
-     "terms": ["house price", "housing price", "property price", "home price", "ibudaverd", "fasteignaverd", "husnaedisverd"],
-     "tables": ["VIS01106"]},
-    {"concept": "cars", "search": "registered passenger cars motor vehicles",
-     "terms": ["car", "cars", "vehicle", "bilar", "folksbil", "okutaek"],
-     "tables": ["SAM03105"]},
-    {"concept": "building cost index", "search": "building cost index",
-     "terms": ["building cost", "construction cost", "byggingarvisital", "byggingarkostn"],
-     "tables": []},
-    {"concept": "compulsory schools", "search": "compulsory school pupils",
-     "terms": ["pupil", "school", "student", "nemend", "grunnskol", "skol"],
-     "tables": []},
-    {"concept": "income", "search": "income tax returns",
-     "terms": ["income", "earnings", "tekjur", "tekna"],
-     "tables": []},
-    {"concept": "government finances", "search": "general government finances",
-     "terms": ["government", "deficit", "public finance", "revenue", "hid opinbera", "halli", "rikissjod"],
-     "tables": []},
-    {"concept": "elections", "search": "elections votes",
-     "terms": ["election", "vote", "voting", "kosning", "atkvaed", "kjosend"],
-     "tables": []}
-  ]
+    {
+      "id": "consumer_prices",
+      "aliases": [
+        "inflation",
+        "inflation rate",
+        "cost of living",
+        "living costs",
+        "CPI",
+        "consumer price index",
+        "verðbólga",
+        "verðbólgan",
+        "verðbólgu",
+        "verðbólguna",
+        "verðbólgunnar",
+        "vísitala neysluverðs",
+        "vísitölu neysluverðs",
+        "neysluverðsvísitala",
+        "neysluverðsvísitölu",
+        "rising prices",
+        "price inflation",
+        "consumer prices",
+        "verðbólgunni",
+        "verðbólguhraði",
+        "verðhækkanir",
+        "verðhækkun",
+        "neysluverð",
+        "VNV",
+        "framfærslukostnaður",
+        "framfærslukostnaði",
+        "dýrara að lifa"
+      ],
+      "search_terms": "consumer price index",
+      "table_paths": [
+        "Efnahagur/visitolur/1_vnv"
+      ],
+      "note": "Inflation is a change in CPI; the selector must still distinguish the index level from annual or monthly change. Cost of living is a search hint, not an assertion that CPI measures every household's costs.",
+      "role": "topic",
+      "broader": [
+        "prices"
+      ],
+      "concept": "consumer price index",
+      "search": "consumer price index",
+      "terms": [
+        "inflation",
+        "inflation rate",
+        "cost of living",
+        "living costs",
+        "CPI",
+        "consumer price index",
+        "verðbólga",
+        "verðbólgan",
+        "verðbólgu",
+        "verðbólguna",
+        "verðbólgunnar",
+        "vísitala neysluverðs",
+        "vísitölu neysluverðs",
+        "neysluverðsvísitala",
+        "neysluverðsvísitölu",
+        "rising prices",
+        "price inflation",
+        "consumer prices",
+        "verðbólgunni",
+        "verðbólguhraði",
+        "verðhækkanir",
+        "verðhækkun",
+        "neysluverð",
+        "VNV",
+        "framfærslukostnaður",
+        "framfærslukostnaði",
+        "dýrara að lifa",
+        "verdbolg",
+        "consumer price",
+        "cpi",
+        "visitala neysluverds",
+        "neysluverd",
+        "price level"
+      ],
+      "tables": [
+        "VIS01000"
+      ]
+    },
+    {
+      "id": "population",
+      "role": "topic",
+      "aliases": [
+        "population",
+        "population size",
+        "population count",
+        "mannfjöldi",
+        "mannfjölda",
+        "mannfjöldinn",
+        "mannfjöldanum",
+        "íbúafjöldi",
+        "íbúafjölda",
+        "íbúafjöldinn",
+        "fólksfjöldi",
+        "fólksfjölda"
+      ],
+      "search_terms": "population",
+      "table_paths": [
+        "Ibuar/mannfjoldi"
+      ],
+      "broader": [
+        "demography"
+      ],
+      "concept": "population",
+      "search": "population",
+      "terms": [
+        "population",
+        "population size",
+        "population count",
+        "mannfjöldi",
+        "mannfjölda",
+        "mannfjöldinn",
+        "mannfjöldanum",
+        "íbúafjöldi",
+        "íbúafjölda",
+        "íbúafjöldinn",
+        "fólksfjöldi",
+        "fólksfjölda",
+        "inhabitant",
+        "people live",
+        "people lived",
+        "residents",
+        "mannfjold",
+        "ibua",
+        "ibuar",
+        "landsmenn",
+        "bua ",
+        "bjuggu"
+      ],
+      "tables": [
+        "MAN00101",
+        "MAN02005",
+        "MAN10001"
+      ]
+    },
+    {
+      "id": "gdp",
+      "aliases": [
+        "GDP",
+        "gross domestic product",
+        "economic growth",
+        "hagvöxtur",
+        "hagvöxt",
+        "hagvexti",
+        "hagvaxtar",
+        "landsframleiðsla",
+        "landsframleiðslu",
+        "verg landsframleiðsla",
+        "vergrar landsframleiðslu",
+        "economic output",
+        "national output",
+        "growth of the economy",
+        "VLF",
+        "landsframleiðslan",
+        "landsframleiðslunnar",
+        "hagvöxturinn",
+        "hagvaxtarhraði"
+      ],
+      "search_terms": "gross domestic product",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar"
+      ],
+      "table_phrases": [
+        "gross domestic product",
+        "GDP",
+        "landsframleiðsla",
+        "landsframleiðslu"
+      ],
+      "note": "Growth needs a volume change; GDP levels and growth are not interchangeable.",
+      "role": "topic",
+      "broader": [
+        "economy"
+      ],
+      "concept": "gross domestic product",
+      "search": "gross domestic product",
+      "terms": [
+        "GDP",
+        "gross domestic product",
+        "economic growth",
+        "hagvöxtur",
+        "hagvöxt",
+        "hagvexti",
+        "hagvaxtar",
+        "landsframleiðsla",
+        "landsframleiðslu",
+        "verg landsframleiðsla",
+        "vergrar landsframleiðslu",
+        "economic output",
+        "national output",
+        "growth of the economy",
+        "VLF",
+        "landsframleiðslan",
+        "landsframleiðslunnar",
+        "hagvöxturinn",
+        "hagvaxtarhraði",
+        "gdp",
+        "gross domestic",
+        "economy",
+        "hagvoxt",
+        "landsframleidsl"
+      ],
+      "tables": [
+        "THJ01000",
+        "THJ01601"
+      ]
+    },
+    {
+      "id": "unemployment",
+      "aliases": [
+        "unemployment",
+        "unemployment rate",
+        "unemployed",
+        "unemployed people",
+        "joblessness",
+        "atvinnuleysi",
+        "atvinnuleysið",
+        "atvinnuleysinu",
+        "atvinnulausir",
+        "atvinnulausra",
+        "atvinnuleysishlutfall",
+        "out of work",
+        "without work",
+        "without a job",
+        "jobless",
+        "unemployment benefit",
+        "atvinnuleysishlutfallið",
+        "atvinnuleysis",
+        "án atvinnu",
+        "án vinnu",
+        "vinnulaus",
+        "vinnulausir",
+        "atvinnulaus",
+        "atvinnulaust"
+      ],
+      "search_terms": "unemployment",
+      "table_paths": [
+        "Samfelag/vinnumarkadur"
+      ],
+      "table_phrases": [
+        "unemployment",
+        "atvinnuleysi"
+      ],
+      "role": "topic",
+      "concept": "unemployment",
+      "search": "unemployment",
+      "terms": [
+        "unemployment",
+        "unemployment rate",
+        "unemployed",
+        "unemployed people",
+        "joblessness",
+        "atvinnuleysi",
+        "atvinnuleysið",
+        "atvinnuleysinu",
+        "atvinnulausir",
+        "atvinnulausra",
+        "atvinnuleysishlutfall",
+        "out of work",
+        "without work",
+        "without a job",
+        "jobless",
+        "unemployment benefit",
+        "atvinnuleysishlutfallið",
+        "atvinnuleysis",
+        "án atvinnu",
+        "án vinnu",
+        "vinnulaus",
+        "vinnulausir",
+        "atvinnulaus",
+        "atvinnulaust",
+        "unemploy",
+        "atvinnuleys"
+      ],
+      "tables": [
+        "VIN00001",
+        "VIN00920"
+      ]
+    },
+    {
+      "id": "employment",
+      "aliases": [
+        "employment",
+        "employed people",
+        "employed persons",
+        "starfandi",
+        "fjöldi starfandi",
+        "jobs",
+        "workers",
+        "working people",
+        "number employed",
+        "vinnandi",
+        "vinnandi fólk",
+        "störf",
+        "starfa",
+        "starfsfólk",
+        "starfsmenn",
+        "starfsmanna",
+        "vinnumarkaður",
+        "vinnumarkaði",
+        "vinna",
+        "vinnur",
+        "unnu",
+        "vann",
+        "vinni",
+        "work",
+        "works",
+        "worked",
+        "employed",
+        "in work",
+        "in employment",
+        "eru í vinnu",
+        "er í vinnu"
+      ],
+      "search_terms": "employment",
+      "table_paths": [
+        "Samfelag/vinnumarkadur"
+      ],
+      "note": "Participation and employment are distinct measures within the labour-market family.",
+      "role": "topic",
+      "concept": "employment",
+      "search": "employment",
+      "terms": [
+        "employment",
+        "employed people",
+        "employed persons",
+        "starfandi",
+        "fjöldi starfandi",
+        "jobs",
+        "workers",
+        "working people",
+        "number employed",
+        "vinnandi",
+        "vinnandi fólk",
+        "störf",
+        "starfa",
+        "starfsfólk",
+        "starfsmenn",
+        "starfsmanna",
+        "vinnumarkaður",
+        "vinnumarkaði",
+        "vinna",
+        "vinnur",
+        "unnu",
+        "vann",
+        "vinni",
+        "work",
+        "works",
+        "worked",
+        "employed",
+        "in work",
+        "in employment",
+        "eru í vinnu",
+        "er í vinnu",
+        "labour force",
+        "labor force",
+        "vinnumarkad",
+        "atvinnuthatttak"
+      ],
+      "tables": [
+        "VIN10001",
+        "VIN00001"
+      ]
+    },
+    {
+      "id": "wage_index",
+      "aliases": [
+        "wage index",
+        "wage growth",
+        "launavísitala",
+        "launavísitölu",
+        "launavísitalan",
+        "launaþróun",
+        "launahækkun",
+        "launahækkanir",
+        "wage increases",
+        "salary increases",
+        "salary growth",
+        "pay growth",
+        "launavísitölunnar",
+        "launavísitölunni",
+        "hækkun launa",
+        "laun hækkuðu"
+      ],
+      "search_terms": "wage index",
+      "table_paths": [
+        "Samfelag/launogtekjur/2_lvt"
+      ],
+      "role": "topic",
+      "concept": "wage index",
+      "search": "wage index",
+      "terms": [
+        "wage index",
+        "wage growth",
+        "launavísitala",
+        "launavísitölu",
+        "launavísitalan",
+        "launaþróun",
+        "launahækkun",
+        "launahækkanir",
+        "wage increases",
+        "salary increases",
+        "salary growth",
+        "pay growth",
+        "launavísitölunnar",
+        "launavísitölunni",
+        "hækkun launa",
+        "laun hækkuðu",
+        "wage",
+        "salar",
+        "pay rise",
+        "launavisital",
+        "laun"
+      ],
+      "tables": [
+        "LAU04000",
+        "LAU04001"
+      ]
+    },
+    {
+      "id": "wages",
+      "aliases": [
+        "wages",
+        "salary",
+        "salaries",
+        "earnings",
+        "laun",
+        "launum",
+        "meðallaun",
+        "miðgildi launa",
+        "pay",
+        "paycheck",
+        "pay cheque",
+        "monthly salary",
+        "monthly pay",
+        "hourly pay",
+        "hourly wage",
+        "average salary",
+        "median salary",
+        "launin",
+        "launa",
+        "mánaðarlaun",
+        "mánaðarlauna",
+        "tímakaup",
+        "launaseðill",
+        "launaseðlar",
+        "grunnlaun",
+        "heildarlaun",
+        "launafólk",
+        "average wages",
+        "mean wages",
+        "median wages",
+        "meðallauna",
+        "launafólks",
+        "launað",
+        "borgað í laun",
+        "fá í laun"
+      ],
+      "search_terms": "earnings wages",
+      "table_paths": [
+        "Samfelag/launogtekjur/1_laun",
+        "Samfelag/launogtekjur/2_lvt"
+      ],
+      "role": "topic",
+      "broader": [
+        "income"
+      ],
+      "concept": "wages",
+      "search": "earnings wages",
+      "terms": [
+        "wages",
+        "salary",
+        "salaries",
+        "earnings",
+        "laun",
+        "launum",
+        "meðallaun",
+        "miðgildi launa",
+        "pay",
+        "paycheck",
+        "pay cheque",
+        "monthly salary",
+        "monthly pay",
+        "hourly pay",
+        "hourly wage",
+        "average salary",
+        "median salary",
+        "launin",
+        "launa",
+        "mánaðarlaun",
+        "mánaðarlauna",
+        "tímakaup",
+        "launaseðill",
+        "launaseðlar",
+        "grunnlaun",
+        "heildarlaun",
+        "launafólk",
+        "average wages",
+        "mean wages",
+        "median wages",
+        "meðallauna",
+        "launafólks",
+        "launað",
+        "borgað í laun",
+        "fá í laun"
+      ],
+      "tables": [
+        "VIN02001",
+        "VIN02002"
+      ]
+    },
+    {
+      "id": "overnight_stays",
+      "aliases": [
+        "overnight stays",
+        "overnight stay",
+        "guest nights",
+        "hotel nights",
+        "gistinætur",
+        "gistinátta",
+        "gistinóttum",
+        "gistinótt",
+        "hótelgisting",
+        "hótelgistinætur",
+        "nights stayed",
+        "nights in hotels",
+        "hotel stays",
+        "accommodation nights",
+        "registered accommodation",
+        "gistinæturnar",
+        "gistináttafjöldi",
+        "gistinóttafjöldi",
+        "gistinæturgistingu",
+        "skráðir gististaðir",
+        "skráðum gististöðum"
+      ],
+      "search_terms": "overnight stays",
+      "table_paths": [
+        "Atvinnuvegir/ferdathjonusta/gisting"
+      ],
+      "role": "topic",
+      "broader": [
+        "tourism"
+      ],
+      "concept": "overnight stays",
+      "search": "overnight stays",
+      "terms": [
+        "overnight stays",
+        "overnight stay",
+        "guest nights",
+        "hotel nights",
+        "gistinætur",
+        "gistinátta",
+        "gistinóttum",
+        "gistinótt",
+        "hótelgisting",
+        "hótelgistinætur",
+        "nights stayed",
+        "nights in hotels",
+        "hotel stays",
+        "accommodation nights",
+        "registered accommodation",
+        "gistinæturnar",
+        "gistináttafjöldi",
+        "gistinóttafjöldi",
+        "gistinæturgistingu",
+        "skráðir gististaðir",
+        "skráðum gististöðum",
+        "overnight",
+        "accommodation",
+        "hotel",
+        "guesthouse",
+        "gistinott",
+        "gistinaet",
+        "gististad"
+      ],
+      "tables": [
+        "SAM01601",
+        "SAM01201"
+      ]
+    },
+    {
+      "id": "passengers",
+      "aliases": [
+        "passengers",
+        "passenger numbers",
+        "airport passengers",
+        "farþegar",
+        "farþega",
+        "farþegafjöldi",
+        "flugfarþegar",
+        "air passengers",
+        "air travellers",
+        "air travelers",
+        "passenger traffic",
+        "airport traffic",
+        "flugfarþega",
+        "flugfarþegum",
+        "farþegum",
+        "farþegafjölda",
+        "flugumferð",
+        "farþegaumferð"
+      ],
+      "search_terms": "passengers",
+      "table_paths": [
+        "Atvinnuvegir/ferdathjonusta/farthegar"
+      ],
+      "role": "topic",
+      "broader": [
+        "tourism",
+        "transport"
+      ],
+      "concept": "passengers",
+      "search": "passengers",
+      "terms": [
+        "passengers",
+        "passenger numbers",
+        "airport passengers",
+        "farþegar",
+        "farþega",
+        "farþegafjöldi",
+        "flugfarþegar",
+        "air passengers",
+        "air travellers",
+        "air travelers",
+        "passenger traffic",
+        "airport traffic",
+        "flugfarþega",
+        "flugfarþegum",
+        "farþegum",
+        "farþegafjölda",
+        "flugumferð",
+        "farþegaumferð",
+        "passenger",
+        "keflavik",
+        "airport",
+        "farthe",
+        "flugvoll"
+      ],
+      "tables": [
+        "SAM02001"
+      ]
+    },
+    {
+      "id": "births",
+      "aliases": [
+        "births",
+        "live births",
+        "children born",
+        "fæddust",
+        "fæddir",
+        "fæðingar",
+        "fæðinga",
+        "fæðingum",
+        "lifandi fæddir",
+        "babies born",
+        "newborns",
+        "newborn babies",
+        "birth rate",
+        "fertility",
+        "fertility rate",
+        "frjósemi",
+        "frjósemin",
+        "frjósemishlutfall",
+        "fæðingartíðni",
+        "fædd",
+        "fæddra",
+        "fæddar",
+        "fæddum",
+        "fæðing",
+        "fæðingarnar",
+        "barneignir",
+        "barnsfæðingar",
+        "lifandi fæddra",
+        "how many children were born",
+        "hve mörg börn fæddust",
+        "hversu mörg börn fæddust",
+        "were born",
+        "was born"
+      ],
+      "search_terms": "live births",
+      "table_phrases": [
+        "live births",
+        "fæddir",
+        "fæddra"
+      ],
+      "role": "topic",
+      "concept": "live births",
+      "search": "live births",
+      "terms": [
+        "births",
+        "live births",
+        "children born",
+        "fæddust",
+        "fæddir",
+        "fæðingar",
+        "fæðinga",
+        "fæðingum",
+        "lifandi fæddir",
+        "babies born",
+        "newborns",
+        "newborn babies",
+        "birth rate",
+        "fertility",
+        "fertility rate",
+        "frjósemi",
+        "frjósemin",
+        "frjósemishlutfall",
+        "fæðingartíðni",
+        "fædd",
+        "fæddra",
+        "fæddar",
+        "fæddum",
+        "fæðing",
+        "fæðingarnar",
+        "barneignir",
+        "barnsfæðingar",
+        "lifandi fæddra",
+        "how many children were born",
+        "hve mörg börn fæddust",
+        "hversu mörg börn fæddust",
+        "were born",
+        "was born",
+        "born",
+        "birth",
+        "babies",
+        "faedd",
+        "faeding",
+        "frjosemi"
+      ],
+      "tables": [
+        "MAN05101",
+        "MAN05100"
+      ]
+    },
+    {
+      "id": "deaths",
+      "aliases": [
+        "deaths",
+        "mortality",
+        "died",
+        "andlát",
+        "andlátum",
+        "dánir",
+        "dauðsföll",
+        "dánartíðni",
+        "death rate",
+        "death toll",
+        "deceased",
+        "life lost",
+        "dauðsfalla",
+        "dauðsföllum",
+        "dánartíðnin",
+        "dóu",
+        "dó",
+        "létust",
+        "látnir",
+        "látinna",
+        "dánarorsakir",
+        "causes of death",
+        "die",
+        "dies",
+        "decease",
+        "látast",
+        "deyja",
+        "deyr"
+      ],
+      "search_terms": "deaths",
+      "table_phrases": [
+        "deaths",
+        "dánir"
+      ],
+      "table_paths": [
+        "Ibuar"
+      ],
+      "role": "topic",
+      "concept": "deaths",
+      "search": "deaths",
+      "terms": [
+        "deaths",
+        "mortality",
+        "died",
+        "andlát",
+        "andlátum",
+        "dánir",
+        "dauðsföll",
+        "dánartíðni",
+        "death rate",
+        "death toll",
+        "deceased",
+        "life lost",
+        "dauðsfalla",
+        "dauðsföllum",
+        "dánartíðnin",
+        "dóu",
+        "dó",
+        "létust",
+        "látnir",
+        "látinna",
+        "dánarorsakir",
+        "causes of death",
+        "die",
+        "dies",
+        "decease",
+        "látast",
+        "deyja",
+        "deyr",
+        "death",
+        "letust",
+        "lest",
+        "latnir",
+        "danir",
+        "dauds",
+        "andlat"
+      ],
+      "tables": [
+        "MAN05210"
+      ]
+    },
+    {
+      "id": "migration",
+      "aliases": [
+        "migration",
+        "immigration",
+        "emigration",
+        "net migration",
+        "moved to Iceland",
+        "búferlaflutningar",
+        "búferlaflutninga",
+        "aðfluttir",
+        "brottfluttir",
+        "nettóflutningar",
+        "flutningsjöfnuður",
+        "moving abroad",
+        "move abroad",
+        "moving to Iceland",
+        "moved abroad",
+        "moved away",
+        "immigrated",
+        "emigrated",
+        "aðflutningur",
+        "aðflutninga",
+        "brottflutningur",
+        "brottflutninga",
+        "fluttust",
+        "fluttir",
+        "flutningar milli landa",
+        "flutningar innanlands"
+      ],
+      "search_terms": "migration",
+      "table_phrases": [
+        "migration",
+        "búferlaflutningar",
+        "fluttir"
+      ],
+      "table_paths": [
+        "Ibuar"
+      ],
+      "role": "topic",
+      "concept": "migration",
+      "search": "migration",
+      "terms": [
+        "migration",
+        "immigration",
+        "emigration",
+        "net migration",
+        "moved to Iceland",
+        "búferlaflutningar",
+        "búferlaflutninga",
+        "aðfluttir",
+        "brottfluttir",
+        "nettóflutningar",
+        "flutningsjöfnuður",
+        "moving abroad",
+        "move abroad",
+        "moving to Iceland",
+        "moved abroad",
+        "moved away",
+        "immigrated",
+        "emigrated",
+        "aðflutningur",
+        "aðflutninga",
+        "brottflutningur",
+        "brottflutninga",
+        "fluttust",
+        "fluttir",
+        "flutningar milli landa",
+        "flutningar innanlands",
+        "emigrat",
+        "moved to",
+        "moved from",
+        "left the country",
+        "flutt",
+        "buferla",
+        "adflutt",
+        "brottflutt"
+      ],
+      "tables": [
+        "MAN10003",
+        "MAN10002"
+      ]
+    },
+    {
+      "id": "exports",
+      "aliases": [
+        "exports",
+        "export",
+        "exported",
+        "útflutningur",
+        "útflutnings",
+        "útflutningi",
+        "útflutt",
+        "útflutningsverðmæti",
+        "goods exports",
+        "export value",
+        "export earnings",
+        "export revenue",
+        "útfluttra",
+        "útfluttar",
+        "útflutning",
+        "útflutningurinn",
+        "verðmæti útflutnings",
+        "útflutningsverðmæta"
+      ],
+      "search_terms": "exports",
+      "table_paths": [
+        "Efnahagur/utanrikisverslun"
+      ],
+      "role": "topic",
+      "broader": [
+        "trade",
+        "fisheries"
+      ],
+      "concept": "exports",
+      "search": "exports",
+      "terms": [
+        "exports",
+        "export",
+        "exported",
+        "útflutningur",
+        "útflutnings",
+        "útflutningi",
+        "útflutt",
+        "útflutningsverðmæti",
+        "goods exports",
+        "export value",
+        "export earnings",
+        "export revenue",
+        "útfluttra",
+        "útfluttar",
+        "útflutning",
+        "útflutningurinn",
+        "verðmæti útflutnings",
+        "útflutningsverðmæta"
+      ],
+      "tables": [
+        "UTA06001"
+      ]
+    },
+    {
+      "id": "imports",
+      "aliases": [
+        "imports",
+        "import",
+        "imported",
+        "innflutningur",
+        "innflutnings",
+        "innflutningi",
+        "innflutt",
+        "innflutningsverðmæti",
+        "goods imports",
+        "import value",
+        "innfluttra",
+        "innfluttar",
+        "innflutning",
+        "innflutningurinn",
+        "verðmæti innflutnings"
+      ],
+      "search_terms": "imports",
+      "table_paths": [
+        "Efnahagur/utanrikisverslun"
+      ],
+      "role": "topic",
+      "broader": [
+        "trade",
+        "fisheries"
+      ],
+      "concept": "imports",
+      "search": "imports",
+      "terms": [
+        "imports",
+        "import",
+        "imported",
+        "innflutningur",
+        "innflutnings",
+        "innflutningi",
+        "innflutt",
+        "innflutningsverðmæti",
+        "goods imports",
+        "import value",
+        "innfluttra",
+        "innfluttar",
+        "innflutning",
+        "innflutningurinn",
+        "verðmæti innflutnings"
+      ],
+      "tables": [
+        "UTA06001"
+      ]
+    },
+    {
+      "id": "house_prices",
+      "aliases": [
+        "house prices",
+        "house price index",
+        "housing prices",
+        "residential property prices",
+        "vísitala íbúðaverðs",
+        "vísitölu íbúðaverðs",
+        "íbúðaverð",
+        "íbúðaverðs",
+        "húsnæðisverð",
+        "fasteignaverð",
+        "home prices",
+        "apartment prices",
+        "property prices",
+        "housing price index",
+        "house prices index",
+        "íbúðaverði",
+        "húsnæðisverði",
+        "fasteignaverði",
+        "íbúðaverðsvísitala",
+        "markaðsverð íbúðarhúsnæðis"
+      ],
+      "search_terms": "residential property price index",
+      "table_phrases": [
+        "residential property market price",
+        "residential property price",
+        "house price",
+        "íbúðaverð",
+        "íbúðaverðs"
+      ],
+      "role": "topic",
+      "broader": [
+        "housing",
+        "prices"
+      ],
+      "concept": "house prices",
+      "search": "residential property price index",
+      "terms": [
+        "house prices",
+        "house price index",
+        "housing prices",
+        "residential property prices",
+        "vísitala íbúðaverðs",
+        "vísitölu íbúðaverðs",
+        "íbúðaverð",
+        "íbúðaverðs",
+        "húsnæðisverð",
+        "fasteignaverð",
+        "home prices",
+        "apartment prices",
+        "property prices",
+        "housing price index",
+        "house prices index",
+        "íbúðaverði",
+        "húsnæðisverði",
+        "fasteignaverði",
+        "íbúðaverðsvísitala",
+        "markaðsverð íbúðarhúsnæðis",
+        "house price",
+        "housing price",
+        "property price",
+        "home price",
+        "ibudaverd",
+        "fasteignaverd",
+        "husnaedisverd"
+      ],
+      "tables": [
+        "VIS01106"
+      ]
+    },
+    {
+      "id": "cars",
+      "aliases": [
+        "passenger cars",
+        "cars",
+        "car ownership",
+        "fólksbílar",
+        "fólksbíla",
+        "fólksbílum",
+        "bifreiðar",
+        "bifreiða",
+        "bílar",
+        "bíla",
+        "vehicles",
+        "vehicle fleet",
+        "registered vehicles",
+        "electric cars",
+        "electric vehicles",
+        "rafbílar",
+        "rafbíla",
+        "rafbílum",
+        "ökutæki",
+        "ökutækja",
+        "ökutækjum",
+        "bílafjöldi",
+        "bílafjölda",
+        "bifreiðafjöldi",
+        "bílaeign"
+      ],
+      "search_terms": "passenger cars vehicles",
+      "table_phrases": [
+        "vehicles",
+        "cars",
+        "bifreiðar",
+        "ökutæki"
+      ],
+      "note": "Includes vehicle tables and related breakdowns; car rentals and household car ownership need different tables.",
+      "role": "topic",
+      "broader": [
+        "transport"
+      ],
+      "concept": "cars",
+      "search": "passenger cars vehicles",
+      "terms": [
+        "passenger cars",
+        "cars",
+        "car ownership",
+        "fólksbílar",
+        "fólksbíla",
+        "fólksbílum",
+        "bifreiðar",
+        "bifreiða",
+        "bílar",
+        "bíla",
+        "vehicles",
+        "vehicle fleet",
+        "registered vehicles",
+        "electric cars",
+        "electric vehicles",
+        "rafbílar",
+        "rafbíla",
+        "rafbílum",
+        "ökutæki",
+        "ökutækja",
+        "ökutækjum",
+        "bílafjöldi",
+        "bílafjölda",
+        "bifreiðafjöldi",
+        "bílaeign",
+        "car",
+        "vehicle",
+        "bilar",
+        "folksbil",
+        "okutaek"
+      ],
+      "tables": [
+        "SAM03105"
+      ]
+    },
+    {
+      "id": "education",
+      "aliases": [
+        "students",
+        "student numbers",
+        "pupils",
+        "nemendur",
+        "nemenda",
+        "nemendafjöldi",
+        "háskólanemar",
+        "skólanemar",
+        "education",
+        "schools",
+        "school",
+        "skólar",
+        "skóla",
+        "skólum",
+        "skólamál",
+        "menntun",
+        "menntunar",
+        "menntakerfi",
+        "nám",
+        "námi",
+        "number of students",
+        "fjöldi nemenda"
+      ],
+      "search_terms": "students",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "role": "topic",
+      "concept": "education",
+      "search": "students",
+      "terms": [
+        "students",
+        "student numbers",
+        "pupils",
+        "nemendur",
+        "nemenda",
+        "nemendafjöldi",
+        "háskólanemar",
+        "skólanemar",
+        "education",
+        "schools",
+        "school",
+        "skólar",
+        "skóla",
+        "skólum",
+        "skólamál",
+        "menntun",
+        "menntunar",
+        "menntakerfi",
+        "nám",
+        "námi",
+        "number of students",
+        "fjöldi nemenda"
+      ],
+      "tables": []
+    },
+    {
+      "id": "male",
+      "aliases": [
+        "men",
+        "man",
+        "male",
+        "males",
+        "karlar",
+        "karla",
+        "karl",
+        "karlmenn",
+        "karlmanna"
+      ],
+      "search_terms": "males",
+      "note": "Category expansion only; never routes a question to a topic.",
+      "role": "group",
+      "concept": "male",
+      "search": "males",
+      "terms": [
+        "men",
+        "man",
+        "male",
+        "males",
+        "karlar",
+        "karla",
+        "karl",
+        "karlmenn",
+        "karlmanna"
+      ],
+      "tables": []
+    },
+    {
+      "id": "female",
+      "aliases": [
+        "women",
+        "woman",
+        "female",
+        "females",
+        "konur",
+        "kvenna",
+        "kona",
+        "konum"
+      ],
+      "search_terms": "females",
+      "note": "Category expansion only; never routes a question to a topic.",
+      "role": "group",
+      "concept": "female",
+      "search": "females",
+      "terms": [
+        "women",
+        "woman",
+        "female",
+        "females",
+        "konur",
+        "kvenna",
+        "kona",
+        "konum"
+      ],
+      "tables": []
+    },
+    {
+      "id": "population_hint",
+      "role": "hint",
+      "aliases": [
+        "people",
+        "person",
+        "persons",
+        "inhabitants",
+        "residents",
+        "live",
+        "lived",
+        "lives",
+        "living",
+        "búa",
+        "býr",
+        "bjó",
+        "bjuggu",
+        "búi",
+        "íbúar",
+        "íbúa",
+        "íbúum",
+        "íbúanna",
+        "landsmenn",
+        "landsmanna",
+        "fólk",
+        "fólks",
+        "fólki"
+      ],
+      "search_terms": "population",
+      "table_paths": [
+        "Ibuar/mannfjoldi"
+      ],
+      "note": "Suppressed when the same clause names a statistical measure. People are a subject, not automatically a population count.",
+      "concept": "population hint",
+      "search": "population",
+      "terms": [],
+      "tables": []
+    },
+    {
+      "id": "population_denominator",
+      "role": "topic",
+      "aliases": [
+        "per capita",
+        "per inhabitant",
+        "per resident",
+        "per person",
+        "per 1000 inhabitants",
+        "per 1 000 inhabitants",
+        "per 1 000 residents",
+        "á hvern íbúa",
+        "á hvern einstakling",
+        "á mann",
+        "á hverja 1000 íbúa",
+        "á hverja 1 000 íbúa"
+      ],
+      "search_terms": "population",
+      "table_paths": [
+        "Ibuar/mannfjoldi"
+      ],
+      "note": "A population denominator may require a second table, even when the numerator is a different topic.",
+      "concept": "population denominator",
+      "search": "population",
+      "terms": [
+        "per capita",
+        "per inhabitant",
+        "per resident",
+        "per person",
+        "per 1000 inhabitants",
+        "per 1 000 inhabitants",
+        "per 1 000 residents",
+        "á hvern íbúa",
+        "á hvern einstakling",
+        "á mann",
+        "á hverja 1000 íbúa",
+        "á hverja 1 000 íbúa"
+      ],
+      "tables": []
+    },
+    {
+      "id": "demography",
+      "role": "topic",
+      "aliases": [
+        "demography",
+        "demographics",
+        "lýðfræði",
+        "lýðfræðileg",
+        "lýðfræðilegar"
+      ],
+      "search_terms": "population births deaths migration",
+      "table_paths": [
+        "Ibuar"
+      ],
+      "concept": "demography",
+      "search": "population births deaths migration",
+      "terms": [
+        "demography",
+        "demographics",
+        "lýðfræði",
+        "lýðfræðileg",
+        "lýðfræðilegar"
+      ],
+      "tables": []
+    },
+    {
+      "id": "immigrant_population",
+      "role": "topic",
+      "aliases": [
+        "immigrant population",
+        "number of immigrants",
+        "fjöldi innflytjenda",
+        "innflytjendafjöldi"
+      ],
+      "search_terms": "immigrants population",
+      "table_paths": [
+        "Ibuar/mannfjoldi"
+      ],
+      "broader": [
+        "population",
+        "demography"
+      ],
+      "concept": "immigrant population",
+      "search": "immigrants population",
+      "terms": [
+        "immigrant population",
+        "number of immigrants",
+        "fjöldi innflytjenda",
+        "innflytjendafjöldi"
+      ],
+      "tables": []
+    },
+    {
+      "id": "life_expectancy",
+      "role": "topic",
+      "aliases": [
+        "life expectancy",
+        "expected lifespan",
+        "how long do people live",
+        "how long people live",
+        "ævilengd",
+        "lífslíkur",
+        "lífslíkur við fæðingu",
+        "meðalævilengd",
+        "hvað lifir fólk lengi",
+        "hversu lengi lifir fólk"
+      ],
+      "search_terms": "life expectancy",
+      "table_phrases": [
+        "life expectancy",
+        "lífslíkur",
+        "ævilengd"
+      ],
+      "broader": [
+        "demography"
+      ],
+      "concept": "life expectancy",
+      "search": "life expectancy",
+      "terms": [
+        "life expectancy",
+        "expected lifespan",
+        "how long do people live",
+        "how long people live",
+        "ævilengd",
+        "lífslíkur",
+        "lífslíkur við fæðingu",
+        "meðalævilengd",
+        "hvað lifir fólk lengi",
+        "hversu lengi lifir fólk",
+        "lifslikur"
+      ],
+      "tables": [
+        "MAN05401"
+      ]
+    },
+    {
+      "id": "families",
+      "role": "topic",
+      "aliases": [
+        "families",
+        "family structure",
+        "family types",
+        "fjölskyldur",
+        "fjölskyldna",
+        "fjölskyldum",
+        "fjölskyldugerð",
+        "fjölskyldur á Íslandi"
+      ],
+      "search_terms": "families family",
+      "table_paths": [
+        "Ibuar/fjolsk"
+      ],
+      "concept": "families",
+      "search": "families family",
+      "terms": [
+        "families",
+        "family structure",
+        "family types",
+        "fjölskyldur",
+        "fjölskyldna",
+        "fjölskyldum",
+        "fjölskyldugerð",
+        "fjölskyldur á Íslandi"
+      ],
+      "tables": []
+    },
+    {
+      "id": "marriages",
+      "role": "topic",
+      "aliases": [
+        "marriage",
+        "marriages",
+        "married couples",
+        "weddings",
+        "hjónabönd",
+        "hjónabanda",
+        "giftingar",
+        "giftingum",
+        "gift fólk",
+        "hjónavígslur"
+      ],
+      "search_terms": "marriages",
+      "table_paths": [
+        "Ibuar"
+      ],
+      "table_phrases": [
+        "marriages",
+        "hjónabönd",
+        "marital"
+      ],
+      "broader": [
+        "families"
+      ],
+      "concept": "marriages",
+      "search": "marriages",
+      "terms": [
+        "marriage",
+        "marriages",
+        "married couples",
+        "weddings",
+        "hjónabönd",
+        "hjónabanda",
+        "giftingar",
+        "giftingum",
+        "gift fólk",
+        "hjónavígslur"
+      ],
+      "tables": []
+    },
+    {
+      "id": "divorces",
+      "role": "topic",
+      "aliases": [
+        "divorce",
+        "divorces",
+        "divorced",
+        "skilnaður",
+        "skilnaðir",
+        "skilnaða",
+        "hjúskaparslit",
+        "fráskilin"
+      ],
+      "search_terms": "divorces",
+      "table_paths": [
+        "Ibuar"
+      ],
+      "table_phrases": [
+        "divorces",
+        "skilnaðir",
+        "marital"
+      ],
+      "broader": [
+        "families"
+      ],
+      "concept": "divorces",
+      "search": "divorces",
+      "terms": [
+        "divorce",
+        "divorces",
+        "divorced",
+        "skilnaður",
+        "skilnaðir",
+        "skilnaða",
+        "hjúskaparslit",
+        "fráskilin"
+      ],
+      "tables": []
+    },
+    {
+      "id": "households",
+      "role": "topic",
+      "aliases": [
+        "households",
+        "household size",
+        "heimili",
+        "heimila",
+        "heimilum",
+        "heimilisstærð",
+        "heimilisgerðir"
+      ],
+      "search_terms": "households",
+      "table_phrases": [
+        "households",
+        "heimili",
+        "heimila"
+      ],
+      "clarification": "Distinguish households from families, and specify the measure being asked for.",
+      "concept": "households",
+      "search": "households",
+      "terms": [
+        "households",
+        "household size",
+        "heimili",
+        "heimila",
+        "heimilum",
+        "heimilisstærð",
+        "heimilisgerðir"
+      ],
+      "tables": []
+    },
+    {
+      "id": "population_forecasts",
+      "role": "topic",
+      "aliases": [
+        "population forecast",
+        "population projection",
+        "future population",
+        "mannfjöldaspá",
+        "mannfjöldaspár",
+        "mannfjöldaspána",
+        "framtíðarmannfjöldi"
+      ],
+      "search_terms": "population projection",
+      "table_paths": [
+        "Ibuar/mannfjoldaspa"
+      ],
+      "broader": [
+        "population",
+        "demography"
+      ],
+      "concept": "population forecasts",
+      "search": "population projection",
+      "terms": [
+        "population forecast",
+        "population projection",
+        "future population",
+        "mannfjöldaspá",
+        "mannfjöldaspár",
+        "mannfjöldaspána",
+        "framtíðarmannfjöldi"
+      ],
+      "tables": []
+    },
+    {
+      "id": "census",
+      "role": "topic",
+      "aliases": [
+        "census",
+        "population census",
+        "manntal",
+        "manntali",
+        "manntals",
+        "manntalið"
+      ],
+      "search_terms": "census",
+      "table_paths": [
+        "Ibuar/manntal"
+      ],
+      "concept": "census",
+      "search": "census",
+      "terms": [
+        "census",
+        "population census",
+        "manntal",
+        "manntali",
+        "manntals",
+        "manntalið"
+      ],
+      "tables": []
+    },
+    {
+      "id": "financial_wellbeing",
+      "role": "topic",
+      "aliases": [
+        "rich",
+        "richer",
+        "richest",
+        "rich people",
+        "wealthy",
+        "wealthier",
+        "well off",
+        "financial wellbeing",
+        "financial well being",
+        "financial situation",
+        "ríkt",
+        "ríkur",
+        "rík",
+        "ríkir",
+        "ríkra",
+        "ríkari",
+        "ríkast",
+        "ríkasta",
+        "ríkustu",
+        "auðugt",
+        "auðugur",
+        "auðugir",
+        "efnað",
+        "efnaður",
+        "efnaðir",
+        "efnafólk",
+        "vel stætt",
+        "vel stæðir",
+        "fjárhagur",
+        "fjárhag",
+        "fjárhagsstaða",
+        "fjárhagsstöðu",
+        "efnahagur fólks",
+        "money",
+        "how much money",
+        "peningar",
+        "peninga",
+        "peningum",
+        "eignamikið",
+        "eignamiklir",
+        "eignamiklar",
+        "efnameiri",
+        "velstætt",
+        "velstæðir"
+      ],
+      "search_terms": "net worth assets income",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar",
+        "Samfelag/launogtekjur",
+        "Samfelag/lifskjor"
+      ],
+      "table_phrases": [
+        "net worth",
+        "assets",
+        "income",
+        "wealth",
+        "eignir",
+        "tekjur",
+        "incomes"
+      ],
+      "clarification": "Rich can mean net worth, assets or income. Ask which measure and whether a mean, median or comparison is wanted; do not silently equate them.",
+      "concept": "financial wellbeing",
+      "search": "net worth assets income",
+      "terms": [
+        "rich",
+        "richer",
+        "richest",
+        "rich people",
+        "wealthy",
+        "wealthier",
+        "well off",
+        "financial wellbeing",
+        "financial well being",
+        "financial situation",
+        "ríkt",
+        "ríkur",
+        "rík",
+        "ríkir",
+        "ríkra",
+        "ríkari",
+        "ríkast",
+        "ríkasta",
+        "ríkustu",
+        "auðugt",
+        "auðugur",
+        "auðugir",
+        "efnað",
+        "efnaður",
+        "efnaðir",
+        "efnafólk",
+        "vel stætt",
+        "vel stæðir",
+        "fjárhagur",
+        "fjárhag",
+        "fjárhagsstaða",
+        "fjárhagsstöðu",
+        "efnahagur fólks",
+        "money",
+        "how much money",
+        "peningar",
+        "peninga",
+        "peningum",
+        "eignamikið",
+        "eignamiklir",
+        "eignamiklar",
+        "efnameiri",
+        "velstætt",
+        "velstæðir"
+      ],
+      "tables": [
+        "THJ09000",
+        "TEK01001"
+      ]
+    },
+    {
+      "id": "net_worth",
+      "role": "topic",
+      "aliases": [
+        "wealth",
+        "net worth",
+        "net wealth",
+        "household wealth",
+        "personal wealth",
+        "auður",
+        "auð",
+        "auðs",
+        "hrein eign",
+        "hreinar eignir",
+        "hreinna eigna",
+        "hreina eign",
+        "eignastaða",
+        "eignastöðu",
+        "eignir að frádregnum skuldum",
+        "eignir mínus skuldir",
+        "auðlegð",
+        "auðlegðar",
+        "hreinnar eignar",
+        "netto eign",
+        "nettóeign",
+        "nettóeignir"
+      ],
+      "search_terms": "net worth",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar",
+        "Samfelag/lifskjor",
+        "Samfelag/launogtekjur"
+      ],
+      "table_phrases": [
+        "net worth",
+        "net wealth",
+        "wealth",
+        "eignir"
+      ],
+      "broader": [
+        "financial_wellbeing"
+      ],
+      "concept": "net worth",
+      "search": "net worth",
+      "terms": [
+        "wealth",
+        "net worth",
+        "net wealth",
+        "household wealth",
+        "personal wealth",
+        "auður",
+        "auð",
+        "auðs",
+        "hrein eign",
+        "hreinar eignir",
+        "hreinna eigna",
+        "hreina eign",
+        "eignastaða",
+        "eignastöðu",
+        "eignir að frádregnum skuldum",
+        "eignir mínus skuldir",
+        "auðlegð",
+        "auðlegðar",
+        "hreinnar eignar",
+        "netto eign",
+        "nettóeign",
+        "nettóeignir"
+      ],
+      "tables": [
+        "THJ09000",
+        "THJ09007"
+      ]
+    },
+    {
+      "id": "assets",
+      "role": "topic",
+      "aliases": [
+        "assets",
+        "household assets",
+        "financial assets",
+        "eignir",
+        "eigna",
+        "eignum",
+        "eignir heimila",
+        "fjáreignir",
+        "fjáreigna"
+      ],
+      "search_terms": "assets",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar",
+        "Samfelag/launogtekjur",
+        "Samfelag/lifskjor"
+      ],
+      "table_phrases": [
+        "assets",
+        "eignir",
+        "eigna"
+      ],
+      "broader": [
+        "financial_wellbeing"
+      ],
+      "concept": "assets",
+      "search": "assets",
+      "terms": [
+        "assets",
+        "household assets",
+        "financial assets",
+        "eignir",
+        "eigna",
+        "eignum",
+        "eignir heimila",
+        "fjáreignir",
+        "fjáreigna"
+      ],
+      "tables": [
+        "THJ09000",
+        "THJ09004"
+      ]
+    },
+    {
+      "id": "debts",
+      "role": "topic",
+      "aliases": [
+        "debt",
+        "debts",
+        "liabilities",
+        "indebted",
+        "indebtedness",
+        "household debt",
+        "owe",
+        "owing",
+        "skuldir",
+        "skulda",
+        "skuldum",
+        "skuldsetning",
+        "skuldsetningu",
+        "skuldastaða",
+        "skuldastöðu",
+        "skuldir heimila",
+        "skuldahlutfall"
+      ],
+      "search_terms": "liabilities debts",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar",
+        "Samfelag/lifskjor",
+        "Samfelag/launogtekjur"
+      ],
+      "table_phrases": [
+        "liabilities",
+        "debts",
+        "debt",
+        "skuldir",
+        "skulda"
+      ],
+      "broader": [
+        "financial_wellbeing"
+      ],
+      "concept": "debts",
+      "search": "liabilities debts",
+      "terms": [
+        "debt",
+        "debts",
+        "liabilities",
+        "indebted",
+        "indebtedness",
+        "household debt",
+        "owe",
+        "owing",
+        "skuldir",
+        "skulda",
+        "skuldum",
+        "skuldsetning",
+        "skuldsetningu",
+        "skuldastaða",
+        "skuldastöðu",
+        "skuldir heimila",
+        "skuldahlutfall"
+      ],
+      "tables": [
+        "THJ09000",
+        "SKU01007"
+      ]
+    },
+    {
+      "id": "income",
+      "role": "topic",
+      "aliases": [
+        "income",
+        "incomes",
+        "personal income",
+        "household income",
+        "annual income",
+        "earn",
+        "earns",
+        "earning",
+        "make money",
+        "tekjur",
+        "tekna",
+        "tekjum",
+        "tekjurnar",
+        "árstekjur",
+        "árstekna",
+        "heildartekjur",
+        "heildartekna",
+        "heimilistekjur",
+        "afla tekna",
+        "þénar",
+        "þéna",
+        "þénuðu",
+        "þénaði",
+        "mean income",
+        "average income",
+        "median income",
+        "meðaltekjur",
+        "miðgildi tekna"
+      ],
+      "search_terms": "income",
+      "table_paths": [
+        "Samfelag/launogtekjur",
+        "Samfelag/lifskjor",
+        "Efnahagur/thjodhagsreikningar"
+      ],
+      "table_phrases": [
+        "income",
+        "tekjur",
+        "tekna",
+        "payments",
+        "incomes"
+      ],
+      "broader": [
+        "financial_wellbeing"
+      ],
+      "note": "Generic income is a personal/household hint; business income and public revenue have their own longer aliases.",
+      "concept": "income",
+      "search": "income",
+      "terms": [
+        "income",
+        "incomes",
+        "personal income",
+        "household income",
+        "annual income",
+        "earn",
+        "earns",
+        "earning",
+        "make money",
+        "tekjur",
+        "tekna",
+        "tekjum",
+        "tekjurnar",
+        "árstekjur",
+        "árstekna",
+        "heildartekjur",
+        "heildartekna",
+        "heimilistekjur",
+        "afla tekna",
+        "þénar",
+        "þéna",
+        "þénuðu",
+        "þénaði",
+        "mean income",
+        "average income",
+        "median income",
+        "meðaltekjur",
+        "miðgildi tekna",
+        "earnings"
+      ],
+      "tables": [
+        "TEK01001",
+        "TEK01006"
+      ]
+    },
+    {
+      "id": "disposable_income",
+      "role": "topic",
+      "aliases": [
+        "disposable income",
+        "after tax income",
+        "take home income",
+        "take home pay",
+        "ráðstöfunartekjur",
+        "ráðstöfunartekna",
+        "ráðstöfunartekjum",
+        "tekjur eftir skatt",
+        "útborguð laun"
+      ],
+      "search_terms": "disposable income",
+      "table_paths": [
+        "Samfelag",
+        "Efnahagur/thjodhagsreikningar"
+      ],
+      "table_phrases": [
+        "disposable income",
+        "ráðstöfunartekjur"
+      ],
+      "broader": [
+        "income",
+        "financial_wellbeing"
+      ],
+      "concept": "disposable income",
+      "search": "disposable income",
+      "terms": [
+        "disposable income",
+        "after tax income",
+        "take home income",
+        "take home pay",
+        "ráðstöfunartekjur",
+        "ráðstöfunartekna",
+        "ráðstöfunartekjum",
+        "tekjur eftir skatt",
+        "útborguð laun"
+      ],
+      "tables": [
+        "THJ09001",
+        "LIF01120"
+      ]
+    },
+    {
+      "id": "poverty",
+      "role": "topic",
+      "aliases": [
+        "poverty",
+        "poor",
+        "poorer",
+        "poorest",
+        "poor people",
+        "low income",
+        "at risk of poverty",
+        "poverty line",
+        "poverty risk",
+        "fátækt",
+        "fátækur",
+        "fátæk",
+        "fátækt fólk",
+        "fátækir",
+        "fátækra",
+        "fátækari",
+        "fátækast",
+        "tekjulágir",
+        "tekjulágra",
+        "lágtekjur",
+        "lágtekjumörk",
+        "lágtekjuhlutfall",
+        "fátæktarmörk",
+        "fátæktarhætta"
+      ],
+      "search_terms": "poverty",
+      "table_paths": [
+        "Samfelag"
+      ],
+      "table_phrases": [
+        "poverty",
+        "lágtekju",
+        "fátækt"
+      ],
+      "broader": [
+        "financial_wellbeing"
+      ],
+      "clarification": "Poverty may mean a relative income threshold or material deprivation; confirm the definition when it matters.",
+      "concept": "poverty",
+      "search": "poverty",
+      "terms": [
+        "poverty",
+        "poor",
+        "poorer",
+        "poorest",
+        "poor people",
+        "low income",
+        "at risk of poverty",
+        "poverty line",
+        "poverty risk",
+        "fátækt",
+        "fátækur",
+        "fátæk",
+        "fátækt fólk",
+        "fátækir",
+        "fátækra",
+        "fátækari",
+        "fátækast",
+        "tekjulágir",
+        "tekjulágra",
+        "lágtekjur",
+        "lágtekjumörk",
+        "lágtekjuhlutfall",
+        "fátæktarmörk",
+        "fátæktarhætta"
+      ],
+      "tables": [
+        "LIF01130",
+        "LIF01140"
+      ]
+    },
+    {
+      "id": "inequality",
+      "role": "topic",
+      "aliases": [
+        "inequality",
+        "income inequality",
+        "wealth inequality",
+        "gini",
+        "gini coefficient",
+        "pay inequality",
+        "ójöfnuður",
+        "ójöfnuði",
+        "tekjuójöfnuður",
+        "tekjuójöfnuði",
+        "eignaójöfnuður",
+        "ójöfn skipting",
+        "ginistuðull",
+        "gini stuðull"
+      ],
+      "search_terms": "gini inequality distribution income",
+      "table_paths": [
+        "Samfelag/launogtekjur",
+        "Samfelag/lifskjor",
+        "Efnahagur/thjodhagsreikningar"
+      ],
+      "table_phrases": [
+        "gini",
+        "distribution",
+        "percentiles",
+        "deciles",
+        "inequality"
+      ],
+      "broader": [
+        "financial_wellbeing"
+      ],
+      "concept": "inequality",
+      "search": "gini inequality distribution income",
+      "terms": [
+        "inequality",
+        "income inequality",
+        "wealth inequality",
+        "gini",
+        "gini coefficient",
+        "pay inequality",
+        "ójöfnuður",
+        "ójöfnuði",
+        "tekjuójöfnuður",
+        "tekjuójöfnuði",
+        "eignaójöfnuður",
+        "ójöfn skipting",
+        "ginistuðull",
+        "gini stuðull"
+      ],
+      "tables": [
+        "LIF01110"
+      ]
+    },
+    {
+      "id": "financial_hardship",
+      "role": "topic",
+      "aliases": [
+        "make ends meet",
+        "making ends meet",
+        "financial difficulties",
+        "financial hardship",
+        "struggling financially",
+        "cannot afford",
+        "can t afford",
+        "material deprivation",
+        "get ends to meet",
+        "ná endum saman",
+        "endar ná saman",
+        "fjárhagserfiðleikar",
+        "fjárhagserfiðleikum",
+        "fjárhagsvandi",
+        "fjárhagsvanda",
+        "efnislegur skortur",
+        "efnislegan skort",
+        "hafa ekki efni",
+        "á ekki efni",
+        "endum saman",
+        "ends meet",
+        "struggle to make ends meet"
+      ],
+      "search_terms": "financial difficulties material deprivation",
+      "table_paths": [
+        "Samfelag/lifskjor",
+        "Samfelag/heilbrigdismal"
+      ],
+      "broader": [
+        "poverty",
+        "financial_wellbeing"
+      ],
+      "concept": "financial hardship",
+      "search": "financial difficulties material deprivation",
+      "terms": [
+        "make ends meet",
+        "making ends meet",
+        "financial difficulties",
+        "financial hardship",
+        "struggling financially",
+        "cannot afford",
+        "can t afford",
+        "material deprivation",
+        "get ends to meet",
+        "ná endum saman",
+        "endar ná saman",
+        "fjárhagserfiðleikar",
+        "fjárhagserfiðleikum",
+        "fjárhagsvandi",
+        "fjárhagsvanda",
+        "efnislegur skortur",
+        "efnislegan skort",
+        "hafa ekki efni",
+        "á ekki efni",
+        "endum saman",
+        "ends meet",
+        "struggle to make ends meet"
+      ],
+      "tables": [
+        "LIF01138",
+        "LIF01139"
+      ]
+    },
+    {
+      "id": "pensions",
+      "role": "topic",
+      "aliases": [
+        "pension",
+        "pensions",
+        "retirement income",
+        "old age pension",
+        "pension payments",
+        "lífeyrir",
+        "lífeyris",
+        "lífeyri",
+        "ellilífeyrir",
+        "ellilífeyris",
+        "ellilífeyri",
+        "lífeyristekjur",
+        "lífeyrisgreiðslur",
+        "eftirlaun",
+        "eftirlaunum",
+        "pension income",
+        "pensioners income",
+        "tekjur ellilífeyrisþega"
+      ],
+      "search_terms": "pension old age benefits",
+      "table_paths": [
+        "Samfelag/felagsmal",
+        "Efnahagur/fjaropinber",
+        "Samfelag/launogtekjur"
+      ],
+      "table_phrases": [
+        "pension",
+        "old age",
+        "lífeyri",
+        "ellilífeyr"
+      ],
+      "broader": [
+        "income"
+      ],
+      "concept": "pensions",
+      "search": "pension old age benefits",
+      "terms": [
+        "pension",
+        "pensions",
+        "retirement income",
+        "old age pension",
+        "pension payments",
+        "lífeyrir",
+        "lífeyris",
+        "lífeyri",
+        "ellilífeyrir",
+        "ellilífeyris",
+        "ellilífeyri",
+        "lífeyristekjur",
+        "lífeyrisgreiðslur",
+        "eftirlaun",
+        "eftirlaunum",
+        "pension income",
+        "pensioners income",
+        "tekjur ellilífeyrisþega"
+      ],
+      "tables": [
+        "FEL02000",
+        "FEL02001"
+      ]
+    },
+    {
+      "id": "social_benefits",
+      "role": "topic",
+      "aliases": [
+        "social benefits",
+        "welfare benefits",
+        "social assistance",
+        "benefit payments",
+        "welfare payments",
+        "bætur",
+        "bóta",
+        "bótum",
+        "almannatryggingar",
+        "almannatryggingum",
+        "félagsleg aðstoð",
+        "fjárhagsaðstoð",
+        "barnabætur",
+        "húsnæðisbætur"
+      ],
+      "search_terms": "social benefits assistance",
+      "table_paths": [
+        "Samfelag/felagsmal",
+        "Efnahagur/fjaropinber"
+      ],
+      "concept": "social benefits",
+      "search": "social benefits assistance",
+      "terms": [
+        "social benefits",
+        "welfare benefits",
+        "social assistance",
+        "benefit payments",
+        "welfare payments",
+        "bætur",
+        "bóta",
+        "bótum",
+        "almannatryggingar",
+        "almannatryggingum",
+        "félagsleg aðstoð",
+        "fjárhagsaðstoð",
+        "barnabætur",
+        "húsnæðisbætur"
+      ],
+      "tables": []
+    },
+    {
+      "id": "real_wages",
+      "role": "topic",
+      "aliases": [
+        "real wages",
+        "real earnings",
+        "purchasing power",
+        "purchasing power of wages",
+        "kaupmáttur",
+        "kaupmátt",
+        "kaupmáttar",
+        "kaupmáttur launa",
+        "raunlaun",
+        "raunlauna"
+      ],
+      "search_terms": "wage index constant price",
+      "table_paths": [
+        "Samfelag/launogtekjur"
+      ],
+      "table_phrases": [
+        "constant price",
+        "real wages",
+        "kaupmátt"
+      ],
+      "broader": [
+        "wages",
+        "wage_index"
+      ],
+      "concept": "real wages",
+      "search": "wage index constant price",
+      "terms": [
+        "real wages",
+        "real earnings",
+        "purchasing power",
+        "purchasing power of wages",
+        "kaupmáttur",
+        "kaupmátt",
+        "kaupmáttar",
+        "kaupmáttur launa",
+        "raunlaun",
+        "raunlauna"
+      ],
+      "tables": [
+        "LAU04800"
+      ]
+    },
+    {
+      "id": "gender_pay_gap",
+      "role": "topic",
+      "aliases": [
+        "gender pay gap",
+        "pay gap",
+        "wage gap",
+        "equal pay",
+        "gender wage gap",
+        "launamunur",
+        "launamun",
+        "launamunar",
+        "launamunur kynjanna",
+        "launajafnrétti",
+        "kynbundinn launamunur"
+      ],
+      "search_terms": "gender pay gap",
+      "table_paths": [
+        "Samfelag/launogtekjur"
+      ],
+      "table_phrases": [
+        "pay gap",
+        "launamun"
+      ],
+      "broader": [
+        "wages"
+      ],
+      "concept": "gender pay gap",
+      "search": "gender pay gap",
+      "terms": [
+        "gender pay gap",
+        "pay gap",
+        "wage gap",
+        "equal pay",
+        "gender wage gap",
+        "launamunur",
+        "launamun",
+        "launamunar",
+        "launamunur kynjanna",
+        "launajafnrétti",
+        "kynbundinn launamunur"
+      ],
+      "tables": [
+        "VIN02010"
+      ]
+    },
+    {
+      "id": "housing",
+      "role": "topic",
+      "aliases": [
+        "housing",
+        "homes",
+        "housing market",
+        "húsnæði",
+        "húsnæðis",
+        "húsnæðismarkaður",
+        "húsnæðismarkaði",
+        "íbúðir",
+        "íbúða",
+        "íbúðum"
+      ],
+      "search_terms": "housing dwellings",
+      "table_phrases": [
+        "housing",
+        "dwellings",
+        "residential",
+        "húsnæði",
+        "íbúðir"
+      ],
+      "concept": "housing",
+      "search": "housing dwellings",
+      "terms": [
+        "housing",
+        "homes",
+        "housing market",
+        "húsnæði",
+        "húsnæðis",
+        "húsnæðismarkaður",
+        "húsnæðismarkaði",
+        "íbúðir",
+        "íbúða",
+        "íbúðum"
+      ],
+      "tables": []
+    },
+    {
+      "id": "rent",
+      "role": "topic",
+      "aliases": [
+        "rent",
+        "rents",
+        "rental prices",
+        "rental housing",
+        "tenants",
+        "renting",
+        "leiga",
+        "leigu",
+        "leigan",
+        "leiguverð",
+        "leiguverði",
+        "leiguhúsnæði",
+        "leigjendur",
+        "leigjenda",
+        "húsaleiga",
+        "húsaleigu",
+        "leigja",
+        "leigir",
+        "leigði",
+        "leigðu",
+        "að leigja",
+        "rent a flat",
+        "rent an apartment"
+      ],
+      "search_terms": "rent housing tenure",
+      "table_paths": [
+        "Samfelag/lifskjor",
+        "Efnahagur/visitolur",
+        "Ibuar/manntal"
+      ],
+      "table_phrases": [
+        "rent",
+        "rental",
+        "tenure",
+        "housing",
+        "húsaleiga",
+        "leigu",
+        "CPI",
+        "consumer price index"
+      ],
+      "broader": [
+        "housing",
+        "prices"
+      ],
+      "clarification": "Rent may refer to rental prices, a rent price index, housing expenditure or tenancy status; confirm the intended measure.",
+      "concept": "rent",
+      "search": "rent housing tenure",
+      "terms": [
+        "rent",
+        "rents",
+        "rental prices",
+        "rental housing",
+        "tenants",
+        "renting",
+        "leiga",
+        "leigu",
+        "leigan",
+        "leiguverð",
+        "leiguverði",
+        "leiguhúsnæði",
+        "leigjendur",
+        "leigjenda",
+        "húsaleiga",
+        "húsaleigu",
+        "leigja",
+        "leigir",
+        "leigði",
+        "leigðu",
+        "að leigja",
+        "rent a flat",
+        "rent an apartment"
+      ],
+      "tables": []
+    },
+    {
+      "id": "housing_costs",
+      "role": "topic",
+      "aliases": [
+        "housing costs",
+        "housing expenses",
+        "mortgage payments",
+        "housing burden",
+        "mortgage burden",
+        "húsnæðiskostnaður",
+        "húsnæðiskostnað",
+        "húsnæðiskostnaði",
+        "greiðslubyrði",
+        "greiðslubyrðar",
+        "afborganir",
+        "afborganir lána",
+        "húsnæðislán",
+        "húsnæðislána"
+      ],
+      "search_terms": "housing costs payment income ratio",
+      "table_paths": [
+        "Samfelag/lifskjor",
+        "Efnahagur/visitolur"
+      ],
+      "table_phrases": [
+        "housing",
+        "payment",
+        "debt",
+        "húsnæði",
+        "greiðslu"
+      ],
+      "broader": [
+        "housing",
+        "debts"
+      ],
+      "concept": "housing costs",
+      "search": "housing costs payment income ratio",
+      "terms": [
+        "housing costs",
+        "housing expenses",
+        "mortgage payments",
+        "housing burden",
+        "mortgage burden",
+        "húsnæðiskostnaður",
+        "húsnæðiskostnað",
+        "húsnæðiskostnaði",
+        "greiðslubyrði",
+        "greiðslubyrðar",
+        "afborganir",
+        "afborganir lána",
+        "húsnæðislán",
+        "húsnæðislána"
+      ],
+      "tables": [
+        "LFI03305",
+        "SKU01001"
+      ]
+    },
+    {
+      "id": "construction",
+      "role": "topic",
+      "aliases": [
+        "construction",
+        "house building",
+        "new dwellings",
+        "building permits",
+        "built homes",
+        "byggingar",
+        "bygginga",
+        "byggingum",
+        "byggingastarfsemi",
+        "íbúðabyggingar",
+        "nýjar íbúðir",
+        "nýbyggingar",
+        "byggingarleyfi"
+      ],
+      "search_terms": "residential buildings dwellings construction",
+      "table_paths": [
+        "Atvinnuvegir/idnadur",
+        "Efnahagur/visitolur"
+      ],
+      "broader": [
+        "housing"
+      ],
+      "concept": "construction",
+      "search": "residential buildings dwellings construction",
+      "terms": [
+        "construction",
+        "house building",
+        "new dwellings",
+        "building permits",
+        "built homes",
+        "byggingar",
+        "bygginga",
+        "byggingum",
+        "byggingastarfsemi",
+        "íbúðabyggingar",
+        "nýjar íbúðir",
+        "nýbyggingar",
+        "byggingarleyfi"
+      ],
+      "tables": []
+    },
+    {
+      "id": "homelessness",
+      "role": "topic",
+      "aliases": [
+        "homeless",
+        "homelessness",
+        "without a home",
+        "heimilislaus",
+        "heimilislausir",
+        "heimilislausra",
+        "heimilisleysi",
+        "húsnæðisleysi",
+        "húsnæðishrakningar",
+        "húsnæðishraki"
+      ],
+      "search_terms": "homelessness",
+      "table_phrases": [
+        "homelessness",
+        "heimilislausir"
+      ],
+      "broader": [
+        "housing"
+      ],
+      "concept": "homelessness",
+      "search": "homelessness",
+      "terms": [
+        "homeless",
+        "homelessness",
+        "without a home",
+        "heimilislaus",
+        "heimilislausir",
+        "heimilislausra",
+        "heimilisleysi",
+        "húsnæðisleysi",
+        "húsnæðishrakningar",
+        "húsnæðishraki"
+      ],
+      "tables": [
+        "CEN1513"
+      ]
+    },
+    {
+      "id": "participation",
+      "role": "topic",
+      "aliases": [
+        "labour force participation",
+        "labor force participation",
+        "activity rate",
+        "participation rate",
+        "atvinnuþátttaka",
+        "atvinnuþátttöku",
+        "atvinnuþátttakan",
+        "þátttaka á vinnumarkaði"
+      ],
+      "search_terms": "activity rate labour force",
+      "table_paths": [
+        "Samfelag/vinnumarkadur"
+      ],
+      "broader": [
+        "employment"
+      ],
+      "concept": "participation",
+      "search": "activity rate labour force",
+      "terms": [
+        "labour force participation",
+        "labor force participation",
+        "activity rate",
+        "participation rate",
+        "atvinnuþátttaka",
+        "atvinnuþátttöku",
+        "atvinnuþátttakan",
+        "þátttaka á vinnumarkaði"
+      ],
+      "tables": []
+    },
+    {
+      "id": "vacancies",
+      "role": "topic",
+      "aliases": [
+        "job vacancies",
+        "vacancies",
+        "vacant jobs",
+        "vacant positions",
+        "unfilled jobs",
+        "staff shortage",
+        "laus störf",
+        "lausra starfa",
+        "mönnunarvandi",
+        "skortur á starfsfólki",
+        "mannaflaskortur"
+      ],
+      "search_terms": "vacant positions",
+      "table_paths": [
+        "Samfelag/vinnumarkadur"
+      ],
+      "table_phrases": [
+        "vacant",
+        "laus"
+      ],
+      "broader": [
+        "employment"
+      ],
+      "concept": "vacancies",
+      "search": "vacant positions",
+      "terms": [
+        "job vacancies",
+        "vacancies",
+        "vacant jobs",
+        "vacant positions",
+        "unfilled jobs",
+        "staff shortage",
+        "laus störf",
+        "lausra starfa",
+        "mönnunarvandi",
+        "skortur á starfsfólki",
+        "mannaflaskortur"
+      ],
+      "tables": [
+        "JVS00001"
+      ]
+    },
+    {
+      "id": "working_hours",
+      "role": "topic",
+      "aliases": [
+        "working hours",
+        "hours worked",
+        "work hours",
+        "overtime",
+        "part time work",
+        "full time work",
+        "vinnutími",
+        "vinnutíma",
+        "vinnustundir",
+        "vinnustunda",
+        "vinnustundum",
+        "yfirvinna",
+        "yfirvinnu",
+        "hlutastörf",
+        "fullt starf"
+      ],
+      "search_terms": "hours worked working hours",
+      "table_paths": [
+        "Samfelag/vinnumarkadur",
+        "Efnahagur/vinnumagnogframleidni"
+      ],
+      "broader": [
+        "employment"
+      ],
+      "concept": "working hours",
+      "search": "hours worked working hours",
+      "terms": [
+        "working hours",
+        "hours worked",
+        "work hours",
+        "overtime",
+        "part time work",
+        "full time work",
+        "vinnutími",
+        "vinnutíma",
+        "vinnustundir",
+        "vinnustunda",
+        "vinnustundum",
+        "yfirvinna",
+        "yfirvinnu",
+        "hlutastörf",
+        "fullt starf"
+      ],
+      "tables": [
+        "THJ11001",
+        "THJ11002"
+      ]
+    },
+    {
+      "id": "productivity",
+      "role": "topic",
+      "aliases": [
+        "productivity",
+        "labour productivity",
+        "labor productivity",
+        "framleiðni",
+        "framleiðnin",
+        "framleiðni vinnuafls",
+        "vinnuaflsframleiðni"
+      ],
+      "search_terms": "labour productivity",
+      "table_paths": [
+        "Efnahagur/vinnumagnogframleidni"
+      ],
+      "broader": [
+        "economy"
+      ],
+      "concept": "productivity",
+      "search": "labour productivity",
+      "terms": [
+        "productivity",
+        "labour productivity",
+        "labor productivity",
+        "framleiðni",
+        "framleiðnin",
+        "framleiðni vinnuafls",
+        "vinnuaflsframleiðni"
+      ],
+      "tables": []
+    },
+    {
+      "id": "preschool",
+      "role": "topic",
+      "aliases": [
+        "preschool",
+        "pre school",
+        "kindergarten",
+        "nursery school",
+        "daycare",
+        "leikskóli",
+        "leikskólar",
+        "leikskóla",
+        "leikskólum",
+        "leikskólabörn",
+        "leikskólastig"
+      ],
+      "search_terms": "pre primary schools children",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "table_phrases": [
+        "pre primary",
+        "preschool",
+        "leikskól"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "preschool",
+      "search": "pre primary schools children",
+      "terms": [
+        "preschool",
+        "pre school",
+        "kindergarten",
+        "nursery school",
+        "daycare",
+        "leikskóli",
+        "leikskólar",
+        "leikskóla",
+        "leikskólum",
+        "leikskólabörn",
+        "leikskólastig"
+      ],
+      "tables": []
+    },
+    {
+      "id": "primary_school",
+      "role": "topic",
+      "aliases": [
+        "primary school",
+        "compulsory school",
+        "elementary school",
+        "grunnskóli",
+        "grunnskólar",
+        "grunnskóla",
+        "grunnskólum",
+        "grunnskólanemendur",
+        "grunnskólastig"
+      ],
+      "search_terms": "compulsory schools pupils",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "table_phrases": [
+        "compulsory",
+        "primary school",
+        "grunnskól"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "compulsory schools",
+      "search": "compulsory schools pupils",
+      "terms": [
+        "primary school",
+        "compulsory school",
+        "elementary school",
+        "grunnskóli",
+        "grunnskólar",
+        "grunnskóla",
+        "grunnskólum",
+        "grunnskólanemendur",
+        "grunnskólastig",
+        "pupil",
+        "school",
+        "student",
+        "nemend",
+        "grunnskol",
+        "skol"
+      ],
+      "tables": []
+    },
+    {
+      "id": "secondary_school",
+      "role": "topic",
+      "aliases": [
+        "secondary school",
+        "upper secondary",
+        "high school",
+        "framhaldsskóli",
+        "framhaldsskólar",
+        "framhaldsskóla",
+        "framhaldsskólum",
+        "menntaskóli",
+        "framhaldsskólanemar"
+      ],
+      "search_terms": "upper secondary students",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "table_phrases": [
+        "secondary",
+        "framhaldsskól"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "secondary school",
+      "search": "upper secondary students",
+      "terms": [
+        "secondary school",
+        "upper secondary",
+        "high school",
+        "framhaldsskóli",
+        "framhaldsskólar",
+        "framhaldsskóla",
+        "framhaldsskólum",
+        "menntaskóli",
+        "framhaldsskólanemar"
+      ],
+      "tables": []
+    },
+    {
+      "id": "university",
+      "role": "topic",
+      "aliases": [
+        "university",
+        "universities",
+        "higher education",
+        "tertiary education",
+        "college",
+        "háskóli",
+        "háskólar",
+        "háskóla",
+        "háskólum",
+        "háskólanám",
+        "háskólastig"
+      ],
+      "search_terms": "tertiary students university",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "table_phrases": [
+        "tertiary",
+        "university",
+        "háskól"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "university",
+      "search": "tertiary students university",
+      "terms": [
+        "university",
+        "universities",
+        "higher education",
+        "tertiary education",
+        "college",
+        "háskóli",
+        "háskólar",
+        "háskóla",
+        "háskólum",
+        "háskólanám",
+        "háskólastig"
+      ],
+      "tables": []
+    },
+    {
+      "id": "graduations",
+      "role": "topic",
+      "aliases": [
+        "graduation",
+        "graduations",
+        "graduates",
+        "graduated",
+        "degrees awarded",
+        "útskrift",
+        "útskriftir",
+        "útskrifaðir",
+        "útskrifuðust",
+        "brautskráningar",
+        "brautskráðir",
+        "prófgráður",
+        "háskólagráður"
+      ],
+      "search_terms": "graduated students graduations",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "table_phrases": [
+        "graduat",
+        "graduates",
+        "graduations",
+        "graduated",
+        "brautskrá"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "graduations",
+      "search": "graduated students graduations",
+      "terms": [
+        "graduation",
+        "graduations",
+        "graduates",
+        "graduated",
+        "degrees awarded",
+        "útskrift",
+        "útskriftir",
+        "útskrifaðir",
+        "útskrifuðust",
+        "brautskráningar",
+        "brautskráðir",
+        "prófgráður",
+        "háskólagráður"
+      ],
+      "tables": [
+        "SKO04201",
+        "SKO03202"
+      ]
+    },
+    {
+      "id": "dropout",
+      "role": "topic",
+      "aliases": [
+        "dropout",
+        "drop out",
+        "dropped out",
+        "school leaving",
+        "completion rate",
+        "brottfall",
+        "brottfalls",
+        "brottfalli",
+        "hætta í skóla",
+        "luku námi",
+        "námslok"
+      ],
+      "search_terms": "dropout completion rate",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "table_phrases": [
+        "dropout",
+        "completion",
+        "retention",
+        "brottfall"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "dropout",
+      "search": "dropout completion rate",
+      "terms": [
+        "dropout",
+        "drop out",
+        "dropped out",
+        "school leaving",
+        "completion rate",
+        "brottfall",
+        "brottfalls",
+        "brottfalli",
+        "hætta í skóla",
+        "luku námi",
+        "námslok"
+      ],
+      "tables": [
+        "SKO03223",
+        "SKO03224"
+      ]
+    },
+    {
+      "id": "health",
+      "role": "topic",
+      "aliases": [
+        "health",
+        "healthy",
+        "health status",
+        "heilsa",
+        "heilsu",
+        "heilbrigði",
+        "heilbrigðis",
+        "heilsufar",
+        "heilsufari",
+        "heilsufars"
+      ],
+      "search_terms": "health",
+      "table_paths": [
+        "Samfelag/heilbrigdismal"
+      ],
+      "concept": "health",
+      "search": "health",
+      "terms": [
+        "health",
+        "healthy",
+        "health status",
+        "heilsa",
+        "heilsu",
+        "heilbrigði",
+        "heilbrigðis",
+        "heilsufar",
+        "heilsufari",
+        "heilsufars"
+      ],
+      "tables": []
+    },
+    {
+      "id": "healthcare",
+      "role": "topic",
+      "aliases": [
+        "healthcare",
+        "health care",
+        "medical care",
+        "health services",
+        "doctor",
+        "doctors",
+        "GP",
+        "heilbrigðisþjónusta",
+        "heilbrigðisþjónustu",
+        "læknir",
+        "læknar",
+        "lækna",
+        "læknisþjónusta",
+        "heilsugæsla",
+        "heilsugæslu",
+        "læknisheimsóknir"
+      ],
+      "search_terms": "health services consultations",
+      "table_paths": [
+        "Samfelag/heilbrigdismal"
+      ],
+      "broader": [
+        "health"
+      ],
+      "concept": "healthcare",
+      "search": "health services consultations",
+      "terms": [
+        "healthcare",
+        "health care",
+        "medical care",
+        "health services",
+        "doctor",
+        "doctors",
+        "GP",
+        "heilbrigðisþjónusta",
+        "heilbrigðisþjónustu",
+        "læknir",
+        "læknar",
+        "lækna",
+        "læknisþjónusta",
+        "heilsugæsla",
+        "heilsugæslu",
+        "læknisheimsóknir"
+      ],
+      "tables": []
+    },
+    {
+      "id": "hospitals",
+      "role": "topic",
+      "aliases": [
+        "hospital",
+        "hospitals",
+        "hospital beds",
+        "hospital stay",
+        "sjúkrahús",
+        "sjúkrahúsa",
+        "sjúkrahúsum",
+        "spítali",
+        "spítalar",
+        "spítala",
+        "sjúkrarúm",
+        "legudagar"
+      ],
+      "search_terms": "hospital beds discharges",
+      "table_paths": [
+        "Samfelag/heilbrigdismal"
+      ],
+      "table_phrases": [
+        "hospital",
+        "sjúkrahús",
+        "legudagar"
+      ],
+      "broader": [
+        "healthcare",
+        "health"
+      ],
+      "concept": "hospitals",
+      "search": "hospital beds discharges",
+      "terms": [
+        "hospital",
+        "hospitals",
+        "hospital beds",
+        "hospital stay",
+        "sjúkrahús",
+        "sjúkrahúsa",
+        "sjúkrahúsum",
+        "spítali",
+        "spítalar",
+        "spítala",
+        "sjúkrarúm",
+        "legudagar"
+      ],
+      "tables": [
+        "HEI04103"
+      ]
+    },
+    {
+      "id": "mental_health",
+      "role": "topic",
+      "aliases": [
+        "mental health",
+        "depression",
+        "depressed",
+        "depressive symptoms",
+        "geðheilsa",
+        "geðheilsu",
+        "geðheilbrigði",
+        "þunglyndi",
+        "þunglyndis",
+        "þunglyndiseinkenni"
+      ],
+      "search_terms": "depressive symptoms",
+      "table_paths": [
+        "Samfelag/heilbrigdismal"
+      ],
+      "table_phrases": [
+        "depressive",
+        "mental",
+        "þunglyndi"
+      ],
+      "broader": [
+        "health"
+      ],
+      "concept": "mental health",
+      "search": "depressive symptoms",
+      "terms": [
+        "mental health",
+        "depression",
+        "depressed",
+        "depressive symptoms",
+        "geðheilsa",
+        "geðheilsu",
+        "geðheilbrigði",
+        "þunglyndi",
+        "þunglyndis",
+        "þunglyndiseinkenni"
+      ],
+      "tables": [
+        "HER02210",
+        "HER02211"
+      ]
+    },
+    {
+      "id": "disability",
+      "role": "topic",
+      "aliases": [
+        "disability",
+        "disabled",
+        "disabled people",
+        "disabilities",
+        "functional limitations",
+        "fötlun",
+        "fötlunar",
+        "fötlunina",
+        "fatlaðir",
+        "fatlaðra",
+        "fatlað fólk",
+        "örorka",
+        "örorku",
+        "öryrkjar",
+        "öryrkja"
+      ],
+      "search_terms": "disability limitations support",
+      "table_paths": [
+        "Samfelag/felagsmal",
+        "Samfelag/heilbrigdismal"
+      ],
+      "broader": [
+        "health",
+        "social_benefits"
+      ],
+      "concept": "disability",
+      "search": "disability limitations support",
+      "terms": [
+        "disability",
+        "disabled",
+        "disabled people",
+        "disabilities",
+        "functional limitations",
+        "fötlun",
+        "fötlunar",
+        "fötlunina",
+        "fatlaðir",
+        "fatlaðra",
+        "fatlað fólk",
+        "örorka",
+        "örorku",
+        "öryrkjar",
+        "öryrkja"
+      ],
+      "tables": []
+    },
+    {
+      "id": "elderly_care",
+      "role": "topic",
+      "aliases": [
+        "elderly care",
+        "nursing homes",
+        "retirement homes",
+        "care homes",
+        "home help",
+        "hjúkrunarheimili",
+        "hjúkrunarheimila",
+        "hjúkrunarheimilum",
+        "elliheimili",
+        "dvalarheimili",
+        "heimaþjónusta",
+        "heimaþjónustu",
+        "öldrunarþjónusta"
+      ],
+      "search_terms": "retirement nursing homes elderly",
+      "table_paths": [
+        "Samfelag/felagsmal"
+      ],
+      "broader": [
+        "healthcare"
+      ],
+      "concept": "elderly care",
+      "search": "retirement nursing homes elderly",
+      "terms": [
+        "elderly care",
+        "nursing homes",
+        "retirement homes",
+        "care homes",
+        "home help",
+        "hjúkrunarheimili",
+        "hjúkrunarheimila",
+        "hjúkrunarheimilum",
+        "elliheimili",
+        "dvalarheimili",
+        "heimaþjónusta",
+        "heimaþjónustu",
+        "öldrunarþjónusta"
+      ],
+      "tables": [
+        "HEI03000",
+        "HEI03004"
+      ]
+    },
+    {
+      "id": "smoking",
+      "role": "topic",
+      "aliases": [
+        "smoking",
+        "smokers",
+        "tobacco",
+        "cigarettes",
+        "reykja",
+        "reykingar",
+        "reykinga",
+        "reykingum",
+        "reykingafólk",
+        "tóbak",
+        "tóbaksnotkun",
+        "sígarettur",
+        "smoke",
+        "smokes",
+        "smoked",
+        "reykir",
+        "reyktu",
+        "reykt"
+      ],
+      "search_terms": "smoking tobacco",
+      "table_paths": [
+        "Samfelag/heilbrigdismal"
+      ],
+      "table_phrases": [
+        "smoking",
+        "tobacco",
+        "reyking"
+      ],
+      "broader": [
+        "health"
+      ],
+      "concept": "smoking",
+      "search": "smoking tobacco",
+      "terms": [
+        "smoking",
+        "smokers",
+        "tobacco",
+        "cigarettes",
+        "reykja",
+        "reykingar",
+        "reykinga",
+        "reykingum",
+        "reykingafólk",
+        "tóbak",
+        "tóbaksnotkun",
+        "sígarettur",
+        "smoke",
+        "smokes",
+        "smoked",
+        "reykir",
+        "reyktu",
+        "reykt"
+      ],
+      "tables": [
+        "HER01210",
+        "HER01211"
+      ]
+    },
+    {
+      "id": "alcohol",
+      "role": "topic",
+      "aliases": [
+        "alcohol",
+        "drinking",
+        "binge drinking",
+        "alcohol consumption",
+        "áfengi",
+        "áfengis",
+        "áfengisneysla",
+        "áfengisneyslu",
+        "drykkja",
+        "drykkju",
+        "ölvun"
+      ],
+      "search_terms": "alcohol consumption",
+      "table_paths": [
+        "Samfelag/heilbrigdismal"
+      ],
+      "table_phrases": [
+        "alcohol",
+        "drinking",
+        "áfengi"
+      ],
+      "broader": [
+        "health"
+      ],
+      "concept": "alcohol",
+      "search": "alcohol consumption",
+      "terms": [
+        "alcohol",
+        "drinking",
+        "binge drinking",
+        "alcohol consumption",
+        "áfengi",
+        "áfengis",
+        "áfengisneysla",
+        "áfengisneyslu",
+        "drykkja",
+        "drykkju",
+        "ölvun"
+      ],
+      "tables": [
+        "HEI07202"
+      ]
+    },
+    {
+      "id": "cancer",
+      "role": "topic",
+      "aliases": [
+        "cancer",
+        "cancer cases",
+        "krabbamein",
+        "krabbameina",
+        "krabbameinum",
+        "krabbameinstilfelli"
+      ],
+      "search_terms": "cancer",
+      "table_paths": [
+        "Samfelag/heilbrigdismal"
+      ],
+      "table_phrases": [
+        "cancer",
+        "krabbamein"
+      ],
+      "broader": [
+        "health"
+      ],
+      "concept": "cancer",
+      "search": "cancer",
+      "terms": [
+        "cancer",
+        "cancer cases",
+        "krabbamein",
+        "krabbameina",
+        "krabbameinum",
+        "krabbameinstilfelli"
+      ],
+      "tables": []
+    },
+    {
+      "id": "accidents",
+      "role": "topic",
+      "aliases": [
+        "accidents",
+        "injuries",
+        "injury",
+        "slys",
+        "slysa",
+        "slysum",
+        "slysatíðni",
+        "slasaðir",
+        "slösuðust"
+      ],
+      "search_terms": "accidents",
+      "table_phrases": [
+        "accidents",
+        "injuries",
+        "slys"
+      ],
+      "broader": [
+        "health"
+      ],
+      "concept": "accidents",
+      "search": "accidents",
+      "terms": [
+        "accidents",
+        "injuries",
+        "injury",
+        "slys",
+        "slysa",
+        "slysum",
+        "slysatíðni",
+        "slasaðir",
+        "slösuðust"
+      ],
+      "tables": []
+    },
+    {
+      "id": "economy",
+      "role": "topic",
+      "aliases": [
+        "economy",
+        "economic conditions",
+        "economic situation",
+        "macroeconomy",
+        "efnahagur",
+        "efnahags",
+        "efnahagsmál",
+        "efnahagslíf",
+        "efnahagsástand",
+        "þjóðarbúið",
+        "þjóðarbúskapur"
+      ],
+      "search_terms": "gross domestic product national accounts",
+      "table_paths": [
+        "Efnahagur"
+      ],
+      "clarification": "The economy is broad: distinguish production, prices, employment, trade and public finances.",
+      "concept": "economy",
+      "search": "gross domestic product national accounts",
+      "terms": [
+        "economy",
+        "economic conditions",
+        "economic situation",
+        "macroeconomy",
+        "efnahagur",
+        "efnahags",
+        "efnahagsmál",
+        "efnahagslíf",
+        "efnahagsástand",
+        "þjóðarbúið",
+        "þjóðarbúskapur"
+      ],
+      "tables": []
+    },
+    {
+      "id": "economic_forecast",
+      "role": "topic",
+      "aliases": [
+        "economic forecast",
+        "economic outlook",
+        "GDP forecast",
+        "þjóðhagsspá",
+        "þjóðhagsspár",
+        "hagspá",
+        "hagspár",
+        "efnahagsspá"
+      ],
+      "search_terms": "economic forecast",
+      "table_paths": [
+        "Efnahagur/thjodhagsspa"
+      ],
+      "broader": [
+        "economy"
+      ],
+      "concept": "economic forecast",
+      "search": "economic forecast",
+      "terms": [
+        "economic forecast",
+        "economic outlook",
+        "GDP forecast",
+        "þjóðhagsspá",
+        "þjóðhagsspár",
+        "hagspá",
+        "hagspár",
+        "efnahagsspá"
+      ],
+      "tables": []
+    },
+    {
+      "id": "prices",
+      "role": "topic",
+      "aliases": [
+        "prices",
+        "price level",
+        "price index",
+        "price indices",
+        "expensive",
+        "cheaper",
+        "costlier",
+        "verð",
+        "verði",
+        "verðlag",
+        "verðlagi",
+        "verðlags",
+        "dýrt",
+        "dýrir",
+        "dýrara",
+        "ódýrt",
+        "ódýrara",
+        "verðvísitala"
+      ],
+      "search_terms": "price index",
+      "table_paths": [
+        "Efnahagur/visitolur"
+      ],
+      "clarification": "General prices need a product or market; do not assume CPI, house prices or a particular index.",
+      "concept": "prices",
+      "search": "price index",
+      "terms": [
+        "prices",
+        "price level",
+        "price index",
+        "price indices",
+        "expensive",
+        "cheaper",
+        "costlier",
+        "verð",
+        "verði",
+        "verðlag",
+        "verðlagi",
+        "verðlags",
+        "dýrt",
+        "dýrir",
+        "dýrara",
+        "ódýrt",
+        "ódýrara",
+        "verðvísitala"
+      ],
+      "tables": []
+    },
+    {
+      "id": "producer_prices",
+      "role": "topic",
+      "aliases": [
+        "producer prices",
+        "producer price index",
+        "factory prices",
+        "framleiðsluverð",
+        "framleiðsluverðsvísitala",
+        "vísitala framleiðsluverðs",
+        "vísitölu framleiðsluverðs"
+      ],
+      "search_terms": "producer price index",
+      "table_paths": [
+        "Efnahagur/visitolur"
+      ],
+      "table_phrases": [
+        "producer",
+        "framleiðsluverð"
+      ],
+      "broader": [
+        "prices"
+      ],
+      "concept": "producer prices",
+      "search": "producer price index",
+      "terms": [
+        "producer prices",
+        "producer price index",
+        "factory prices",
+        "framleiðsluverð",
+        "framleiðsluverðsvísitala",
+        "vísitala framleiðsluverðs",
+        "vísitölu framleiðsluverðs"
+      ],
+      "tables": []
+    },
+    {
+      "id": "construction_prices",
+      "role": "topic",
+      "aliases": [
+        "building cost index",
+        "construction cost index",
+        "construction prices",
+        "byggingarvísitala",
+        "byggingarvísitölu",
+        "vísitala byggingarkostnaðar",
+        "byggingarkostnaður",
+        "byggingarkostnaði"
+      ],
+      "search_terms": "building cost index",
+      "table_paths": [
+        "Efnahagur/visitolur"
+      ],
+      "table_phrases": [
+        "building",
+        "construction",
+        "byggingar"
+      ],
+      "broader": [
+        "prices",
+        "construction"
+      ],
+      "concept": "building cost index",
+      "search": "building cost index",
+      "terms": [
+        "building cost index",
+        "construction cost index",
+        "construction prices",
+        "byggingarvísitala",
+        "byggingarvísitölu",
+        "vísitala byggingarkostnaðar",
+        "byggingarkostnaður",
+        "byggingarkostnaði",
+        "building cost",
+        "construction cost",
+        "byggingarvisital",
+        "byggingarkostn"
+      ],
+      "tables": []
+    },
+    {
+      "id": "household_consumption",
+      "role": "topic",
+      "aliases": [
+        "household spending",
+        "household expenditure",
+        "household consumption",
+        "consumer spending",
+        "consumption expenditure",
+        "einkaneysla",
+        "einkaneyslu",
+        "neysla heimila",
+        "útgjöld heimila",
+        "neysluútgjöld",
+        "heimilisútgjöld"
+      ],
+      "search_terms": "household consumption expenditure",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar",
+        "Efnahagur/visitolur"
+      ],
+      "table_phrases": [
+        "household",
+        "consumption",
+        "expenditure",
+        "einkaneysla"
+      ],
+      "broader": [
+        "economy"
+      ],
+      "concept": "household consumption",
+      "search": "household consumption expenditure",
+      "terms": [
+        "household spending",
+        "household expenditure",
+        "household consumption",
+        "consumer spending",
+        "consumption expenditure",
+        "einkaneysla",
+        "einkaneyslu",
+        "neysla heimila",
+        "útgjöld heimila",
+        "neysluútgjöld",
+        "heimilisútgjöld"
+      ],
+      "tables": []
+    },
+    {
+      "id": "savings",
+      "role": "topic",
+      "aliases": [
+        "savings",
+        "saving rate",
+        "household savings",
+        "sparnaður",
+        "sparnað",
+        "sparnaði",
+        "sparnaðar",
+        "sparnaðarhlutfall"
+      ],
+      "search_terms": "savings",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar"
+      ],
+      "table_phrases": [
+        "savings",
+        "saving",
+        "sparnaður"
+      ],
+      "broader": [
+        "financial_wellbeing",
+        "economy"
+      ],
+      "concept": "savings",
+      "search": "savings",
+      "terms": [
+        "savings",
+        "saving rate",
+        "household savings",
+        "sparnaður",
+        "sparnað",
+        "sparnaði",
+        "sparnaðar",
+        "sparnaðarhlutfall"
+      ],
+      "tables": []
+    },
+    {
+      "id": "public_finances",
+      "role": "topic",
+      "aliases": [
+        "public finances",
+        "government finances",
+        "public sector finances",
+        "ríkisfjármál",
+        "opinber fjármál",
+        "fjármál ríkisins",
+        "fjármál hins opinbera"
+      ],
+      "search_terms": "general government revenue expenditure",
+      "table_paths": [
+        "Efnahagur/fjaropinber"
+      ],
+      "broader": [
+        "economy"
+      ],
+      "concept": "government finances",
+      "search": "general government revenue expenditure",
+      "terms": [
+        "public finances",
+        "government finances",
+        "public sector finances",
+        "ríkisfjármál",
+        "opinber fjármál",
+        "fjármál ríkisins",
+        "fjármál hins opinbera",
+        "government",
+        "deficit",
+        "public finance",
+        "revenue",
+        "hid opinbera",
+        "halli",
+        "rikissjod"
+      ],
+      "tables": []
+    },
+    {
+      "id": "taxes",
+      "role": "topic",
+      "aliases": [
+        "tax",
+        "taxes",
+        "taxation",
+        "tax revenue",
+        "income tax",
+        "VAT",
+        "skattur",
+        "skattar",
+        "skatta",
+        "sköttum",
+        "skatttekjur",
+        "skatttekna",
+        "tekjuskattur",
+        "virðisaukaskattur",
+        "VSK"
+      ],
+      "search_terms": "taxes revenue",
+      "table_paths": [
+        "Efnahagur/fjaropinber",
+        "Umhverfi/6_graenahagkerfid"
+      ],
+      "broader": [
+        "public_finances"
+      ],
+      "concept": "taxes",
+      "search": "taxes revenue",
+      "terms": [
+        "tax",
+        "taxes",
+        "taxation",
+        "tax revenue",
+        "income tax",
+        "VAT",
+        "skattur",
+        "skattar",
+        "skatta",
+        "sköttum",
+        "skatttekjur",
+        "skatttekna",
+        "tekjuskattur",
+        "virðisaukaskattur",
+        "VSK"
+      ],
+      "tables": []
+    },
+    {
+      "id": "government_spending",
+      "role": "topic",
+      "aliases": [
+        "government spending",
+        "public spending",
+        "government expenditure",
+        "public expenditure",
+        "ríkisútgjöld",
+        "ríkisútgjalda",
+        "útgjöld ríkisins",
+        "opinber útgjöld",
+        "samneysla",
+        "samneyslu"
+      ],
+      "search_terms": "government expenditure",
+      "table_paths": [
+        "Efnahagur/fjaropinber",
+        "Efnahagur/thjodhagsreikningar"
+      ],
+      "broader": [
+        "public_finances"
+      ],
+      "concept": "government spending",
+      "search": "government expenditure",
+      "terms": [
+        "government spending",
+        "public spending",
+        "government expenditure",
+        "public expenditure",
+        "ríkisútgjöld",
+        "ríkisútgjalda",
+        "útgjöld ríkisins",
+        "opinber útgjöld",
+        "samneysla",
+        "samneyslu"
+      ],
+      "tables": []
+    },
+    {
+      "id": "government_revenue",
+      "role": "topic",
+      "aliases": [
+        "government revenue",
+        "public revenue",
+        "state revenue",
+        "tekjur ríkisins",
+        "tekjur hins opinbera",
+        "ríkistekjur"
+      ],
+      "search_terms": "government revenue",
+      "table_paths": [
+        "Efnahagur/fjaropinber"
+      ],
+      "broader": [
+        "public_finances",
+        "income"
+      ],
+      "concept": "government revenue",
+      "search": "government revenue",
+      "terms": [
+        "government revenue",
+        "public revenue",
+        "state revenue",
+        "tekjur ríkisins",
+        "tekjur hins opinbera",
+        "ríkistekjur"
+      ],
+      "tables": []
+    },
+    {
+      "id": "government_debt",
+      "role": "topic",
+      "aliases": [
+        "government debt",
+        "public debt",
+        "national debt",
+        "ríkisskuldir",
+        "ríkisskulda",
+        "skuldir ríkisins",
+        "skuldir hins opinbera",
+        "skuldir sveitarfélaga"
+      ],
+      "search_terms": "government debt liabilities",
+      "table_paths": [
+        "Efnahagur/fjaropinber"
+      ],
+      "broader": [
+        "public_finances",
+        "debts"
+      ],
+      "concept": "government debt",
+      "search": "government debt liabilities",
+      "terms": [
+        "government debt",
+        "public debt",
+        "national debt",
+        "ríkisskuldir",
+        "ríkisskulda",
+        "skuldir ríkisins",
+        "skuldir hins opinbera",
+        "skuldir sveitarfélaga"
+      ],
+      "tables": []
+    },
+    {
+      "id": "trade",
+      "role": "topic",
+      "aliases": [
+        "foreign trade",
+        "international trade",
+        "trade balance",
+        "balance of trade",
+        "trade deficit",
+        "trade surplus",
+        "utanríkisverslun",
+        "utanríkisviðskipti",
+        "vöruskipti",
+        "vöruskiptajöfnuður",
+        "viðskiptajöfnuður",
+        "viðskiptaafgangur",
+        "viðskiptahalli"
+      ],
+      "search_terms": "exports imports balance trade",
+      "table_paths": [
+        "Efnahagur/utanrikisverslun"
+      ],
+      "broader": [
+        "economy"
+      ],
+      "concept": "trade in goods",
+      "search": "exports imports balance trade",
+      "terms": [
+        "foreign trade",
+        "international trade",
+        "trade balance",
+        "balance of trade",
+        "trade deficit",
+        "trade surplus",
+        "utanríkisverslun",
+        "utanríkisviðskipti",
+        "vöruskipti",
+        "vöruskiptajöfnuður",
+        "viðskiptajöfnuður",
+        "viðskiptaafgangur",
+        "viðskiptahalli",
+        "export",
+        "import",
+        "utflutn",
+        "innflutn",
+        "voruvidskipt",
+        "voruskipt"
+      ],
+      "tables": [
+        "UTA06001"
+      ]
+    },
+    {
+      "id": "businesses",
+      "role": "topic",
+      "aliases": [
+        "businesses",
+        "business",
+        "companies",
+        "company",
+        "enterprises",
+        "firms",
+        "fyrirtæki",
+        "fyrirtækja",
+        "fyrirtækjum",
+        "fyrirtækin",
+        "rekstur fyrirtækja",
+        "atvinnulíf"
+      ],
+      "search_terms": "enterprises companies",
+      "table_paths": [
+        "Atvinnuvegir/fyrirtaeki"
+      ],
+      "concept": "businesses",
+      "search": "enterprises companies",
+      "terms": [
+        "businesses",
+        "business",
+        "companies",
+        "company",
+        "enterprises",
+        "firms",
+        "fyrirtæki",
+        "fyrirtækja",
+        "fyrirtækjum",
+        "fyrirtækin",
+        "rekstur fyrirtækja",
+        "atvinnulíf"
+      ],
+      "tables": []
+    },
+    {
+      "id": "business_finances",
+      "role": "topic",
+      "aliases": [
+        "business income",
+        "company income",
+        "business profits",
+        "company profits",
+        "profit",
+        "profits",
+        "profitability",
+        "turnover",
+        "revenue of companies",
+        "tekjur fyrirtækja",
+        "hagnaður",
+        "hagnað",
+        "hagnaði",
+        "hagnaðar",
+        "arðsemi",
+        "velta",
+        "veltu",
+        "rekstrartekjur",
+        "rekstrarafkoma",
+        "afkoma fyrirtækja",
+        "rekstrarreikningur"
+      ],
+      "search_terms": "income statement balance sheet operating",
+      "table_paths": [
+        "Atvinnuvegir/fyrirtaeki"
+      ],
+      "broader": [
+        "businesses",
+        "income",
+        "financial_wellbeing"
+      ],
+      "concept": "business finances",
+      "search": "income statement balance sheet operating",
+      "terms": [
+        "business income",
+        "company income",
+        "business profits",
+        "company profits",
+        "profit",
+        "profits",
+        "profitability",
+        "turnover",
+        "revenue of companies",
+        "tekjur fyrirtækja",
+        "hagnaður",
+        "hagnað",
+        "hagnaði",
+        "hagnaðar",
+        "arðsemi",
+        "velta",
+        "veltu",
+        "rekstrartekjur",
+        "rekstrarafkoma",
+        "afkoma fyrirtækja",
+        "rekstrarreikningur"
+      ],
+      "tables": [
+        "FYR08010",
+        "FYR08011"
+      ]
+    },
+    {
+      "id": "business_demography",
+      "role": "topic",
+      "aliases": [
+        "new businesses",
+        "new companies",
+        "startups",
+        "start ups",
+        "business births",
+        "company births",
+        "business deaths",
+        "business survival",
+        "ný fyrirtæki",
+        "nýskráningar fyrirtækja",
+        "stofnun fyrirtækja",
+        "nýstofnuð fyrirtæki",
+        "lífslíkur fyrirtækja"
+      ],
+      "search_terms": "births survivals enterprises",
+      "table_paths": [
+        "Atvinnuvegir/fyrirtaeki"
+      ],
+      "broader": [
+        "businesses",
+        "births",
+        "deaths"
+      ],
+      "concept": "business demography",
+      "search": "births survivals enterprises",
+      "terms": [
+        "new businesses",
+        "new companies",
+        "startups",
+        "start ups",
+        "business births",
+        "company births",
+        "business deaths",
+        "business survival",
+        "ný fyrirtæki",
+        "nýskráningar fyrirtækja",
+        "stofnun fyrirtækja",
+        "nýstofnuð fyrirtæki",
+        "lífslíkur fyrirtækja"
+      ],
+      "tables": []
+    },
+    {
+      "id": "bankruptcies",
+      "role": "topic",
+      "aliases": [
+        "bankruptcy",
+        "bankruptcies",
+        "insolvency",
+        "bankrupt",
+        "gjaldþrot",
+        "gjaldþrota",
+        "gjaldþrotum",
+        "gjaldþrotaskipti"
+      ],
+      "search_terms": "bankruptcies",
+      "table_paths": [
+        "Atvinnuvegir/fyrirtaeki"
+      ],
+      "table_phrases": [
+        "bankrupt",
+        "gjaldþrot"
+      ],
+      "broader": [
+        "businesses"
+      ],
+      "concept": "bankruptcies",
+      "search": "bankruptcies",
+      "terms": [
+        "bankruptcy",
+        "bankruptcies",
+        "insolvency",
+        "bankrupt",
+        "gjaldþrot",
+        "gjaldþrota",
+        "gjaldþrotum",
+        "gjaldþrotaskipti"
+      ],
+      "tables": [
+        "FYR03001",
+        "FYR03010"
+      ]
+    },
+    {
+      "id": "tourism",
+      "role": "topic",
+      "aliases": [
+        "tourism",
+        "tourists",
+        "tourist",
+        "visitors",
+        "visitor",
+        "travel industry",
+        "ferðamenn",
+        "ferðamanna",
+        "ferðamönnum",
+        "ferðafólk",
+        "ferðafólks",
+        "ferðaþjónusta",
+        "ferðaþjónustu",
+        "ferðalög",
+        "ferðalaga"
+      ],
+      "search_terms": "tourism passengers overnight stays",
+      "table_paths": [
+        "Atvinnuvegir/ferdathjonusta",
+        "Efnahagur/thjodhagsreikningar/ferdathjonustureikningar"
+      ],
+      "clarification": "Tourists may mean arrivals, airport passengers, accommodation guests or overnight stays; these are not interchangeable.",
+      "concept": "tourism",
+      "search": "tourism passengers overnight stays",
+      "terms": [
+        "tourism",
+        "tourists",
+        "tourist",
+        "visitors",
+        "visitor",
+        "travel industry",
+        "ferðamenn",
+        "ferðamanna",
+        "ferðamönnum",
+        "ferðafólk",
+        "ferðafólks",
+        "ferðaþjónusta",
+        "ferðaþjónustu",
+        "ferðalög",
+        "ferðalaga"
+      ],
+      "tables": []
+    },
+    {
+      "id": "hotels",
+      "role": "topic",
+      "aliases": [
+        "hotels",
+        "hotel",
+        "guesthouses",
+        "guesthouse",
+        "hótel",
+        "hótelum",
+        "hótela",
+        "gistiheimili",
+        "gistiheimilum",
+        "gistihús",
+        "gistihúsum"
+      ],
+      "search_terms": "hotels guesthouses",
+      "table_paths": [
+        "Atvinnuvegir/ferdathjonusta/gisting"
+      ],
+      "broader": [
+        "tourism"
+      ],
+      "concept": "hotels",
+      "search": "hotels guesthouses",
+      "terms": [
+        "hotels",
+        "hotel",
+        "guesthouses",
+        "guesthouse",
+        "hótel",
+        "hótelum",
+        "hótela",
+        "gistiheimili",
+        "gistiheimilum",
+        "gistihús",
+        "gistihúsum"
+      ],
+      "tables": []
+    },
+    {
+      "id": "cruise_ships",
+      "role": "topic",
+      "aliases": [
+        "cruise ships",
+        "cruise passengers",
+        "cruise liners",
+        "luxury liners",
+        "skemmtiferðaskip",
+        "skemmtiferðaskipa",
+        "skemmtiferðaskipum",
+        "farþegar skemmtiferðaskipa"
+      ],
+      "search_terms": "passengers luxury liners",
+      "table_paths": [
+        "Atvinnuvegir/ferdathjonusta"
+      ],
+      "table_phrases": [
+        "liners",
+        "cruise",
+        "skemmtiferðaskip"
+      ],
+      "broader": [
+        "passengers",
+        "tourism"
+      ],
+      "concept": "cruise ships",
+      "search": "passengers luxury liners",
+      "terms": [
+        "cruise ships",
+        "cruise passengers",
+        "cruise liners",
+        "luxury liners",
+        "skemmtiferðaskip",
+        "skemmtiferðaskipa",
+        "skemmtiferðaskipum",
+        "farþegar skemmtiferðaskipa"
+      ],
+      "tables": []
+    },
+    {
+      "id": "transport",
+      "role": "topic",
+      "aliases": [
+        "transport",
+        "transportation",
+        "traffic",
+        "samgöngur",
+        "samgangna",
+        "samgöngum",
+        "umferð",
+        "umferðar",
+        "umferðinni"
+      ],
+      "search_terms": "transport vehicles",
+      "table_paths": [
+        "Umhverfi/5_samgongur",
+        "Atvinnuvegir/ferdathjonusta"
+      ],
+      "concept": "transport",
+      "search": "transport vehicles",
+      "terms": [
+        "transport",
+        "transportation",
+        "traffic",
+        "samgöngur",
+        "samgangna",
+        "samgöngum",
+        "umferð",
+        "umferðar",
+        "umferðinni"
+      ],
+      "tables": []
+    },
+    {
+      "id": "public_transport",
+      "role": "topic",
+      "aliases": [
+        "public transport",
+        "buses",
+        "bus passengers",
+        "bus travel",
+        "almenningssamgöngur",
+        "almenningssamgangna",
+        "strætó",
+        "strætisvagnar",
+        "strætisvagna",
+        "strætófarþegar"
+      ],
+      "search_terms": "public transport",
+      "table_paths": [
+        "Umhverfi/5_samgongur"
+      ],
+      "broader": [
+        "transport"
+      ],
+      "concept": "public transport",
+      "search": "public transport",
+      "terms": [
+        "public transport",
+        "buses",
+        "bus passengers",
+        "bus travel",
+        "almenningssamgöngur",
+        "almenningssamgangna",
+        "strætó",
+        "strætisvagnar",
+        "strætisvagna",
+        "strætófarþegar"
+      ],
+      "tables": [
+        "SAM03401",
+        "SAM03403"
+      ]
+    },
+    {
+      "id": "agriculture",
+      "role": "topic",
+      "aliases": [
+        "agriculture",
+        "farming",
+        "farms",
+        "farmers",
+        "landbúnaður",
+        "landbúnað",
+        "landbúnaði",
+        "búskapur",
+        "búskap",
+        "bændur",
+        "bænda",
+        "býli",
+        "býla",
+        "bújarðir"
+      ],
+      "search_terms": "agricultural farms",
+      "table_paths": [
+        "Atvinnuvegir/landbunadur"
+      ],
+      "concept": "agriculture",
+      "search": "agricultural farms",
+      "terms": [
+        "agriculture",
+        "farming",
+        "farms",
+        "farmers",
+        "landbúnaður",
+        "landbúnað",
+        "landbúnaði",
+        "búskapur",
+        "búskap",
+        "bændur",
+        "bænda",
+        "býli",
+        "býla",
+        "bújarðir"
+      ],
+      "tables": []
+    },
+    {
+      "id": "livestock",
+      "role": "topic",
+      "aliases": [
+        "livestock",
+        "sheep",
+        "cattle",
+        "horses",
+        "pigs",
+        "chickens",
+        "farm animals",
+        "búfé",
+        "búfjár",
+        "sauðfé",
+        "sauðfjár",
+        "kindur",
+        "kinda",
+        "nautgripir",
+        "nautgripa",
+        "kýr",
+        "kúa",
+        "hross",
+        "hrossa",
+        "svín",
+        "alifuglar"
+      ],
+      "search_terms": "livestock sheep cattle horses",
+      "table_paths": [
+        "Atvinnuvegir/landbunadur"
+      ],
+      "broader": [
+        "agriculture"
+      ],
+      "concept": "livestock",
+      "search": "livestock sheep cattle horses",
+      "terms": [
+        "livestock",
+        "sheep",
+        "cattle",
+        "horses",
+        "pigs",
+        "chickens",
+        "farm animals",
+        "búfé",
+        "búfjár",
+        "sauðfé",
+        "sauðfjár",
+        "kindur",
+        "kinda",
+        "nautgripir",
+        "nautgripa",
+        "kýr",
+        "kúa",
+        "hross",
+        "hrossa",
+        "svín",
+        "alifuglar"
+      ],
+      "tables": []
+    },
+    {
+      "id": "fisheries",
+      "role": "topic",
+      "aliases": [
+        "fishing",
+        "fisheries",
+        "fishery",
+        "seafood industry",
+        "fishing industry",
+        "sjávarútvegur",
+        "sjávarútveg",
+        "sjávarútvegi",
+        "fiskveiðar",
+        "fiskveiða",
+        "fiskveiðum",
+        "fiskvinnsla",
+        "fiskvinnslu",
+        "sjávarafurðir",
+        "sjávarafurða"
+      ],
+      "search_terms": "fishing fish marine products",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur",
+        "Efnahagur/utanrikisverslun"
+      ],
+      "note": "Marine products can be a trade category; exports/imports in the same clause refine this broad sector.",
+      "concept": "fisheries",
+      "search": "fishing fish marine products",
+      "terms": [
+        "fishing",
+        "fisheries",
+        "fishery",
+        "seafood industry",
+        "fishing industry",
+        "sjávarútvegur",
+        "sjávarútveg",
+        "sjávarútvegi",
+        "fiskveiðar",
+        "fiskveiða",
+        "fiskveiðum",
+        "fiskvinnsla",
+        "fiskvinnslu",
+        "sjávarafurðir",
+        "sjávarafurða"
+      ],
+      "tables": []
+    },
+    {
+      "id": "fish_catch",
+      "role": "topic",
+      "aliases": [
+        "fish catch",
+        "fish catches",
+        "catch volume",
+        "landings",
+        "landed catch",
+        "afli",
+        "afla",
+        "aflinn",
+        "fiskafli",
+        "fiskafla",
+        "löndun",
+        "lönnuðum afla",
+        "lönduðum afla",
+        "veiddur fiskur",
+        "veitt magn"
+      ],
+      "search_terms": "catch landings",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur"
+      ],
+      "table_phrases": [
+        "catch",
+        "landings",
+        "afli",
+        "afla"
+      ],
+      "broader": [
+        "fisheries"
+      ],
+      "concept": "fish catch",
+      "search": "catch landings",
+      "terms": [
+        "fish catch",
+        "fish catches",
+        "catch volume",
+        "landings",
+        "landed catch",
+        "afli",
+        "afla",
+        "aflinn",
+        "fiskafli",
+        "fiskafla",
+        "löndun",
+        "lönnuðum afla",
+        "lönduðum afla",
+        "veiddur fiskur",
+        "veitt magn",
+        "fish",
+        "catch",
+        "landed",
+        "fiskur",
+        "fiski"
+      ],
+      "tables": [
+        "SJA01101"
+      ]
+    },
+    {
+      "id": "aquaculture",
+      "role": "topic",
+      "aliases": [
+        "aquaculture",
+        "fish farming",
+        "salmon farming",
+        "farmed fish",
+        "fiskeldi",
+        "fiskeldis",
+        "laxeldi",
+        "laxeldis",
+        "eldisfiskur",
+        "eldisfisk"
+      ],
+      "search_terms": "aquaculture",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur"
+      ],
+      "table_phrases": [
+        "aquaculture",
+        "farming",
+        "fiskeldi"
+      ],
+      "broader": [
+        "fisheries"
+      ],
+      "concept": "aquaculture",
+      "search": "aquaculture",
+      "terms": [
+        "aquaculture",
+        "fish farming",
+        "salmon farming",
+        "farmed fish",
+        "fiskeldi",
+        "fiskeldis",
+        "laxeldi",
+        "laxeldis",
+        "eldisfiskur",
+        "eldisfisk"
+      ],
+      "tables": [
+        "SJA07001"
+      ]
+    },
+    {
+      "id": "manufacturing",
+      "role": "topic",
+      "aliases": [
+        "manufacturing",
+        "industrial production",
+        "industry production",
+        "iðnaður",
+        "iðnað",
+        "iðnaði",
+        "iðnaðarframleiðsla",
+        "verksmiðjur",
+        "verksmiðja"
+      ],
+      "search_terms": "industrial manufacturing production",
+      "table_paths": [
+        "Atvinnuvegir/idnadur",
+        "Efnahagur/thjodhagsreikningar"
+      ],
+      "concept": "manufacturing",
+      "search": "industrial manufacturing production",
+      "terms": [
+        "manufacturing",
+        "industrial production",
+        "industry production",
+        "iðnaður",
+        "iðnað",
+        "iðnaði",
+        "iðnaðarframleiðsla",
+        "verksmiðjur",
+        "verksmiðja"
+      ],
+      "tables": []
+    },
+    {
+      "id": "elections",
+      "role": "topic",
+      "aliases": [
+        "election",
+        "elections",
+        "votes",
+        "voting",
+        "electoral",
+        "kosningar",
+        "kosninga",
+        "kosningum",
+        "kosningarnar",
+        "atkvæði",
+        "atkvæða",
+        "atkvæðum",
+        "kjör",
+        "kjöri"
+      ],
+      "search_terms": "elections votes",
+      "table_paths": [
+        "Ibuar/kosningar"
+      ],
+      "concept": "elections",
+      "search": "elections votes",
+      "terms": [
+        "election",
+        "elections",
+        "votes",
+        "voting",
+        "electoral",
+        "kosningar",
+        "kosninga",
+        "kosningum",
+        "kosningarnar",
+        "atkvæði",
+        "atkvæða",
+        "atkvæðum",
+        "kjör",
+        "kjöri",
+        "vote",
+        "kosning",
+        "atkvaed",
+        "kjosend"
+      ],
+      "tables": []
+    },
+    {
+      "id": "presidential_elections",
+      "role": "topic",
+      "aliases": [
+        "presidential election",
+        "presidential elections",
+        "presidential votes",
+        "forsetakjör",
+        "forsetakjöri",
+        "forsetakjörinu",
+        "forsetakosningar",
+        "forsetakosningum"
+      ],
+      "search_terms": "presidential election votes",
+      "table_paths": [
+        "Ibuar/kosningar"
+      ],
+      "table_phrases": [
+        "presidential",
+        "forseta"
+      ],
+      "broader": [
+        "elections"
+      ],
+      "concept": "presidential elections",
+      "search": "presidential election votes",
+      "terms": [
+        "presidential election",
+        "presidential elections",
+        "presidential votes",
+        "forsetakjör",
+        "forsetakjöri",
+        "forsetakjörinu",
+        "forsetakosningar",
+        "forsetakosningum"
+      ],
+      "tables": []
+    },
+    {
+      "id": "parliamentary_elections",
+      "role": "topic",
+      "aliases": [
+        "parliamentary election",
+        "general election",
+        "general elections",
+        "Althingi election",
+        "althingi elections",
+        "alþingiskosningar",
+        "alþingiskosningum",
+        "alþingiskjöri"
+      ],
+      "search_terms": "general elections Althingi",
+      "table_paths": [
+        "Ibuar/kosningar"
+      ],
+      "table_phrases": [
+        "general election",
+        "general elections",
+        "Althingi",
+        "alþingi"
+      ],
+      "broader": [
+        "elections"
+      ],
+      "concept": "parliamentary elections",
+      "search": "general elections Althingi",
+      "terms": [
+        "parliamentary election",
+        "general election",
+        "general elections",
+        "Althingi election",
+        "althingi elections",
+        "alþingiskosningar",
+        "alþingiskosningum",
+        "alþingiskjöri"
+      ],
+      "tables": []
+    },
+    {
+      "id": "local_elections",
+      "role": "topic",
+      "aliases": [
+        "local elections",
+        "municipal elections",
+        "municipal election",
+        "sveitarstjórnarkosningar",
+        "sveitarstjórnarkosningum",
+        "sveitarstjórnarkjör",
+        "borgarstjórnarkosningar"
+      ],
+      "search_terms": "local government elections",
+      "table_paths": [
+        "Ibuar/kosningar"
+      ],
+      "table_phrases": [
+        "local",
+        "municipal",
+        "sveitarstjórn"
+      ],
+      "broader": [
+        "elections"
+      ],
+      "concept": "local elections",
+      "search": "local government elections",
+      "terms": [
+        "local elections",
+        "municipal elections",
+        "municipal election",
+        "sveitarstjórnarkosningar",
+        "sveitarstjórnarkosningum",
+        "sveitarstjórnarkjör",
+        "borgarstjórnarkosningar"
+      ],
+      "tables": []
+    },
+    {
+      "id": "voter_turnout",
+      "role": "topic",
+      "aliases": [
+        "voter turnout",
+        "voting turnout",
+        "electoral participation",
+        "kjörsókn",
+        "kjörsóknar",
+        "kjörsóknin",
+        "þátttaka í kosningum"
+      ],
+      "search_terms": "participation elections turnout",
+      "table_paths": [
+        "Ibuar/kosningar"
+      ],
+      "broader": [
+        "elections"
+      ],
+      "concept": "voter turnout",
+      "search": "participation elections turnout",
+      "terms": [
+        "voter turnout",
+        "voting turnout",
+        "electoral participation",
+        "kjörsókn",
+        "kjörsóknar",
+        "kjörsóknin",
+        "þátttaka í kosningum"
+      ],
+      "tables": []
+    },
+    {
+      "id": "crime",
+      "role": "topic",
+      "aliases": [
+        "crime",
+        "crimes",
+        "criminal offences",
+        "criminal offenses",
+        "offenses",
+        "offences",
+        "police",
+        "afbrot",
+        "afbrota",
+        "afbrotum",
+        "glæpir",
+        "glæpa",
+        "glæpum",
+        "lögbrot",
+        "lögregla",
+        "lögreglu",
+        "brotatíðni"
+      ],
+      "search_terms": "offenses police criminal",
+      "table_paths": [
+        "Samfelag/domsmal"
+      ],
+      "concept": "crime",
+      "search": "offenses police criminal",
+      "terms": [
+        "crime",
+        "crimes",
+        "criminal offences",
+        "criminal offenses",
+        "offenses",
+        "offences",
+        "police",
+        "afbrot",
+        "afbrota",
+        "afbrotum",
+        "glæpir",
+        "glæpa",
+        "glæpum",
+        "lögbrot",
+        "lögregla",
+        "lögreglu",
+        "brotatíðni"
+      ],
+      "tables": []
+    },
+    {
+      "id": "prisons",
+      "role": "topic",
+      "aliases": [
+        "prison",
+        "prisons",
+        "prisoners",
+        "incarceration",
+        "inmates",
+        "fangelsi",
+        "fangelsa",
+        "fangar",
+        "fanga",
+        "föngum",
+        "afplánun",
+        "fangelsisvist"
+      ],
+      "search_terms": "prisoners prison",
+      "table_paths": [
+        "Samfelag/domsmal"
+      ],
+      "broader": [
+        "crime"
+      ],
+      "concept": "prisons",
+      "search": "prisoners prison",
+      "terms": [
+        "prison",
+        "prisons",
+        "prisoners",
+        "incarceration",
+        "inmates",
+        "fangelsi",
+        "fangelsa",
+        "fangar",
+        "fanga",
+        "föngum",
+        "afplánun",
+        "fangelsisvist"
+      ],
+      "tables": []
+    },
+    {
+      "id": "culture",
+      "role": "topic",
+      "aliases": [
+        "culture",
+        "cultural activities",
+        "arts",
+        "menning",
+        "menningar",
+        "menningu",
+        "menningarlíf",
+        "listir",
+        "lista",
+        "listum"
+      ],
+      "search_terms": "culture arts",
+      "table_paths": [
+        "Samfelag/menning"
+      ],
+      "concept": "culture",
+      "search": "culture arts",
+      "terms": [
+        "culture",
+        "cultural activities",
+        "arts",
+        "menning",
+        "menningar",
+        "menningu",
+        "menningarlíf",
+        "listir",
+        "lista",
+        "listum"
+      ],
+      "tables": []
+    },
+    {
+      "id": "theatre",
+      "role": "topic",
+      "aliases": [
+        "theatre",
+        "theater",
+        "theatres",
+        "theaters",
+        "theatre attendance",
+        "leiklist",
+        "leikhús",
+        "leikhúsa",
+        "leikhúsum",
+        "leiksýningar",
+        "leiksýninga"
+      ],
+      "search_terms": "theatres performances spectators",
+      "table_paths": [
+        "Samfelag/menning"
+      ],
+      "table_phrases": [
+        "theatre",
+        "theatres",
+        "theater",
+        "leikhús"
+      ],
+      "broader": [
+        "culture"
+      ],
+      "concept": "theatre",
+      "search": "theatres performances spectators",
+      "terms": [
+        "theatre",
+        "theater",
+        "theatres",
+        "theaters",
+        "theatre attendance",
+        "leiklist",
+        "leikhús",
+        "leikhúsa",
+        "leikhúsum",
+        "leiksýningar",
+        "leiksýninga"
+      ],
+      "tables": [
+        "MEN05101",
+        "MEN05102"
+      ]
+    },
+    {
+      "id": "cinema",
+      "role": "topic",
+      "aliases": [
+        "cinema",
+        "cinemas",
+        "movies",
+        "movie attendance",
+        "films",
+        "bíó",
+        "kvikmyndir",
+        "kvikmynda",
+        "kvikmyndahús",
+        "bíógestir"
+      ],
+      "search_terms": "cinemas films admissions",
+      "table_paths": [
+        "Samfelag/menning",
+        "Samfelag/midlun"
+      ],
+      "table_phrases": [
+        "cinema",
+        "cinemas",
+        "films",
+        "kvikmynda"
+      ],
+      "broader": [
+        "culture"
+      ],
+      "concept": "cinema",
+      "search": "cinemas films admissions",
+      "terms": [
+        "cinema",
+        "cinemas",
+        "movies",
+        "movie attendance",
+        "films",
+        "bíó",
+        "kvikmyndir",
+        "kvikmynda",
+        "kvikmyndahús",
+        "bíógestir"
+      ],
+      "tables": []
+    },
+    {
+      "id": "libraries",
+      "role": "topic",
+      "aliases": [
+        "library",
+        "libraries",
+        "library loans",
+        "bókasafn",
+        "bókasöfn",
+        "bókasafna",
+        "bókasöfnum",
+        "bókaútlán"
+      ],
+      "search_terms": "libraries loans",
+      "table_paths": [
+        "Samfelag/menning"
+      ],
+      "table_phrases": [
+        "libraries",
+        "library",
+        "bókasöfn"
+      ],
+      "broader": [
+        "culture"
+      ],
+      "concept": "libraries",
+      "search": "libraries loans",
+      "terms": [
+        "library",
+        "libraries",
+        "library loans",
+        "bókasafn",
+        "bókasöfn",
+        "bókasafna",
+        "bókasöfnum",
+        "bókaútlán"
+      ],
+      "tables": [
+        "MEN01206"
+      ]
+    },
+    {
+      "id": "books",
+      "role": "topic",
+      "aliases": [
+        "books",
+        "book publishing",
+        "published books",
+        "bækur",
+        "bóka",
+        "bókum",
+        "bókaútgáfa",
+        "útgefnar bækur"
+      ],
+      "search_terms": "books publishing",
+      "table_paths": [
+        "Samfelag/menning",
+        "Samfelag/midlun"
+      ],
+      "table_phrases": [
+        "books",
+        "book",
+        "bækur",
+        "bóka"
+      ],
+      "broader": [
+        "culture"
+      ],
+      "concept": "books",
+      "search": "books publishing",
+      "terms": [
+        "books",
+        "book publishing",
+        "published books",
+        "bækur",
+        "bóka",
+        "bókum",
+        "bókaútgáfa",
+        "útgefnar bækur"
+      ],
+      "tables": []
+    },
+    {
+      "id": "media",
+      "role": "topic",
+      "aliases": [
+        "media",
+        "news media",
+        "mass media",
+        "fjölmiðlar",
+        "fjölmiðla",
+        "fjölmiðlum",
+        "fjölmiðlun",
+        "fjölmiðlunar"
+      ],
+      "search_terms": "media",
+      "table_paths": [
+        "Samfelag/midlun"
+      ],
+      "concept": "media",
+      "search": "media",
+      "terms": [
+        "media",
+        "news media",
+        "mass media",
+        "fjölmiðlar",
+        "fjölmiðla",
+        "fjölmiðlum",
+        "fjölmiðlun",
+        "fjölmiðlunar"
+      ],
+      "tables": []
+    },
+    {
+      "id": "advertising",
+      "role": "topic",
+      "aliases": [
+        "advertising",
+        "advertisements",
+        "advertising revenue",
+        "ad revenue",
+        "auglýsingar",
+        "auglýsinga",
+        "auglýsingum",
+        "auglýsingatekjur",
+        "auglýsingamarkaður"
+      ],
+      "search_terms": "advertising revenue expenditure",
+      "table_paths": [
+        "Samfelag/midlun"
+      ],
+      "table_phrases": [
+        "advertising",
+        "advertsing",
+        "auglýsinga"
+      ],
+      "broader": [
+        "media"
+      ],
+      "concept": "advertising",
+      "search": "advertising revenue expenditure",
+      "terms": [
+        "advertising",
+        "advertisements",
+        "advertising revenue",
+        "ad revenue",
+        "auglýsingar",
+        "auglýsinga",
+        "auglýsingum",
+        "auglýsingatekjur",
+        "auglýsingamarkaður"
+      ],
+      "tables": [
+        "MID00101"
+      ]
+    },
+    {
+      "id": "broadcasting",
+      "role": "topic",
+      "aliases": [
+        "television",
+        "TV",
+        "radio",
+        "broadcasting",
+        "sjónvarp",
+        "sjónvarps",
+        "sjónvarpi",
+        "útvarp",
+        "útvarps",
+        "útvarpi",
+        "ljósvakamiðlar"
+      ],
+      "search_terms": "television radio broadcasting",
+      "table_paths": [
+        "Samfelag/midlun"
+      ],
+      "broader": [
+        "media"
+      ],
+      "concept": "broadcasting",
+      "search": "television radio broadcasting",
+      "terms": [
+        "television",
+        "TV",
+        "radio",
+        "broadcasting",
+        "sjónvarp",
+        "sjónvarps",
+        "sjónvarpi",
+        "útvarp",
+        "útvarps",
+        "útvarpi",
+        "ljósvakamiðlar"
+      ],
+      "tables": []
+    },
+    {
+      "id": "technology",
+      "role": "topic",
+      "aliases": [
+        "technology",
+        "digital technology",
+        "science",
+        "research",
+        "innovation",
+        "tækni",
+        "tæknin",
+        "vísindi",
+        "vísinda",
+        "rannsóknir",
+        "rannsókna",
+        "nýsköpun",
+        "nýsköpunar",
+        "rannsóknir og þróun"
+      ],
+      "search_terms": "research technology innovation",
+      "table_paths": [
+        "Atvinnuvegir/visinditaekni"
+      ],
+      "concept": "technology",
+      "search": "research technology innovation",
+      "terms": [
+        "technology",
+        "digital technology",
+        "science",
+        "research",
+        "innovation",
+        "tækni",
+        "tæknin",
+        "vísindi",
+        "vísinda",
+        "rannsóknir",
+        "rannsókna",
+        "nýsköpun",
+        "nýsköpunar",
+        "rannsóknir og þróun"
+      ],
+      "tables": []
+    },
+    {
+      "id": "internet",
+      "role": "topic",
+      "aliases": [
+        "internet",
+        "online access",
+        "broadband",
+        "internet users",
+        "internet access",
+        "netið",
+        "netsins",
+        "internetið",
+        "netnotkun",
+        "netnotendur",
+        "nettenging",
+        "nettengingar",
+        "breiðband",
+        "breiðbands",
+        "internettenging"
+      ],
+      "search_terms": "internet broadband",
+      "table_paths": [
+        "Atvinnuvegir/visinditaekni"
+      ],
+      "broader": [
+        "technology"
+      ],
+      "concept": "internet",
+      "search": "internet broadband",
+      "terms": [
+        "internet",
+        "online access",
+        "broadband",
+        "internet users",
+        "internet access",
+        "netið",
+        "netsins",
+        "internetið",
+        "netnotkun",
+        "netnotendur",
+        "nettenging",
+        "nettengingar",
+        "breiðband",
+        "breiðbands",
+        "internettenging"
+      ],
+      "tables": []
+    },
+    {
+      "id": "research_development",
+      "role": "topic",
+      "aliases": [
+        "research and development",
+        "R and D",
+        "R&D",
+        "R D",
+        "research spending",
+        "rannsóknir og þróunarstarf",
+        "rannsóknarútgjöld",
+        "þróunarstarf",
+        "rannsóknastarfsemi"
+      ],
+      "search_terms": "research development expenditure",
+      "table_paths": [
+        "Atvinnuvegir/visinditaekni"
+      ],
+      "broader": [
+        "technology"
+      ],
+      "concept": "research development",
+      "search": "research development expenditure",
+      "terms": [
+        "research and development",
+        "R and D",
+        "R&D",
+        "R D",
+        "research spending",
+        "rannsóknir og þróunarstarf",
+        "rannsóknarútgjöld",
+        "þróunarstarf",
+        "rannsóknastarfsemi"
+      ],
+      "tables": []
+    },
+    {
+      "id": "environment",
+      "role": "topic",
+      "aliases": [
+        "environment",
+        "environmental",
+        "umhverfi",
+        "umhverfis",
+        "umhverfismál",
+        "umhverfismála"
+      ],
+      "search_terms": "environment",
+      "table_paths": [
+        "Umhverfi"
+      ],
+      "concept": "environment",
+      "search": "environment",
+      "terms": [
+        "environment",
+        "environmental",
+        "umhverfi",
+        "umhverfis",
+        "umhverfismál",
+        "umhverfismála"
+      ],
+      "tables": []
+    },
+    {
+      "id": "emissions",
+      "role": "topic",
+      "aliases": [
+        "emissions",
+        "greenhouse gases",
+        "greenhouse gas",
+        "carbon emissions",
+        "carbon footprint",
+        "CO2",
+        "carbon dioxide",
+        "climate emissions",
+        "losun",
+        "losunar",
+        "losuninni",
+        "gróðurhúsalofttegundir",
+        "gróðurhúsalofttegunda",
+        "kolefnislosun",
+        "kolefnisspor",
+        "koltvísýringur",
+        "koltvísýrings",
+        "útblástur",
+        "útblæstri",
+        "greenhouse gas emissions",
+        "emission",
+        "loftslagslosun",
+        "losum",
+        "losa",
+        "losar",
+        "loftmengun"
+      ],
+      "search_terms": "greenhouse gasses emissions CO2",
+      "table_paths": [
+        "Umhverfi/2_losunlofttegunda"
+      ],
+      "broader": [
+        "environment",
+        "pollution"
+      ],
+      "concept": "emissions",
+      "search": "greenhouse gasses emissions CO2",
+      "terms": [
+        "emissions",
+        "greenhouse gases",
+        "greenhouse gas",
+        "carbon emissions",
+        "carbon footprint",
+        "CO2",
+        "carbon dioxide",
+        "climate emissions",
+        "losun",
+        "losunar",
+        "losuninni",
+        "gróðurhúsalofttegundir",
+        "gróðurhúsalofttegunda",
+        "kolefnislosun",
+        "kolefnisspor",
+        "koltvísýringur",
+        "koltvísýrings",
+        "útblástur",
+        "útblæstri",
+        "greenhouse gas emissions",
+        "emission",
+        "loftslagslosun",
+        "losum",
+        "losa",
+        "losar",
+        "loftmengun"
+      ],
+      "tables": [
+        "UMH31101",
+        "UMH31107"
+      ]
+    },
+    {
+      "id": "waste",
+      "role": "topic",
+      "aliases": [
+        "waste",
+        "rubbish",
+        "garbage",
+        "recycling",
+        "recycled",
+        "landfill",
+        "municipal waste",
+        "úrgangur",
+        "úrgangs",
+        "úrgangi",
+        "sorp",
+        "sorps",
+        "sorpi",
+        "endurvinnsla",
+        "endurvinnslu",
+        "urðun",
+        "urðunar"
+      ],
+      "search_terms": "waste recycling",
+      "table_paths": [
+        "Umhverfi/3_efnisflaedi"
+      ],
+      "broader": [
+        "environment"
+      ],
+      "concept": "waste",
+      "search": "waste recycling",
+      "terms": [
+        "waste",
+        "rubbish",
+        "garbage",
+        "recycling",
+        "recycled",
+        "landfill",
+        "municipal waste",
+        "úrgangur",
+        "úrgangs",
+        "úrgangi",
+        "sorp",
+        "sorps",
+        "sorpi",
+        "endurvinnsla",
+        "endurvinnslu",
+        "urðun",
+        "urðunar"
+      ],
+      "tables": [
+        "UMH04105"
+      ]
+    },
+    {
+      "id": "energy",
+      "role": "topic",
+      "aliases": [
+        "energy",
+        "energy consumption",
+        "energy production",
+        "power generation",
+        "orka",
+        "orku",
+        "orkan",
+        "orkunotkun",
+        "orkuframleiðsla",
+        "orkuframleiðslu",
+        "orkumál"
+      ],
+      "search_terms": "energy electricity generation",
+      "table_paths": [
+        "Umhverfi/4_orkumal"
+      ],
+      "broader": [
+        "environment"
+      ],
+      "concept": "energy",
+      "search": "energy electricity generation",
+      "terms": [
+        "energy",
+        "energy consumption",
+        "energy production",
+        "power generation",
+        "orka",
+        "orku",
+        "orkan",
+        "orkunotkun",
+        "orkuframleiðsla",
+        "orkuframleiðslu",
+        "orkumál"
+      ],
+      "tables": []
+    },
+    {
+      "id": "electricity",
+      "role": "topic",
+      "aliases": [
+        "electricity",
+        "electricity generation",
+        "electricity use",
+        "electric power",
+        "rafmagn",
+        "rafmagns",
+        "rafmagni",
+        "raforkuframleiðsla",
+        "raforkunotkun",
+        "raforka",
+        "raforku",
+        "virkjanir",
+        "virkjana"
+      ],
+      "search_terms": "electricity generation",
+      "table_paths": [
+        "Umhverfi/4_orkumal"
+      ],
+      "broader": [
+        "energy",
+        "environment"
+      ],
+      "concept": "electricity",
+      "search": "electricity generation",
+      "terms": [
+        "electricity",
+        "electricity generation",
+        "electricity use",
+        "electric power",
+        "rafmagn",
+        "rafmagns",
+        "rafmagni",
+        "raforkuframleiðsla",
+        "raforkunotkun",
+        "raforka",
+        "raforku",
+        "virkjanir",
+        "virkjana"
+      ],
+      "tables": []
+    },
+    {
+      "id": "energy_prices",
+      "role": "topic",
+      "aliases": [
+        "electricity prices",
+        "electricity price",
+        "energy prices",
+        "power prices",
+        "raforkuverð",
+        "raforkuverði",
+        "rafmagnsverð",
+        "rafmagnsverði",
+        "orkuverð"
+      ],
+      "search_terms": "electricity prices",
+      "table_paths": [
+        "Umhverfi/4_orkumal"
+      ],
+      "table_phrases": [
+        "prices",
+        "verð"
+      ],
+      "broader": [
+        "energy",
+        "electricity",
+        "prices"
+      ],
+      "concept": "energy prices",
+      "search": "electricity prices",
+      "terms": [
+        "electricity prices",
+        "electricity price",
+        "energy prices",
+        "power prices",
+        "raforkuverð",
+        "raforkuverði",
+        "rafmagnsverð",
+        "rafmagnsverði",
+        "orkuverð"
+      ],
+      "tables": [
+        "IDN02303"
+      ]
+    },
+    {
+      "id": "nature",
+      "role": "topic",
+      "aliases": [
+        "nature",
+        "geography",
+        "land area",
+        "protected areas",
+        "national parks",
+        "náttúra",
+        "náttúru",
+        "landafræði",
+        "flatarmál",
+        "friðlýst svæði",
+        "friðlýsing",
+        "þjóðgarðar",
+        "þjóðgarða"
+      ],
+      "search_terms": "geographical nature protection",
+      "table_paths": [
+        "Umhverfi/1_natturufar"
+      ],
+      "broader": [
+        "environment"
+      ],
+      "concept": "nature",
+      "search": "geographical nature protection",
+      "terms": [
+        "nature",
+        "geography",
+        "land area",
+        "protected areas",
+        "national parks",
+        "náttúra",
+        "náttúru",
+        "landafræði",
+        "flatarmál",
+        "friðlýst svæði",
+        "friðlýsing",
+        "þjóðgarðar",
+        "þjóðgarða"
+      ],
+      "tables": []
+    },
+    {
+      "id": "green_economy",
+      "role": "topic",
+      "aliases": [
+        "green economy",
+        "environmental taxes",
+        "environmental goods",
+        "environmental employment",
+        "grænt hagkerfi",
+        "græna hagkerfið",
+        "umhverfisskattar",
+        "umhverfisskatta",
+        "umhverfisgjöld"
+      ],
+      "search_terms": "environmental taxes goods services",
+      "table_paths": [
+        "Umhverfi/6_graenahagkerfid"
+      ],
+      "broader": [
+        "environment",
+        "taxes",
+        "economy"
+      ],
+      "concept": "green economy",
+      "search": "environmental taxes goods services",
+      "terms": [
+        "green economy",
+        "environmental taxes",
+        "environmental goods",
+        "environmental employment",
+        "grænt hagkerfi",
+        "græna hagkerfið",
+        "umhverfisskattar",
+        "umhverfisskatta",
+        "umhverfisgjöld"
+      ],
+      "tables": []
+    },
+    {
+      "id": "older_adults",
+      "role": "group",
+      "aliases": [
+        "older people",
+        "old people",
+        "elderly people",
+        "elderly",
+        "older adults",
+        "senior citizens",
+        "seniors",
+        "old age people",
+        "gamalt fólk",
+        "gamla fólkið",
+        "gamla fólksins",
+        "gamals fólks",
+        "gömlu fólki",
+        "gömlu fólks",
+        "eldra fólk",
+        "eldra fólks",
+        "eldra fólki",
+        "eldri borgarar",
+        "eldri borgara",
+        "eldri borgurum",
+        "eldri einstaklingar",
+        "aldraðir",
+        "aldraðra",
+        "öldruðum",
+        "aldrað fólk",
+        "ellilífeyrisþegar",
+        "ellilífeyrisþega",
+        "aldraða",
+        "aldrað",
+        "gamlingjar",
+        "gamlingja",
+        "gamalmenni",
+        "gamalmenna",
+        "eldri kynslóðin",
+        "eldri kynslóðar"
+      ],
+      "search_terms": "age",
+      "clarification": "Specify the older age group; do not silently assume 65+, 67+ or any other boundary.",
+      "concept": "older adults",
+      "search": "age",
+      "terms": [
+        "older people",
+        "old people",
+        "elderly people",
+        "elderly",
+        "older adults",
+        "senior citizens",
+        "seniors",
+        "old age people",
+        "gamalt fólk",
+        "gamla fólkið",
+        "gamla fólksins",
+        "gamals fólks",
+        "gömlu fólki",
+        "gömlu fólks",
+        "eldra fólk",
+        "eldra fólks",
+        "eldra fólki",
+        "eldri borgarar",
+        "eldri borgara",
+        "eldri borgurum",
+        "eldri einstaklingar",
+        "aldraðir",
+        "aldraðra",
+        "öldruðum",
+        "aldrað fólk",
+        "ellilífeyrisþegar",
+        "ellilífeyrisþega",
+        "aldraða",
+        "aldrað",
+        "gamlingjar",
+        "gamlingja",
+        "gamalmenni",
+        "gamalmenna",
+        "eldri kynslóðin",
+        "eldri kynslóðar"
+      ],
+      "tables": []
+    },
+    {
+      "id": "young_people",
+      "role": "group",
+      "aliases": [
+        "young people",
+        "young adults",
+        "youth",
+        "youths",
+        "teenagers",
+        "adolescents",
+        "ungt fólk",
+        "unga fólkið",
+        "ungs fólks",
+        "ungu fólki",
+        "ungmenni",
+        "ungmenna",
+        "ungmennum",
+        "unglingar",
+        "unglinga",
+        "unglingum",
+        "ungir fullorðnir"
+      ],
+      "search_terms": "age",
+      "clarification": "Specify the young age group; do not invent an age boundary.",
+      "concept": "young people",
+      "search": "age",
+      "terms": [
+        "young people",
+        "young adults",
+        "youth",
+        "youths",
+        "teenagers",
+        "adolescents",
+        "ungt fólk",
+        "unga fólkið",
+        "ungs fólks",
+        "ungu fólki",
+        "ungmenni",
+        "ungmenna",
+        "ungmennum",
+        "unglingar",
+        "unglinga",
+        "unglingum",
+        "ungir fullorðnir"
+      ],
+      "tables": []
+    },
+    {
+      "id": "children",
+      "role": "group",
+      "aliases": [
+        "children",
+        "child",
+        "kids",
+        "börn",
+        "barna",
+        "börnum",
+        "krakkar",
+        "krakka",
+        "krökkum",
+        "smábörn",
+        "smábarna",
+        "ungbörn",
+        "ungbarna"
+      ],
+      "search_terms": "children age",
+      "concept": "children",
+      "search": "children age",
+      "terms": [
+        "children",
+        "child",
+        "kids",
+        "börn",
+        "barna",
+        "börnum",
+        "krakkar",
+        "krakka",
+        "krökkum",
+        "smábörn",
+        "smábarna",
+        "ungbörn",
+        "ungbarna"
+      ],
+      "tables": []
+    },
+    {
+      "id": "immigrants",
+      "role": "group",
+      "aliases": [
+        "immigrants",
+        "immigrant",
+        "immigrant background",
+        "immigrant status",
+        "innflytjendur",
+        "innflytjenda",
+        "innflytjendum",
+        "innflytjendanna",
+        "fólk af erlendum uppruna",
+        "erlendur bakgrunnur"
+      ],
+      "search_terms": "immigrants origin background",
+      "clarification": "Immigrant background, citizenship and country of birth are different classifications.",
+      "concept": "immigrants",
+      "search": "immigrants origin background",
+      "terms": [
+        "immigrants",
+        "immigrant",
+        "immigrant background",
+        "immigrant status",
+        "innflytjendur",
+        "innflytjenda",
+        "innflytjendum",
+        "innflytjendanna",
+        "fólk af erlendum uppruna",
+        "erlendur bakgrunnur",
+        "foreign citizen",
+        "foreign-born",
+        "innflytjend",
+        "erlendir rikisborgar",
+        "uppruni",
+        "bakgrunn"
+      ],
+      "tables": [
+        "MAN43000"
+      ]
+    },
+    {
+      "id": "foreign_citizens",
+      "role": "group",
+      "aliases": [
+        "foreigners",
+        "foreign citizens",
+        "foreign nationals",
+        "foreign citizenship",
+        "útlendingar",
+        "útlendinga",
+        "útlendingum",
+        "erlendir ríkisborgarar",
+        "erlendra ríkisborgara",
+        "erlendu ríkisfangi",
+        "erlent ríkisfang"
+      ],
+      "search_terms": "foreign citizenship",
+      "concept": "foreign citizens",
+      "search": "foreign citizenship",
+      "terms": [
+        "foreigners",
+        "foreign citizens",
+        "foreign nationals",
+        "foreign citizenship",
+        "útlendingar",
+        "útlendinga",
+        "útlendingum",
+        "erlendir ríkisborgarar",
+        "erlendra ríkisborgara",
+        "erlendu ríkisfangi",
+        "erlent ríkisfang"
+      ],
+      "tables": []
+    },
+    {
+      "id": "domestic",
+      "role": "group",
+      "aliases": [
+        "Icelanders",
+        "Icelandic citizens",
+        "Icelandic nationals",
+        "Íslendingar",
+        "Íslendinga",
+        "Íslendingum",
+        "íslenskir ríkisborgarar",
+        "íslenskt ríkisfang",
+        "íslensku ríkisfangi"
+      ],
+      "search_terms": "Icelandic citizenship",
+      "note": "Explicit citizenship only: Iceland as a country is not a citizenship filter.",
+      "concept": "domestic",
+      "search": "Icelandic citizenship",
+      "terms": [
+        "Icelanders",
+        "Icelandic citizens",
+        "Icelandic nationals",
+        "Íslendingar",
+        "Íslendinga",
+        "Íslendingum",
+        "íslenskir ríkisborgarar",
+        "íslenskt ríkisfang",
+        "íslensku ríkisfangi"
+      ],
+      "tables": []
+    },
+    {
+      "id": "single_parents",
+      "role": "group",
+      "aliases": [
+        "single parents",
+        "single parent",
+        "lone parents",
+        "single mothers",
+        "single fathers",
+        "einstæðir foreldrar",
+        "einstæðra foreldra",
+        "einstæð móðir",
+        "einstæðar mæður",
+        "einstæðir feður"
+      ],
+      "search_terms": "single parent children",
+      "concept": "single parents",
+      "search": "single parent children",
+      "terms": [
+        "single parents",
+        "single parent",
+        "lone parents",
+        "single mothers",
+        "single fathers",
+        "einstæðir foreldrar",
+        "einstæðra foreldra",
+        "einstæð móðir",
+        "einstæðar mæður",
+        "einstæðir feður"
+      ],
+      "tables": []
+    },
+    {
+      "id": "couples",
+      "role": "group",
+      "aliases": [
+        "couples",
+        "married people",
+        "cohabiting",
+        "sambúðarfólk",
+        "sambúð",
+        "hjón",
+        "hjóna",
+        "hjónum",
+        "sambúðarfólks"
+      ],
+      "search_terms": "couples family",
+      "concept": "couples",
+      "search": "couples family",
+      "terms": [
+        "couples",
+        "married people",
+        "cohabiting",
+        "sambúðarfólk",
+        "sambúð",
+        "hjón",
+        "hjóna",
+        "hjónum",
+        "sambúðarfólks"
+      ],
+      "tables": []
+    },
+    {
+      "id": "age",
+      "role": "group",
+      "aliases": [
+        "age",
+        "age group",
+        "age groups",
+        "by age",
+        "aldur",
+        "aldri",
+        "aldurs",
+        "aldurshópur",
+        "aldurshópa",
+        "aldurshópum",
+        "aldurshópar",
+        "eftir aldri"
+      ],
+      "search_terms": "age",
+      "concept": "age",
+      "search": "age",
+      "terms": [
+        "age",
+        "age group",
+        "age groups",
+        "by age",
+        "aldur",
+        "aldri",
+        "aldurs",
+        "aldurshópur",
+        "aldurshópa",
+        "aldurshópum",
+        "aldurshópar",
+        "eftir aldri"
+      ],
+      "tables": []
+    },
+    {
+      "id": "mean_age",
+      "role": "topic",
+      "aliases": [
+        "mean age",
+        "average age",
+        "meðalaldur",
+        "meðalaldri",
+        "meðalaldurs",
+        "meðalaldurinn"
+      ],
+      "search_terms": "mean age",
+      "table_phrases": [
+        "mean age",
+        "average age",
+        "meðalaldur",
+        "median age",
+        "age of parents"
+      ],
+      "broader": [
+        "demography"
+      ],
+      "concept": "mean age",
+      "search": "mean age",
+      "terms": [
+        "mean age",
+        "average age",
+        "meðalaldur",
+        "meðalaldri",
+        "meðalaldurs",
+        "meðalaldurinn",
+        "medalaldur"
+      ],
+      "tables": [
+        "MAN00102"
+      ]
+    },
+    {
+      "id": "region",
+      "role": "group",
+      "aliases": [
+        "region",
+        "regions",
+        "regional",
+        "municipality",
+        "municipalities",
+        "by region",
+        "by municipality",
+        "sveitarfélag",
+        "sveitarfélög",
+        "sveitarfélaga",
+        "sveitarfélögum",
+        "landshluti",
+        "landshlutar",
+        "landshluta",
+        "landshlutum",
+        "landsvæði",
+        "póstnúmer",
+        "hverfi"
+      ],
+      "search_terms": "region municipality",
+      "concept": "region",
+      "search": "region municipality",
+      "terms": [
+        "region",
+        "regions",
+        "regional",
+        "municipality",
+        "municipalities",
+        "by region",
+        "by municipality",
+        "sveitarfélag",
+        "sveitarfélög",
+        "sveitarfélaga",
+        "sveitarfélögum",
+        "landshluti",
+        "landshlutar",
+        "landshluta",
+        "landshlutum",
+        "landsvæði",
+        "póstnúmer",
+        "hverfi"
+      ],
+      "tables": []
+    },
+    {
+      "id": "occupation",
+      "role": "group",
+      "aliases": [
+        "occupation",
+        "occupations",
+        "by occupation",
+        "profession",
+        "professions",
+        "starfsstétt",
+        "starfsstéttir",
+        "starfsstétta",
+        "starfsstéttum",
+        "atvinnugrein",
+        "atvinnugreinar",
+        "atvinnugreinum",
+        "starfsgrein"
+      ],
+      "search_terms": "occupation industry",
+      "concept": "occupation",
+      "search": "occupation industry",
+      "terms": [
+        "occupation",
+        "occupations",
+        "by occupation",
+        "profession",
+        "professions",
+        "starfsstétt",
+        "starfsstéttir",
+        "starfsstétta",
+        "starfsstéttum",
+        "atvinnugrein",
+        "atvinnugreinar",
+        "atvinnugreinum",
+        "starfsgrein"
+      ],
+      "tables": []
+    },
+    {
+      "id": "educational_attainment",
+      "role": "group",
+      "aliases": [
+        "educational attainment",
+        "education level",
+        "level of education",
+        "menntunarstig",
+        "menntunarstigi",
+        "menntunarstöðu",
+        "menntunarstaða"
+      ],
+      "search_terms": "education",
+      "concept": "educational attainment",
+      "search": "education",
+      "terms": [
+        "educational attainment",
+        "education level",
+        "level of education",
+        "menntunarstig",
+        "menntunarstigi",
+        "menntunarstöðu",
+        "menntunarstaða"
+      ],
+      "tables": []
+    },
+    {
+      "id": "change",
+      "role": "operation",
+      "aliases": [
+        "change",
+        "changes",
+        "changed",
+        "growth",
+        "increase",
+        "increased",
+        "decrease",
+        "decreased",
+        "grew",
+        "grow",
+        "rise",
+        "rose",
+        "fall",
+        "fell",
+        "breyting",
+        "breytingin",
+        "breytingar",
+        "breyttist",
+        "fjölgaði",
+        "fjölgun",
+        "fjölgar",
+        "fækkaði",
+        "fækkun",
+        "hækkun",
+        "hækkaði",
+        "hækkar",
+        "lækkun",
+        "lækkaði",
+        "lækkar",
+        "vöxtur",
+        "jókst",
+        "minnkaði"
+      ],
+      "search_terms": "",
+      "concept": "change",
+      "search": "",
+      "terms": [
+        "change",
+        "changes",
+        "changed",
+        "growth",
+        "increase",
+        "increased",
+        "decrease",
+        "decreased",
+        "grew",
+        "grow",
+        "rise",
+        "rose",
+        "fall",
+        "fell",
+        "breyting",
+        "breytingin",
+        "breytingar",
+        "breyttist",
+        "fjölgaði",
+        "fjölgun",
+        "fjölgar",
+        "fækkaði",
+        "fækkun",
+        "hækkun",
+        "hækkaði",
+        "hækkar",
+        "lækkun",
+        "lækkaði",
+        "lækkar",
+        "vöxtur",
+        "jókst",
+        "minnkaði"
+      ],
+      "tables": []
+    },
+    {
+      "id": "share",
+      "role": "operation",
+      "aliases": [
+        "share",
+        "percentage",
+        "percent",
+        "proportion",
+        "fraction",
+        "hlutfall",
+        "hlutfallið",
+        "hlutfalli",
+        "prósent",
+        "prósenta",
+        "prósentur",
+        "prósentustig"
+      ],
+      "search_terms": "",
+      "concept": "share",
+      "search": "",
+      "terms": [
+        "share",
+        "percentage",
+        "percent",
+        "proportion",
+        "fraction",
+        "hlutfall",
+        "hlutfallið",
+        "hlutfalli",
+        "prósent",
+        "prósenta",
+        "prósentur",
+        "prósentustig"
+      ],
+      "tables": []
+    },
+    {
+      "id": "average",
+      "role": "operation",
+      "aliases": [
+        "average",
+        "mean",
+        "on average",
+        "meðaltal",
+        "meðaltali",
+        "meðaltals",
+        "að meðaltali"
+      ],
+      "search_terms": "",
+      "concept": "average",
+      "search": "",
+      "terms": [
+        "average",
+        "mean",
+        "on average",
+        "meðaltal",
+        "meðaltali",
+        "meðaltals",
+        "að meðaltali"
+      ],
+      "tables": []
+    },
+    {
+      "id": "median",
+      "role": "operation",
+      "aliases": [
+        "median",
+        "middle value",
+        "miðgildi",
+        "miðgildið",
+        "miðgildis",
+        "miðgildið af"
+      ],
+      "search_terms": "median",
+      "concept": "median",
+      "search": "median",
+      "terms": [
+        "median",
+        "middle value",
+        "miðgildi",
+        "miðgildið",
+        "miðgildis",
+        "miðgildið af"
+      ],
+      "tables": []
+    },
+    {
+      "id": "comparison",
+      "role": "operation",
+      "aliases": [
+        "compare",
+        "compared",
+        "comparison",
+        "versus",
+        "vs",
+        "difference",
+        "gap",
+        "samanburður",
+        "samanburð",
+        "samanborið",
+        "mismunur",
+        "mismun",
+        "munur",
+        "muninn",
+        "munar",
+        "borið saman"
+      ],
+      "search_terms": "",
+      "concept": "comparison",
+      "search": "",
+      "terms": [
+        "compare",
+        "compared",
+        "comparison",
+        "versus",
+        "vs",
+        "difference",
+        "gap",
+        "samanburður",
+        "samanburð",
+        "samanborið",
+        "mismunur",
+        "mismun",
+        "munur",
+        "muninn",
+        "munar",
+        "borið saman"
+      ],
+      "tables": []
+    },
+    {
+      "id": "trend",
+      "role": "operation",
+      "aliases": [
+        "trend",
+        "development over time",
+        "over time",
+        "time series",
+        "historical development",
+        "þróun",
+        "þróunin",
+        "þróast",
+        "yfir tíma",
+        "tímaröð",
+        "tímaraðir",
+        "söguleg þróun"
+      ],
+      "search_terms": "",
+      "concept": "trend",
+      "search": "",
+      "terms": [
+        "trend",
+        "development over time",
+        "over time",
+        "time series",
+        "historical development",
+        "þróun",
+        "þróunin",
+        "þróast",
+        "yfir tíma",
+        "tímaröð",
+        "tímaraðir",
+        "söguleg þróun"
+      ],
+      "tables": []
+    },
+    {
+      "id": "latest",
+      "role": "qualifier",
+      "aliases": [
+        "latest",
+        "current",
+        "currently",
+        "today",
+        "now",
+        "newest",
+        "recent",
+        "núna",
+        "nú",
+        "nýjustu",
+        "nýjasta",
+        "nýjast",
+        "núverandi",
+        "í dag",
+        "síðustu tölur"
+      ],
+      "search_terms": "",
+      "concept": "latest",
+      "search": "",
+      "terms": [
+        "latest",
+        "current",
+        "currently",
+        "today",
+        "now",
+        "newest",
+        "recent",
+        "núna",
+        "nú",
+        "nýjustu",
+        "nýjasta",
+        "nýjast",
+        "núverandi",
+        "í dag",
+        "síðustu tölur"
+      ],
+      "tables": []
+    },
+    {
+      "id": "monthly",
+      "role": "qualifier",
+      "aliases": [
+        "monthly",
+        "per month",
+        "each month",
+        "by month",
+        "mánaðarlega",
+        "á mánuði",
+        "eftir mánuðum",
+        "mánaðartölur",
+        "mánaðartalna"
+      ],
+      "search_terms": "",
+      "concept": "monthly",
+      "search": "",
+      "terms": [
+        "monthly",
+        "per month",
+        "each month",
+        "by month",
+        "mánaðarlega",
+        "á mánuði",
+        "eftir mánuðum",
+        "mánaðartölur",
+        "mánaðartalna"
+      ],
+      "tables": []
+    },
+    {
+      "id": "quarterly",
+      "role": "qualifier",
+      "aliases": [
+        "quarterly",
+        "by quarter",
+        "per quarter",
+        "árs fjórðungur",
+        "ársfjórðungur",
+        "ársfjórðungi",
+        "ársfjórðunga",
+        "ársfjórðungum",
+        "ársfjórðungslega"
+      ],
+      "search_terms": "",
+      "concept": "quarterly",
+      "search": "",
+      "terms": [
+        "quarterly",
+        "by quarter",
+        "per quarter",
+        "árs fjórðungur",
+        "ársfjórðungur",
+        "ársfjórðungi",
+        "ársfjórðunga",
+        "ársfjórðungum",
+        "ársfjórðungslega"
+      ],
+      "tables": []
+    },
+    {
+      "id": "annual",
+      "role": "qualifier",
+      "aliases": [
+        "annual",
+        "annually",
+        "yearly",
+        "per year",
+        "by year",
+        "á ári",
+        "árlega",
+        "eftir árum",
+        "árstölur",
+        "árstalna"
+      ],
+      "search_terms": "",
+      "concept": "annual",
+      "search": "",
+      "terms": [
+        "annual",
+        "annually",
+        "yearly",
+        "per year",
+        "by year",
+        "á ári",
+        "árlega",
+        "eftir árum",
+        "árstölur",
+        "árstalna"
+      ],
+      "tables": []
+    },
+    {
+      "id": "seasonally_adjusted",
+      "role": "qualifier",
+      "aliases": [
+        "seasonally adjusted",
+        "seasonal adjustment",
+        "árstíðaleiðrétt",
+        "árstíðaleiðréttar",
+        "árstíðaleiðréttum",
+        "árstíðaleiðrétting"
+      ],
+      "search_terms": "",
+      "concept": "seasonally adjusted",
+      "search": "",
+      "terms": [
+        "seasonally adjusted",
+        "seasonal adjustment",
+        "árstíðaleiðrétt",
+        "árstíðaleiðréttar",
+        "árstíðaleiðréttum",
+        "árstíðaleiðrétting"
+      ],
+      "tables": []
+    },
+    {
+      "id": "forecast",
+      "role": "qualifier",
+      "aliases": [
+        "forecast",
+        "projection",
+        "predicted",
+        "future",
+        "spá",
+        "spár",
+        "spáð",
+        "spáin",
+        "framtíð",
+        "framtíðar"
+      ],
+      "search_terms": "",
+      "concept": "forecast",
+      "search": "",
+      "terms": [
+        "forecast",
+        "projection",
+        "predicted",
+        "future",
+        "spá",
+        "spár",
+        "spáð",
+        "spáin",
+        "framtíð",
+        "framtíðar"
+      ],
+      "tables": []
+    },
+    {
+      "id": "pollution",
+      "role": "topic",
+      "aliases": [
+        "pollution",
+        "pollute",
+        "polluting",
+        "mengun",
+        "mengunar",
+        "mengunina",
+        "mengum",
+        "menga",
+        "mengar",
+        "menguðum",
+        "mengað"
+      ],
+      "search_terms": "emissions waste",
+      "table_paths": [
+        "Umhverfi/2_losunlofttegunda",
+        "Umhverfi/3_efnisflaedi"
+      ],
+      "broader": [
+        "environment"
+      ],
+      "clarification": "Specify the pollutant or environmental measure; greenhouse gases and other pollution are different statistics.",
+      "concept": "pollution",
+      "search": "emissions waste",
+      "terms": [
+        "pollution",
+        "pollute",
+        "polluting",
+        "mengun",
+        "mengunar",
+        "mengunina",
+        "mengum",
+        "menga",
+        "mengar",
+        "menguðum",
+        "mengað"
+      ],
+      "tables": []
+    },
+    {
+      "id": "religion",
+      "role": "topic",
+      "aliases": [
+        "religion",
+        "religious affiliation",
+        "religious groups",
+        "church membership",
+        "trú",
+        "trúarbrögð",
+        "trúfélög",
+        "trúfélaga",
+        "trúfélögum",
+        "kirkja",
+        "kirkjunnar",
+        "þjóðkirkja",
+        "þjóðkirkjunnar"
+      ],
+      "search_terms": "religious life stance organizations",
+      "table_phrases": [
+        "religious",
+        "religion",
+        "trúfélög",
+        "trúfélaga",
+        "kirkju"
+      ],
+      "concept": "religion",
+      "search": "religious life stance organizations",
+      "terms": [
+        "religion",
+        "religious affiliation",
+        "religious groups",
+        "church membership",
+        "trú",
+        "trúarbrögð",
+        "trúfélög",
+        "trúfélaga",
+        "trúfélögum",
+        "kirkja",
+        "kirkjunnar",
+        "þjóðkirkja",
+        "þjóðkirkjunnar"
+      ],
+      "tables": []
+    },
+    {
+      "id": "sports",
+      "role": "topic",
+      "aliases": [
+        "sport",
+        "sports",
+        "sports participation",
+        "exercise",
+        "physical activity",
+        "íþróttir",
+        "íþrótta",
+        "íþróttum",
+        "íþróttaiðkun",
+        "hreyfing",
+        "hreyfingu",
+        "líkamsrækt",
+        "líkamsræktar"
+      ],
+      "search_terms": "sports physical activity",
+      "table_paths": [
+        "Samfelag/menning",
+        "Samfelag/heilbrigdismal"
+      ],
+      "broader": [
+        "culture",
+        "health"
+      ],
+      "concept": "sports",
+      "search": "sports physical activity",
+      "terms": [
+        "sport",
+        "sports",
+        "sports participation",
+        "exercise",
+        "physical activity",
+        "íþróttir",
+        "íþrótta",
+        "íþróttum",
+        "íþróttaiðkun",
+        "hreyfing",
+        "hreyfingu",
+        "líkamsrækt",
+        "líkamsræktar"
+      ],
+      "tables": []
+    },
+    {
+      "id": "museums",
+      "role": "topic",
+      "aliases": [
+        "museum",
+        "museums",
+        "museum visitors",
+        "söfn",
+        "safna",
+        "söfnum",
+        "listasafn",
+        "listasöfn",
+        "byggðasöfn",
+        "minjasöfn",
+        "safngestir"
+      ],
+      "search_terms": "museums visitors",
+      "table_paths": [
+        "Samfelag/menning"
+      ],
+      "table_phrases": [
+        "museums",
+        "museum",
+        "söfn",
+        "safna"
+      ],
+      "broader": [
+        "culture"
+      ],
+      "concept": "museums",
+      "search": "museums visitors",
+      "terms": [
+        "museum",
+        "museums",
+        "museum visitors",
+        "söfn",
+        "safna",
+        "söfnum",
+        "listasafn",
+        "listasöfn",
+        "byggðasöfn",
+        "minjasöfn",
+        "safngestir"
+      ],
+      "tables": []
+    },
+    {
+      "id": "music",
+      "role": "topic",
+      "aliases": [
+        "music",
+        "concerts",
+        "music concerts",
+        "tónlist",
+        "tónlistar",
+        "tónleikar",
+        "tónleika",
+        "hljómsveitir"
+      ],
+      "search_terms": "music concerts",
+      "table_paths": [
+        "Samfelag/menning"
+      ],
+      "broader": [
+        "culture"
+      ],
+      "concept": "music",
+      "search": "music concerts",
+      "terms": [
+        "music",
+        "concerts",
+        "music concerts",
+        "tónlist",
+        "tónlistar",
+        "tónleikar",
+        "tónleika",
+        "hljómsveitir"
+      ],
+      "tables": []
+    },
+    {
+      "id": "telecommunications",
+      "role": "topic",
+      "aliases": [
+        "telecommunications",
+        "telecom",
+        "telephone",
+        "mobile phones",
+        "mobile subscriptions",
+        "fjarskipti",
+        "fjarskipta",
+        "sími",
+        "símar",
+        "síma",
+        "símanotkun",
+        "farsími",
+        "farsímar",
+        "farsíma",
+        "farsímaáskrift"
+      ],
+      "search_terms": "telephone mobile subscriptions",
+      "table_paths": [
+        "Atvinnuvegir/visinditaekni"
+      ],
+      "broader": [
+        "technology"
+      ],
+      "concept": "telecommunications",
+      "search": "telephone mobile subscriptions",
+      "terms": [
+        "telecommunications",
+        "telecom",
+        "telephone",
+        "mobile phones",
+        "mobile subscriptions",
+        "fjarskipti",
+        "fjarskipta",
+        "sími",
+        "símar",
+        "síma",
+        "símanotkun",
+        "farsími",
+        "farsímar",
+        "farsíma",
+        "farsímaáskrift"
+      ],
+      "tables": []
+    },
+    {
+      "id": "abortions",
+      "role": "topic",
+      "aliases": [
+        "abortion",
+        "abortions",
+        "termination of pregnancy",
+        "fóstureyðing",
+        "fóstureyðingar",
+        "fóstureyðinga",
+        "þungunarrof",
+        "þungunarrofa"
+      ],
+      "search_terms": "induced abortions",
+      "table_paths": [
+        "Samfelag/heilbrigdismal"
+      ],
+      "table_phrases": [
+        "abortions",
+        "fóstureyðingar"
+      ],
+      "broader": [
+        "health"
+      ],
+      "concept": "abortions",
+      "search": "induced abortions",
+      "terms": [
+        "abortion",
+        "abortions",
+        "termination of pregnancy",
+        "fóstureyðing",
+        "fóstureyðingar",
+        "fóstureyðinga",
+        "þungunarrof",
+        "þungunarrofa"
+      ],
+      "tables": []
+    },
+    {
+      "id": "interest_rates",
+      "role": "topic",
+      "aliases": [
+        "interest rate",
+        "interest rates",
+        "borrowing rates",
+        "lending rates",
+        "deposit rates",
+        "vextir",
+        "vaxta",
+        "vöxtum",
+        "vaxtastig",
+        "vaxtaprósenta",
+        "lánsvextir",
+        "innlánsvextir",
+        "útlánsvextir"
+      ],
+      "search_terms": "interest rates",
+      "table_paths": [
+        "Efnahagur"
+      ],
+      "table_phrases": [
+        "interest rates",
+        "vextir"
+      ],
+      "broader": [
+        "economy"
+      ],
+      "concept": "interest rates",
+      "search": "interest rates",
+      "terms": [
+        "interest rate",
+        "interest rates",
+        "borrowing rates",
+        "lending rates",
+        "deposit rates",
+        "vextir",
+        "vaxta",
+        "vöxtum",
+        "vaxtastig",
+        "vaxtaprósenta",
+        "lánsvextir",
+        "innlánsvextir",
+        "útlánsvextir"
+      ],
+      "tables": []
+    },
+    {
+      "id": "exchange_rates",
+      "role": "topic",
+      "aliases": [
+        "exchange rate",
+        "exchange rates",
+        "currency exchange",
+        "krona exchange rate",
+        "króna exchange rate",
+        "gengi",
+        "gengis",
+        "gjaldmiðlar",
+        "gjaldmiðla",
+        "gengi krónunnar",
+        "gengisvísitala"
+      ],
+      "search_terms": "exchange rates",
+      "table_paths": [
+        "Efnahagur"
+      ],
+      "table_phrases": [
+        "exchange",
+        "gengi"
+      ],
+      "broader": [
+        "economy"
+      ],
+      "concept": "exchange rates",
+      "search": "exchange rates",
+      "terms": [
+        "exchange rate",
+        "exchange rates",
+        "currency exchange",
+        "krona exchange rate",
+        "króna exchange rate",
+        "gengi",
+        "gengis",
+        "gjaldmiðlar",
+        "gjaldmiðla",
+        "gengi krónunnar",
+        "gengisvísitala"
+      ],
+      "tables": []
+    },
+    {
+      "id": "financial_markets",
+      "role": "topic",
+      "aliases": [
+        "financial markets",
+        "banking",
+        "banks",
+        "money supply",
+        "stocks",
+        "stock market",
+        "investment funds",
+        "fjármálamarkaður",
+        "fjármálamarkaðir",
+        "bankar",
+        "banka",
+        "bankastarfsemi",
+        "peningamagn",
+        "hlutabréf",
+        "hlutabréfa",
+        "verðbréf",
+        "verðbréfa"
+      ],
+      "search_terms": "financial assets banks securities",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar"
+      ],
+      "broader": [
+        "economy"
+      ],
+      "concept": "financial markets",
+      "search": "financial assets banks securities",
+      "terms": [
+        "financial markets",
+        "banking",
+        "banks",
+        "money supply",
+        "stocks",
+        "stock market",
+        "investment funds",
+        "fjármálamarkaður",
+        "fjármálamarkaðir",
+        "bankar",
+        "banka",
+        "bankastarfsemi",
+        "peningamagn",
+        "hlutabréf",
+        "hlutabréfa",
+        "verðbréf",
+        "verðbréfa"
+      ],
+      "tables": []
+    },
+    {
+      "id": "weather",
+      "role": "topic",
+      "aliases": [
+        "weather",
+        "climate",
+        "weather conditions",
+        "veður",
+        "veðrið",
+        "veðri",
+        "veðurs",
+        "veðurfar",
+        "veðurfars",
+        "veðrátta",
+        "veðurstöðvar"
+      ],
+      "search_terms": "weather stations temperature precipitation",
+      "table_paths": [
+        "Umhverfi/1_natturufar/2_vedurfar"
+      ],
+      "broader": [
+        "nature",
+        "environment"
+      ],
+      "note": "Historical station data, not a current weather forecast.",
+      "concept": "weather",
+      "search": "weather stations temperature precipitation",
+      "terms": [
+        "weather",
+        "climate",
+        "weather conditions",
+        "veður",
+        "veðrið",
+        "veðri",
+        "veðurs",
+        "veðurfar",
+        "veðurfars",
+        "veðrátta",
+        "veðurstöðvar"
+      ],
+      "tables": []
+    },
+    {
+      "id": "temperature",
+      "role": "topic",
+      "aliases": [
+        "temperature",
+        "temperatures",
+        "warming",
+        "average temperature",
+        "hiti",
+        "hita",
+        "hitinn",
+        "hitastig",
+        "hitastigi",
+        "meðalhiti",
+        "hlýnun",
+        "hlýrra",
+        "hlýtt",
+        "kaldara",
+        "kuldi"
+      ],
+      "search_terms": "temperature",
+      "table_paths": [
+        "Umhverfi/1_natturufar/2_vedurfar"
+      ],
+      "broader": [
+        "weather",
+        "nature",
+        "environment"
+      ],
+      "concept": "temperature",
+      "search": "temperature",
+      "terms": [
+        "temperature",
+        "temperatures",
+        "warming",
+        "average temperature",
+        "hiti",
+        "hita",
+        "hitinn",
+        "hitastig",
+        "hitastigi",
+        "meðalhiti",
+        "hlýnun",
+        "hlýrra",
+        "hlýtt",
+        "kaldara",
+        "kuldi"
+      ],
+      "tables": []
+    },
+    {
+      "id": "precipitation",
+      "role": "topic",
+      "aliases": [
+        "rain",
+        "rainfall",
+        "precipitation",
+        "snow",
+        "snowfall",
+        "rigning",
+        "rignir",
+        "úrkoma",
+        "úrkomu",
+        "úrkomumagn",
+        "snjór",
+        "snjó",
+        "snjókoma"
+      ],
+      "search_terms": "precipitation",
+      "table_paths": [
+        "Umhverfi/1_natturufar/2_vedurfar"
+      ],
+      "broader": [
+        "weather",
+        "nature",
+        "environment"
+      ],
+      "concept": "precipitation",
+      "search": "precipitation",
+      "terms": [
+        "rain",
+        "rainfall",
+        "precipitation",
+        "snow",
+        "snowfall",
+        "rigning",
+        "rignir",
+        "úrkoma",
+        "úrkomu",
+        "úrkomumagn",
+        "snjór",
+        "snjó",
+        "snjókoma"
+      ],
+      "tables": [
+        "UMH11120"
+      ]
+    },
+    {
+      "id": "wind",
+      "role": "topic",
+      "aliases": [
+        "wind",
+        "wind speed",
+        "windy",
+        "vindur",
+        "vindi",
+        "vinds",
+        "vindhraði",
+        "vindhraða",
+        "hvasst",
+        "hvassviðri"
+      ],
+      "search_terms": "wind speed",
+      "table_paths": [
+        "Umhverfi/1_natturufar/2_vedurfar"
+      ],
+      "broader": [
+        "weather",
+        "nature",
+        "environment"
+      ],
+      "concept": "wind",
+      "search": "wind speed",
+      "terms": [
+        "wind",
+        "wind speed",
+        "windy",
+        "vindur",
+        "vindi",
+        "vinds",
+        "vindhraði",
+        "vindhraða",
+        "hvasst",
+        "hvassviðri"
+      ],
+      "tables": [
+        "UMH11150"
+      ]
+    },
+    {
+      "id": "pensioners",
+      "role": "group",
+      "aliases": [
+        "pensioners",
+        "retirees",
+        "retired people",
+        "retired",
+        "lífeyrisþegar",
+        "lífeyrisþega",
+        "lífeyrisþegum",
+        "eftirlaunaþegar",
+        "eftirlaunaþega",
+        "komnir á eftirlaun"
+      ],
+      "search_terms": "pension",
+      "clarification": "Specify the pension/retirement group; retirement or pension receipt does not itself imply a fixed age threshold.",
+      "concept": "pensioners",
+      "search": "pension",
+      "terms": [
+        "pensioners",
+        "retirees",
+        "retired people",
+        "retired",
+        "lífeyrisþegar",
+        "lífeyrisþega",
+        "lífeyrisþegum",
+        "eftirlaunaþegar",
+        "eftirlaunaþega",
+        "komnir á eftirlaun"
+      ],
+      "tables": []
+    },
+    {
+      "id": "labour_force",
+      "role": "topic",
+      "aliases": [
+        "labour force",
+        "labor force",
+        "labour supply",
+        "labor supply",
+        "vinnuafl",
+        "vinnuafls",
+        "vinnuafli",
+        "mannafli",
+        "mannafla"
+      ],
+      "search_terms": "labour force",
+      "table_paths": [
+        "Samfelag/vinnumarkadur"
+      ],
+      "broader": [
+        "employment"
+      ],
+      "concept": "labour force",
+      "search": "labour force",
+      "terms": [
+        "labour force",
+        "labor force",
+        "labour supply",
+        "labor supply",
+        "vinnuafl",
+        "vinnuafls",
+        "vinnuafli",
+        "mannafli",
+        "mannafla"
+      ],
+      "tables": [
+        "VIN00001",
+        "VIN00910"
+      ]
+    }
+  ],
+  "_about": "Bilingual search associations. concept/terms/search/tables are compatible with the tiered finder. id/role/aliases/search_terms/table_paths/table_phrases/broader/clarification provide richer metadata for role-aware consumers; the current harness does not automatically apply those fields. Terms are normalized and prefix-matched by the harness. Generic population hints are metadata-only; use explicit population phrases. Preferred IDs retain existing team choices and add selected financial/subject tables, not exhaustive lists. Subjective meanings and demographic thresholds still need clarification."
 }
