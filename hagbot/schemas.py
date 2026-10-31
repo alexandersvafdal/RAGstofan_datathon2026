@@ -20,6 +20,9 @@ class AskRequest(BaseModel):
     table_id: str | None = None  # set when the user picked a table in a clarification
     history: list[Turn] = []  # the conversation so far, oldest first (the browser keeps the last few)
     model: str | None = None  # one of /api/models; None: the server's default, the best one we have measured
+    temperature: float | None = None  # None: 0, the same answer every time
+    reasoning: Literal["none", "low", "medium", "high"] | None = None  # thinking length; None: the server's default
+    fast: bool = False  # "Answer now": the fast model with thinking off, whatever else is asked
 
 
 class TableRef(BaseModel):

@@ -59,9 +59,10 @@ class Pipeline:
     async def answer(self, req: AskRequest, on_step: Callable[[Step], None] | None = None) -> Answer:
         """Answer with the model asked for, or the default. Another model runs on a copy of this pipeline, so
         concurrent questions on different models do not disturb each other."""
-        if req.model and req.model != self.llm.model:
+        model, reasoning = (settings.fast_model, "none") if req.fast else (req.model, req.reasoning)
+        if model or reasoning or req.temperature is not None:
             other = copy.copy(self)
-            other.llm = self.llm.with_model(req.model)
+            other.llm = self.llm.with_options(model, req.temperature, reasoning)
             return await other._answer(req, on_step)
         return await self._answer(req, on_step)
 

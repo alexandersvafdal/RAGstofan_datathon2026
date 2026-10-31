@@ -902,6 +902,10 @@ td.num { text-align: right; }
   *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
 }
 
-/* the model picker in the settings popover */
-.model-select { width: 100%; font: inherit; font-size: 14px; color: var(--text); background: var(--card);
-  border: 1px solid var(--hairline); border-radius: 10px; padding: 8px 10px; }
+/* answer settings under the question box: model, thinking length, temperature */
+.tuning { max-width: 720px; margin: 8px auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; }
+.tuning label { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3); }
+.tuning select { font: inherit; font-size: 12px; color: var(--text-2); background: var(--card-glass); border: 1px solid var(--hairline);
+  border-radius: 999px; padding: 3px 8px; cursor: pointer; }
+/* "Answer now" under the live steps */
+.live .pill.now { position: static; opacity: 1; transform: none; align-self: flex-end; width: auto; margin-bottom: 8px; font-size: 13px; padding: 6px 12px; }

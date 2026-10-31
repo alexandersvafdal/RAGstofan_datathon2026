@@ -27,11 +27,20 @@ class LLM:
             headers={"Authorization": f"Bearer {api_key or settings.llm_api_key}"},
         )
         self.calls = 0
+        self.temperature = 0.0                                 # for calls that do not set their own
+        self.reasoning_effort = settings.llm_reasoning_effort  # "" sends nothing: the server's default
 
-    def with_model(self, model: str) -> "LLM":
-        """The same endpoint and connection, another model, its own call count."""
+    def with_options(self, model: str | None = None, temperature: float | None = None,
+                     reasoning_effort: str | None = None) -> "LLM":
+        """The same endpoint and connection with another model, temperature or thinking length; its own call count."""
         other = copy.copy(self)
-        other.model, other.calls = model, 0
+        other.calls = 0
+        if model:
+            other.model = model
+        if temperature is not None:
+            other.temperature = temperature
+        if reasoning_effort is not None:
+            other.reasoning_effort = reasoning_effort
         return other
 
     async def models(self) -> list[str]:
@@ -40,10 +49,11 @@ class LLM:
         r.raise_for_status()
         return sorted(m["id"] for m in r.json().get("data", []) if "embed" not in m["id"])
 
-    async def chat(self, messages: list[dict], *, json_mode: bool = False, temperature: float = 0.0) -> str:
-        body = {"model": self.model, "messages": messages, "temperature": temperature}
-        if settings.llm_reasoning_effort:
-            effort = settings.llm_reasoning_effort
+    async def chat(self, messages: list[dict], *, json_mode: bool = False, temperature: float | None = None) -> str:
+        body = {"model": self.model, "messages": messages,
+                "temperature": self.temperature if temperature is None else temperature}
+        if self.reasoning_effort:
+            effort = self.reasoning_effort
             if effort == "none" and "gpt-oss" in self.model:  # gpt-oss only takes low / medium / high
                 effort = "low"
             body["reasoning_effort"] = effort
@@ -59,7 +69,7 @@ class LLM:
             raise LLMError(f"LLM request failed: {type(e).__name__} {e}".strip()) from e
         return r.json()["choices"][0]["message"]["content"]
 
-    async def complete_json(self, system: str, user: str, schema: type[T], *, retries: int = 2, temperature: float = 0.0) -> T:
+    async def complete_json(self, system: str, user: str, schema: type[T], *, retries: int = 2, temperature: float | None = None) -> T:
         """Ask for JSON matching `schema`. On a parse or validation error, show the model the error and retry."""
         messages = [
             {"role": "system", "content": system + "\n\nReply with one JSON object only. JSON schema:\n"

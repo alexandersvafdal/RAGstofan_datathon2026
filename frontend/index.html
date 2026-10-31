@@ -43,8 +43,6 @@
             <button data-mode="light">Light</button>
             <button data-mode="dark">Dark</button>
           </div>
-          <h3 data-i18n="model">Model</h3>
-          <select id="model" class="model-select" aria-label="Language model"></select>
         </div>
       </div>
       <div class="segmented" role="group" aria-label="Answer language">
@@ -83,8 +81,16 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
     </div>
+    <!-- how the next question is answered; the defaults are the best model and the longest thinking -->
+    <div class="tuning" aria-label="Answer settings">
+      <label><span data-i18n="model">Model</span><select id="model" aria-label="Language model"></select></label>
+      <label><span data-i18n="thinking">Thinking</span><select id="reasoning" aria-label="Thinking length"></select></label>
+      <label><span data-i18n="temp">Temperature</span><select id="temperature" aria-label="Temperature">
+        <option value="">0</option><option value="0.3">0.3</option><option value="0.7">0.7</option><option value="1">1.0</option>
+      </select></label>
+    </div>
   </form>
 
-  <script src="app.js?v=30"></script>
+  <script src="app.js?v=31"></script>
 </body>
 </html>

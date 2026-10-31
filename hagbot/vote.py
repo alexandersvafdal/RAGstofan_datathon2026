@@ -27,10 +27,10 @@ def voters(llm: LLM) -> list[tuple[LLM, float]]:
         out, seen = [], set()
         for m in models:
             client = llm if m == llm.model else _clients.setdefault(m, LLM(base_url=llm.base_url, model=m))
-            out.append((client, settings.vote_temperature if m in seen else 0.0))  # a model listed twice votes warmer
+            out.append((client, settings.vote_temperature if m in seen else None))  # a model listed twice votes warmer
             seen.add(m)
         return out
-    return [(llm, 0.0)] + [(llm, settings.vote_temperature)] * (max(settings.votes, 1) - 1)
+    return [(llm, None)] + [(llm, settings.vote_temperature)] * (max(settings.votes, 1) - 1)
 
 
 def voting_on() -> bool:

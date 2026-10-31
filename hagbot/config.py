@@ -22,6 +22,8 @@ class Settings:
     # Reasoning models think before they answer. "none" turns that off for Qwen3-style models (2-3x faster here);
     # gpt-oss takes "low" / "medium" / "high". Empty: send nothing, the server's default.
     llm_reasoning_effort: str = os.getenv("LLM_REASONING_EFFORT", "")
+    # "Answer now": a quick model with thinking off, for when the default is taking too long
+    fast_model: str = os.getenv("FAST_MODEL", "gpt-oss:20b")
 
     data_source: str = os.getenv("DATA_SOURCE", "fixtures")
     px_base_url: str = os.getenv("PX_BASE_URL", "https://px.hagstofa.is")

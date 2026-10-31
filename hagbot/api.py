@@ -61,7 +61,9 @@ async def models():
         except Exception:   # the endpoint cannot list models: offer only the default
             _models = (time.monotonic(), [])
     names = _models[1]
-    return {"default": settings.llm_model, "models": [settings.llm_model, *(m for m in names if m != settings.llm_model)]}
+    return {"default": settings.llm_model, "models": [settings.llm_model, *(m for m in names if m != settings.llm_model)],
+            "fast": settings.fast_model, "reasoning_default": settings.llm_reasoning_effort or "high",
+            "reasoning": ["none", "low", "medium", "high"]}
 
 
 @app.get("/api/indicators", response_model=Indicators)

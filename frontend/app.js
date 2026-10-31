@@ -8,7 +8,9 @@ const I18N = {
     steps: ["Understanding the question", "Finding the right table", "Choosing the categories", "Reading the numbers", "Writing the answer"],
     working: "Working on it", how: "How I got this", data: "Data", source: "Source", checked: "Numbers checked against the table",
     calc: "Calculated", failed: "Something went wrong", retry: "Try again", seconds: "s", calls: "model calls",
-    pts: "pts", more: "Ask next", palette: "Colour", appearance: "Appearance", model: "Model", shortlist: "Shortlist", chosen: "chosen",
+    pts: "pts", more: "Ask next", palette: "Colour", appearance: "Appearance", model: "Model", thinking: "Thinking", temp: "Temperature",
+    now: "Answer now", fastNote: "Answered quickly with the fast model, thinking off.",
+    effort: { none: "Off", low: "Short", medium: "Medium", high: "Long" }, shortlist: "Shortlist", chosen: "chosen",
     signal: { dictionary: "dictionary", bm25: "keywords", e5: "meaning (e5)", "bge-m3": "meaning (bge-m3)" },
     live: { plan: q => `Read as: ${q}`, split: n => `Split into ${n} questions`, searched: n => `Searched ${n} tables`,
             picked: "picked", numbers: n => `${n} ${n === 1 ? "number" : "numbers"} read`, checked: "Numbers checked against the table",
@@ -24,7 +26,9 @@ const I18N = {
     steps: ["Skil spurninguna", "Finn réttu töfluna", "Vel flokkana", "Les tölurnar", "Skrifa svarið"],
     working: "Augnablik", how: "Hvernig svarið varð til", data: "Gögn", source: "Heimild", checked: "Tölur bornar saman við töfluna",
     calc: "Reiknað", failed: "Eitthvað fór úrskeiðis", retry: "Reyna aftur", seconds: "s", calls: "köll í líkan",
-    pts: "pst.", more: "Spyrðu næst", palette: "Litir", appearance: "Útlit", model: "Líkan", shortlist: "Stuttlisti", chosen: "valin",
+    pts: "pst.", more: "Spyrðu næst", palette: "Litir", appearance: "Útlit", model: "Líkan", thinking: "Hugsun", temp: "Hitastig",
+    now: "Svara strax", fastNote: "Svarað í flýti með hraða líkaninu, án hugsunar.",
+    effort: { none: "Engin", low: "Stutt", medium: "Miðlungs", high: "Löng" }, shortlist: "Stuttlisti", chosen: "valin",
     signal: { dictionary: "orðasafn", bm25: "leitarorð", e5: "merking (e5)", "bge-m3": "merking (bge-m3)" },
     live: { plan: q => `Skilið sem: ${q}`, split: n => `Skipt í ${n} spurningar`, searched: n => `Leitaði í ${n} töflum`,
             picked: "valdi", numbers: n => `${n} ${n === 1 ? "tala lesin" : "tölur lesnar"}`, checked: "Tölur bornar saman við töfluna",
@@ -411,8 +415,8 @@ function liveView(L) {
   return view;
 }
 
-async function askStream(body, onStep) {
-  const r = await fetch("/api/ask/stream", { method: "POST", headers: { "Content-Type": "application/json" }, body });
+async function askStream(body, onStep, signal) {
+  const r = await fetch("/api/ask/stream", { method: "POST", headers: { "Content-Type": "application/json" }, body, signal });
   if (!r.ok || !r.body) throw new Error(`${r.status} ${r.ok ? "" : await r.text()}`);
   const reader = r.body.getReader(), dec = new TextDecoder();
   let buf = "";
@@ -437,22 +441,28 @@ async function askStream(body, onStep) {
 const history = [];
 const HISTORY_TURNS = 3;
 
-async function ask(question, tableId = null) {
+async function ask(question, tableId = null, fast = false) {
   showChat();
   const chat = $("#chat");
   const guess = lang === "auto" ? (/[þðæöáéíóúý]/i.test(question) ? "is" : "en") : lang;
-  if (!tableId) chat.append(el("div", { class: "msg user" }, el("div", { class: "bubble" }, question)));
+  if (!tableId && !fast) chat.append(el("div", { class: "msg user" }, el("div", { class: "bubble" }, question)));
   const card = el("div", { class: "card" });
   const progress = liveView(guess);
   card.append(progress);
+  // "Answer now": stop this question (the server stops with it) and ask again with the fast model, thinking off
+  const stop = new AbortController();
+  if (!fast) progress.prepend(el("button", { class: "pill now", type: "button", onclick: () => {
+    stop.abort(); bot.remove(); ask(question, tableId, true); } }, `⚡ ${t("now", guess)}`));
   const bot = el("div", { class: "msg bot" }, card);
   chat.append(bot);
   setTimeout(() => bot.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "end" }), 380);
   $("#send").disabled = true;
   try {
     const body = JSON.stringify({ question, language: lang === "auto" ? null : lang, table_id: tableId, model: modelChoice,
+                                  reasoning: reasoningChoice, temperature: temperatureChoice, fast,
                                   history: history.slice(-HISTORY_TURNS) });
-    const answer = await askStream(body, st => progress.step(st));
+    const answer = await askStream(body, st => progress.step(st), stop.signal);
+    if (fast) answer.parts.forEach((p, i) => { if (!i) p.note = [t("fastNote", guess), p.note].filter(Boolean).join(" "); });
     clearInterval(progress._timer);
     progress.classList.add("finishing");
     await new Promise(r => setTimeout(r, reduceMotion ? 0 : 450));   // let the last tick land before the answer replaces it
@@ -462,6 +472,7 @@ async function ask(question, tableId = null) {
       question: answer.steps.find(st => st.name === "context")?.detail || question,   // the full question, so follow-ups chain
       answer: answer.text, tables: answer.sources.map(src => src.id) });
   } catch (e) {
+    if (stop.signal.aborted) return;   // replaced by the quick answer
     card.replaceChildren(
       el("p", { class: "answer-text error" }, `${t("failed", guess)}. ${e.message}`),
       el("div", { class: "followups" }, el("button", { class: "pill", type: "button", onclick: () => { bot.remove(); ask(question, tableId); } }, t("retry", guess))));
@@ -788,8 +799,13 @@ function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", com
 
 /* ---------- wiring ---------- */
 // The model questions go to: null means the server's default, the best one we measured. Kept per browser.
-let modelChoice = null;
-try { modelChoice = localStorage.getItem("ragstofan-model") || null; } catch {}
+let modelChoice = null, reasoningChoice = null, temperatureChoice = null;
+try {
+  modelChoice = localStorage.getItem("ragstofan-model") || null;
+  reasoningChoice = localStorage.getItem("ragstofan-reasoning") || null;
+  temperatureChoice = localStorage.getItem("ragstofan-temperature") ? +localStorage.getItem("ragstofan-temperature") : null;
+} catch {}
+const remember = (key, v) => { try { v == null ? localStorage.removeItem(key) : localStorage.setItem(key, v); } catch {} };
 
 async function health() {
   try {
@@ -805,9 +821,17 @@ async function health() {
     pick.value = modelChoice || m.default;
     pick.onchange = () => {
       modelChoice = pick.value === m.default ? null : pick.value;
-      try { modelChoice ? localStorage.setItem("ragstofan-model", modelChoice) : localStorage.removeItem("ragstofan-model"); } catch {}
+      remember("ragstofan-model", modelChoice);
       show();
     };
+    // thinking length: the server's default (the longest) unless changed
+    const think = $("#reasoning"), names = t("effort");
+    think.replaceChildren(...m.reasoning.map(r => el("option", { value: r }, names[r] || r)));
+    think.value = reasoningChoice || m.reasoning_default;
+    think.onchange = () => { reasoningChoice = think.value === m.reasoning_default ? null : think.value; remember("ragstofan-reasoning", reasoningChoice); };
+    const temp = $("#temperature");
+    temp.value = temperatureChoice == null ? "" : String(temperatureChoice);
+    temp.onchange = () => { temperatureChoice = temp.value === "" ? null : +temp.value; remember("ragstofan-temperature", temperatureChoice); };
     show();
   } catch { $("#status").textContent = "backend offline"; }
 }
