@@ -5,8 +5,11 @@ import json
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
-from fastapi.responses import StreamingResponse
+import os
+
+import httpx
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.responses import Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -108,6 +111,51 @@ async def ask_stream(req: AskRequest) -> StreamingResponse:
                 task.cancel()
 
     return StreamingResponse(lines(), media_type="application/x-ndjson")
+
+
+# Voice runs as its own service (voice/server.py, port 8001, own GPU environment). The website reaches it through
+# these routes so it only ever talks to one address; the app calls the service directly.
+VOICE_URL = os.getenv("VOICE_URL", "http://127.0.0.1:8001")
+
+
+async def _voice(method: str, path: str, **kwargs) -> httpx.Response:
+    try:
+        async with httpx.AsyncClient(timeout=60) as c:
+            r = await c.request(method, f"{VOICE_URL}{path}", **kwargs)
+    except httpx.HTTPError as e:
+        raise HTTPException(503, f"voice service unavailable: {type(e).__name__}") from e
+    if r.status_code >= 400:
+        raise HTTPException(r.status_code, r.text[:300])
+    return r
+
+
+@app.get("/api/voices")
+async def voices():
+    return (await _voice("GET", "/voices")).json()
+
+
+class SpeakRequest(BaseModel):
+    text: str
+    language: str = "en"
+    voice: str | None = None
+
+
+@app.post("/api/tts")
+async def tts(req: SpeakRequest):
+    r = await _voice("POST", "/tts", json=req.model_dump())
+    return Response(r.content, media_type="audio/wav")
+
+
+@app.post("/api/stt")
+async def stt(audio: UploadFile = File(...), language: str | None = Form(None)):
+    files = {"audio": (audio.filename or "question.webm", await audio.read(), audio.content_type or "application/octet-stream")}
+    return (await _voice("POST", "/stt", files=files, data={"language": language} if language else None)).json()
+
+
+@app.post("/api/suggest")
+async def suggest(ans: Answer) -> dict:
+    """Three follow-up questions for an answer the user is already reading (the client asks once it has shown it)."""
+    return {"questions": await pipeline.suggest(ans)}
 
 
 class PromptRequest(BaseModel):

@@ -10,7 +10,10 @@ const I18N = {
     calc: "Calculated", failed: "Something went wrong", retry: "Try again", seconds: "s", calls: "model calls",
     pts: "pts", more: "Ask next", palette: "Colour", appearance: "Appearance", model: "Model", thinking: "Thinking", temp: "Temperature",
     now: "Answer now", fastNote: "Answered quickly with the fast model, thinking off.",
-    effort: { none: "Off", low: "Short", medium: "Medium", high: "Long" }, shortlist: "Shortlist", chosen: "chosen",
+    effort: { none: "Off", low: "Short", medium: "Medium", high: "Long" },
+    voice: "Voice", listen: "Listen", stopVoice: "Stop", copy: "Copy", copied: "Copied", listening: "Listening…",
+    writing: "Writing it down…", micHttps: "Asking by voice needs HTTPS (or localhost) in the browser", best: "best",
+    icelandic: "Icelandic", english: "English", micBlocked: "Microphone access is blocked", shortlist: "Shortlist", chosen: "chosen",
     signal: { dictionary: "dictionary", bm25: "keywords", e5: "meaning (e5)", "bge-m3": "meaning (bge-m3)" },
     live: { plan: q => `Read as: ${q}`, split: n => `Split into ${n} questions`, searched: n => `Searched ${n} tables`,
             picked: "picked", numbers: n => `${n} ${n === 1 ? "number" : "numbers"} read`, checked: "Numbers checked against the table",
@@ -28,7 +31,10 @@ const I18N = {
     calc: "Reiknað", failed: "Eitthvað fór úrskeiðis", retry: "Reyna aftur", seconds: "s", calls: "köll í líkan",
     pts: "pst.", more: "Spyrðu næst", palette: "Litir", appearance: "Útlit", model: "Líkan", thinking: "Hugsun", temp: "Hitastig",
     now: "Svara strax", fastNote: "Svarað í flýti með hraða líkaninu, án hugsunar.",
-    effort: { none: "Engin", low: "Stutt", medium: "Miðlungs", high: "Löng" }, shortlist: "Stuttlisti", chosen: "valin",
+    effort: { none: "Engin", low: "Stutt", medium: "Miðlungs", high: "Löng" },
+    voice: "Rödd", listen: "Hlusta", stopVoice: "Stöðva", copy: "Afrita", copied: "Afritað", listening: "Hlusta…",
+    writing: "Skrifa upp…", micHttps: "Raddspurningar þurfa HTTPS (eða localhost) í vafranum", best: "besta",
+    icelandic: "Íslenska", english: "Enska", micBlocked: "Aðgangur að hljóðnema er lokaður", shortlist: "Stuttlisti", chosen: "valin",
     signal: { dictionary: "orðasafn", bm25: "leitarorð", e5: "merking (e5)", "bge-m3": "merking (bge-m3)" },
     live: { plan: q => `Skilið sem: ${q}`, split: n => `Skipt í ${n} spurningar`, searched: n => `Leitaði í ${n} töflum`,
             picked: "valdi", numbers: n => `${n} ${n === 1 ? "tala lesin" : "tölur lesnar"}`, checked: "Tölur bornar saman við töfluna",
@@ -441,7 +447,7 @@ async function askStream(body, onStep, signal) {
 const history = [];
 const HISTORY_TURNS = 3;
 
-async function ask(question, tableId = null, fast = false) {
+async function ask(question, tableId = null, fast = false, spoken = false) {
   showChat();
   const chat = $("#chat");
   const guess = lang === "auto" ? (/[þðæöáéíóúý]/i.test(question) ? "is" : "en") : lang;
@@ -452,7 +458,7 @@ async function ask(question, tableId = null, fast = false) {
   // "Answer now": stop this question (the server stops with it) and ask again with the fast model, thinking off
   const stop = new AbortController();
   if (!fast) progress.prepend(el("button", { class: "pill now", type: "button", onclick: () => {
-    stop.abort(); bot.remove(); ask(question, tableId, true); } }, `⚡ ${t("now", guess)}`));
+    stop.abort(); bot.remove(); ask(question, tableId, true, spoken); } }, `⚡ ${t("now", guess)}`));
   const bot = el("div", { class: "msg bot" }, card);
   chat.append(bot);
   setTimeout(() => bot.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "end" }), 380);
@@ -468,6 +474,7 @@ async function ask(question, tableId = null, fast = false) {
     await new Promise(r => setTimeout(r, reduceMotion ? 0 : 450));   // let the last tick land before the answer replaces it
     renderAnswer(card, answer);
     card.classList.add("arrive");
+    if (spoken && answer.status !== "error") card.querySelector(".chip.listen")?.click();   // asked by voice: answered aloud
     if (answer.status === "answered") history.push({
       question: answer.steps.find(st => st.name === "context")?.detail || question,   // the full question, so follow-ups chain
       answer: answer.text, tables: answer.sources.map(src => src.id) });
@@ -524,12 +531,56 @@ function renderAnswer(card, a) {
   }
   if (a.text_source === "model") meta.append(el("span", { class: "chip ok" }, t("checked", L)));
   if (a.total_ms) meta.append(el("span", { class: "chip" }, `${(a.total_ms / 1000).toFixed(1)} ${t("seconds", L)}`));
+  if (voiceList && a.status !== "error") {
+    const key = `answer-${Math.random()}`;
+    const listen = el("button", { type: "button", class: "chip listen" });
+    listen.innerHTML = `<span class="wave"><i></i><i></i><i></i></span><span class="lbl">${t("listen", L)}</span>`;
+    const label = listen.querySelector(".lbl");
+    listen.addEventListener("click", () => speak(key, prettyPeriods(a.text, L), L, null, s => {
+      voiceStateOn(listen)(s);
+      label.textContent = s === "idle" ? t("listen", L) : t("stopVoice", L);
+    }));
+    meta.append(listen);
+  }
+  const copy = el("button", { type: "button", class: "chip copy" }, t("copy", L));
+  copy.addEventListener("click", async () => {
+    const src = a.sources.map(s => `${s.id} ${s.url}`).join("\n");
+    try { await navigator.clipboard.writeText(prettyPeriods(a.text, L) + (src ? `\n\n${t("source", L)}: ${src}` : "")); } catch {}
+    copy.textContent = `✓ ${t("copied", L)}`;
+    copy.classList.add("done");
+    setTimeout(() => { copy.textContent = t("copy", L); copy.classList.remove("done"); }, 1800);
+  });
+  meta.append(copy);
   if (meta.childElementCount) card.append(meta);
 
   if (a.parts.length) card.append(dataTable(a.parts, L));
   if (a.parts.some(p => p.ranking?.length)) card.append(hitlistView(a.parts, L));
   if (a.steps.length) card.append(stepsView(a, L));
-  card.append(followups(a, L));
+  card.append(a.status === "answered" ? suggestions(a, L) : followups(a, L));
+}
+
+// Follow-up questions that lead somewhere, asked for once the answer is on screen so they never delay it. Ghost pills
+// shimmer meanwhile; then each suggestion pops in after the one before. If the server can't, the example questions do.
+const KIND = { en: { compare: "Compare", related: "Related", deeper: "Dig deeper", wider: "Bigger picture" },
+               is: { compare: "Samanburður", related: "Skylt efni", deeper: "Nánar", wider: "Víðara samhengi" } };
+function suggestions(a, L) {
+  const box = el("div", { class: "followups suggesting", "aria-label": t("more", L), "aria-busy": "true" },
+    ...[0, 1, 2, 3].map(i => el("span", { class: "pill ghost", style: `animation-delay:${i * 120}ms` })));
+  fetch("/api/suggest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) })
+    .then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(({ questions }) => {
+      if (!questions?.length) throw new Error("none");
+      box.classList.remove("suggesting");
+      box.removeAttribute("aria-busy");
+      box.replaceChildren(...questions.map((s, i) => {
+        const pill = el("button", { class: "pill suggestion", type: "button", style: `animation-delay:${i * 380}ms`,
+                                    onclick: () => ask(s.question) },
+          el("span", { class: `kind ${s.kind}` }, (KIND[L] || KIND.en)[s.kind] || s.kind), s.question);
+        return pill;
+      }));
+    })
+    .catch(() => box.replaceWith(followups(a, L)));
+  return box;
 }
 
 function followups(a, L) {
@@ -815,24 +866,11 @@ async function health() {
     $("#status").dataset.tables = h.tables_in_catalog.toLocaleString("en-US");
     const m = await (await fetch("/api/models")).json();
     if (modelChoice && !m.models.includes(modelChoice)) modelChoice = null;   // gone from the server
-    const pick = $("#model");
-    pick.replaceChildren(...m.models.map(name => el("option", { value: name },
-      name === m.default ? `${name} (best)` : name)));
-    pick.value = modelChoice || m.default;
-    pick.onchange = () => {
-      modelChoice = pick.value === m.default ? null : pick.value;
-      remember("ragstofan-model", modelChoice);
-      show();
-    };
-    // thinking length: the server's default (the longest) unless changed
-    const think = $("#reasoning"), names = t("effort");
-    think.replaceChildren(...m.reasoning.map(r => el("option", { value: r }, names[r] || r)));
-    think.value = reasoningChoice || m.reasoning_default;
-    think.onchange = () => { reasoningChoice = think.value === m.reasoning_default ? null : think.value; remember("ragstofan-reasoning", reasoningChoice); };
-    const temp = $("#temperature");
-    temp.value = temperatureChoice == null ? "" : String(temperatureChoice);
-    temp.onchange = () => { temperatureChoice = temp.value === "" ? null : +temp.value; remember("ragstofan-temperature", temperatureChoice); };
+    serverModels = m;
+    statusLine = show;
+    renderTuning();
     show();
+    loadVoices();
   } catch { $("#status").textContent = "backend offline"; }
 }
 
@@ -841,6 +879,7 @@ $("#ask").addEventListener("submit", e => {
   const q = $("#q").value.trim();
   if (!q) return;
   $("#q").value = "";
+  updateComposer();
   ask(q);
 });
 /* about: how it works and what it can't do yet */
@@ -941,3 +980,212 @@ document.body.prepend(el("svg", { svg: 1, width: 0, height: 0, style: "position:
 health();
 loadIndicators();
 pills.start();
+
+/* ---------- answer settings: model, thinking, temperature, as chips with menus (as in the app) ---------- */
+let serverModels = null, statusLine = () => {};
+const SVG = (d, extra = "") => `<svg viewBox="0 0 24 24" aria-hidden="true" ${extra}>${d}</svg>`;
+const ICON = {
+  sparkle: SVG('<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>'),
+  cpu: SVG('<rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3v3M14 3v3M10 18v3M14 18v3M3 10h3M3 14h3M18 10h3M18 14h3"/>'),
+  chevrons: SVG('<path d="M8 9l4-4 4 4M8 15l4 4 4-4"/>'),
+  check: SVG('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+};
+
+function renderTuning() {
+  const box = $("#tuning"), m = serverModels;
+  if (!box || !m) return;
+  const L = ui(), names = t("effort");
+  const levels = m.reasoning || ["none", "low", "medium", "high"];
+  const effort = reasoningChoice || m.reasoning_default;
+  const temp = temperatureChoice ?? 0;
+  const meter = levels.slice(1).map((_, i) =>
+    `<i style="height:${4 + i * 2.5}px" class="${i < levels.indexOf(effort) ? "on" : ""}"></i>`).join("");
+  const chips = [
+    { key: "model", changed: modelChoice != null,
+      face: `${modelChoice == null ? ICON.sparkle : ICON.cpu}<span>${modelChoice || m.default}</span>`,
+      options: m.models.map(x => ({ value: x, label: x === m.default ? `${x} <small>${t("best", L)}</small>` : x, on: (modelChoice || m.default) === x })),
+      pick: v => { modelChoice = v === m.default ? null : v; remember("ragstofan-model", modelChoice); statusLine(); } },
+    { key: "thinking", changed: reasoningChoice != null,
+      face: `<span class="meter">${meter}</span><span>${t("thinking", L)} <b>${names[effort] || effort}</b></span>`,
+      options: levels.map(x => ({ value: x, label: names[x] || x, on: effort === x })),
+      pick: v => { reasoningChoice = v === m.reasoning_default ? null : v; remember("ragstofan-reasoning", reasoningChoice); } },
+    { key: "temperature", changed: temperatureChoice != null,
+      face: `<span class="tdot" style="--t:${temp}"></span><span class="num">${temp.toFixed(1)}</span>`,
+      options: [0, 0.3, 0.7, 1].map(x => ({ value: x, label: x ? x.toFixed(1) : (L === "is" ? "0 · sama svar alltaf" : "0 · same answer every time"), on: temp === x })),
+      pick: v => { temperatureChoice = v === 0 ? null : v; remember("ragstofan-temperature", temperatureChoice); } },
+  ];
+  box.replaceChildren(...chips.map(c => {
+    const wrap = el("div", { class: "tchip-wrap" });
+    const btn = el("button", { type: "button", class: "tchip" + (c.changed ? " changed" : ""), "aria-haspopup": "true", "aria-expanded": "false" });
+    btn.innerHTML = c.face + `<span class="chev">${ICON.chevrons}</span>`;
+    const menu = el("div", { class: "tmenu", role: "menu" });
+    for (const o of c.options) {
+      const item = el("button", { type: "button", role: "menuitemradio", "aria-checked": String(o.on), class: o.on ? "on" : "" });
+      item.innerHTML = `<span class="tick">${o.on ? ICON.check : ""}</span><span>${o.label}</span>`;
+      item.addEventListener("click", () => { c.pick(o.value); closeMenus(); renderTuning(); bump(c.key); });
+      menu.append(item);
+    }
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      const open = !wrap.classList.contains("open");
+      closeMenus();
+      wrap.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", String(open));
+    });
+    wrap.dataset.key = c.key;
+    wrap.append(btn, menu);
+    return wrap;
+  }));
+}
+function closeMenus() { document.querySelectorAll(".tchip-wrap.open").forEach(w => { w.classList.remove("open"); w.querySelector(".tchip").setAttribute("aria-expanded", "false"); }); }
+function bump(key) {   // a little spring on the chip that changed
+  const chip = document.querySelector(`.tchip-wrap[data-key="${key}"] .tchip`);
+  if (chip && !reduceMotion) chip.animate([{ transform: "scale(.92)" }, { transform: "scale(1.04)" }, { transform: "scale(1)" }], { duration: 380, easing: "cubic-bezier(.2,.8,.2,1)" });
+}
+document.addEventListener("click", closeMenus);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenus(); });
+
+/* ---------- voice: listen to answers, pick a voice, ask with the microphone ---------- */
+let voiceList = null, voiceChoice = {};
+try { voiceChoice = JSON.parse(localStorage.getItem("ragstofan-voices") || "{}"); } catch {}
+let player = null, playingKey = null;
+
+async function loadVoices() {
+  try {
+    voiceList = await (await fetch("/api/voices")).json();
+  } catch { voiceList = null; }
+  renderVoices();
+  updateComposer();
+}
+
+function activeVoice(lang) { return voiceChoice[lang] || voiceList?.default?.[lang]; }
+
+/** Read text aloud in its language; the same key again stops it. onState(playing|loading|idle) updates the button. */
+async function speak(key, text, lang, voice, onState = () => {}) {
+  if (playingKey === key) { stopSpeaking(); return; }
+  stopSpeaking();
+  playingKey = key;
+  onState("loading");
+  try {
+    const r = await fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, language: lang, voice: voice || activeVoice(lang) }) });
+    if (!r.ok) throw new Error(r.status);
+    if (playingKey !== key) return;
+    player = new Audio(URL.createObjectURL(await r.blob()));
+    player.onended = () => { if (playingKey === key) { playingKey = null; onState("idle"); } };
+    player._onState = onState;
+    await player.play();
+    onState("playing");
+  } catch { if (playingKey === key) playingKey = null; onState("idle"); }
+}
+function stopSpeaking() {
+  if (player) { player.pause(); player._onState?.("idle"); player = null; }
+  document.querySelectorAll(".speaking,.loading-voice").forEach(b => b.classList.remove("speaking", "loading-voice"));
+  playingKey = null;
+}
+function voiceStateOn(btn) {
+  return s => { btn.classList.toggle("speaking", s === "playing"); btn.classList.toggle("loading-voice", s === "loading"); };
+}
+
+function renderVoices() {
+  const box = $("#voices");
+  if (!box) return;
+  if (!voiceList) { box.replaceChildren(el("p", { class: "muted small" }, "–")); return; }
+  const L = ui();
+  const sample = { is: "Íbúar Íslands voru 394.324 í byrjun árs 2026.", en: "Iceland had 394,324 inhabitants at the start of 2026." };
+  box.replaceChildren(...[["is", t("icelandic", L)], ["en", t("english", L)]].map(([lang, title]) =>
+    el("div", { class: "vgroup" }, el("span", { class: "vtitle" }, title),
+      ...(voiceList.voices[lang] || []).map(v => {
+        const chosen = activeVoice(lang) === v.id;
+        const b = el("button", { type: "button", class: "vrow" + (chosen ? " on" : "") });
+        b.innerHTML = `<span class="vplay">${SVG('<path d="M8 5.5v13l11-6.5z"/>')}</span><span class="vname">${v.name}<small>${v.engine}</small></span><span class="tick">${chosen ? ICON.check : ""}</span>`;
+        b.addEventListener("click", e => {
+          e.stopPropagation();
+          if (v.id === voiceList.default[lang]) delete voiceChoice[lang]; else voiceChoice[lang] = v.id;
+          try { localStorage.setItem("ragstofan-voices", JSON.stringify(voiceChoice)); } catch {}
+          renderVoices();
+          const fresh = [...box.querySelectorAll(".vrow")].find(x => x.querySelector(".vname").firstChild.textContent === v.name);
+          speak(`sample-${v.id}`, sample[lang], lang, v.id, voiceStateOn(fresh || b));
+        });
+        return b;
+      }))));
+}
+
+// the microphone: only where the browser allows it (HTTPS or localhost)
+let recorder = null, recordChunks = [], levelTimer = null, audioCtx = null;
+function updateComposer() {
+  const form = $("#ask");
+  const empty = !$("#q").value.trim();
+  form.classList.toggle("has-text", !empty);
+  const mic = $("#mic");
+  const can = !!voiceList && !!navigator.mediaDevices?.getUserMedia && window.isSecureContext;
+  mic.hidden = !voiceList;
+  mic.classList.toggle("unavailable", !can);
+  mic.title = can ? "" : t("micHttps", ui());
+}
+$("#q").addEventListener("input", updateComposer);
+
+$("#mic").addEventListener("click", async () => {
+  const form = $("#ask"), L = ui();
+  if (form.classList.contains("listening-on")) { finishListening(); return; }
+  if ($("#mic").classList.contains("unavailable")) { flashNote(t("micHttps", L)); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stopSpeaking();
+    recordChunks = [];
+    recorder = new MediaRecorder(stream);
+    recorder.ondataavailable = e => recordChunks.push(e.data);
+    recorder.start();
+    audioCtx = new AudioContext();
+    const an = audioCtx.createAnalyser();
+    an.fftSize = 256;
+    audioCtx.createMediaStreamSource(stream).connect(an);
+    const buf = new Uint8Array(an.frequencyBinCount);
+    const bars = form.querySelectorAll(".levels i");
+    levelTimer = setInterval(() => {
+      an.getByteTimeDomainData(buf);
+      const level = Math.min(1, Math.sqrt(buf.reduce((s, v) => s + (v - 128) ** 2, 0) / buf.length) / 40);
+      bars.forEach((b, i) => { b.style.height = `${6 + 22 * level * [0.45, 0.75, 1, 0.75, 0.45][i]}px`; });
+      form.style.setProperty("--level", level);
+    }, 50);
+    form.querySelector(".l-text").textContent = t("listening", L);
+    form.classList.add("listening-on");
+  } catch { flashNote(t("micBlocked", L)); }
+});
+$(".l-cancel").addEventListener("click", () => stopListening(true));
+
+function stopListening(cancel) {
+  const form = $("#ask");
+  clearInterval(levelTimer);
+  audioCtx?.close();
+  if (recorder) { recorder.stream.getTracks().forEach(tr => tr.stop()); if (cancel) { recorder.onstop = null; recorder.stop(); recorder = null; } }
+  form.classList.remove("listening-on");
+  form.style.removeProperty("--level");
+}
+async function finishListening() {
+  const form = $("#ask"), L = ui();
+  if (!recorder) return;
+  const rec = recorder;
+  recorder = null;
+  const done = new Promise(r => { rec.onstop = r; });
+  rec.stop();
+  stopListening(false);
+  await done;
+  form.classList.add("writing-on");
+  form.querySelector(".l-text").textContent = t("writing", L);
+  try {
+    const body = new FormData();
+    const type = rec.mimeType || "audio/webm";
+    body.append("audio", new Blob(recordChunks, { type }), "question." + (type.includes("mp4") ? "m4a" : "webm"));
+    if (lang !== "auto") body.append("language", lang);
+    const heard = await (await fetch("/api/stt", { method: "POST", body })).json();
+    if (heard.text) ask(heard.text, null, false, true);
+  } catch { flashNote(t("failed", L)); }
+  form.classList.remove("writing-on");
+}
+function flashNote(text) {
+  const n = el("div", { class: "flash" }, text);
+  document.body.append(n);
+  setTimeout(() => n.remove(), 3200);
+}
+updateComposer();

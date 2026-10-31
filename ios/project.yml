@@ -41,9 +41,9 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         ITSAppUsesNonExemptEncryption: false
-        # The server is the team's machine on the local network, reached over plain HTTP by its IP address
+        # The server is the team's machine, reached over plain HTTP on the local network or through Tailscale (100.x).
+        # Only NSAllowsArbitraryLoads: with NSAllowsLocalNetworking beside it iOS ignores it and blocks 100.x addresses.
         NSAppTransportSecurity:
-          NSAllowsLocalNetworking: true
           NSAllowsArbitraryLoads: true
         NSLocalNetworkUsageDescription: RAGstofan connects to the team's statistics server on your local network.
         NSMicrophoneUsageDescription: RAGstofan listens after you tap the microphone button, so you can ask by voice.

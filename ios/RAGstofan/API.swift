@@ -93,6 +93,18 @@ struct API {
         return data
     }
 
+    /// Follow-up questions for an answer already on screen, asked for afterwards so they never delay it.
+    func suggest(_ answer: Answer) async throws -> [Suggestion] {
+        var req = URLRequest(url: base.appendingPathComponent("api/suggest"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try Self.encoder.encode(answer)
+        req.timeoutInterval = 120
+        let (data, resp) = try await Self.session.data(for: req)
+        try check(resp, data)
+        return try Self.decoder.decode(SuggestionList.self, from: data).questions
+    }
+
     /// The voices answers can be read in, per language.
     func voices() async throws -> VoiceList {
         let (data, resp) = try await Self.session.data(from: voice.appendingPathComponent("voices"))
