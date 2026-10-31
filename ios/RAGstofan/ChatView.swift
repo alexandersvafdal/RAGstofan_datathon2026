@@ -9,6 +9,7 @@ struct ChatView: View {
     @State private var draft = ""
     @State private var showSettings = false
     @State private var drawer = false
+    @State private var tuning = false
     @FocusState private var focused: Bool
 
     var body: some View {
@@ -40,40 +41,42 @@ struct ChatView: View {
                 }
             }
             .background(pal.bg.ignoresSafeArea())
-            // how questions are answered, at the top under the title
-            .safeAreaInset(edge: .top, spacing: 0) {
-                Tuning()
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .frame(maxWidth: .infinity)
-                    .background(.ultraThinMaterial)
-            }
             .safeAreaInset(edge: .bottom) { composer(w) }
+            // how questions are answered: dropped down from the model name in the title
+            .overlay(alignment: .top) {
+                if tuning {
+                    Color.black.opacity(0.28).ignoresSafeArea()
+                        .onTapGesture { withAnimation(.spring(duration: 0.35)) { tuning = false } }
+                        .transition(.opacity)
+                    // scrolls only when the screen is too short for it (landscape)
+                    ViewThatFits(in: .vertical) {
+                        TuningPanel()
+                        ScrollView { TuningPanel() }.scrollIndicators(.hidden)
+                    }
+                        .padding(.horizontal, 12)
+                        .padding(.top, 6)
+                        .frame(maxWidth: 520)
+                        .transition(.asymmetric(insertion: .scale(scale: 0.92, anchor: .topLeading).combined(with: .opacity),
+                                                removal: .scale(scale: 0.96, anchor: .topLeading).combined(with: .opacity)))
+                }
+            }
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(pal.bg, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button { focused = false; withAnimation(.spring(duration: 0.4, bounce: 0.1)) { drawer = true } } label: {
-                        Image(systemName: "line.3.horizontal")
-                    }
-                    .accessibilityLabel(model.ui == .is ? "Valmynd og fyrri samtöl" : "Menu and past conversations")
-                }
-                ToolbarItem(placement: .principal) {
-                    HStack(spacing: 6) {
-                        Text("RAGstofan").font(.headline).foregroundStyle(pal.text)
-                        if model.privateMode {
-                            Label(model.ui == .is ? "Einka" : "Private", systemImage: "eye.slash")
-                                .font(.caption2.weight(.semibold)).labelStyle(.titleAndIcon)
-                                .foregroundStyle(pal.accent)
-                                .padding(.horizontal, 7).padding(.vertical, 3)
-                                .background(pal.soft, in: Capsule())
-                                .transition(.scale.combined(with: .opacity))
+                    HStack(spacing: 4) {
+                        Button { focused = false; tuning = false; withAnimation(.spring(duration: 0.4, bounce: 0.1)) { drawer = true } } label: {
+                            Image(systemName: "line.3.horizontal")
+                        }
+                        .accessibilityLabel(model.ui == .is ? "Valmynd og fyrri samtöl" : "Menu and past conversations")
+                        ModelTitle(open: tuning) {
+                            focused = false
+                            withAnimation(.spring(duration: 0.4, bounce: 0.2)) { tuning.toggle() }
                         }
                     }
-                    .animation(.spring(duration: 0.35), value: model.privateMode)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { showSettings = true } label: { Image(systemName: "slider.horizontal.3") }
+                    Button { tuning = false; showSettings = true } label: { Image(systemName: "gearshape") }
                         .accessibilityLabel(w.settings)
                 }
             }
@@ -233,109 +236,184 @@ struct ExchangeView: View {
     }
 }
 
-/// How the next question is answered: model, thinking length and temperature, as small menus above the question box.
-/// Untouched, they are the server's defaults (the best model, the longest thinking); a changed one is tinted.
-private struct Tuning: View {
+/// "qwen3.8:27b" -> "Qwen3.8:27B": how a model is named in the title and the picker.
+func prettyModel(_ name: String) -> String {
+    var n = name.prefix(1).uppercased() + name.dropFirst()
+    if n.lowercased().hasPrefix("gpt-oss") { n = "GPT-OSS" + n.dropFirst(7) }
+    if let r = n.range(of: #"(\d+(\.\d+)?)([bm])\b"#, options: .regularExpression) { n.replaceSubrange(r, with: n[r].uppercased()) }
+    return n
+}
+
+/// The model in use as the screen's title, with a chevron: it opens the panel for model, thinking and temperature.
+/// A tinted dot says something differs from the recommended settings; the Private tag sits beside it.
+private struct ModelTitle: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.pal) private var pal
+    let open: Bool
+    let action: () -> Void
+
+    var body: some View {
+        let changed = model.modelChoice != nil || model.reasoningChoice != nil || model.temperatureChoice != nil
+        Button(action: action) {
+            HStack(spacing: 5) {
+                Text(model.activeModel.map(prettyModel) ?? "RAGstofan")
+                    .font(.headline).foregroundStyle(pal.text)
+                    .contentTransition(.interpolate)
+                if changed { Circle().fill(pal.accent).frame(width: 6, height: 6).transition(.scale) }
+                Image(systemName: "chevron.down")
+                    .font(.caption.weight(.bold)).foregroundStyle(pal.text3)
+                    .rotationEffect(.degrees(open ? 180 : 0))
+                if model.privateMode {
+                    Image(systemName: "eye.slash").font(.caption.weight(.semibold)).foregroundStyle(pal.accent)
+                        .padding(5).background(pal.soft, in: Circle())
+                        .accessibilityLabel(model.ui == .is ? "Einkahamur" : "Private mode")
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .lineLimit(1)
+            .fixedSize()
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .animation(.spring(duration: 0.35), value: changed)
+        .animation(.spring(duration: 0.35), value: model.privateMode)
+        .animation(.spring(duration: 0.35, bounce: 0.3), value: open)
+        .accessibilityLabel(model.ui == .is ? "Líkan og stillingar svara" : "Model and answer settings")
+    }
+}
+
+/// The dropdown: model, thinking length and temperature in one layered card. The server's best settings are chosen
+/// until the user picks something else, and are tagged "Recommended"; one tap puts them all back.
+private struct TuningPanel: View {
     @Environment(AppModel.self) private var model
     @Environment(\.pal) private var pal
 
     var body: some View {
         let isl = model.ui == .is
-        let names = isl ? ["none": "Engin", "low": "Stutt", "medium": "Miðlungs", "high": "Löng"]
-                        : ["none": "Off", "low": "Short", "medium": "Medium", "high": "Long"]
-        let levels = model.models?.reasoning ?? ["none", "low", "medium", "high"]
         let best = model.models?.default
+        let fast = model.models?.fast
         let longest = model.models?.reasoningDefault ?? "high"
-        let temp = model.temperatureChoice ?? 0
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                Menu {
-                    Picker(isl ? "Líkan" : "Model", selection: Binding(get: { model.activeModel ?? "" },
-                                                                        set: { model.modelChoice = $0 == best ? nil : $0 })) {
-                        ForEach(model.models?.models ?? [], id: \.self) { m in
-                            Label(m == best ? "\(m) (\(isl ? "besta" : "best"))" : m, systemImage: m == best ? "star.fill" : "cpu").tag(m)
+        let levels = model.models?.reasoning ?? ["none", "low", "medium", "high"]
+        let names = isl ? ["none": "Engin", "low": "Stutt", "medium": "Miðl.", "high": "Löng"]
+                        : ["none": "Off", "low": "Short", "medium": "Medium", "high": "Long"]
+        let changed = model.modelChoice != nil || model.reasoningChoice != nil || model.temperatureChoice != nil
+        VStack(alignment: .leading, spacing: 0) {
+            section(isl ? "Líkan" : "Model") {
+                VStack(spacing: 2) {
+                    ForEach(model.models?.models ?? [], id: \.self) { m in
+                        let on = m == model.activeModel
+                        Button { model.modelChoice = m == best ? nil : m } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: m == best ? "sparkles" : m == fast ? "hare" : "cpu")
+                                    .font(.subheadline).frame(width: 22)
+                                    .foregroundStyle(on ? pal.accent : pal.text3)
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(prettyModel(m)).font(.subheadline.weight(on ? .semibold : .regular)).foregroundStyle(pal.text)
+                                    if m == best || m == fast {
+                                        Text(m == best ? (isl ? "Mælt með · nákvæmast" : "Recommended · most accurate")
+                                                       : (isl ? "Hraðast" : "Fastest"))
+                                            .font(.caption).foregroundStyle(m == best ? pal.accent : pal.text3)
+                                    }
+                                }
+                                Spacer()
+                                if on { Image(systemName: "checkmark").font(.subheadline.weight(.semibold)).foregroundStyle(pal.accent)
+                                        .transition(.scale.combined(with: .opacity)) }
+                            }
+                            .padding(.horizontal, 10).padding(.vertical, 9)
+                            .background(on ? pal.soft : .clear, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .contentShape(Rectangle())
                         }
-                    }
-                } label: {
-                    chip(changed: model.modelChoice != nil) {
-                        Image(systemName: model.modelChoice == nil ? "sparkles" : "cpu")
-                            .contentTransition(.symbolEffect(.replace))
-                        Text(model.activeModel ?? "–").contentTransition(.interpolate)
-                    }
-                }
-                Menu {
-                    Picker(isl ? "Hugsun" : "Thinking", selection: Binding(get: { model.activeReasoning },
-                                                                            set: { model.reasoningChoice = $0 == longest ? nil : $0 })) {
-                        ForEach(levels, id: \.self) { Text(names[$0] ?? $0).tag($0) }
-                    }
-                } label: {
-                    chip(changed: model.reasoningChoice != nil) {
-                        Meter(level: levels.firstIndex(of: model.activeReasoning) ?? 0, of: levels.count - 1)
-                        Text("\(isl ? "Hugsun" : "Thinking") ")
-                        + Text(names[model.activeReasoning] ?? model.activeReasoning).fontWeight(.semibold)
-                    }
-                }
-                Menu {
-                    Picker(isl ? "Hitastig" : "Temperature", selection: Binding(get: { model.temperatureChoice ?? 0 },
-                                                                                 set: { model.temperatureChoice = $0 == 0 ? nil : $0 })) {
-                        ForEach([0.0, 0.3, 0.7, 1.0], id: \.self) { t in
-                            Text(t == 0 ? (isl ? "0 · sama svar alltaf" : "0 · same answer every time") : String(format: "%.1f", t)).tag(t)
-                        }
-                    }
-                } label: {
-                    chip(changed: model.temperatureChoice != nil) {
-                        // cool at 0, warmer as it rises
-                        Circle()
-                            .fill(LinearGradient(colors: [pal.series1, pal.series2], startPoint: .bottom, endPoint: .top))
-                            .frame(width: 9, height: 9)
-                            .hueRotation(.degrees(temp * 40))
-                            .scaleEffect(0.8 + temp * 0.4)
-                        Text(String(format: "%.1f", temp)).monospacedDigit().contentTransition(.numericText(value: temp))
+                        .buttonStyle(.plain)
                     }
                 }
             }
-            .padding(.horizontal, 2)
-            .padding(.vertical, 1)
+            divider
+            section(isl ? "Hugsun" : "Thinking", note: names[longest].map { (isl ? "Mælt með: " : "Recommended: ") + $0 }) {
+                Segments(options: levels.map { ($0, names[$0] ?? $0) }, recommended: longest,
+                         selection: Binding(get: { model.activeReasoning },
+                                            set: { model.reasoningChoice = $0 == longest ? nil : $0 }))
+            }
+            divider
+            section(isl ? "Hitastig" : "Temperature",
+                    note: isl ? "0 gefur sama svar í hvert sinn" : "0 gives the same answer every time") {
+                Segments(options: [0.0, 0.3, 0.7, 1.0].map { ($0, String(format: "%.1f", $0)) }, recommended: 0.0,
+                         selection: Binding(get: { model.temperatureChoice ?? 0 },
+                                            set: { model.temperatureChoice = $0 == 0 ? nil : $0 }))
+            }
+            if changed {
+                divider
+                Button {
+                    model.modelChoice = nil; model.reasoningChoice = nil; model.temperatureChoice = nil
+                } label: {
+                    Label(isl ? "Nota ráðlagðar stillingar" : "Reset to recommended", systemImage: "arrow.counterclockwise")
+                        .font(.subheadline.weight(.medium)).foregroundStyle(pal.accent)
+                        .frame(maxWidth: .infinity).padding(.vertical, 12)
+                }
+                .buttonStyle(.plain)
+                .transition(.opacity)
+            }
         }
-        .disabled(model.models == nil)
-        .opacity(model.models == nil ? 0.5 : 1)
-        .animation(.spring(duration: 0.4, bounce: 0.25), value: model.modelChoice)
-        .animation(.spring(duration: 0.4, bounce: 0.25), value: model.reasoningChoice)
-        .animation(.spring(duration: 0.4, bounce: 0.25), value: model.temperatureChoice)
+        .padding(.vertical, 6)
+        .background(pal.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(pal.text.opacity(0.08)))
+        // layered: a soft wide shadow under a tight one
+        .shadow(color: .black.opacity(0.10), radius: 2, y: 1)
+        .shadow(color: .black.opacity(0.22), radius: 24, y: 12)
+        .animation(.spring(duration: 0.35, bounce: 0.2), value: model.modelChoice)
+        .animation(.spring(duration: 0.35, bounce: 0.2), value: changed)
         .sensoryFeedback(.selection, trigger: model.modelChoice)
         .sensoryFeedback(.selection, trigger: model.reasoningChoice)
         .sensoryFeedback(.selection, trigger: model.temperatureChoice)
     }
 
-    private func chip<C: View>(changed: Bool, @ViewBuilder _ content: () -> C) -> some View {
-        HStack(spacing: 6) {
+    private var divider: some View { Rectangle().fill(pal.text.opacity(0.07)).frame(height: 1).padding(.horizontal, 14) }
+
+    private func section<C: View>(_ title: String, note: String? = nil, @ViewBuilder _ content: () -> C) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(title.uppercased()).font(.caption2.weight(.semibold)).tracking(0.8).foregroundStyle(pal.text3)
+                Spacer()
+                if let note { Text(note).font(.caption2).foregroundStyle(pal.text3) }
+            }
+            .padding(.horizontal, 6)
             content()
-            Image(systemName: "chevron.up.chevron.down").font(.system(size: 8, weight: .semibold)).opacity(0.6)
         }
-        .font(.caption)
-        .lineLimit(1)
-        .foregroundStyle(changed ? pal.accent : pal.text2)
-        .padding(.horizontal, 11)
-        .padding(.vertical, 7)
-        .background(changed ? pal.soft : pal.card, in: Capsule())
-        .overlay(Capsule().stroke(changed ? pal.accent.opacity(0.35) : pal.text.opacity(0.1)))
-        .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
+        .padding(.horizontal, 10).padding(.vertical, 10)
     }
 }
 
-/// Thinking length as rising bars: none lit for Off, all four for Long.
-private struct Meter: View {
+/// A row of options with a sliding highlight; the recommended one carries a small dot.
+private struct Segments<V: Hashable>: View {
     @Environment(\.pal) private var pal
-    let level: Int
-    let of: Int
+    let options: [(V, String)]
+    let recommended: V
+    @Binding var selection: V
+    @Namespace private var ns
+
     var body: some View {
-        HStack(alignment: .bottom, spacing: 1.5) {
-            ForEach(0..<max(of, 1), id: \.self) { i in
-                Capsule()
-                    .fill(i < level ? pal.accent : pal.text.opacity(0.2))
-                    .frame(width: 2.5, height: 4 + CGFloat(i) * 2.5)
+        HStack(spacing: 2) {
+            ForEach(options, id: \.0) { value, label in
+                let on = value == selection
+                Button { withAnimation(.spring(duration: 0.35, bounce: 0.25)) { selection = value } } label: {
+                    VStack(spacing: 3) {
+                        Text(label).font(.subheadline.weight(on ? .semibold : .regular))
+                            .foregroundStyle(on ? pal.text : pal.text2)
+                        Circle().fill(value == recommended ? pal.accent : .clear).frame(width: 4, height: 4)
+                    }
+                    .frame(maxWidth: .infinity).padding(.vertical, 7)
+                    .background {
+                        if on {
+                            RoundedRectangle(cornerRadius: 10, style: .continuous).fill(pal.card)
+                                .shadow(color: .black.opacity(0.12), radius: 3, y: 1)
+                                .matchedGeometryEffect(id: "on", in: ns)
+                        }
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
             }
         }
-        .frame(height: 12, alignment: .bottom)
+        .padding(3)
+        .background(pal.text.opacity(0.06), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
     }
 }
