@@ -1,0 +1,48 @@
+# Xcode project for the RAGstofan iPhone app. Generate the .xcodeproj with:  cd ios && xcodegen
+name: RAGstofan
+options:
+  bundleIdPrefix: com.alexandersvarfdal
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    DEVELOPMENT_TEAM: L76JG6N5NJ          # Alexander Svarfdal Gudmundsson (personal)
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "2"
+targets:
+  RAGstofan:
+    type: application
+    platform: iOS
+    sources: [RAGstofan]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.alexandersvarfdal.ragstofan
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_CFBundleDisplayName: RAGstofan
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+    info:
+      path: RAGstofan/Info.plist
+      properties:
+        CFBundleDisplayName: RAGstofan
+        UILaunchScreen: {}
+        # The written Info.plist wins over INFOPLIST_KEY_ settings, so orientations go here; iPad needs all four
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        ITSAppUsesNonExemptEncryption: false
+        # The server is the team's machine on the local network, reached over plain HTTP by its IP address
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+          NSAllowsArbitraryLoads: true
+        NSLocalNetworkUsageDescription: RAGstofan connects to the team's statistics server on your local network.

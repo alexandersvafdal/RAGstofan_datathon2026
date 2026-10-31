@@ -1,0 +1,104 @@
+// The server's JSON, as hagbot/schemas.py and hagbot/indicators.py define it. Keys arrive in snake_case and are
+// decoded with .convertFromSnakeCase, so `text_source` becomes `textSource`.
+import Foundation
+
+struct TableRef: Codable, Hashable { let id: String; let title: String; let url: String }
+
+struct Fact: Codable, Hashable { let label: String; let value: Double; let unit: String; let formatted: String }
+
+struct Computation: Codable, Hashable { let op: String; let expression: String; let result: Double; let unit: String }
+
+struct ChartPoint: Codable, Hashable { let x: String; let y: Double; let series: String? }
+
+struct ChartSpec: Codable, Hashable {
+    let type: String          // "kpi", "line" or "bar"
+    let title: String
+    let xLabel: String
+    let yLabel: String
+    let unit: String
+    let data: [ChartPoint]
+}
+
+struct Row: Codable, Hashable {
+    let key: [String: String]
+    let labels: [String: String]
+    let value: Double?
+}
+
+struct RankedTable: Codable, Hashable { let id: String; let title: String; let score: Double; let signals: [String] }
+
+struct AnswerPart: Codable, Hashable {
+    let subQuestion: String
+    let table: TableRef
+    let selection: [String: [String]]
+    let rows: [Row]
+    let unit: String
+    let computation: Computation?
+    let facts: [Fact]
+    let chart: ChartSpec?
+    let note: String?
+    let ranking: [RankedTable]?
+}
+
+struct ClarifyOption: Codable, Hashable { let label: String; let tableId: String }
+struct Clarification: Codable, Hashable { let message: String; let options: [ClarifyOption] }
+
+struct Step: Codable, Hashable { let name: String; let ms: Int; let detail: String }
+
+struct Answer: Codable, Hashable {
+    let question: String
+    let language: String
+    let status: String        // "answered", "clarify" or "error"
+    let text: String
+    let parts: [AnswerPart]
+    let clarification: Clarification?
+    let sources: [TableRef]
+    let steps: [Step]
+    let textSource: String
+    let llmCalls: Int
+    let totalMs: Int
+    let model: String
+}
+
+/// One earlier question and answer, sent back so "what about last year?" can be understood.
+struct Turn: Codable, Hashable { let question: String; let answer: String; let tables: [String] }
+
+struct AskRequest: Encodable {
+    let question: String
+    let language: String?
+    let tableId: String?
+    let history: [Turn]
+    let model: String?        // nil: the server's default, the best one measured
+}
+
+/// The models a question can go to; the default is the server's best.
+struct ModelList: Codable { let `default`: String; let models: [String] }
+
+struct Health: Codable { let model: String; let dataSource: String; let tablesInCatalog: Int }
+
+struct LangText: Codable, Hashable {
+    let en: String
+    let `is`: String
+    func callAsFunction(_ lang: Lang) -> String { lang == .is ? self.is : en }
+}
+
+struct Indicator: Codable, Hashable, Identifiable {
+    let id: String
+    let label: LangText
+    let unit: LangText
+    let value: Double
+    let period: String
+    let previous: Double?
+    let previousPeriod: String?
+    let series: [ChartPoint]
+    let table: [String: String]
+    let question: LangText
+}
+
+struct Indicators: Codable { let dataAsOf: String; let indicators: [Indicator] }
+
+/// A line of the answer stream: a pipeline step the moment it finishes, then the answer.
+enum StreamEvent {
+    case step(Step)
+    case answer(Answer)
+}

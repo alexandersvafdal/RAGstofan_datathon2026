@@ -8,3 +8,8 @@ Slides/
 data/release/
 data/*.vectors.bin
 data/*.vectors.json
+
+# iOS app build output
+ios/build/
+ios/*.xcodeproj/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/xcuserdata/
