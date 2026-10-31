@@ -61,11 +61,12 @@ _PERIOD = re.compile(r"\b(?:18|19|20)\d\d(?:M\d\d|Q\d)?\b")
 
 def _series_sentence(p: AnswerPart, lang: str) -> str | None:
     """A trend in one sentence per line: where it started, where it is now, and its highest point."""
-    periods = [_PERIOD.search(f.label) for f in p.facts]
-    if len(p.facts) <= 3 or not all(periods):
+    facts = p.facts[:-1] if p.computation else p.facts   # the calculated change is said on its own, below
+    periods = [_PERIOD.search(f.label) for f in facts]
+    if len(facts) <= 3 or not all(periods):
         return None
     lines: dict[str, list] = {}  # one line per series: the label without its period
-    for f, m in zip(p.facts, periods):
+    for f, m in zip(facts, periods):
         lines.setdefault(re.sub(r"(\s*,)+", ",", _PERIOD.sub("", f.label)).strip(" ,"), []).append((m.group(0), f))
     out = []
     for measure, pts in lines.items():
@@ -75,6 +76,8 @@ def _series_sentence(p: AnswerPart, lang: str) -> str | None:
             out.append(f"{measure}: {first.formatted} ({p0}), {last.formatted} ({p1}); hæst {peak.formatted} ({pk})")
         else:
             out.append(f"{measure}: {first.formatted} in {p0}, {last.formatted} in {p1}; highest {peak.formatted} in {pk}")
+    if p.computation:
+        out.append(f"{p.facts[-1].label}: {p.facts[-1].formatted}")
     return ". ".join(out)
 
 

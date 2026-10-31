@@ -123,6 +123,18 @@ def _window(q: str) -> tuple[int, str] | None:
         "quarter" if unit.startswith(("quarter", "arsfjord")) else "year"
 
 
+def _same_year_edge(var: Variable, v: str) -> str | None:
+    """The table's first or last period, when v is a period of the same kind and year just beyond it."""
+    first, last = var.values[0], var.values[-1]
+    if len(v) != len(first) or v[:4].isdigit() is False or v[4:5] != first[4:5]:
+        return None
+    if v < first and v[:4] == first[:4]:
+        return first
+    if v > last and v[:4] == last[:4]:
+        return last
+    return None
+
+
 def _default(var: Variable) -> list[str]:
     if var.time:
         return [var.values[-1]]
@@ -148,13 +160,19 @@ def guess_op(question: str) -> str | None:
     return next((op for op, rx in _INTENT if rx.search(q)), None)
 
 
-def resolve(meta: TableMeta, sel: Selection, question: str = "") -> Resolved:
+def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | None = None) -> Resolved:
     """Map whatever the model returned onto valid codes; fill gaps with defaults."""
     notes, out = [], {}
     by_key = {normalize(k): k for k in sel.selections}
     for var in meta.variables:
         raw = sel.selections.get(var.code) or sel.selections.get(by_key.get(normalize(var.text), ""), [])
         codes = [c for c in (_resolve_value(var, v) for v in raw) if c]
+        if var.time:   # "2000M01" in a table that starts at 2000M03: the nearest period in the same year
+            for v in raw:
+                if not _resolve_value(var, v) and (near := _same_year_edge(var, v)):
+                    codes.append(near)
+                    notes.append(f"{var.text}: {v} is outside the table, using {near}")
+            raw = [v for v in raw if _resolve_value(var, v) or not _same_year_edge(var, v)]
         if len(codes) < len(raw):
             notes.append(f"{var.text}: dropped unknown values {[v for v in raw if not _resolve_value(var, v)]}")
         if not codes:
@@ -215,7 +233,10 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "") -> Resolved:
     # "The last 15 years": from that calendar year to the latest period. A window reaching back before the table
     # starts gets every period there is, and the answer says where the table begins.
     # ("in the last 12 months" with inflation or wages is the published annual change, handled above)
-    window = None if re.search(_ANNUAL_ASK, q) else _window(q)
+    # Read from this part alone: "the past 5 years compared to 2000 to 2005" is planned as two parts, and the second
+    # must keep its own years. A part that names a year has no window.
+    own = normalize(part or question)
+    window = None if re.search(_ANNUAL_ASK, q) or re.search(r"\b(?:18|19|20)\d\d\b", own) else _window(own)
     window_note = None
     if window:
         for var in meta.variables:
@@ -325,9 +346,9 @@ async def select(llm: LLM, meta: TableMeta, question: str, original: str | None 
     user = f"{asked}\n\nTable {meta.id}: {meta.title}\nDimensions:\n" + "\n".join(lines)
     if not voting_on():
         sel = await llm.complete_json(SYSTEM, user, Selection)
-        return resolve(meta, sel, f"{original or ''} {question}")
+        return resolve(meta, sel, f"{original or ''} {question}", part=question)
     sel, agreement = vote_selection(await ask_all(llm, SYSTEM, user, Selection))
-    res = resolve(meta, sel, f"{original or ''} {question}")
+    res = resolve(meta, sel, f"{original or ''} {question}", part=question)
     res.notes.insert(0, "votes: " + ", ".join(f"{(meta.var(k).text if k in {v.code for v in meta.variables} else k)} {a}"
                                               for k, a in agreement.items()))
     return res
