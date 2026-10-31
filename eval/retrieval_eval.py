@@ -1,8 +1,8 @@
 """Search only, no model: is an accepted table among the first k search hits? Seconds per run, so use it to compare
 card texts and search settings before a full eval.
 
-    python -m eval.retrieval_eval                               # every question file in eval/
-    python -m eval.retrieval_eval --questions eval/questions_official.jsonl --k 5 15
+    python -m eval.retrieval_eval                               # dev sets + organizers (never the holdout)
+    python -m eval.retrieval_eval --questions eval/organizers.jsonl --k 5 15
     python -m eval.retrieval_eval --catalog data/catalog_enriched.json --show-misses
 
 A hard question names two tables; it counts only when both are found. The search runs on the question as asked,
@@ -34,7 +34,8 @@ def ranks(catalog: Catalog, q: dict, depth: int) -> list[int | None]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--questions", nargs="*", default=sorted(str(p) for p in HERE.glob("questions*.jsonl")))
+    # the holdout is left out unless named: tuning against it would spoil it
+    ap.add_argument("--questions", nargs="*", default=[str(HERE / f) for f in ("dev_core.jsonl", "dev_topics.jsonl", "organizers.jsonl")])
     ap.add_argument("--catalog", default=str(settings.catalog_path))
     ap.add_argument("--k", nargs="*", type=int, default=[1, 5, 15])
     ap.add_argument("--show-misses", action="store_true")

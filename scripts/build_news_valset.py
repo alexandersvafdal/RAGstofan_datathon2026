@@ -3,7 +3,7 @@ Statistics Iceland itself.
 
     python -m scripts.build_news_valset scrape --limit 40     # fetch the newest English releases (10 s apart)
     python -m scripts.build_news_valset draft                 # model writes questions; code keeps only checked ones
-    python -m scripts.build_news_valset add eval/news_drafts.json   # hand-written questions, same check
+    python -m scripts.build_news_valset add eval/holdout_news_drafts.json   # hand-written questions, same check
 
 1. scrape: the newest articles from statice.is/publications/news-archive, cached in .cache/news/ (the site's
    robots.txt asks for 10 s between requests, and that is kept).
@@ -12,7 +12,7 @@ Statistics Iceland itself.
    appears verbatim in the article text, so the answer key is Statistics Iceland's wording, not the model's.
    The scoring tolerance follows the article's rounding: "roughly 1,039,000" allows ±500, "5.4%" allows ±0.05.
 
-Output: eval/questions_news.jsonl in the eval format (expected_tables empty: any table may answer). This set is for
+Output: eval/holdout_news.jsonl in the eval format (expected_tables empty: any table may answer). This set is for
 measuring only. Do not fix the bot against its questions, or it stops telling us anything.
 """
 
@@ -32,7 +32,7 @@ from hagbot.llm import LLM, LLMError
 BASE = "https://statice.is"
 LIST = f"{BASE}/publications/news-archive/"
 CACHE = Path(".cache/news")
-OUT = Path("eval/questions_news.jsonl")
+OUT = Path("eval/holdout_news.jsonl")
 AGENT = "RAGstofan-datathon2026 (validation set; contact via github.com/alexandersvafdal/RAGstofan_datathon2026)"
 DELAY_S = 10  # robots.txt: Crawl-delay: 10
 

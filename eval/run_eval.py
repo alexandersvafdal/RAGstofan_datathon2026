@@ -98,7 +98,7 @@ def compare(results: list[dict], baseline_path: Path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--questions", default=str(HERE / "questions.jsonl"))
+    ap.add_argument("--questions", default=str(HERE / "dev_core.jsonl"))
     ap.add_argument("--level")
     ap.add_argument("--language")
     ap.add_argument("--ids", help="comma-separated question ids")

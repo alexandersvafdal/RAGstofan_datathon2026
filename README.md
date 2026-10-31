@@ -60,7 +60,7 @@ Every LLM step has a Pydantic output schema (`hagbot/steps/*.py`). The model nev
 .venv/bin/python -m eval.run_eval --label my-change --baseline eval/results/<previous>.json
 ```
 
-The ten seed questions in `eval/questions.jsonl` only use numbers from the organizers' slides. On Friday, convert the kit's 52 questions into this format and record the baseline first.
+The ten seed questions in `eval/dev_core.jsonl` only use numbers from the organizers' slides. On Friday, convert the kit's 52 questions into this format and record the baseline first.
 
 Results so far (live PX-API, full 1,857-table catalog):
 
@@ -77,7 +77,7 @@ Results so far (live PX-API, full 1,857-table catalog):
 
 | + annual-change options, multi-word synonyms, forecast filter, share completion (fixes from the second set) | 14b | 10/10 (median 49 s) |
 
-Second question set, `eval/questions_heldout.jsonl`: 20 questions on inflation, wages, exports, hotel stays,
+Second question set, `eval/dev_topics.jsonl`: 20 questions on inflation, wages, exports, hotel stays,
 Keflavík passengers, house prices, births, GDP, migration, mean age and cars (13 English, 7 Icelandic), answers
 read from the live API on 30 Oct 2026.
 
@@ -108,4 +108,4 @@ are not on the accepted lists; the numbers match.
 1. Clone `gagnvist-starter`, run its `gagnvist evaluate` for the official baseline.
 2. Load the kit's `cards/` into `Catalog` and its `data.px` files into a `LocalPxSource`.
 3. Point `LLM_BASE_URL` at the LUMI tunnel.
-4. Port the 52 questions to `eval/questions.jsonl`; work on table choice first.
+4. Port the 52 questions to `eval/dev_core.jsonl`; work on table choice first.
