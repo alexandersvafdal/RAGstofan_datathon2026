@@ -44,9 +44,16 @@ def _allowed_numbers(parts: list[AnswerPart]) -> set[float]:
     return allowed
 
 
+_SCALE = re.compile(r"\b(thousand|million|billion|trillion|þúsund|milljón|milljónir|milljarð|milljarðar|bn|mn)\w*", re.I)
+
+
 def verify(text: str, parts: list[AnswerPart]) -> bool:
+    """Every number in the text is in the facts, and no scale word ("10.254 milljónir") turns a right number wrong."""
     allowed = _allowed_numbers(parts)
-    return all(any(abs(n - a) < 0.051 for a in allowed) for n in numbers_in(text))
+    if not all(any(abs(n - a) < 0.051 for a in allowed) for n in numbers_in(text)):
+        return False
+    facts_text = " ".join(f"{p.table.title} {p.unit} {f.label} {f.unit}" for p in parts for f in p.facts)
+    return not (_SCALE.search(text) and not _SCALE.search(facts_text))
 
 
 _PERIOD = re.compile(r"\b(?:18|19|20)\d\d(?:M\d\d|Q\d)?\b")

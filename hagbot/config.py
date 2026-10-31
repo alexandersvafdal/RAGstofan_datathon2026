@@ -19,6 +19,9 @@ class Settings:
     llm_model: str = os.getenv("LLM_MODEL", "qwen2.5:7b")
     llm_api_key: str = os.getenv("LLM_API_KEY", "ollama")
     llm_timeout_s: float = float(os.getenv("LLM_TIMEOUT_S", "300"))
+    # Reasoning models think before they answer. "none" turns that off for Qwen3-style models (2-3x faster here);
+    # gpt-oss takes "low" / "medium" / "high". Empty: send nothing, the server's default.
+    llm_reasoning_effort: str = os.getenv("LLM_REASONING_EFFORT", "")
 
     data_source: str = os.getenv("DATA_SOURCE", "fixtures")
     px_base_url: str = os.getenv("PX_BASE_URL", "https://px.hagstofa.is")

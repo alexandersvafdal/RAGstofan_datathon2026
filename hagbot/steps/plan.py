@@ -18,6 +18,8 @@ SYSTEM = """You plan lookups in Statistics Iceland's official statistics tables.
 Split the user's question into the smallest number of sub-questions (1 to 3) where each can be answered from ONE table.
 Most questions need exactly one. Only split when the question asks about clearly different topics
 (for example population AND unemployment).
+Never split a comparison within one measure: "how many more men than women", "Reykjavík vs Kópavogur",
+"share of foreigners", "change from 2025 to 2026" are each ONE sub-question, because one table holds both sides.
 Write sub-questions and search queries in English even if the user wrote Icelandic.
 Keep place names in their Icelandic spelling (Reykjavík, Kópavogur, Akureyri).
 Icelandic words that are easy to mistranslate:
