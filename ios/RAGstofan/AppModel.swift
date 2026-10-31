@@ -334,8 +334,14 @@ final class AppModel {
         return (try? JSONDecoder().decode([Conversation].self, from: data)) ?? []
     }
 
+    /// Encoding every saved conversation (rows, steps and all) takes long enough to freeze the screen just as an
+    /// answer arrives, so it happens off the main thread, one write at a time, in order.
+    private static let writer = DispatchQueue(label: "ragstofan.history", qos: .utility)
     private func write() {
-        if let data = try? JSONEncoder().encode(conversations) { try? data.write(to: Self.file, options: .atomic) }
+        let snapshot = conversations, file = Self.file
+        Self.writer.async {
+            if let data = try? JSONEncoder().encode(snapshot) { try? data.write(to: file, options: .atomic) }
+        }
     }
 
     /// Store the conversation on screen, newest first, after each answer.

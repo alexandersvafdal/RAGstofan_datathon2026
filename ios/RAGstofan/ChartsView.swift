@@ -34,6 +34,7 @@ struct ChartBlock: View {
     let comp: Computation?
     let lang: Lang
     var compare = false
+    private let views: [String]   // decided once: it scans every point
     @State private var view: String
 
     init(chart: ChartSpec, comp: Computation?, lang: Lang, compare: Bool = false) {
@@ -41,11 +42,11 @@ struct ChartBlock: View {
         self.comp = comp
         self.lang = lang
         self.compare = compare
-        _view = State(initialValue: viewsFor(chart, comp, compare: compare).first ?? "bars")
+        views = viewsFor(chart, comp, compare: compare)
+        _view = State(initialValue: views.first ?? "bars")
     }
 
     var body: some View {
-        let views = viewsFor(chart, comp, compare: compare)
         VStack(alignment: .leading, spacing: 12) {
             Text(chart.title).font(.subheadline.weight(.semibold)).foregroundStyle(pal.text2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -103,50 +104,52 @@ private struct ChartCanvas: View {
     @State private var selected: String?
     @State private var grow = 0.0   // 0 → 1 as the chart draws itself in
 
-    private var pts: [Pt] {
+    // Everything the chart draws from, worked out once when the chart is made. These were computed properties, and
+    // rise() read yDomain, which rebuilt and sorted every point: hundreds of rebuilds per frame while a long series
+    // drew itself in, scrolled or was scrubbed.
+    private let pts: [Pt]
+    private let series: [String]        // in the order they first appear; one entry ("") for a single line
+    private let labels: [String]
+    private let byLabel: [String: [Pt]]
+    private let yearsOnly: Bool          // many months: the axis names years only, at Januaries
+    private let ticks: [String]          // at most five x labels, evenly spread, so they never collide
+    private let yDomain: ClosedRange<Double>
+    private let stackDomain: ClosedRange<Double>
+    private let maxY: Double
+
+    init(chart: ChartSpec, comp: Computation?, lang: Lang, view: String, compare: Bool = false) {
+        self.chart = chart; self.comp = comp; self.lang = lang; self.view = view; self.compare = compare
         var d = chart.data.enumerated().map { i, p in Pt(id: i, x: p.x, label: fmtPeriod(p.x, lang), y: p.y, series: p.series ?? "") }
         if d.allSatisfy({ isPeriod($0.x) }) { d.sort { ($0.x, $0.id) < ($1.x, $1.id) } }
-        return d
+        pts = d
+        var seenS: [String] = [], seenSet = Set<String>()
+        var seenL: [String] = [], labelSet = Set<String>()
+        var by: [String: [Pt]] = [:]
+        for p in d {
+            if seenSet.insert(p.series).inserted { seenS.append(p.series) }
+            if labelSet.insert(p.label).inserted { seenL.append(p.label) }
+            by[p.label, default: []].append(p)
+        }
+        series = seenS.isEmpty ? [""] : Array(seenS.prefix(7))
+        labels = seenL
+        byLabel = by
+        let monthly = seenL.count > 24 && d.allSatisfy { $0.x.count == 7 && $0.x.dropFirst(4).first == "M" }
+        yearsOnly = monthly
+        let candidates = monthly ? seenL.filter { by[$0]?.first?.x.hasSuffix("M01") == true } : seenL
+        let step = max(1, Int((Double(candidates.count) / 5).rounded(.up)))
+        ticks = stride(from: 0, to: candidates.count, by: step).map { candidates[$0] }
+        let ys = d.map(\.y)
+        let lo = ys.min() ?? 0, hi = ys.max() ?? 1
+        let pad = hi > lo ? (hi - lo) * 0.12 : max(abs(hi) * 0.05, 1)
+        yDomain = (lo - pad)...(hi + pad)
+        let top = by.values.map { $0.reduce(0) { $0 + max($1.y, 0) } }.max() ?? 1
+        stackDomain = 0...max(top * 1.05, 1)
+        maxY = hi
     }
-    /// Series in the order they first appear; one entry ("") when there is a single line.
-    private var series: [String] {
-        var seen: [String] = []
-        for p in pts where !seen.contains(p.series) { seen.append(p.series) }
-        return seen.isEmpty ? [""] : Array(seen.prefix(7))
-    }
+
     private var multi: Bool { series.count > 1 }
     private func colors(_ n: Int) -> [Color] { Array((pal.series + [pal.text.opacity(0.25)]).prefix(max(n, 1))) }
     private func color(_ s: String) -> Color { colors(series.count)[series.firstIndex(of: s) ?? 0] }
-    private var labels: [String] {
-        var seen: [String] = []
-        for p in pts where !seen.contains(p.label) { seen.append(p.label) }
-        return seen
-    }
-    /// Many months: the axis names years only, at Januaries, so the dates never run together.
-    private var yearsOnly: Bool {
-        labels.count > 24 && pts.allSatisfy { $0.x.range(of: #"^\d{4}M\d\d$"#, options: .regularExpression) != nil }
-    }
-    /// At most five x labels, evenly spread, so they never collide.
-    private var ticks: [String] {
-        if yearsOnly {
-            let jans = labels.filter { l in pts.contains { $0.label == l && $0.x.hasSuffix("M01") } }
-            let step = max(1, Int((Double(jans.count) / 5).rounded(.up)))
-            return stride(from: 0, to: jans.count, by: step).map { jans[$0] }
-        }
-        let step = max(1, Int((Double(labels.count) / 5).rounded(.up)))
-        return stride(from: 0, to: labels.count, by: step).map { labels[$0] }
-    }
-    private var yDomain: ClosedRange<Double> {
-        let ys = pts.map(\.y)
-        let lo = ys.min() ?? 0, hi = ys.max() ?? 1
-        let pad = hi > lo ? (hi - lo) * 0.12 : max(abs(hi) * 0.05, 1)
-        return (lo - pad)...(hi + pad)
-    }
-    /// Zero to the tallest stack.
-    private var stackDomain: ClosedRange<Double> {
-        let top = Dictionary(grouping: pts, by: \.label).values.map { $0.reduce(0) { $0 + max($1.y, 0) } }.max() ?? 1
-        return 0...max(top * 1.05, 1)
-    }
     /// Values while drawing in: lines rise from the floor of the chart, bars grow from zero.
     private func rise(_ y: Double) -> Double { yDomain.lowerBound + (y - yDomain.lowerBound) * grow }
     private func scaled(_ y: Double) -> Double { y * grow }
@@ -261,7 +264,7 @@ private struct ChartCanvas: View {
     private func tooltip(_ label: String) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(label).font(.caption2).foregroundStyle(pal.text3)
-            ForEach(pts.filter { $0.label == label }) { p in
+            ForEach(byLabel[label] ?? []) { p in
                 HStack(spacing: 5) {
                     if multi {
                         Circle().fill(color(p.series)).frame(width: 7, height: 7)
@@ -331,7 +334,7 @@ private struct ChartCanvas: View {
                 }
             }
             .chartYAxis { AxisMarks { AxisValueLabel().font(.caption2).foregroundStyle(pal.text2) } }
-            .chartXScale(domain: 0...max((pts.map(\.y).max() ?? 1) * 1.02, 1), range: .plotDimension(endPadding: multi ? 0 : 56))
+            .chartXScale(domain: 0...max(maxY * 1.02, 1), range: .plotDimension(endPadding: multi ? 0 : 56))
             .chartLegend(multi ? .visible : .hidden)
             .chartLegend(position: .top, alignment: .leading)
             .frame(height: CGFloat(max(150, labels.count * (multi ? 22 * series.count : 30) + 30)))
@@ -359,7 +362,7 @@ private struct ChartCanvas: View {
             }
         }
         .chartYAxis { AxisMarks { AxisValueLabel().font(.caption2).foregroundStyle(pal.text2) } }
-        .chartXScale(domain: 0...max((pts.map(\.y).max() ?? 1) * 1.02, 1), range: .plotDimension(endPadding: 56))
+        .chartXScale(domain: 0...max(maxY * 1.02, 1), range: .plotDimension(endPadding: 56))
         .frame(height: CGFloat(max(150, labels.count * 32 + 30)))
     }
 
@@ -483,13 +486,15 @@ private struct Axes: ViewModifier {
     let compact: (Double) -> String
     var yearsOnly = false
     func body(content: Content) -> some View {
-        content
+        let tickSet = Set(ticks)
+        return content
             .chartXAxis {
+                // a category axis takes no explicit tick list: every category gets a mark, only the evenly spread
+                // ticks get text, looked up in a set
                 AxisMarks { v in
-                    // every category gets a mark; only the evenly spread ticks get text
                     AxisValueLabel(collisionResolution: .disabled) {
                         let s = v.as(String.self) ?? ""
-                        Text(ticks.contains(s) ? (yearsOnly ? String(s.suffix(4)) : s) : "").font(.caption2).foregroundStyle(pal.text3)
+                        Text(tickSet.contains(s) ? (yearsOnly ? String(s.suffix(4)) : s) : "").font(.caption2).foregroundStyle(pal.text3)
                     }
                 }
             }

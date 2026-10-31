@@ -282,13 +282,20 @@ private struct CountUp: View, Animatable {
         get { value }
         set { value = newValue }
     }
-    var body: some View {
+    // one formatter per number of decimals, not a new one on every frame of the count
+    private static var formatters: [Int: NumberFormatter] = [:]
+    private static func formatter(_ digits: Int) -> NumberFormatter {
+        if let f = formatters[digits] { return f }
         let f = NumberFormatter()
         f.numberStyle = .decimal
         f.locale = Locale(identifier: "en_US")
         f.minimumFractionDigits = digits
         f.maximumFractionDigits = digits
-        let s = f.string(from: NSNumber(value: value)) ?? ""
+        formatters[digits] = f
+        return f
+    }
+    var body: some View {
+        let s = Self.formatter(digits).string(from: NSNumber(value: value)) ?? ""
         return Text(lang == .is ? String(s.map { $0 == "," ? "." : $0 == "." ? "," : $0 }) : s)
     }
 }

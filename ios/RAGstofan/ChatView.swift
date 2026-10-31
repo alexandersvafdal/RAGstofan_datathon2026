@@ -18,7 +18,8 @@ struct ChatView: View {
         NavigationStack {
             ScrollViewReader { proxy in
                 ScrollView {
-                    VStack(spacing: 20) {
+                    // lazy: past answers (charts, tables) are built only when they scroll into view
+                    LazyVStack(spacing: 20) {
                         if model.exchanges.isEmpty {
                             HomeView(ask: send, openSettings: { showSettings = true })
                                 .transition(.opacity.combined(with: .scale(scale: 0.97)))
