@@ -115,15 +115,8 @@ struct LiveStepsView: View {
             line(w.searched(model.health?.tablesInCatalog ?? 1857, picked)
                  + (via.map { " · " + w.via($0) } ?? "") + (concepts.map { " (\($0))" } ?? ""))
             if let v = firstGroups(#"votes (\d+/\d+)"#, s.detail)?[1] { line(w.votes(v)) }
-            if let cands = m?[2].components(separatedBy: ", ").prefix(8), cands.count > 1 {
-                Flow(spacing: 5) {
-                    ForEach(Array(cands.enumerated()), id: \.offset) { _, c in
-                        Text(c).font(.caption2.monospaced())
-                            .padding(.horizontal, 7).padding(.vertical, 3)
-                            .foregroundStyle(c == picked ? pal.accentInk : pal.text2)
-                            .background(c == picked ? pal.accent : pal.text.opacity(0.06), in: Capsule())
-                    }
-                }
+            if let cands = m?[2].components(separatedBy: ", ").prefix(12), cands.count > 1 {
+                Candidates(cands: Array(cands), picked: picked, lang: L)
             }
         case "select":
             let sel = readSelection(s.detail, L)
@@ -164,5 +157,38 @@ private struct StepDot: View {
         }
         .frame(width: 20, height: 20)
         .padding(.top, 1)
+    }
+}
+
+
+/// The tables the search looked at, folded under one quiet line; open, the pick is highlighted among them.
+private struct Candidates: View {
+    @Environment(\.pal) private var pal
+    let cands: [String]
+    let picked: String
+    let lang: Lang
+    @State private var open = false
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Button { withAnimation(.snappy) { open.toggle() } } label: {
+                HStack(spacing: 4) {
+                    Text(lang == .is ? "Skoðaði \(cands.count) töflur" : "Looked at \(cands.count) tables")
+                    Image(systemName: "chevron.right").font(.system(size: 9, weight: .bold)).rotationEffect(.degrees(open ? 90 : 0))
+                }
+                .font(.caption2).foregroundStyle(pal.text3)
+            }
+            .buttonStyle(.plain)
+            if open {
+                Flow(spacing: 5) {
+                    ForEach(Array(cands.enumerated()), id: \.offset) { _, c in
+                        Text(c).font(.caption2.monospaced())
+                            .padding(.horizontal, 7).padding(.vertical, 3)
+                            .foregroundStyle(c == picked ? pal.accentInk : pal.text2)
+                            .background(c == picked ? pal.accent : pal.text.opacity(0.06), in: Capsule())
+                    }
+                }
+                .transition(.opacity)
+            }
+        }
     }
 }

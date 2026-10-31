@@ -396,8 +396,9 @@ function liveView(L) {
         via ? ` · ${words.via(via[1])}` : "", concepts ? ` (${concepts[1]})` : ""));
       const tv = /votes (\d+\/\d+)/.exec(st.detail);
       if (tv) add(el("span", { class: "ls-text votes" }, words.votes(tv[1])));
-      add(el("span", { class: "cands" }, cands.slice(0, 8).map((c, i) =>
-        el("span", { class: "cand" + (m && c === m[1] ? " hit" : ""), style: `animation-delay:${i * 60}ms` }, c))));
+      if (cands.length > 1) add(el("details", { class: "cand-more" },
+        el("summary", {}, L === "is" ? `Skoðaði ${cands.length} töflur` : `Looked at ${cands.length} tables`),
+        el("span", { class: "cands" }, cands.slice(0, 12).map(c => el("span", { class: "cand" + (m && c === m[1] ? " hit" : "") }, c)))));
     } else if (st.name === "select") {
       add(el("span", { class: "ls-text" }, readSelection(st.detail, L)));
       const sv = /votes: ([^'"\]]+)/.exec(st.detail);
@@ -491,9 +492,40 @@ async function ask(question, tableId = null, fast = false, spoken = false) {
   }
 }
 
+// "Value of index", "Index", "Total": words that name the table's layout, not the number, are left off tile labels
+const FILLER = /^(value of index|index|total|alls|samtals|gildi vísitölu|vísitala|value)$/i;
+const cleanLabel = text => text.split(/,\s*|\s·\s/).filter(x => x && !FILLER.test(x.trim())).join(", ");
+// "Launavísitala eftir mánuðum frá 1989" -> "Launavísitala", as the server shortens legend names
+const shortTitle = title => title.split(/\s+-\s+|,|\(|\s+(?:from|by|and changes|frá|eftir|og breytingar)\b|\s+\d{4}/)[0].trim() || title;
+
+// A tile shows the number as the table has it: 1.149,3 stays 1.149,3, 394.324 stays whole
+const fmtExact = (v, L) => localize(new Intl.NumberFormat("en-US", { maximumFractionDigits: Number.isInteger(v) ? 0 : 1,
+  minimumFractionDigits: Number.isInteger(v) ? 0 : 1 }).format(v), L);
+
+/** A part's time series as [name, points sorted by period], when its chart is a line over periods. */
+function seriesOf(p) {
+  const c = p.chart;
+  if (!c || c.type !== "line" || c.data.length < 3 || !c.data.every(d => IS_PERIOD(d.x))) return [];
+  const by = new Map();
+  for (const d of c.data) (by.get(d.series || "") || by.set(d.series || "", []).get(d.series || "")).push(d);
+  return [...by].map(([k, pts]) => [k, pts.sort((x, y) => x.x.localeCompare(y.x))]);
+}
+
+/** "+111%" for a level, "+1,2 pp" for a rate: green up, red down, quiet when flat. */
+function changeBadge(from, to, pct, L) {
+  if (from == null || to == null || (!pct && !from)) return null;
+  const d = pct ? to - from : (to - from) / Math.abs(from) * 100;
+  const sign = d > 0 ? "+" : d < 0 ? "−" : "±";
+  const unit = pct ? (L === "is" ? " prst." : " pp") : "%";
+  return el("span", { class: "f-change " + (d > 0 ? "up" : d < 0 ? "down" : "") }, `${sign}${fmtNum(Math.abs(d), "%", L)}${unit}`);
+}
+
 function renderAnswer(card, a) {
   const L = a.language;
-  card.replaceChildren(el("p", { class: "answer-text" + (a.status === "error" ? " error" : "") }, prettyPeriods(a.text, L)));
+  // the answer arrives a sentence at a time (split after . ! ? followed by a capital, so 5,9 and "jan. 2016" stay whole)
+  const sentences = prettyPeriods(a.text, L).split(/(?<=[.!?])\s+(?=[A-ZÁÐÉÍÓÚÝÞÆÖ])/);
+  card.replaceChildren(el("p", { class: "answer-text" + (a.status === "error" ? " error" : "") },
+    ...sentences.map((x, i) => el("span", { class: "sent", style: `animation-delay:${i * 220}ms` }, x + (i < sentences.length - 1 ? " " : "")))));
 
   if (a.status === "clarify" && a.clarification) {
     card.append(el("div", { class: "clarify" },     // the question itself is already the answer text above
@@ -503,17 +535,27 @@ function renderAnswer(card, a) {
 
   const figures = el("div", { class: "figures" });
   for (const p of a.parts) {
-    // a calculation: its result; a series: where it started and where it is now; otherwise up to three numbers
-    const lines = new Map();   // several series: the latest value of each line
-    for (const f of p.facts) lines.set(f.label.replace(/\b\d{4}(M\d{2}|Q\d)?\b,?\s*/, ""), f);
-    const facts = p.computation ? [p.facts[p.facts.length - 1]]
-      : p.facts.length > 3 && lines.size > 1 ? [...lines.values()].slice(0, 4)
-      : p.facts.length > 3 ? [p.facts[0], p.facts[p.facts.length - 1]] : p.facts.slice(0, 3);
+    const unit = p.unit && p.unit !== "%" ? p.unit : "";
+    const pct = p.unit === "%" || p.facts.some(f => /%$/.test(f.formatted));
+    const lines = seriesOf(p);
+    if (!p.computation && lines.length) {
+      // a series: one tile per line, where it ended, where it started and the change between
+      for (const [name, pts] of lines.slice(0, 4)) {
+        const first = pts[0], last = pts[pts.length - 1];
+        figures.append(el("div", { class: "figure" },
+          el("div", { class: "f-value" }, fmtExact(last.y, L), el("small", {}, pct ? "%" : unit)),
+          el("div", { class: "f-label" }, [cleanLabel(name || shortTitle(p.table.title)), fmtPeriod(last.x, L)].filter(Boolean).join(" · ")),
+          el("div", { class: "f-from" }, `${L === "is" ? "frá" : "from"} ${fmtExact(first.y, L)}${pct ? "%" : ""} (${fmtPeriod(first.x, L)})`,
+            changeBadge(first.y, last.y, pct, L))));
+      }
+      continue;
+    }
+    const facts = p.computation ? [p.facts[p.facts.length - 1]] : p.facts.slice(0, 3);
     for (const f of facts) {
-      const unit = f.unit && f.unit !== "%" ? f.unit : "";
+      const u = f.unit && f.unit !== "%" ? f.unit : "";
       figures.append(el("div", { class: "figure" },
-        el("div", { class: "f-value" }, f.formatted.replace(/\s*%$/, ""), el("small", {}, f.unit === "%" || /%$/.test(f.formatted) ? "%" : unit)),
-        el("div", { class: "f-label" }, prettyPeriods(f.label, L)),
+        el("div", { class: "f-value" }, f.formatted.replace(/\s*%$/, ""), el("small", {}, f.unit === "%" || /%$/.test(f.formatted) ? "%" : u)),
+        el("div", { class: "f-label" }, cleanLabel(prettyPeriods(f.label, L))),
         p.computation ? el("div", { class: "f-calc" }, `${t("calc", L)}: ${p.computation.expression}`) : null));
     }
   }
@@ -528,12 +570,15 @@ function renderAnswer(card, a) {
 
   for (const p of a.parts) if (p.note) card.append(el("p", { class: "note" }, prettyPeriods(p.note, L)));
 
-  // One quiet line under the answer: where it came from on the left, listen and copy as icons on the right
+  // Where the numbers come from: the table in the answer's language, a link, and how recent its data is
+  if (a.sources.length) card.append(el("div", { class: "sources" }, a.sources.map(s =>
+    el("a", { class: "source-card", href: s.url, target: "_blank", rel: "noopener" },
+      el("span", { class: "sc-kicker" }, L === "is" ? "Heimild · Hagstofa Íslands" : "Source · Statistics Iceland"),
+      el("span", { class: "sc-title" }, s.title, el("span", { class: "arrow", "aria-hidden": "true" }, " ↗")),
+      el("span", { class: "sc-meta" }, [s.id, s.updated ? `${L === "is" ? "gögn til" : "data to"} ${fmtPeriod(s.updated, L)}` : ""].filter(Boolean).join(" · "))))));
+
+  // One quiet line under the answer: whether the numbers were checked and how long it took, then listen and copy
   const info = el("div", { class: "meta-info" });
-  for (const s of a.sources) {
-    info.append(el("a", { class: "src", href: s.url, target: "_blank", rel: "noopener", title: s.title, "aria-label": `${t("source", L)} ${s.id}` },
-      s.id, el("span", { class: "arrow", "aria-hidden": "true" }, "↗")));
-  }
   if (a.text_source === "model") info.append(el("span", { class: "ok", title: t("checked", L) }, t("checkedShort", L)));
   if (a.total_ms) info.append(el("span", { class: "secs" }, `${(a.total_ms / 1000).toFixed(1)} ${t("seconds", L)}`));
   const actions = el("div", { class: "meta-actions" });
@@ -717,8 +762,19 @@ function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", com
   let spec, width = "container", height = 260;
 
   if (view === "line" || view === "stacked") {
-    const x = { field: "label", type: "ordinal", title: null, sort: null, axis: { labelAngle: 0, labelOverlap: "greedy", labelPadding: 8 } };
+    // many months: label the years only, at most about eight of them, so the dates never run together
+    const months = [...new Set(data.filter(d => /M01$/.test(d.x)).map(d => d.label))];   // once each, whatever the series
+    const firsts = [...new Set(data.map(d => d.label))];
+    const axisX = { labelAngle: 0, labelOverlap: "greedy", labelPadding: 8 };
+    if (firsts.length > 24 && months.length) {
+      const step = Math.ceil(months.length / 8);
+      Object.assign(axisX, { values: months.filter((_, i) => i % step === 0), labelExpr: "slice(datum.label, -4)" });
+    }
+    const x = { field: "label", type: "ordinal", title: null, sort: null, axis: axisX };
     const layers = [];
+    // a comparison set to 100 at the start: the starting line, faint, so above and below read at a glance
+    if (c.compare && c.unit !== "%") layers.push({ data: { values: [{ y: 100 }] },
+      mark: { type: "rule", color: muted, strokeDash: [4, 4], opacity: 0.7 }, encoding: { y: { field: "y", type: "quantitative" } } });
     if (view === "stacked") {
       layers.push({ mark: { type: "area", interpolate: "monotone", opacity: 0.85, line: { strokeWidth: 1.5, color: card } },
         encoding: { x, y: { ...y, stack: "zero", scale: { zero: true } }, color, tooltip } });
@@ -735,6 +791,14 @@ function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", com
         { filter: "datum.i === datum.n" }],
         mark: { type: "text", align: "right", dx: -4, dy: -12, fontWeight: 600, fontSize: 13, color: ink },
         encoding: { x, y, text: { field: "y", type: "quantitative", format: fmt } } });
+      // several lines: each named at its end with its last value, so nobody has to match colours to a legend
+      if (multi && series.length <= 4) layers.push({ transform: [
+          { window: [{ op: "row_number", as: "i" }], groupby: ["series"] },
+          { joinaggregate: [{ op: "max", field: "i", as: "n" }], groupby: ["series"] }, { filter: "datum.i === datum.n" },
+          { calculate: `datum.series + '  ' + format(datum.y, '${fmt}')`, as: "end" }],
+        mark: { type: "text", align: "right", dx: -2, dy: -10, fontWeight: 600, fontSize: 12 },
+        encoding: { x, y, color: { ...color, legend: null },
+          text: { field: "end" } } });
     }
     spec = { layer: layers };
 
@@ -859,7 +923,9 @@ function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", com
       axisX: { grid: false }, axisY: { gridDash: [2, 3] },
       legend: { labelColor: cssVar("--text-2"), labelFontSize: 12, gradientThickness: 8 },
     },
-  }, { actions: false, renderer: "svg", tooltip: { theme: "custom" } })
+  }, { actions: false, renderer: "svg", tooltip: { theme: "custom" },
+       // Icelandic numbers on the axes and labels: 1.149,3, as in the answer text
+       ...(L === "is" ? { formatLocale: { decimal: ",", thousands: ".", grouping: [3], currency: ["", " kr."] } } : {}) })
     .catch(e => holder.append(el("div", { class: "muted" }, `chart error: ${e.message}`)));
 }
 
@@ -1006,57 +1072,62 @@ const ICON = {
   check: SVG('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
 };
 
-function renderTuning() {
+// "qwen3.8:27b" -> "Qwen3.8:27B", "gpt-oss:20b" -> "GPT-OSS:20B": how a model is named in the title and the panel
+const prettyModel = n => (n.toLowerCase().startsWith("gpt-oss") ? "GPT-OSS" + n.slice(7) : n[0].toUpperCase() + n.slice(1))
+  .replace(/(\d+(?:\.\d+)?)([bm])\b/, (_, a, b) => a + b.toUpperCase());
+
+/** The model in use as a button next to the menu; it opens one layered panel with the model, thinking length and
+ *  temperature. The recommended settings are chosen until the user picks something else; a dot says something did. */
+function renderTuning(open = false) {
   const box = $("#tuning"), m = serverModels;
   if (!box || !m) return;
-  const L = ui(), names = t("effort");
+  const L = ui(), names = t("effort"), is = L === "is";
   const levels = m.reasoning || ["none", "low", "medium", "high"];
-  const effort = reasoningChoice || m.reasoning_default;
-  const temp = temperatureChoice ?? 0;
-  const meter = levels.slice(1).map((_, i) =>
-    `<i style="height:${4 + i * 2.5}px" class="${i < levels.indexOf(effort) ? "on" : ""}"></i>`).join("");
-  const chips = [
-    { key: "model", changed: modelChoice != null,
-      face: `${modelChoice == null ? ICON.sparkle : ICON.cpu}<span>${modelChoice || m.default}</span>`,
-      options: m.models.map(x => ({ value: x, label: x === m.default ? `${x} <small>${t("best", L)}</small>` : x, on: (modelChoice || m.default) === x })),
-      pick: v => { modelChoice = v === m.default ? null : v; remember("ragstofan-model", modelChoice); statusLine(); } },
-    { key: "thinking", changed: reasoningChoice != null,
-      face: `<span class="meter">${meter}</span><span>${t("thinking", L)} <b>${names[effort] || effort}</b></span>`,
-      options: levels.map(x => ({ value: x, label: names[x] || x, on: effort === x })),
-      pick: v => { reasoningChoice = v === m.reasoning_default ? null : v; remember("ragstofan-reasoning", reasoningChoice); } },
-    { key: "temperature", changed: temperatureChoice != null,
-      face: `<span class="tdot" style="--t:${temp}"></span><span class="num">${temp.toFixed(1)}</span>`,
-      options: [0, 0.3, 0.7, 1].map(x => ({ value: x, label: x ? x.toFixed(1) : (L === "is" ? "0 · sama svar alltaf" : "0 · same answer every time"), on: temp === x })),
-      pick: v => { temperatureChoice = v === 0 ? null : v; remember("ragstofan-temperature", temperatureChoice); } },
-  ];
-  box.replaceChildren(...chips.map(c => {
-    const wrap = el("div", { class: "tchip-wrap" });
-    const btn = el("button", { type: "button", class: "tchip" + (c.changed ? " changed" : ""), "aria-haspopup": "true", "aria-expanded": "false" });
-    btn.innerHTML = c.face + `<span class="chev">${ICON.chevrons}</span>`;
-    const menu = el("div", { class: "tmenu", role: "menu" });
-    for (const o of c.options) {
-      const item = el("button", { type: "button", role: "menuitemradio", "aria-checked": String(o.on), class: o.on ? "on" : "" });
-      item.innerHTML = `<span class="tick">${o.on ? ICON.check : ""}</span><span>${o.label}</span>`;
-      item.addEventListener("click", () => { c.pick(o.value); closeMenus(); renderTuning(); bump(c.key); });
-      menu.append(item);
-    }
-    btn.addEventListener("click", e => {
-      e.stopPropagation();
-      const open = !wrap.classList.contains("open");
-      closeMenus();
-      wrap.classList.toggle("open", open);
-      btn.setAttribute("aria-expanded", String(open));
-    });
-    wrap.dataset.key = c.key;
-    wrap.append(btn, menu);
-    return wrap;
+  const best = m.default, longest = m.reasoning_default;
+  const active = modelChoice || best, effort = reasoningChoice || longest, temp = temperatureChoice ?? 0;
+  const changed = modelChoice != null || reasoningChoice != null || temperatureChoice != null;
+  const pick = (fn) => e => { e.stopPropagation(); fn(); renderTuning(true); };
+
+  const btn = el("button", { type: "button", class: "model-title", "aria-haspopup": "true", "aria-expanded": String(open) });
+  btn.innerHTML = `<span>${prettyModel(active)}</span>${changed ? '<i class="mdot"></i>' : ""}<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`;
+  btn.addEventListener("click", e => { e.stopPropagation(); renderTuning(!box.classList.contains("open")); });
+
+  const row = x => {
+    const b = el("button", { type: "button", class: "mrow" + (x === active ? " on" : ""), role: "menuitemradio", "aria-checked": String(x === active) });
+    const tag = x === best ? `<small class="rec">${is ? "Mælt með · nákvæmast" : "Recommended · most accurate"}</small>`
+      : x === m.fast ? `<small>${is ? "Hraðast" : "Fastest"}</small>` : "";
+    b.innerHTML = `<span class="mic">${x === best ? ICON.sparkle : ICON.cpu}</span><span class="mname">${prettyModel(x)}${tag}</span><span class="tick">${x === active ? ICON.check : ""}</span>`;
+    b.addEventListener("click", pick(() => { modelChoice = x === best ? null : x; remember("ragstofan-model", modelChoice); statusLine(); }));
+    return b;
+  };
+  const segs = (opts, current, recommended, set) => el("div", { class: "segs" }, opts.map(([v, label]) => {
+    const b = el("button", { type: "button", class: (v === current ? "on" : "") + (v === recommended ? " rec" : "") }, label);
+    b.addEventListener("click", pick(() => set(v)));
+    return b;
   }));
+  const section = (title, note, body) => el("div", { class: "psec" },
+    el("div", { class: "phead" }, el("span", {}, title), note ? el("small", {}, note) : null), body);
+
+  const panel = el("div", { class: "tpanel", role: "menu" },
+    section(is ? "Líkan" : "Model", null, el("div", { class: "mrows" }, m.models.map(row))),
+    section(is ? "Hugsun" : "Thinking", `${is ? "Mælt með" : "Recommended"}: ${names[longest] || longest}`,
+      segs(levels.map(x => [x, names[x] || x]), effort, longest,
+        v => { reasoningChoice = v === longest ? null : v; remember("ragstofan-reasoning", reasoningChoice); })),
+    section(is ? "Hitastig" : "Temperature", is ? "0 gefur sama svar í hvert sinn" : "0 gives the same answer every time",
+      segs([0, 0.3, 0.7, 1].map(x => [x, x.toFixed(1)]), temp, 0,
+        v => { temperatureChoice = v === 0 ? null : v; remember("ragstofan-temperature", temperatureChoice); })),
+    changed ? (() => {
+      const r = el("button", { type: "button", class: "preset" }, is ? "↺ Nota ráðlagðar stillingar" : "↺ Reset to recommended");
+      r.addEventListener("click", pick(() => {
+        modelChoice = reasoningChoice = temperatureChoice = null;
+        ["ragstofan-model", "ragstofan-reasoning", "ragstofan-temperature"].forEach(k => remember(k, null)); statusLine(); }));
+      return r;
+    })() : null);
+  panel.addEventListener("click", e => e.stopPropagation());
+  box.classList.toggle("open", open);
+  box.replaceChildren(btn, panel);
 }
-function closeMenus() { document.querySelectorAll(".tchip-wrap.open").forEach(w => { w.classList.remove("open"); w.querySelector(".tchip").setAttribute("aria-expanded", "false"); }); }
-function bump(key) {   // a little spring on the chip that changed
-  const chip = document.querySelector(`.tchip-wrap[data-key="${key}"] .tchip`);
-  if (chip && !reduceMotion) chip.animate([{ transform: "scale(.92)" }, { transform: "scale(1.04)" }, { transform: "scale(1)" }], { duration: 380, easing: "cubic-bezier(.2,.8,.2,1)" });
-}
+function closeMenus() { const box = $("#tuning"); if (box?.classList.contains("open")) renderTuning(false); }
 document.addEventListener("click", closeMenus);
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenus(); });
 
@@ -1067,7 +1138,8 @@ let player = null, playingKey = null;
 
 async function loadVoices() {
   try {
-    voiceList = await (await fetch("/api/voices")).json();
+    const r = await fetch("/api/voices");
+    voiceList = r.ok ? await r.json() : null;   // 503 when the voice service is down: no voice buttons
   } catch { voiceList = null; }
   renderVoices();
   updateComposer();
@@ -1105,7 +1177,7 @@ function voiceStateOn(btn) {
 function renderVoices() {
   const box = $("#voices");
   if (!box) return;
-  if (!voiceList) { box.replaceChildren(el("p", { class: "muted small" }, "–")); return; }
+  if (!voiceList?.is || !voiceList?.en) { box.replaceChildren(el("p", { class: "muted small" }, "–")); return; }   // voice service down
   const L = ui();
   const sample = { is: "Íbúar Íslands voru 394.324 í byrjun árs 2026.", en: "Iceland had 394,324 inhabitants at the start of 2026." };
   box.replaceChildren(...[["is", t("icelandic", L)], ["en", t("english", L)]].map(([lang, title]) =>
@@ -1253,6 +1325,8 @@ function openChat(c) {
   }
   current = c;
   setTimeout(() => chat.lastElementChild?.scrollIntoView({ block: "end" }), 50);
+  // charts drawn while the chat was still hidden come out zero wide: one resize lets them fit
+  requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
 }
 
 function newChat() {

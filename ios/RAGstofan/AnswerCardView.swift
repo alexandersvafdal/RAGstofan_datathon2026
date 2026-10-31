@@ -4,6 +4,9 @@ import UIKit
 
 private struct Figure: Identifiable {
     let id: Int; let value: String; let number: Double; let unit: String; let label: String; let calc: String?
+    var from: String? = nil      // "frá 545 (jan. 2016)": where a series started
+    var change: Double? = nil    // % for a level, percentage points for a rate
+    var points = false           // the change is in percentage points
 }
 
 /// Each part of the card fades and rises into place a moment after the one above it.
@@ -63,10 +66,9 @@ struct AnswerCard: View {
         let w = Words(lang: L)
         Card {
             VStack(alignment: .leading, spacing: 18) {
-                Text(prettyPeriods(a.text, L))
+                SentenceText(text: prettyPeriods(a.text, L), color: a.status == "error" ? Color.red : pal.text)
                     .font(.system(size: 17))
                     .lineSpacing(3)
-                    .foregroundStyle(a.status == "error" ? Color.red : pal.text)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Rectangle())
@@ -130,21 +132,14 @@ struct AnswerCard: View {
                         .reveal(4, shown)
                 }
 
-                // One quiet line under the answer: where it came from, then the two actions. Nothing here competes with it.
+                // where the numbers come from: the table in the answer's language, a link, and how recent its data is
+                if !a.sources.isEmpty {
+                    VStack(spacing: 8) { ForEach(a.sources, id: \.id) { SourceCard(s: $0, lang: L) } }.reveal(5, shown)
+                }
+
+                // One quiet line under the answer: whether the numbers were checked and how long it took, then the actions
                 HStack(alignment: .center, spacing: 4) {
                     Flow(spacing: 10) {
-                        ForEach(a.sources, id: \.id) { s in
-                            if let url = URL(string: s.url) {
-                                Link(destination: url) {
-                                    HStack(spacing: 3) {
-                                        Text(s.id).fontWeight(.semibold)
-                                        Image(systemName: "arrow.up.right").font(.caption2.weight(.semibold))
-                                    }
-                                    .foregroundStyle(pal.accent)
-                                }
-                                .accessibilityLabel("\(w.source) \(s.id)")
-                            }
-                        }
                         if a.textSource == "model" {
                             Label(L == .is ? "Yfirfarið" : "Checked", systemImage: "checkmark.seal")
                                 .labelStyle(.titleAndIcon)
@@ -238,6 +233,23 @@ struct AnswerCard: View {
     private func figures(_ w: Words) -> [Figure] {
         var out: [Figure] = []
         for p in a.parts {
+            // a series: one tile per line, where it ended, where it started and the change between
+            if p.computation == nil, let c = p.chart, c.type == "line", c.data.count > 2, c.data.allSatisfy({ isPeriod($0.x) }) {
+                let pct = p.unit == "%" || c.unit == "%"
+                var order: [String] = [], by: [String: [ChartPoint]] = [:]
+                for d in c.data { let k = d.series ?? ""; if by[k] == nil { order.append(k) }; by[k, default: []].append(d) }
+                for k in order.prefix(4) {
+                    let pts = by[k]!.sorted { $0.x < $1.x }
+                    guard let first = pts.first, let last = pts.last else { continue }
+                    let name = cleanLabel(k.isEmpty ? shortTitle(p.table.title) : k)
+                    let change = pct ? last.y - first.y : (first.y != 0 ? (last.y - first.y) / abs(first.y) * 100 : nil)
+                    out.append(Figure(id: out.count, value: fmtExact(last.y, L), number: last.y, unit: pct ? "%" : p.unit,
+                                      label: [name, fmtPeriod(last.x, L)].filter { !$0.isEmpty }.joined(separator: " · "), calc: nil,
+                                      from: "\(L == .is ? "frá" : "from") \(fmtExact(first.y, L))\(pct ? "%" : "") (\(fmtPeriod(first.x, L)))",
+                                      change: change, points: pct))
+                }
+                continue
+            }
             var keys: [String] = [], lines: [String: Fact] = [:]
             for f in p.facts {
                 let k = replaceFirst(f.label, #"\b\d{4}(M\d{2}|Q\d)?\b,?\s*"#, "")
@@ -253,7 +265,7 @@ struct AnswerCard: View {
                 let pct = f.unit == "%" || f.formatted.hasSuffix("%")
                 out.append(Figure(id: out.count,
                                   value: f.formatted.replacingOccurrences(of: #"\s*%$"#, with: "", options: .regularExpression),
-                                  number: f.value, unit: pct ? "%" : f.unit, label: prettyPeriods(f.label, L),
+                                  number: f.value, unit: pct ? "%" : f.unit, label: cleanLabel(prettyPeriods(f.label, L)),
                                   calc: p.computation.map { "\(w.calc): \($0.expression)" }))
             }
         }
@@ -308,6 +320,21 @@ private struct FigureView: View {
                 if !fig.unit.isEmpty { Text(fig.unit).font(.subheadline).foregroundStyle(pal.text3).lineLimit(1) }
             }
             Text(fig.label).font(.caption).foregroundStyle(pal.text2).fixedSize(horizontal: false, vertical: true)
+            if let from = fig.from {
+                VStack(alignment: .leading, spacing: 4) {
+                    if let d = fig.change {
+                        let tint = d > 0 ? Color.green : d < 0 ? Color.red : pal.text2
+                        Text("\(d > 0 ? "+" : d < 0 ? "−" : "±")\(fmtNum(abs(d), digits: 1, lang))\(fig.points ? (lang == .is ? " prst." : " pp") : "%")")
+                            .font(.caption2.weight(.semibold)).monospacedDigit().foregroundStyle(tint)
+                            .padding(.horizontal, 7).padding(.vertical, 2)
+                            .background(tint.opacity(0.14), in: Capsule())
+                            .fixedSize()
+                    }
+                    Text(from).font(.caption2).monospacedDigit().foregroundStyle(pal.text3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.top, 2)
+            }
             if let c = fig.calc { Text(c).font(.caption2.monospaced()).foregroundStyle(pal.text3).fixedSize(horizontal: false, vertical: true) }
         }
         .padding(14)
@@ -450,6 +477,57 @@ func followupPicks(_ a: Answer) -> [String] {
     let same = POOL.filter { topics.contains($0.topic) && text($0) != a.question }.shuffled().prefix(2)
     let other = POOL.filter { !topics.contains($0.topic) }.shuffled().prefix(1)
     return (same + other).map(text)
+}
+
+/// The answer a sentence at a time: the rest is laid out but clear, so nothing moves as each one fades in.
+private struct SentenceText: View {
+    let text: String
+    let color: Color
+    @State private var visible = 0
+    @Environment(\.accessibilityReduceMotion) private var still
+
+    private var sentences: [String] {   // split after . ! ? before a capital, so 5,9 and "jan. 2016" stay whole
+        text.replacingOccurrences(of: #"(?<=[.!?])\s+(?=[A-ZÁÐÉÍÓÚÝÞÆÖ])"#, with: "\u{1}", options: .regularExpression)
+            .components(separatedBy: "\u{1}")
+    }
+
+    var body: some View {
+        let parts = sentences
+        parts.enumerated().reduce(Text("")) { acc, e in
+            acc + Text(e.element + (e.offset < parts.count - 1 ? " " : ""))
+                .foregroundColor(e.offset < visible ? color : .clear)
+        }
+        .task(id: text) {
+            if still { visible = parts.count; return }
+            for i in 1...max(parts.count, 1) {
+                withAnimation(.easeOut(duration: 0.45)) { visible = i }
+                try? await Task.sleep(for: .milliseconds(220))
+            }
+        }
+    }
+}
+
+/// One source: "Heimild · Hagstofa Íslands", the table's title in the answer's language, its id and latest period.
+private struct SourceCard: View {
+    @Environment(\.pal) private var pal
+    let s: TableRef
+    let lang: Lang
+    var body: some View {
+        let card = VStack(alignment: .leading, spacing: 3) {
+            Text(lang == .is ? "HEIMILD · HAGSTOFA ÍSLANDS" : "SOURCE · STATISTICS ICELAND")
+                .font(.caption2.weight(.semibold)).tracking(0.6).foregroundStyle(pal.text3)
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(s.title).font(.subheadline.weight(.semibold)).foregroundStyle(pal.text).multilineTextAlignment(.leading)
+                Image(systemName: "arrow.up.right").font(.caption.weight(.semibold)).foregroundStyle(pal.accent)
+            }
+            Text([s.id, s.updated.map { "\(lang == .is ? "gögn til" : "data to") \(fmtPeriod($0, lang))" }].compactMap { $0 }.joined(separator: " · "))
+                .font(.caption).monospacedDigit().foregroundStyle(pal.text3)
+        }
+        .padding(.horizontal, 14).padding(.vertical, 11)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(pal.text.opacity(0.04), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        if let url = URL(string: s.url) { Link(destination: url) { card } } else { card }
+    }
 }
 
 /// Shrinks a little while pressed.

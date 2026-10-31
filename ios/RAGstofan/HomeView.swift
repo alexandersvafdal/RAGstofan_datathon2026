@@ -52,8 +52,6 @@ struct HomeView: View {
             }
             .padding(.top, 18)
 
-            FloatingPills(lang: model.ui, ask: ask)
-
             if let ind = model.indicators, !ind.indicators.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack(alignment: .firstTextBaseline) {
@@ -66,6 +64,9 @@ struct HomeView: View {
                     }
                 }
             }
+
+            // the headline figures first, as on Statistics Iceland's front page; then questions to try
+            FloatingPills(lang: model.ui, ask: ask)
         }
     }
 

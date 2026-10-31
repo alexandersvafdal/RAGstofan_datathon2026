@@ -1069,3 +1069,70 @@ td.num { text-align: right; }
 .d-del { border: 0; background: transparent; color: var(--text-3); padding: 10px; cursor: pointer; opacity: 0; transition: opacity .2s; }
 .d-row:hover .d-del { opacity: 1; }
 .d-empty { font-size: 13px; color: var(--text-3); }
+
+/* ---------- answer card: a sentence at a time, series tiles, source card, folded candidates ---------- */
+.answer-text .sent { animation: sent-in .6s var(--ease) backwards; }   /* inline: fades and sharpens, no movement */
+@keyframes sent-in { from { opacity: 0; filter: blur(3px); } to { opacity: 1; filter: none; } }
+.figure .f-from { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+  font-size: 13px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.f-change { font-weight: 600; font-size: 12.5px; padding: 2px 8px; border-radius: 999px; color: var(--text-2);
+  background: color-mix(in srgb, var(--text) 8%, transparent); font-variant-numeric: tabular-nums; }
+.f-change.up { color: #1f9d55; background: color-mix(in srgb, #1f9d55 14%, transparent); }
+.f-change.down { color: #d64545; background: color-mix(in srgb, #d64545 14%, transparent); }
+.sources { display: grid; gap: 8px; margin-top: 16px; }
+.source-card { display: grid; gap: 2px; padding: 12px 14px; border-radius: 14px; text-decoration: none;
+  background: color-mix(in srgb, var(--text) 4%, transparent); transition: background .2s var(--ease); }
+.source-card:hover { background: color-mix(in srgb, var(--text) 8%, transparent); }
+.source-card .sc-kicker { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+.source-card .sc-title { font-size: 14.5px; font-weight: 600; color: var(--text); }
+.source-card .sc-title .arrow { color: var(--accent); }
+.source-card .sc-meta { font-size: 12.5px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.cand-more { margin-top: 6px; }
+.cand-more summary { cursor: pointer; list-style: none; font-size: 12.5px; color: var(--text-3); }
+.cand-more summary::-webkit-details-marker { display: none; }
+.cand-more summary::after { content: " ›"; }
+.cand-more[open] summary::after { content: " ⌄"; }
+.cand-more .cands { margin-top: 8px; }
+@media (prefers-reduced-motion: reduce) { .answer-text .sent { animation: none; } }
+
+/* ---------- the model in the header and its layered panel ---------- */
+.model-pick { position: relative; }
+.model-title { display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; cursor: pointer;
+  font: inherit; font-size: 17px; font-weight: 600; color: var(--text); padding: 6px 10px; border-radius: 10px;
+  transition: background .2s var(--ease); white-space: nowrap; }
+.model-title:hover, .model-pick.open .model-title { background: color-mix(in srgb, var(--text) 7%, transparent); }
+.model-title .chev { width: 15px; height: 15px; fill: none; stroke: var(--text-3); stroke-width: 2.4; stroke-linecap: round;
+  stroke-linejoin: round; transition: transform .3s var(--ease); }
+.model-pick.open .model-title .chev { transform: rotate(180deg); }
+.model-title .mdot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.tpanel { position: absolute; top: calc(100% + 8px); left: 0; z-index: 60; width: min(420px, calc(100vw - 32px));
+  padding: 6px 0; border-radius: 20px; background: var(--card); border: 1px solid var(--hairline);
+  box-shadow: 0 1px 2px rgba(0,0,0,.10), 0 18px 48px rgba(0,0,0,.24);
+  opacity: 0; transform: translateY(-6px) scale(.97); transform-origin: top left; pointer-events: none;
+  transition: opacity .2s var(--ease), transform .28s cubic-bezier(.2,.9,.3,1.2); }
+.model-pick.open .tpanel { opacity: 1; transform: none; pointer-events: auto; }
+.psec { padding: 10px 12px; }
+.psec + .psec, .tpanel .preset { border-top: 1px solid var(--hairline); }
+.phead { display: flex; justify-content: space-between; align-items: baseline; padding: 0 6px 8px; }
+.phead span { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); }
+.phead small { font-size: 11.5px; color: var(--text-3); }
+.mrows { display: grid; gap: 2px; }
+.mrow { display: grid; grid-template-columns: 24px 1fr 20px; align-items: center; gap: 10px; text-align: left; border: 0;
+  background: transparent; padding: 9px 10px; border-radius: 12px; cursor: pointer; font: inherit; color: var(--text); }
+.mrow:hover { background: color-mix(in srgb, var(--text) 5%, transparent); }
+.mrow.on { background: var(--accent-soft); }
+.mrow .mic svg, .mrow .tick svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.mrow .mic { color: var(--text-3); display: grid; } .mrow.on .mic, .mrow .tick { color: var(--accent); display: grid; }
+.mrow .mname { display: grid; font-size: 14.5px; } .mrow.on .mname { font-weight: 600; }
+.mrow .mname small { font-size: 12px; font-weight: 400; color: var(--text-3); } .mrow .mname small.rec { color: var(--accent); }
+.segs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; padding: 3px; border-radius: 12px;
+  background: color-mix(in srgb, var(--text) 6%, transparent); }
+.segs button { position: relative; border: 0; background: transparent; font: inherit; font-size: 14px; color: var(--text-2);
+  padding: 7px 4px 10px; border-radius: 9px; cursor: pointer; transition: background .2s var(--ease), color .2s var(--ease); }
+.segs button.on { background: var(--card); color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.14); }
+.segs button.rec::after { content: ""; position: absolute; left: 50%; bottom: 3px; width: 4px; height: 4px; margin-left: -2px;
+  border-radius: 50%; background: var(--accent); }
+.tpanel .preset { display: block; width: 100%; border: 0; border-top: 1px solid var(--hairline); background: transparent;
+  font: inherit; font-size: 14px; font-weight: 500; color: var(--accent); padding: 12px; cursor: pointer; }
+.nav-left { display: flex; align-items: center; gap: 6px; min-width: 0; }
+@media (max-width: 560px) { .model-title { font-size: 15px; } .brand .logo-h { display: none; } }

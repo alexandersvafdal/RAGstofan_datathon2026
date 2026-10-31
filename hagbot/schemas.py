@@ -31,6 +31,7 @@ class TableRef(BaseModel):
     id: str
     title: str
     url: str  # human-readable page on px.hagstofa.is
+    updated: str = ""  # the latest period the table has, e.g. "2026M10": how fresh the source is
 
 
 class Row(BaseModel):

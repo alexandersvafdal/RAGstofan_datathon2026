@@ -149,3 +149,23 @@ struct Words {
         return (lang == .is ? is_ : en)[v] ?? v
     }
 }
+
+
+// "Value of index", "Index", "Total": words that name the table's layout, not the number, are left off tile labels
+func cleanLabel(_ text: String) -> String {
+    let filler: Set<String> = ["value of index", "index", "total", "alls", "samtals", "gildi vísitölu", "vísitala", "value"]
+    return text.components(separatedBy: ", ").flatMap { $0.components(separatedBy: " · ") }
+        .filter { !$0.isEmpty && !filler.contains($0.lowercased().trimmingCharacters(in: .whitespaces)) }
+        .joined(separator: ", ")
+}
+
+/// "Launavísitala eftir mánuðum frá 1989" -> "Launavísitala", as the server shortens legend names.
+func shortTitle(_ title: String) -> String {
+    let pattern = #"\s+-\s+|,|\(|\s+(from|by|and changes|frá|eftir|og breytingar)\b|\s+\d{4}"#
+    guard let r = title.range(of: pattern, options: .regularExpression) else { return title }
+    let head = title[..<r.lowerBound].trimmingCharacters(in: .whitespaces)
+    return head.isEmpty ? title : head
+}
+
+/// A number as the table has it: 1.149,3 keeps its decimal, 394.324 stays whole.
+func fmtExact(_ v: Double, _ lang: Lang) -> String { fmtNum(v, digits: v.rounded() == v ? 0 : 1, lang) }

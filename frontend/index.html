@@ -8,7 +8,7 @@
     if (t.palette === "amber") t.palette = "hagstofan";  // Amber was replaced by Hagstofan
     if (t.palette && t.palette !== "warm") document.documentElement.dataset.palette = t.palette;
     if (t.mode && t.mode !== "auto") document.documentElement.dataset.theme = t.mode; } catch {}</script>
-  <link rel="stylesheet" href="style.css?v=31">
+  <link rel="stylesheet" href="style.css?v=32">
   <script src="https://cdn.jsdelivr.net/npm/vega@5.30.0/build/vega.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.21.0/build/vega-lite.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0/build/vega-embed.min.js"></script>
@@ -22,8 +22,9 @@
     <a class="brand" href="/" aria-label="RAGstofan home">
       <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="12" width="4" height="9" rx="2"/><rect x="10" y="7" width="4" height="14" rx="2"/><rect x="17" y="3" width="4" height="18" rx="2"/></svg>
       <svg class="logo-h" viewBox="0 0 12.6 17.45" aria-hidden="true"><path d="M2.295,2.894C1.661,2.679,0.634,2.679,0,2.894v5.403h2.295z"/><path d="M7.419,0.162c-0.634-0.216-1.661-0.216-2.295,0v8.136h2.295z"/><path d="M12.544,9.963c0.081-0.238,0.081-0.623,0-0.86H0v5.403c0.634,0.216,1.661,0.216,2.295,0V9.963h2.829v7.275c0.634,0.216,1.661,0.216,2.295,0V9.963z"/></svg>
-      RAGstofan
     </a>
+    <!-- the model in use; it opens one panel for model, thinking and temperature (untouched: the recommended settings) -->
+    <div class="model-pick" id="tuning" aria-label="Answer settings"></div>
     <span id="private-chip" class="private-chip" hidden>Private</span>
     </div>
     <div class="nav-right">
@@ -94,8 +95,6 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
     </div>
-    <!-- how the next question is answered; untouched, the server's defaults: the best model, the longest thinking -->
-    <div class="tuning" id="tuning" aria-label="Answer settings"></div>
   </form>
 
   <!-- the hamburger menu: new conversation, private mode, past conversations (this browser only) with search -->
@@ -110,6 +109,6 @@
     <div class="d-list" id="chat-list"></div>
   </aside>
 
-  <script src="app.js?v=36"></script>
+  <script src="app.js?v=37"></script>
 </body>
 </html>

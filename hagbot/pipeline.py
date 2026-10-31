@@ -167,7 +167,7 @@ class Pipeline:
                 "rows": rows,
                 "facts": [f for p in group for f in p.facts],
                 "selection": {k: list(dict.fromkeys(v for p in group for v in p.selection.get(k, []))) for k in first.selection},
-                "chart": choose_chart(meta, rows, selections, None),
+                "chart": (c := choose_chart(meta, rows, selections, None)) and c.model_copy(update={"title": first.table.title}),
             }))
         return out
 
@@ -225,15 +225,20 @@ class Pipeline:
         note = self._freshness_note(meta, res.selections, r.candidates, f"{sq.question} {original}", lang)
         if res.window_note:   # "the last 50 years" in a table that starts in 2003
             note = " ".join(x for x in (res.window_note[lang], note) if x)
+        # the table named in the answer's language: chart titles, legends and the source card read it
+        entry = self.catalog.get(meta.id)
+        title = entry.title_is if lang == "is" and entry and entry.title_is else meta.title
+        chart = choose_chart(meta, rows, res.selections, computation)
         return AnswerPart(
             sub_question=sq.question,
-            table=TableRef(id=meta.id, title=meta.title, url=table_url(meta.path, meta.id)),
+            table=TableRef(id=meta.id, title=title, url=table_url(meta.path, meta.id),
+                           updated=entry.last_period if entry else ""),
             selection=chosen,
             rows=rows,
             unit=meta.unit,
             computation=computation,
             facts=facts,
-            chart=choose_chart(meta, rows, res.selections, computation),
+            chart=chart.model_copy(update={"title": title}) if chart else None,
             note=note,
             ranking=r.ranking,
         )

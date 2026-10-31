@@ -2,7 +2,7 @@
 // decoded with .convertFromSnakeCase, so `text_source` becomes `textSource`.
 import Foundation
 
-struct TableRef: Codable, Hashable { let id: String; let title: String; let url: String }
+struct TableRef: Codable, Hashable { let id: String; let title: String; let url: String; var updated: String? = nil }
 
 struct Fact: Codable, Hashable { let label: String; let value: Double; let unit: String; let formatted: String }
 

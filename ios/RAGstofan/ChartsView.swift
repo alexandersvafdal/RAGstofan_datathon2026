@@ -50,7 +50,7 @@ struct ChartBlock: View {
             Text(chart.title).font(.subheadline.weight(.semibold)).foregroundStyle(pal.text2)
                 .fixedSize(horizontal: false, vertical: true)
             if views.count > 1 { Switcher(views: views, selection: $view, lang: lang) }
-            ChartCanvas(chart: chart, comp: comp, lang: lang, view: view)
+            ChartCanvas(chart: chart, comp: comp, lang: lang, view: view, compare: compare)
                 .id(view)
                 .transition(.asymmetric(insertion: .opacity.combined(with: .scale(scale: 0.98, anchor: .bottom)),
                                         removal: .opacity))
@@ -99,6 +99,7 @@ private struct ChartCanvas: View {
     let comp: Computation?
     let lang: Lang
     let view: String
+    var compare = false   // series from different tables, each set to 100 at the start
     @State private var selected: String?
     @State private var grow = 0.0   // 0 → 1 as the chart draws itself in
 
@@ -121,8 +122,17 @@ private struct ChartCanvas: View {
         for p in pts where !seen.contains(p.label) { seen.append(p.label) }
         return seen
     }
+    /// Many months: the axis names years only, at Januaries, so the dates never run together.
+    private var yearsOnly: Bool {
+        labels.count > 24 && pts.allSatisfy { $0.x.range(of: #"^\d{4}M\d\d$"#, options: .regularExpression) != nil }
+    }
     /// At most five x labels, evenly spread, so they never collide.
     private var ticks: [String] {
+        if yearsOnly {
+            let jans = labels.filter { l in pts.contains { $0.label == l && $0.x.hasSuffix("M01") } }
+            let step = max(1, Int((Double(jans.count) / 5).rounded(.up)))
+            return stride(from: 0, to: jans.count, by: step).map { jans[$0] }
+        }
         let step = max(1, Int((Double(labels.count) / 5).rounded(.up)))
         return stride(from: 0, to: labels.count, by: step).map { labels[$0] }
     }
@@ -208,11 +218,30 @@ private struct ChartCanvas: View {
                     .foregroundStyle(pal.card)
                     .symbolSize(20)
             }
+            // several lines: each named at its end with its last value, so nobody matches colours to a legend
+            if multi && !stacked && series.count <= 4 {
+                ForEach(series, id: \.self) { s in
+                    if let end = pts.last(where: { $0.series == s }) {
+                        PointMark(x: .value("x", end.label), y: .value("y", rise(end.y)))
+                            .foregroundStyle(color(s)).symbolSize(36)
+                            .annotation(position: .top, alignment: .trailing, spacing: 4) {
+                                Text("\(s) \(val(end.y))").font(.caption2.weight(.semibold)).monospacedDigit()
+                                    .foregroundStyle(color(s)).opacity(grow).lineLimit(1)
+                            }
+                    }
+                }
+            }
+            // a comparison set to 100 at the start: the starting line, faint, so above and below read at a glance
+            if compare && chart.unit != "%" {
+                RuleMark(y: .value("start", rise(100)))
+                    .foregroundStyle(pal.text3.opacity(0.6))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+            }
             if let s = selected { crosshair(s) }
         }
         .chartForegroundStyleScale(domain: series, range: colors(series.count))
         .chartYScale(domain: stacked ? stackDomain : yDomain)
-        .modifier(Axes(ticks: ticks, pal: pal, compact: compact))
+        .modifier(Axes(ticks: ticks, pal: pal, compact: compact, yearsOnly: yearsOnly))
         .chartLegend(multi ? .visible : .hidden)
         .chartLegend(position: .top, alignment: .leading)
         .chartXSelection(value: $selected)
@@ -452,6 +481,7 @@ private struct Axes: ViewModifier {
     let ticks: [String]
     let pal: Palette
     let compact: (Double) -> String
+    var yearsOnly = false
     func body(content: Content) -> some View {
         content
             .chartXAxis {
@@ -459,7 +489,7 @@ private struct Axes: ViewModifier {
                     // every category gets a mark; only the evenly spread ticks get text
                     AxisValueLabel(collisionResolution: .disabled) {
                         let s = v.as(String.self) ?? ""
-                        Text(ticks.contains(s) ? s : "").font(.caption2).foregroundStyle(pal.text3)
+                        Text(ticks.contains(s) ? (yearsOnly ? String(s.suffix(4)) : s) : "").font(.caption2).foregroundStyle(pal.text3)
                     }
                 }
             }
