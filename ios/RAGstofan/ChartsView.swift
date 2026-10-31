@@ -45,16 +45,44 @@ struct ChartBlock: View {
         let views = viewsFor(chart, comp)
         VStack(alignment: .leading, spacing: 12) {
             Text(chart.title).font(.subheadline.weight(.semibold)).foregroundStyle(pal.text2)
-            if views.count > 1 {
-                Picker("Chart", selection: $view.animation(.smooth)) {
-                    ForEach(views, id: \.self) { Text(Words(lang: lang).viewName($0)).tag($0) }
-                }
-                .pickerStyle(.segmented)
-            }
+                .fixedSize(horizontal: false, vertical: true)
+            if views.count > 1 { Switcher(views: views, selection: $view, lang: lang) }
             ChartCanvas(chart: chart, comp: comp, lang: lang, view: view)
                 .id(view)
-                .transition(.opacity)
+                .transition(.asymmetric(insertion: .opacity.combined(with: .scale(scale: 0.98, anchor: .bottom)),
+                                        removal: .opacity))
         }
+        .padding(14)
+        .background(pal.text.opacity(0.025), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+}
+
+/// The chart views as a capsule switcher; the highlight slides to the one picked.
+private struct Switcher: View {
+    @Environment(\.pal) private var pal
+    let views: [String]
+    @Binding var selection: String
+    let lang: Lang
+    @Namespace private var ns
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(views, id: \.self) { v in
+                Text(Words(lang: lang).viewName(v))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(selection == v ? pal.accentInk : pal.text2)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background {
+                        if selection == v { Capsule().fill(pal.accent).matchedGeometryEffect(id: "on", in: ns) }
+                    }
+                    .contentShape(Capsule())
+                    .onTapGesture { withAnimation(.spring(duration: 0.4, bounce: 0.25)) { selection = v } }
+            }
+        }
+        .padding(3)
+        .background(pal.text.opacity(0.06), in: Capsule())
+        .sensoryFeedback(.selection, trigger: selection)
     }
 }
 
@@ -69,6 +97,7 @@ private struct ChartCanvas: View {
     let lang: Lang
     let view: String
     @State private var selected: String?
+    @State private var grow = 0.0   // 0 → 1 as the chart draws itself in
 
     private var pts: [Pt] {
         var d = chart.data.enumerated().map { i, p in Pt(id: i, x: p.x, label: fmtPeriod(p.x, lang), y: p.y, series: p.series ?? "") }
@@ -100,12 +129,14 @@ private struct ChartCanvas: View {
         let pad = hi > lo ? (hi - lo) * 0.12 : max(abs(hi) * 0.05, 1)
         return (lo - pad)...(hi + pad)
     }
-
     /// Zero to the tallest stack.
     private var stackDomain: ClosedRange<Double> {
         let top = Dictionary(grouping: pts, by: \.label).values.map { $0.reduce(0) { $0 + max($1.y, 0) } }.max() ?? 1
         return 0...max(top * 1.05, 1)
     }
+    /// Values while drawing in: lines rise from the floor of the chart, bars grow from zero.
+    private func rise(_ y: Double) -> Double { yDomain.lowerBound + (y - yDomain.lowerBound) * grow }
+    private func scaled(_ y: Double) -> Double { y * grow }
 
     private func val(_ v: Double) -> String {
         let pct = chart.unit == "%"
@@ -115,48 +146,69 @@ private struct ChartCanvas: View {
     private func compact(_ v: Double) -> String {
         v.formatted(.number.notation(.compactName).precision(.significantDigits(1...3)).locale(Locale(identifier: lang == .is ? "is_IS" : "en_US")))
     }
+    private var barFill: LinearGradient {
+        LinearGradient(colors: [pal.series1, pal.series1.opacity(0.7)], startPoint: .top, endPoint: .bottom)
+    }
 
     var body: some View {
-        switch view {
-        case "donut", "waffle": shareView
-        case "heatmap": heatmap
-        case "slope": slope
-        case "lollipop": lollipop
-        case "line", "stacked": lineChart
-        default: bars
+        Group {
+            switch view {
+            case "donut", "waffle": shareView
+            case "heatmap": heatmap
+            case "slope": slope
+            case "lollipop": lollipop
+            case "line", "stacked": lineChart
+            default: bars
+            }
         }
+        .sensoryFeedback(.selection, trigger: selected)
+        .onAppear { withAnimation(.spring(duration: 1.0, bounce: 0.12).delay(0.1)) { grow = 1 } }
     }
 
     // MARK: line and stacked area
 
     private var lineChart: some View {
         let stacked = view == "stacked", lo = yDomain.lowerBound
+        let last = pts.last
         return Chart {
             ForEach(pts) { p in
                 if stacked {
-                    AreaMark(x: .value("x", p.label), y: .value("y", p.y), stacking: .standard)
+                    AreaMark(x: .value("x", p.label), y: .value("y", scaled(p.y)), stacking: .standard)
                         .foregroundStyle(by: .value("s", p.series))
                         .interpolationMethod(.monotone)
                         .opacity(0.85)
                 } else if multi {
-                    LineMark(x: .value("x", p.label), y: .value("y", p.y))
+                    LineMark(x: .value("x", p.label), y: .value("y", rise(p.y)))
                         .foregroundStyle(by: .value("s", p.series))
                         .interpolationMethod(.monotone)
-                        .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                        .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
                 } else {
-                    AreaMark(x: .value("x", p.label), yStart: .value("lo", lo), yEnd: .value("y", p.y))
-                        .foregroundStyle(LinearGradient(colors: [pal.series1.opacity(0.28), pal.series1.opacity(0)], startPoint: .top, endPoint: .bottom))
+                    AreaMark(x: .value("x", p.label), yStart: .value("lo", lo), yEnd: .value("y", rise(p.y)))
+                        .foregroundStyle(LinearGradient(colors: [pal.series1.opacity(0.32), pal.series1.opacity(0.02)], startPoint: .top, endPoint: .bottom))
                         .interpolationMethod(.monotone)
-                    LineMark(x: .value("x", p.label), y: .value("y", p.y))
+                    LineMark(x: .value("x", p.label), y: .value("y", rise(p.y)))
                         .foregroundStyle(pal.series1)
                         .interpolationMethod(.monotone)
-                        .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                        .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
                 }
+            }
+            // the latest value, labelled, as on the website
+            if !stacked && !multi, let last {
+                PointMark(x: .value("x", last.label), y: .value("y", rise(last.y)))
+                    .foregroundStyle(pal.series1)
+                    .symbolSize(70)
+                    .annotation(position: .top, alignment: .trailing, spacing: 6) {
+                        Text(val(last.y)).font(.caption2.weight(.semibold)).monospacedDigit().foregroundStyle(pal.text)
+                            .opacity(grow)
+                    }
+                PointMark(x: .value("x", last.label), y: .value("y", rise(last.y)))
+                    .foregroundStyle(pal.card)
+                    .symbolSize(20)
             }
             if let s = selected { crosshair(s) }
         }
         .chartForegroundStyleScale(domain: series, range: colors(series.count))
-                .chartYScale(domain: stacked ? stackDomain : yDomain)
+        .chartYScale(domain: stacked ? stackDomain : yDomain)
         .modifier(Axes(ticks: ticks, pal: pal, compact: compact))
         .chartLegend(multi ? .visible : .hidden)
         .chartLegend(position: .top, alignment: .leading)
@@ -188,7 +240,7 @@ private struct ChartCanvas: View {
             }
         }
         .padding(8)
-        .background(pal.card, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
         .shadow(color: .black.opacity(0.12), radius: 8, y: 3)
     }
 
@@ -199,11 +251,18 @@ private struct ChartCanvas: View {
         if pts.allSatisfy({ isPeriod($0.x) }) {
             Chart {
                 ForEach(pts) { p in
-                    BarMark(x: .value("x", p.label), y: .value("y", p.y), width: .ratio(0.72))
-                        .foregroundStyle(by: .value("s", p.series))
-                        .position(by: .value("s", p.series))
-                        .clipShape(UnevenRoundedRectangle(topLeadingRadius: 4, topTrailingRadius: 4))
-                        .opacity(selected == nil || selected == p.label ? 1 : 0.45)
+                    if multi {
+                        BarMark(x: .value("x", p.label), y: .value("y", scaled(p.y)), width: .ratio(0.72))
+                            .foregroundStyle(by: .value("s", p.series))
+                            .position(by: .value("s", p.series))
+                            .clipShape(UnevenRoundedRectangle(topLeadingRadius: 4, topTrailingRadius: 4))
+                            .opacity(selected == nil || selected == p.label ? 1 : 0.4)
+                    } else {
+                        BarMark(x: .value("x", p.label), y: .value("y", scaled(p.y)), width: .ratio(0.72))
+                            .foregroundStyle(barFill)
+                            .clipShape(UnevenRoundedRectangle(topLeadingRadius: 5, topTrailingRadius: 5))
+                            .opacity(selected == nil || selected == p.label ? 1 : 0.4)
+                    }
                 }
                 if let s = selected { crosshair(s) }
             }
@@ -217,24 +276,30 @@ private struct ChartCanvas: View {
             // categories read best as horizontal bars, labelled at the end
             Chart {
                 ForEach(pts) { p in
-                    BarMark(x: .value("y", p.y), y: .value("x", p.label), height: .ratio(0.7))
-                        .foregroundStyle(by: .value("s", p.series))
-                        .position(by: .value("s", p.series))
-                        .clipShape(UnevenRoundedRectangle(bottomTrailingRadius: 4, topTrailingRadius: 4))
-                        .annotation(position: .trailing, spacing: 4) {
-                            if !multi { Text(val(p.y)).font(.caption2).foregroundStyle(pal.text2) }
-                        }
+                    if multi {
+                        BarMark(x: .value("y", scaled(p.y)), y: .value("x", p.label), height: .ratio(0.7))
+                            .foregroundStyle(by: .value("s", p.series))
+                            .position(by: .value("s", p.series))
+                            .clipShape(UnevenRoundedRectangle(bottomTrailingRadius: 4, topTrailingRadius: 4))
+                    } else {
+                        BarMark(x: .value("y", scaled(p.y)), y: .value("x", p.label), height: .ratio(0.7))
+                            .foregroundStyle(LinearGradient(colors: [pal.series1.opacity(0.7), pal.series1], startPoint: .leading, endPoint: .trailing))
+                            .clipShape(UnevenRoundedRectangle(bottomTrailingRadius: 5, topTrailingRadius: 5))
+                            .annotation(position: .trailing, spacing: 4) {
+                                Text(val(p.y)).font(.caption2).monospacedDigit().foregroundStyle(pal.text2).opacity(grow)
+                            }
+                    }
                 }
             }
             .chartForegroundStyleScale(domain: series, range: colors(series.count))
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: 4)) { v in
-                    AxisGridLine().foregroundStyle(pal.grid)
+                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3])).foregroundStyle(pal.grid)
                     AxisValueLabel { if let d = v.as(Double.self) { Text(compact(d)) } }
                 }
             }
             .chartYAxis { AxisMarks { AxisValueLabel().font(.caption2).foregroundStyle(pal.text2) } }
-            .chartXScale(range: .plotDimension(endPadding: multi ? 0 : 56))
+            .chartXScale(domain: 0...max((pts.map(\.y).max() ?? 1) * 1.02, 1), range: .plotDimension(endPadding: multi ? 0 : 56))
             .chartLegend(multi ? .visible : .hidden)
             .chartLegend(position: .top, alignment: .leading)
             .frame(height: CGFloat(max(150, labels.count * (multi ? 22 * series.count : 30) + 30)))
@@ -244,23 +309,25 @@ private struct ChartCanvas: View {
     private var lollipop: some View {
         Chart {
             ForEach(pts) { p in
-                RuleMark(xStart: .value("0", 0), xEnd: .value("y", p.y), y: .value("x", p.label))
+                RuleMark(xStart: .value("0", 0), xEnd: .value("y", scaled(p.y)), y: .value("x", p.label))
                     .foregroundStyle(pal.series1.opacity(0.45))
                     .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round))
-                PointMark(x: .value("y", p.y), y: .value("x", p.label))
+                PointMark(x: .value("y", scaled(p.y)), y: .value("x", p.label))
                     .foregroundStyle(pal.series1)
                     .symbolSize(110)
-                    .annotation(position: .trailing, spacing: 6) { Text(val(p.y)).font(.caption2).foregroundStyle(pal.text2) }
+                    .annotation(position: .trailing, spacing: 6) {
+                        Text(val(p.y)).font(.caption2).monospacedDigit().foregroundStyle(pal.text2).opacity(grow)
+                    }
             }
         }
         .chartXAxis {
             AxisMarks(values: .automatic(desiredCount: 4)) { v in
-                AxisGridLine().foregroundStyle(pal.grid)
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3])).foregroundStyle(pal.grid)
                 AxisValueLabel { if let d = v.as(Double.self) { Text(compact(d)) } }
             }
         }
         .chartYAxis { AxisMarks { AxisValueLabel().font(.caption2).foregroundStyle(pal.text2) } }
-        .chartXScale(range: .plotDimension(endPadding: 56))
+        .chartXScale(domain: 0...max((pts.map(\.y).max() ?? 1) * 1.02, 1), range: .plotDimension(endPadding: 56))
         .frame(height: CGFloat(max(150, labels.count * 32 + 30)))
     }
 
@@ -269,14 +336,14 @@ private struct ChartCanvas: View {
     private var slope: some View {
         Chart {
             ForEach(pts) { p in
-                LineMark(x: .value("x", p.label), y: .value("y", p.y))
+                LineMark(x: .value("x", p.label), y: .value("y", rise(p.y)))
                     .foregroundStyle(by: .value("s", p.series))
                     .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round))
-                PointMark(x: .value("x", p.label), y: .value("y", p.y))
+                PointMark(x: .value("x", p.label), y: .value("y", rise(p.y)))
                     .foregroundStyle(by: .value("s", p.series))
                     .symbolSize(130)
                     .annotation(position: .top, spacing: 8) {
-                        Text(val(p.y)).font(.caption.weight(.semibold)).monospacedDigit().foregroundStyle(pal.text)
+                        Text(val(p.y)).font(.caption.weight(.semibold)).monospacedDigit().foregroundStyle(pal.text).opacity(grow)
                     }
             }
         }
@@ -312,8 +379,10 @@ private struct ChartCanvas: View {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 3), count: 10), spacing: 3) {
                     ForEach(0..<100, id: \.self) { i in
                         RoundedRectangle(cornerRadius: 3, style: .continuous)
-                            .fill(i < n ? pal.series1 : pal.text.opacity(0.08))
+                            .fill(i < n && grow > 0 ? pal.series1 : pal.text.opacity(0.08))
                             .aspectRatio(1, contentMode: .fit)
+                            .scaleEffect(i < n && grow > 0 ? 1 : 0.85)
+                            .animation(.spring(duration: 0.4, bounce: 0.4).delay(Double(i) * 0.008), value: grow > 0)
                     }
                 }
                 .frame(maxWidth: 220)
@@ -321,10 +390,15 @@ private struct ChartCanvas: View {
             }
             .frame(maxWidth: .infinity)
         } else {
-            Chart(sl) { s in
-                SectorMark(angle: .value("v", s.value), innerRadius: .ratio(0.62), angularInset: 1.5)
-                    .cornerRadius(4)
-                    .foregroundStyle(by: .value("k", s.key))
+            // the slices sweep round as the chart draws in; an empty slice holds the rest of the circle meanwhile
+            Chart {
+                ForEach(sl) { s in
+                    SectorMark(angle: .value("v", s.value * grow), innerRadius: .ratio(0.62), angularInset: 1.5)
+                        .cornerRadius(5)
+                        .foregroundStyle(by: .value("k", s.key))
+                }
+                SectorMark(angle: .value("v", total * (1 - grow)), innerRadius: .ratio(0.62))
+                    .foregroundStyle(.clear)
             }
             .chartForegroundStyleScale(domain: sl.map(\.key), range: colors(sl.count))
             .chartLegend(position: .bottom, alignment: .center, spacing: 12)
@@ -334,10 +408,12 @@ private struct ChartCanvas: View {
                         let r = g[f]
                         VStack(spacing: 0) {
                             Text("\(fmtNum(first, percent: true, lang))%").font(.system(size: 26, weight: .semibold, design: .rounded))
+                                .monospacedDigit()
                             Text(sl.first?.key ?? "").font(.caption2).foregroundStyle(pal.text3).lineLimit(1)
                         }
                         .frame(width: r.width * 0.55)
                         .position(x: r.midX, y: r.midY)
+                        .opacity(grow)
                     }
                 }
             }
@@ -355,11 +431,12 @@ private struct ChartCanvas: View {
         }
         let years = Set(cells.map(\.row)).count
         return Chart(cells) { c in
-            RectangleMark(x: .value("col", c.col), y: .value("year", c.row), width: .ratio(0.92), height: .ratio(0.86))
+            RectangleMark(x: .value("col", c.col), y: .value("year", c.row), width: .ratio(0.9), height: .ratio(0.84))
                 .foregroundStyle(by: .value("v", c.value))
-                .cornerRadius(3)
+                .cornerRadius(4)
+                .opacity(grow)
         }
-        .chartForegroundStyleScale(range: Gradient(colors: [pal.series1.opacity(0.1), pal.series1]))
+        .chartForegroundStyleScale(range: Gradient(colors: [pal.series1.opacity(0.08), pal.series1.opacity(0.55), pal.series1]))
         .chartLegend(.hidden)
         .chartXAxis { AxisMarks { AxisValueLabel().font(.system(size: 9)).foregroundStyle(pal.text3) } }
         .chartYAxis { AxisMarks(position: .leading) { AxisValueLabel().font(.caption2).foregroundStyle(pal.text2) } }
@@ -385,7 +462,7 @@ private struct Axes: ViewModifier {
             }
             .chartYAxis {
                 AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { v in
-                    AxisGridLine().foregroundStyle(pal.grid)
+                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3])).foregroundStyle(pal.grid)
                     AxisValueLabel { if let d = v.as(Double.self) { Text(compact(d)).font(.caption2).foregroundStyle(pal.text3) } }
                 }
             }

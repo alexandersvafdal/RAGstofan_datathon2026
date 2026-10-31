@@ -61,6 +61,10 @@ struct SettingsView: View {
 
                 Section {
                     NavigationLink(w.about) { AboutView(lang: model.ui) }
+                    Button(model.ui == .is ? "Sýna kynninguna aftur" : "Show the introduction again") {
+                        dismiss()
+                        model.onboarded = false
+                    }
                 }
             }
             .scrollContentBackground(.hidden)

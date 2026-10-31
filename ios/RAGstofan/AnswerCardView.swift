@@ -1,7 +1,36 @@
 // The answer card (frontend renderAnswer): text, headline figures, charts, notes, sources, and the details behind it.
 import SwiftUI
+import UIKit
 
-private struct Figure: Identifiable { let id: Int; let value: String; let unit: String; let label: String; let calc: String? }
+private struct Figure: Identifiable {
+    let id: Int; let value: String; let number: Double; let unit: String; let label: String; let calc: String?
+}
+
+/// Each part of the card fades and rises into place a moment after the one above it.
+struct Reveal: ViewModifier {
+    let step: Int
+    let shown: Bool
+    func body(content: Content) -> some View {
+        content
+            .opacity(shown ? 1 : 0)
+            .offset(y: shown ? 0 : 12)
+            .blur(radius: shown ? 0 : 3)
+            .animation(.spring(duration: 0.6, bounce: 0.18).delay(Double(step) * 0.07), value: shown)
+    }
+}
+
+extension View {
+    func reveal(_ step: Int, _ shown: Bool) -> some View { modifier(Reveal(step: step, shown: shown)) }
+
+    /// Long-press to copy, with a Copy item in the menu.
+    func copyable(_ text: String, _ lang: Lang) -> some View {
+        contextMenu {
+            Button { UIPasteboard.general.string = text } label: {
+                Label(lang == .is ? "Afrita" : "Copy", systemImage: "doc.on.doc")
+            }
+        }
+    }
+}
 
 struct AnswerCard: View {
     @Environment(\.pal) private var pal
@@ -9,6 +38,8 @@ struct AnswerCard: View {
     let ask: Ask
     var fast = false
     @State private var picks: [String]
+    @State private var shown = false
+    @State private var copied = 0
 
     init(a: Answer, ask: @escaping Ask, fast: Bool = false) {
         self.a = a
@@ -19,6 +50,11 @@ struct AnswerCard: View {
 
     private var L: Lang { a.language == "is" ? .is : .en }
     private var secs: String { String(format: "%.1f s", Double(a.totalMs) / 1000) }
+    /// The answer as it reads, with its sources, for the clipboard.
+    private var copyText: String {
+        let src = a.sources.map { "\($0.id) \($0.url)" }.joined(separator: "\n")
+        return prettyPeriods(a.text, L) + (src.isEmpty ? "" : "\n\n" + (L == .is ? "Heimild: " : "Source: ") + src)
+    }
 
     var body: some View {
         let w = Words(lang: L)
@@ -28,12 +64,15 @@ struct AnswerCard: View {
                     .font(.system(size: 17))
                     .lineSpacing(3)
                     .foregroundStyle(a.status == "error" ? Color.red : pal.text)
-                    .textSelection(.enabled)
                     .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                    .copyable(copyText, L)
+                    .reveal(0, shown)
 
                 if a.status == "clarify", let c = a.clarification {
                     VStack(spacing: 8) {
-                        ForEach(c.options, id: \.tableId) { o in
+                        ForEach(Array(c.options.enumerated()), id: \.offset) { i, o in
                             Button { ask(a.question, o.tableId) } label: {
                                 HStack(spacing: 10) {
                                     Text(o.label).foregroundStyle(pal.text).multilineTextAlignment(.leading)
@@ -45,6 +84,7 @@ struct AnswerCard: View {
                                 .background(pal.soft, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                             }
                             .buttonStyle(.plain)
+                            .reveal(1 + i, shown)
                         }
                     }
                 }
@@ -52,13 +92,17 @@ struct AnswerCard: View {
                 let figs = figures(w)
                 if !figs.isEmpty {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 12, alignment: .topLeading)], alignment: .leading, spacing: 12) {
-                        ForEach(figs) { FigureView(fig: $0) }
+                        ForEach(figs) { f in
+                            FigureView(fig: f, lang: L, shown: shown)
+                                .copyable("\(f.value)\(f.unit == "%" ? "%" : f.unit.isEmpty ? "" : " " + f.unit) · \(f.label)", L)
+                                .reveal(1 + f.id, shown)
+                        }
                     }
                 }
 
-                ForEach(Array(a.parts.enumerated()), id: \.offset) { _, p in
+                ForEach(Array(a.parts.enumerated()), id: \.offset) { i, p in
                     if let c = p.chart, c.type != "kpi", c.data.count > 1 {
-                        ChartBlock(chart: c, comp: p.computation, lang: L)
+                        ChartBlock(chart: c, comp: p.computation, lang: L).reveal(3 + i, shown)
                     }
                 }
 
@@ -66,6 +110,7 @@ struct AnswerCard: View {
                     Label(L == .is ? "Svarað í flýti með hraða líkaninu, án hugsunar." : "Answered quickly with the fast model, thinking off.",
                           systemImage: "bolt.fill")
                         .font(.footnote).foregroundStyle(pal.text2)
+                        .reveal(4, shown)
                 }
                 ForEach(Array(a.parts.compactMap(\.note).filter { !$0.isEmpty }.enumerated()), id: \.offset) { _, note in
                     Label { Text(prettyPeriods(note, L)) } icon: { Image(systemName: "info.circle") }
@@ -74,6 +119,8 @@ struct AnswerCard: View {
                         .padding(12)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(pal.warn, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .copyable(prettyPeriods(note, L), L)
+                        .reveal(4, shown)
                 }
 
                 Flow(spacing: 6) {
@@ -84,26 +131,42 @@ struct AnswerCard: View {
                     }
                     if a.textSource == "model" { Chip(text: Text(w.checked), icon: "checkmark.seal") }
                     if a.totalMs > 0 { Chip(text: Text(secs), icon: "clock") }
+                    Button {
+                        UIPasteboard.general.string = copyText
+                        copied += 1
+                    } label: {
+                        Chip(text: Text(copied > 0 ? (L == .is ? "Afritað" : "Copied") : (L == .is ? "Afrita" : "Copy")),
+                             icon: copied > 0 ? "checkmark" : "doc.on.doc")
+                            .contentTransition(.symbolEffect(.replace))
+                            .animation(.snappy, value: copied)
+                    }
+                    .buttonStyle(.plain)
+                    .sensoryFeedback(.success, trigger: copied)
                 }
+                .reveal(5, shown)
 
-                if !a.parts.isEmpty {
-                    Disclosure(title: w.data) { DataTables(parts: a.parts, lang: L) }
+                VStack(alignment: .leading, spacing: 18) {
+                    if !a.parts.isEmpty {
+                        Disclosure(title: w.data) { DataTables(parts: a.parts, lang: L) }
+                    }
+                    if a.parts.contains(where: { !($0.ranking ?? []).isEmpty }) {
+                        Disclosure(title: w.shortlist) { Shortlist(parts: a.parts, lang: L) }
+                    }
+                    if !a.steps.isEmpty {
+                        Disclosure(title: "\(w.how) · \(secs) · \(a.llmCalls) \(L == .is ? "köll" : "calls")") { StepsTimeline(a: a, lang: L) }
+                    }
                 }
-                if a.parts.contains(where: { !($0.ranking ?? []).isEmpty }) {
-                    Disclosure(title: w.shortlist) { Shortlist(parts: a.parts, lang: L) }
-                }
-                if !a.steps.isEmpty {
-                    Disclosure(title: "\(w.how) · \(secs) · \(a.llmCalls) \(L == .is ? "köll" : "calls")") { StepsTimeline(a: a, lang: L) }
-                }
+                .reveal(6, shown)
 
                 Flow(spacing: 8) {
-                    ForEach(Array(picks.enumerated()), id: \.offset) { _, q in
-                        Button(q) { ask(q, nil) }.buttonStyle(PillStyle())
+                    ForEach(Array(picks.enumerated()), id: \.offset) { i, q in
+                        Button(q) { ask(q, nil) }.buttonStyle(PillStyle()).reveal(7 + i, shown)
                     }
                 }
                 .padding(.top, 2)
             }
         }
+        .onAppear { shown = true }
     }
 
     /// A calculation: its result. A series: where it started and where it is now. Several lines: the latest of each.
@@ -125,7 +188,7 @@ struct AnswerCard: View {
                 let pct = f.unit == "%" || f.formatted.hasSuffix("%")
                 out.append(Figure(id: out.count,
                                   value: f.formatted.replacingOccurrences(of: #"\s*%$"#, with: "", options: .regularExpression),
-                                  unit: pct ? "%" : f.unit, label: prettyPeriods(f.label, L),
+                                  number: f.value, unit: pct ? "%" : f.unit, label: prettyPeriods(f.label, L),
                                   calc: p.computation.map { "\(w.calc): \($0.expression)" }))
             }
         }
@@ -133,14 +196,50 @@ struct AnswerCard: View {
     }
 }
 
+/// A number that counts up from zero, then settles on the server's own formatting.
+private struct CountUp: View, Animatable {
+    var value: Double
+    let digits: Int
+    let lang: Lang
+    var animatableData: Double {
+        get { value }
+        set { value = newValue }
+    }
+    var body: some View {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.locale = Locale(identifier: "en_US")
+        f.minimumFractionDigits = digits
+        f.maximumFractionDigits = digits
+        let s = f.string(from: NSNumber(value: value)) ?? ""
+        return Text(lang == .is ? String(s.map { $0 == "," ? "." : $0 == "." ? "," : $0 }) : s)
+    }
+}
+
 private struct FigureView: View {
     @Environment(\.pal) private var pal
     let fig: Figure
+    let lang: Lang
+    let shown: Bool
+    @State private var counted = 0.0
+    @State private var settled = false
+
+    /// Decimals in the server's formatting: "5,9" and "5.9" have one.
+    private var digits: Int {
+        let sep: Character = lang == .is ? "," : "."
+        guard let i = fig.value.lastIndex(of: sep) else { return 0 }
+        return fig.value[fig.value.index(after: i)...].filter(\.isNumber).count
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(fig.value).font(.system(size: 30, weight: .semibold, design: .rounded)).monospacedDigit()
-                    .foregroundStyle(pal.text).minimumScaleFactor(0.6).lineLimit(1)
+                Group {
+                    if settled { Text(fig.value) }
+                    else { CountUp(value: counted, digits: digits, lang: lang) }
+                }
+                .font(.system(size: 30, weight: .semibold, design: .rounded)).monospacedDigit()
+                .foregroundStyle(pal.text).minimumScaleFactor(0.6).lineLimit(1)
                 if !fig.unit.isEmpty { Text(fig.unit).font(.subheadline).foregroundStyle(pal.text3).lineLimit(1) }
             }
             Text(fig.label).font(.caption).foregroundStyle(pal.text2).fixedSize(horizontal: false, vertical: true)
@@ -149,6 +248,9 @@ private struct FigureView: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(pal.soft, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.9).delay(0.15)) { counted = fig.number } completion: { settled = true }
+        }
     }
 }
 

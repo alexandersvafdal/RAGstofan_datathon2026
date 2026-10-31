@@ -127,6 +127,8 @@ struct ExchangeView: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 11)
                         .background(pal.accent, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .copyable(ex.question, ex.lang)
                 }
             }
             if let a = ex.answer {
@@ -153,7 +155,7 @@ struct ExchangeView: View {
 }
 
 /// How the next question is answered: model, thinking length and temperature, as small menus above the question box.
-/// Untouched, they are the server's defaults: the best model and the longest thinking.
+/// Untouched, they are the server's defaults (the best model, the longest thinking); a changed one is tinted.
 private struct Tuning: View {
     @Environment(AppModel.self) private var model
     @Environment(\.pal) private var pal
@@ -162,45 +164,99 @@ private struct Tuning: View {
         let isl = model.ui == .is
         let names = isl ? ["none": "Engin", "low": "Stutt", "medium": "Miðlungs", "high": "Löng"]
                         : ["none": "Off", "low": "Short", "medium": "Medium", "high": "Long"]
+        let levels = model.models?.reasoning ?? ["none", "low", "medium", "high"]
         let best = model.models?.default
         let longest = model.models?.reasoningDefault ?? "high"
+        let temp = model.temperatureChoice ?? 0
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 Menu {
                     Picker(isl ? "Líkan" : "Model", selection: Binding(get: { model.activeModel ?? "" },
                                                                         set: { model.modelChoice = $0 == best ? nil : $0 })) {
-                        ForEach(model.models?.models ?? [], id: \.self) { Text($0 == best ? "\($0) (\(isl ? "besta" : "best"))" : $0).tag($0) }
+                        ForEach(model.models?.models ?? [], id: \.self) { m in
+                            Label(m == best ? "\(m) (\(isl ? "besta" : "best"))" : m, systemImage: m == best ? "star.fill" : "cpu").tag(m)
+                        }
                     }
-                } label: { chip("cpu", model.activeModel ?? "–") }
+                } label: {
+                    chip(changed: model.modelChoice != nil) {
+                        Image(systemName: model.modelChoice == nil ? "sparkles" : "cpu")
+                            .contentTransition(.symbolEffect(.replace))
+                        Text(model.activeModel ?? "–").contentTransition(.interpolate)
+                    }
+                }
                 Menu {
                     Picker(isl ? "Hugsun" : "Thinking", selection: Binding(get: { model.activeReasoning },
                                                                             set: { model.reasoningChoice = $0 == longest ? nil : $0 })) {
-                        ForEach(model.models?.reasoning ?? ["none", "low", "medium", "high"], id: \.self) { Text(names[$0] ?? $0).tag($0) }
+                        ForEach(levels, id: \.self) { Text(names[$0] ?? $0).tag($0) }
                     }
-                } label: { chip("brain", "\(isl ? "Hugsun" : "Thinking"): \(names[model.activeReasoning] ?? model.activeReasoning)") }
+                } label: {
+                    chip(changed: model.reasoningChoice != nil) {
+                        Meter(level: levels.firstIndex(of: model.activeReasoning) ?? 0, of: levels.count - 1)
+                        Text("\(isl ? "Hugsun" : "Thinking") ")
+                        + Text(names[model.activeReasoning] ?? model.activeReasoning).fontWeight(.semibold)
+                    }
+                }
                 Menu {
                     Picker(isl ? "Hitastig" : "Temperature", selection: Binding(get: { model.temperatureChoice ?? 0 },
                                                                                  set: { model.temperatureChoice = $0 == 0 ? nil : $0 })) {
-                        ForEach([0.0, 0.3, 0.7, 1.0], id: \.self) { Text(String(format: "%.1f", $0)).tag($0) }
+                        ForEach([0.0, 0.3, 0.7, 1.0], id: \.self) { t in
+                            Text(t == 0 ? (isl ? "0 · sama svar alltaf" : "0 · same answer every time") : String(format: "%.1f", t)).tag(t)
+                        }
                     }
-                } label: { chip("thermometer.medium", String(format: "%.1f", model.temperatureChoice ?? 0)) }
+                } label: {
+                    chip(changed: model.temperatureChoice != nil) {
+                        // cool at 0, warmer as it rises
+                        Circle()
+                            .fill(LinearGradient(colors: [pal.series1, pal.series2], startPoint: .bottom, endPoint: .top))
+                            .frame(width: 9, height: 9)
+                            .hueRotation(.degrees(temp * 40))
+                            .scaleEffect(0.8 + temp * 0.4)
+                        Text(String(format: "%.1f", temp)).monospacedDigit().contentTransition(.numericText(value: temp))
+                    }
+                }
             }
             .padding(.horizontal, 2)
+            .padding(.vertical, 1)
         }
         .disabled(model.models == nil)
+        .opacity(model.models == nil ? 0.5 : 1)
+        .animation(.spring(duration: 0.4, bounce: 0.25), value: model.modelChoice)
+        .animation(.spring(duration: 0.4, bounce: 0.25), value: model.reasoningChoice)
+        .animation(.spring(duration: 0.4, bounce: 0.25), value: model.temperatureChoice)
+        .sensoryFeedback(.selection, trigger: model.modelChoice)
+        .sensoryFeedback(.selection, trigger: model.reasoningChoice)
+        .sensoryFeedback(.selection, trigger: model.temperatureChoice)
     }
 
-    private func chip(_ icon: String, _ text: String) -> some View {
-        HStack(spacing: 5) {
-            Image(systemName: icon)
-            Text(text).lineLimit(1)
-            Image(systemName: "chevron.up.chevron.down").font(.system(size: 8, weight: .semibold))
+    private func chip<C: View>(changed: Bool, @ViewBuilder _ content: () -> C) -> some View {
+        HStack(spacing: 6) {
+            content()
+            Image(systemName: "chevron.up.chevron.down").font(.system(size: 8, weight: .semibold)).opacity(0.6)
         }
         .font(.caption)
-        .foregroundStyle(pal.text2)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(pal.card, in: Capsule())
-        .overlay(Capsule().stroke(pal.text.opacity(0.1)))
+        .lineLimit(1)
+        .foregroundStyle(changed ? pal.accent : pal.text2)
+        .padding(.horizontal, 11)
+        .padding(.vertical, 7)
+        .background(changed ? pal.soft : pal.card, in: Capsule())
+        .overlay(Capsule().stroke(changed ? pal.accent.opacity(0.35) : pal.text.opacity(0.1)))
+        .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
+    }
+}
+
+/// Thinking length as rising bars: none lit for Off, all four for Long.
+private struct Meter: View {
+    @Environment(\.pal) private var pal
+    let level: Int
+    let of: Int
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 1.5) {
+            ForEach(0..<max(of, 1), id: \.self) { i in
+                Capsule()
+                    .fill(i < level ? pal.accent : pal.text.opacity(0.2))
+                    .frame(width: 2.5, height: 4 + CGFloat(i) * 2.5)
+            }
+        }
+        .frame(height: 12, alignment: .bottom)
     }
 }

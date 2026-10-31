@@ -21,5 +21,8 @@ struct RootView: View {
             .tint(pal.accent)
             .preferredColorScheme(model.colorScheme)
             .task { await model.connect() }
+            .fullScreenCover(isPresented: Binding(get: { !model.onboarded }, set: { model.onboarded = !$0 })) {
+                OnboardingView().environment(model).environment(\.pal, pal).tint(pal.accent)
+            }
     }
 }

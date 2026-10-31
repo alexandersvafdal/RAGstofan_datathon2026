@@ -48,6 +48,8 @@ final class AppModel {
     var reasoningChoice: String? { didSet { UserDefaults.standard.set(reasoningChoice, forKey: "reasoning") } }
     var temperatureChoice: Double? { didSet { UserDefaults.standard.set(temperatureChoice, forKey: "temperature") } }
     var models: ModelList?
+    /// The first-run introduction has been seen.
+    var onboarded: Bool { didSet { UserDefaults.standard.set(onboarded, forKey: "onboarded") } }
 
     var exchanges: [Exchange] = []
     var conversations: [Conversation] = []
@@ -71,6 +73,7 @@ final class AppModel {
         reasoningChoice = d.string(forKey: "reasoning")
         temperatureChoice = d.object(forKey: "temperature") as? Double
         conversations = Self.load()
+        onboarded = d.bool(forKey: "onboarded")
     }
 
     var colorScheme: ColorScheme? { appearance == "light" ? .light : appearance == "dark" ? .dark : nil }
