@@ -29,8 +29,12 @@ def score(q: dict, a: Answer) -> dict:
     table_ok = all(any(t in got_tables for t in want.split("|")) for want in q["expected_tables"])
     tol = q.get("tolerance", 0.005)
     numbers = [f.value for p in a.parts for f in p.facts] + numbers_in(a.text)
+    # a figure published as "63.1 billion ISK" or "102 thousand tonnes" may sit in a table in millions or units
+    unit = q.get("unit", "").lower()
+    scales = [1] + ([1e3, 1e6, 1e9] if "billion" in unit else [1e3, 1e6] if "million" in unit else
+                    [1e3] if "thousand" in unit else [])
     def found(v: float) -> bool:
-        return any(abs(n - v) <= max(abs(v) * tol, 1e-9) for n in numbers)
+        return any(abs(n - v * k) <= max(abs(v * k) * tol, 1e-9) for n in numbers for k in scales)
     values_ok = a.status == "answered" and all(found(v) for v in q["expected_values"])
     # was the right table among the search candidates the model chose from? (search vs. model failure)
     offered = set()
@@ -70,7 +74,7 @@ def report(results: list[dict]):
                 cells[(lvl, lng)][1] += 1
     langs = ["en", "is", "together"]
     print(f"\n{'level':8}" + "".join(f"{x:>12}" for x in langs))
-    for lvl in ("easy", "medium", "hard", "all"):
+    for lvl in [*dict.fromkeys(r["level"] for r in results), "all"]:
         row = [f"{cells[(lvl, x)][0]} of {cells[(lvl, x)][1]}" if cells[(lvl, x)][1] else "-" for x in langs]
         print(f"{lvl:8}" + "".join(f"{c:>12}" for c in row))
     n = len(results)
@@ -94,7 +98,7 @@ def compare(results: list[dict], baseline_path: Path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--questions", default=str(HERE / "questions.jsonl"))
+    ap.add_argument("--questions", default=str(HERE / "dev_core.jsonl"))
     ap.add_argument("--level")
     ap.add_argument("--language")
     ap.add_argument("--ids", help="comma-separated question ids")

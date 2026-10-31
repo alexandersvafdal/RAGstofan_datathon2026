@@ -36,6 +36,8 @@ def embed(texts: list[str], client: httpx.Client | None = None) -> list[list[flo
 
 
 class Vectors:
+    name = "bge-m3"
+
     def __init__(self, ids: list[str], flat: array, dim: int):
         self.ids, self.flat, self.dim = ids, flat, dim
         self.client = httpx.Client(timeout=30)

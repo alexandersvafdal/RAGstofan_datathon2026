@@ -1,0 +1,116 @@
+{
+  "production-in-agriculture-in-august-2026": [
+    {"question_en": "How much meat was produced in Iceland in August 2026?",
+     "question_is": "Hve mikil var kjötframleiðsla á Íslandi í ágúst 2026?", "figure": "1,872", "unit": "tonnes"}
+  ],
+  "pupils-in-compulsory-schools-2025": [
+    {"question_en": "How many pupils were in compulsory schools in Iceland in the autumn of 2025?",
+     "question_is": "Hve margir nemendur voru í grunnskólum á Íslandi haustið 2025?", "figure": "46,725", "unit": "pupils"},
+    {"question_en": "How many compulsory schools were operating in Iceland in the 2025-2026 school year?",
+     "question_is": "Hve margir grunnskólar störfuðu á Íslandi skólaárið 2025-2026?", "figure": "177", "unit": "schools"}
+  ],
+  "new-registrations-and-company-bankruptcies-in-the-3rd-quarter-of-2026": [
+    {"question_en": "How many new market enterprises were registered in Iceland in the third quarter of 2026?",
+     "question_is": "Hve mörg ný markaðsfyrirtæki voru skráð á Íslandi á þriðja ársfjórðungi 2026?", "figure": "755", "unit": "enterprises"},
+    {"question_en": "How many market enterprises were made insolvent in Iceland in the third quarter of 2026?",
+     "question_is": "Hve mörg markaðsfyrirtæki urðu gjaldþrota á Íslandi á þriðja ársfjórðungi 2026?", "figure": "120", "unit": "enterprises"}
+  ],
+  "trade-in-goods-in-august-2026": [
+    {"question_en": "How large was Iceland's trade deficit in goods in August 2026?",
+     "question_is": "Hver var vöruskiptahallinn á Íslandi í ágúst 2026?", "figure": "63.1", "unit": "ISK billion"}
+  ],
+  "trade-in-goods-in-september-2026": [
+    {"question_en": "What was the value of goods exported from Iceland in September 2026?",
+     "question_is": "Hvert var verðmæti vöruútflutnings frá Íslandi í september 2026?", "figure": "88.1", "unit": "ISK billion"}
+  ],
+  "trade-in-services-by-classification-and-countries-2025": [
+    {"question_en": "What was Iceland's surplus in trade in services in 2025?",
+     "question_is": "Hver var afgangurinn af þjónustuviðskiptum Íslands árið 2025?", "figure": "282.7", "unit": "ISK billion"}
+  ],
+  "fish-catch-in-september-2026": [
+    {"question_en": "How much fish was landed in Iceland in September 2026?",
+     "question_is": "Hve mikill var heildarafli sem landað var á Íslandi í september 2026?", "figure": "102", "unit": "thousand tonnes"}
+  ],
+  "fish-catch-in-august-2026": [
+    {"question_en": "What was the total fish catch in Iceland in August 2026?",
+     "question_is": "Hver var heildaraflinn á Íslandi í ágúst 2026?", "figure": "71", "unit": "thousand tonnes"}
+  ],
+  "labour-market-in-september-2026": [
+    {"question_en": "What was the seasonally adjusted unemployment rate in Iceland in September 2026?",
+     "question_is": "Hvert var árstíðaleiðrétt atvinnuleysi á Íslandi í september 2026?", "figure": "5.7%", "unit": "%"}
+  ],
+  "labour-market-in-august-2026": [
+    {"question_en": "What was the seasonally adjusted unemployment rate in Iceland in August 2026?",
+     "question_is": "Hvert var árstíðaleiðrétt atvinnuleysi á Íslandi í ágúst 2026?", "figure": "6.8%", "unit": "%"}
+  ],
+  "register-based-employment-in-august-2026": [
+    {"question_en": "How many people were employed in Iceland in August 2026 according to register-based data?",
+     "question_is": "Hve margir voru starfandi á Íslandi í ágúst 2026 samkvæmt skráargögnum?", "figure": "235,200", "unit": "people"}
+  ],
+  "the-labour-market-2nd-quarter-2026": [
+    {"question_en": "How many people aged 16 to 74 were in the labour force in Iceland in the second quarter of 2026?",
+     "question_is": "Hve margir á aldrinum 16 til 74 ára voru á vinnumarkaði á Íslandi á öðrum ársfjórðungi 2026?", "figure": "237,700", "unit": "people"}
+  ],
+  "financial-accounts-2025-preliminary-figures": [
+    {"question_en": "What were the net financial assets of Iceland's domestic sectors at the end of 2025?",
+     "question_is": "Hverjar voru hreinar fjáreignir innlendra geira á Íslandi í lok árs 2025?", "figure": "2,467", "unit": "ISK billion"}
+  ],
+  "non-financial-accounts-for-the-household-sector-2025": [
+    {"question_en": "By how much did household disposable income in Iceland increase in 2025?",
+     "question_is": "Um hve mikið jukust ráðstöfunartekjur heimila á Íslandi árið 2025?", "figure": "6.1%", "unit": "%"}
+  ],
+  "building-cost-index-in-september-2026": [
+    {"question_en": "What was the building cost index in September 2026?",
+     "question_is": "Hver var byggingarvísitalan í september 2026?", "figure": "129.6", "unit": "index points"}
+  ],
+  "consumer-price-index-in-october-2026-16579": [
+    {"question_en": "What was the consumer price index in October 2026?",
+     "question_is": "Hver var vísitala neysluverðs í október 2026?", "figure": "700.4", "unit": "index points"},
+    {"question_en": "What was the 12-month inflation rate in Iceland in October 2026?",
+     "question_is": "Hver var tólf mánaða verðbólgan á Íslandi í október 2026?", "figure": "5.9%", "unit": "%"}
+  ],
+  "consumer-price-index-in-september-2026": [
+    {"question_en": "What was the consumer price index less housing cost in September 2026?",
+     "question_is": "Hver var vísitala neysluverðs án húsnæðis í september 2026?", "figure": "556.0", "unit": "index points"}
+  ],
+  "general-government-finances-2025": [
+    {"question_en": "How large was the general government deficit in Iceland in 2025 as a share of GDP?",
+     "question_is": "Hver var halli hins opinbera á Íslandi árið 2025 sem hlutfall af landsframleiðslu?", "figure": "2.6%", "unit": "% of GDP"}
+  ],
+  "general-government-finances-2nd-quarter-2026": [
+    {"question_en": "What was the general government deficit in Iceland in the second quarter of 2026?",
+     "question_is": "Hver var halli hins opinbera á Íslandi á öðrum ársfjórðungi 2026?", "figure": "48.3", "unit": "ISK billion"}
+  ],
+  "operational-cost-per-student-in-primary-schools-in-september-2026": [
+    {"question_en": "What was the estimated operational cost per student in primary schools in Iceland in 2025?",
+     "question_is": "Hver var áætlaður rekstrarkostnaður á hvern nemanda í grunnskólum á Íslandi árið 2025?", "figure": "3,356,177", "unit": "ISK"}
+  ],
+  "liabilities-and-assets-from-tax-registers-2025": [
+    {"question_en": "What were the average assets of families in Iceland in 2025?",
+     "question_is": "Hverjar voru meðaleignir fjölskyldna á Íslandi árið 2025?", "figure": "60.4", "unit": "ISK million"}
+  ],
+  "overnight-stays-in-september-2026": [
+    {"question_en": "How many overnight stays were there at hotels in Iceland in September 2026?",
+     "question_is": "Hve margar gistinætur voru á hótelum á Íslandi í september 2026?", "figure": "561,000", "unit": "nights"}
+  ],
+  "overnight-stays-in-august-2026": [
+    {"question_en": "How many overnight stays were there at hotels in Iceland in August 2026?",
+     "question_is": "Hve margar gistinætur voru á hótelum á Íslandi í ágúst 2026?", "figure": "653,000", "unit": "nights"}
+  ],
+  "income-based-on-tax-registers": [
+    {"question_en": "What was the average total income of individuals in Iceland in 2025?",
+     "question_is": "Hverjar voru meðalheildartekjur einstaklinga á Íslandi árið 2025?", "figure": "10.5", "unit": "ISK million"}
+  ],
+  "monthly-wage-index-in-september-2026-and-related-indices": [
+    {"question_en": "How much did the wage index rise in the twelve months to September 2026?",
+     "question_is": "Hve mikið hækkaði launavísitalan síðustu tólf mánuði fram til september 2026?", "figure": "5.6%", "unit": "%"}
+  ],
+  "taxable-payments-in-august-2026": [
+    {"question_en": "What was the total sum of taxable wages in Iceland in August 2026?",
+     "question_is": "Hver var heildarupphæð skattskyldra launa á Íslandi í ágúst 2026?", "figure": "192.9", "unit": "ISK billion"}
+  ],
+  "total-wage-index-and-labour-cost-index-2nd-quarter-2026": [
+    {"question_en": "By how much did the total wage index rise between the second quarter of 2025 and the second quarter of 2026?",
+     "question_is": "Um hve mikið hækkaði heildarlaunavísitalan milli annars ársfjórðungs 2025 og annars ársfjórðungs 2026?", "figure": "6.2%", "unit": "%"}
+  ]
+}
