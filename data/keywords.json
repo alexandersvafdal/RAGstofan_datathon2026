@@ -4,6 +4,7 @@
   "concepts": [
     {
       "id": "consumer_prices",
+      "headline": true,
       "aliases": [
         "inflation",
         "inflation rate",
@@ -369,6 +370,7 @@
     },
     {
       "id": "wage_index",
+      "headline": true,
       "aliases": [
         "wage index",
         "wage growth",
@@ -417,9 +419,9 @@
         "launavisital",
         "laun"
       ],
+      "note": "The headline wage index is LAU04000 (base 1989), as on Statistics Iceland's front page; LAU04001 (by sector, from 2015) is found by search when a sector is asked.",
       "tables": [
-        "LAU04000",
-        "LAU04001"
+        "LAU04000"
       ]
     },
     {

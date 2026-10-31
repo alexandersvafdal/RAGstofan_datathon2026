@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from ..catalog import MIN_PREFIX, STOPWORDS, Catalog, CatalogEntry
 from ..llm import LLM
-from ..text import normalize, tokens
+from ..text import asked_bases, base_year, normalize, tokens
 
 
 class Pick(BaseModel):
@@ -77,6 +77,12 @@ def _year_range(entry: CatalogEntry) -> tuple[int, int] | None:
     return start, end
 
 
+def newest_base(entry: CatalogEntry) -> int | None:
+    """The newest index base a table offers (2021 for "Base 2021, Base 2009, Base 1987"); None without a base."""
+    years = [y for v in entry.values if (y := base_year(v))]
+    return max(years) if years else None
+
+
 def narrow(entries: list[CatalogEntry], question: str) -> list[CatalogEntry]:
     """Code-side table rules the model follows unreliably. Each rule only applies if some candidate survives it."""
     def keep_if(pred):
@@ -95,6 +101,12 @@ def narrow(entries: list[CatalogEntry], question: str) -> list[CatalogEntry]:
     # a month asked needs a monthly table; "1 January" is the date yearly population figures refer to, not a month
     if re.search(MONTHS, re.sub(r"\b1\.? ?(january|januar|jan)\b", " ", q)):
         keep_if(lambda e: "M" in e.last_period)
+    # An index is read on its current base: tables that only carry old bases (building cost on 1983 and earlier,
+    # CPI "previous bases") answer only a question that names one of those bases
+    if asked := asked_bases(question):
+        keep_if(lambda e: any(base_year(v) in asked for v in [e.title_en, *e.values]))   # CPI: "base 1988=100" in the title
+    else:
+        keep_if(lambda e: (b := newest_base(e)) is None or b >= 2000)
     # Missing time flags must not discard a relevant dated table in favour of an unrelated one.
     keep_if(lambda e: _year_range(e) is not None)
     asked_years = set(int(y) for y in re.findall(r"\b(?:18|19|20)\d\d\b", question))
@@ -113,17 +125,29 @@ def period_end(period: str) -> float:
     return year + (n / 12 if kind == "M" else n / 4 if kind == "Q" else 1.0)
 
 
+# Indexation tables publish the index a month or two ahead, for adjusting loans and contracts ("Indices for financial
+# indexation", "Wage index for mortgage payment adjustment", "by Application Month"). Ending later does not make them
+# the headline index, so they are swapped in only when the question is about indexation or loans.
+_INDEXATION_TABLE = r"indexation|payment adjustment|application month"
+_INDEXATION_ASKED = r"index(ation|ed|ing)|loan|mortgage|financial obligation|verdtrygg|\blan\b|lana\b|lanum|afborgun|greidslujofn"
+
+
 def freshest_sibling(table: CatalogEntry, entries: list[CatalogEntry], question: str) -> CatalogEntry:
     """With no period asked, swap a yearly/quarterly pick for the same measure published more recently next door
     (e.g. labour survey: 3_arstolur 2025 -> 1_manadartolur 2026M09)."""
-    if re.search(r"\b(?:18|19|20)\d\d\b", question) or re.search(MONTHS, normalize(question)):
+    q = normalize(question)
+    if re.search(r"\b(?:18|19|20)\d\d\b", question) or re.search(MONTHS, q):
         return table
+    indexation_ok = bool(re.search(_INDEXATION_ASKED, q))
     words = [w for w in tokens(question) if len(w) >= MIN_PREFIX and w not in STOPWORDS]
     def text(e): return tokens(f"{e.title_en} {' '.join(e.values)}")
     needed = [w for w in words if any(t.startswith(w) for t in text(table))]
     parent = table.path.rsplit("/", 1)[0]
+    base = newest_base(table) or 0   # never trade the current base for an older one (VIS13001 -> VIS13305)
     better = [e for e in entries
               if e.path.rsplit("/", 1)[0] == parent and period_end(e.last_period) > period_end(table.last_period)
+              and (newest_base(e) or 0) >= base
+              and (indexation_ok or not re.search(_INDEXATION_TABLE, e.title_en, re.I))
               and all(any(t.startswith(w) for t in text(e)) for w in needed)]
     return max(better, key=lambda e: period_end(e.last_period)) if better else table
 

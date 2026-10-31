@@ -53,3 +53,37 @@ def numbers_in(text: str) -> list[float]:
             except ValueError:
                 pass
     return out
+
+
+# Index bases. Index tables offer several bases ("Base 2021", "Base 1983", "Grunnur 1988"); the current one is what
+# Statistics Iceland publishes as the index today, so it is the default. An older base only when the question names
+# it: "base 1983", "grunnur 1983", "grunnári 1983", "1983=100".
+_BASE_LABEL = re.compile(r"\b(?:base|grunn\w*)\s*(?:year\s*|ár\w*\s*)?((?:18|19|20)\d\d)\b", re.I)
+_BASE_ASKED = re.compile(r"\b(?:base|grunn\w*)\W{0,3}(?:year\W{0,3}|ar\w*\W{0,3})?((?:18|19|20)\d\d)\b"
+                         r"|\b((?:18|19|20)\d\d)\W{0,3}(?:base|grunn\w*)\b|\b((?:18|19|20)\d\d)\s*=\s*100\b")
+
+
+def base_year(label: str) -> int | None:
+    """1983 for "Base 1983" or "Grunnur 1983"; None for a label that is not an index base."""
+    m = _BASE_LABEL.search(label)
+    return int(m.group(1)) if m else None
+
+
+def asked_bases(question: str) -> set[int]:
+    """The index base years a question names explicitly."""
+    return {int(next(g for g in m.groups() if g)) for m in _BASE_ASKED.finditer(normalize(question))}
+
+
+_MONTHS = {"en": "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(),
+           "is": "jan. feb. mar. apr. maí jún. júl. ágú. sep. okt. nóv. des.".split()}
+
+
+def fmt_period(period: str, lang: str) -> str:
+    """2016M01 -> "Jan 2016" / "jan. 2016", 2016Q2 -> "Q2 2016" / "2. ársfj. 2016"; anything else as it is."""
+    m = re.fullmatch(r"(\d{4})([MQ])(\d{1,2})", period)
+    if not m:
+        return period
+    year, kind, n = m.group(1), m.group(2), int(m.group(3))
+    if kind == "M":
+        return f"{_MONTHS['is' if lang == 'is' else 'en'][n - 1]} {year}"
+    return f"{n}. ársfj. {year}" if lang == "is" else f"Q{n} {year}"

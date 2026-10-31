@@ -9,7 +9,7 @@ from ..catalog import SYNONYMS
 from ..llm import LLM
 from ..vote import ask_all, majority, voting_on
 from ..sources import TableMeta, Variable
-from ..text import normalize, tokens
+from ..text import asked_bases, base_year, normalize, tokens
 
 Op = Literal["value", "series", "difference", "pct_change", "share", "max", "min"]
 
@@ -190,6 +190,19 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                 out[var.code] = _default(var)
                 notes.append(f"{var.text}: 'Iceland' means the whole country; using {[var.label_of(c) for c in out[var.code]]}")
 
+    # An index base the question does not name: the current (newest) one, whatever the model or the default chose.
+    # "Base 1983" stays when the question asks for it ("grunnur 1983", "1983=100").
+    asked = asked_bases(question)
+    for var in meta.variables:
+        bases = {c: y for c in var.values if (y := base_year(var.label_of(c)))}
+        if var.time or len(bases) < 2:
+            continue
+        wanted = [c for c, y in bases.items() if y in asked]
+        pick = wanted or [max(bases, key=bases.get)]
+        if out[var.code] != pick:
+            out[var.code] = sorted(pick, key=var.values.index)
+            notes.append(f"{var.text}: {'base asked for' if wanted else 'current base'} {[var.label_of(c) for c in pick]}")
+
     # Inflation, wage rise "in 12 months", GDP growth: the table publishes the change itself; use it rather than
     # computing one between two periods the model picked (it picked 11 months apart, or 2014 to 2025)
     op = sel.operation
@@ -262,6 +275,21 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                                      f"ekki öll {n} {_IS_UNIT[unit]} sem spurt var um."}
         if op == "value":
             op = "series"
+
+    # Stretches of periods with a hole between them ("January 2016 to September 2026" in a table too long to list,
+    # so the model saw only 2016 and the last 12 months): a series runs from the first period to the last, never
+    # two stretches joined across years. Single periods ("2016, 2020 and 2024") stay as asked.
+    for var in meta.variables:
+        chosen = out[var.code]
+        if not var.time or len(chosen) < 3:
+            continue
+        idx = [var.values.index(c) for c in chosen]
+        runs = sum(1 for a, b in zip(idx, idx[1:]) if b == a + 1)
+        if idx[-1] - idx[0] + 1 > len(idx) and runs >= 2:
+            out[var.code] = var.values[idx[0]:idx[-1] + 1]
+            notes.append(f"{var.text}: filled the gap, {var.values[idx[0]]} to {var.values[idx[-1]]}")
+            if op == "value":
+                op = "series"
 
     # "When was it highest": the extreme along the dimension that varies, time by default
     extreme = next((o for o, rx in _EXTREME if rx.search(q)), None) if op in ("value", "series") else None

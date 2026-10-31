@@ -8,7 +8,8 @@ func isTotal(_ x: String) -> Bool {
 }
 
 /// Which views suit this answer, best first. The server says line or bar; the data and the calculation decide the rest.
-func viewsFor(_ c: ChartSpec, _ comp: Computation?) -> [String] {
+func viewsFor(_ c: ChartSpec, _ comp: Computation?, compare: Bool = false) -> [String] {
+    if compare { return ["line"] }   // rebased series: stacking or summing them means nothing
     let multi = Set(c.data.compactMap(\.series)).count > 1
     let isTime = c.data.allSatisfy { isPeriod($0.x) }
     let monthly = isTime && c.data.allSatisfy { $0.x.range(of: #"M\d\d$"#, options: .regularExpression) != nil }
@@ -32,17 +33,19 @@ struct ChartBlock: View {
     let chart: ChartSpec
     let comp: Computation?
     let lang: Lang
+    var compare = false
     @State private var view: String
 
-    init(chart: ChartSpec, comp: Computation?, lang: Lang) {
+    init(chart: ChartSpec, comp: Computation?, lang: Lang, compare: Bool = false) {
         self.chart = chart
         self.comp = comp
         self.lang = lang
-        _view = State(initialValue: viewsFor(chart, comp).first ?? "bars")
+        self.compare = compare
+        _view = State(initialValue: viewsFor(chart, comp, compare: compare).first ?? "bars")
     }
 
     var body: some View {
-        let views = viewsFor(chart, comp)
+        let views = viewsFor(chart, comp, compare: compare)
         VStack(alignment: .leading, spacing: 12) {
             Text(chart.title).font(.subheadline.weight(.semibold)).foregroundStyle(pal.text2)
                 .fixedSize(horizontal: false, vertical: true)

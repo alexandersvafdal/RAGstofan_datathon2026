@@ -11,7 +11,7 @@ from .config import settings
 from .llm import LLM, LLMError, Timer
 from .schemas import (Answer, AnswerPart, AskRequest, Clarification, ClarifyOption, Step, TableRef)
 from .sources import DataSource, make_source, table_url
-from .steps.chart import choose_chart
+from .steps.chart import choose_chart, comparison_chart
 from .steps.compose import compose
 from .steps.compute import compute
 from .steps.followup import looks_like_followup, rewrite
@@ -135,6 +135,7 @@ class Pipeline:
             ans.text, ans.text_source = await compose(self.llm, req.question, parts, lang)
             steps.append(Step(name="compose", ms=t.ms(), detail=ans.text_source))
             ans.parts, ans.status = parts, "answered"
+            ans.comparison = comparison_chart(parts, lang)
             ans.sources = list({p.table.id: p.table for p in parts}.values())
             return ans
         except Exception as e:  # the API always returns an Answer, never a stack trace

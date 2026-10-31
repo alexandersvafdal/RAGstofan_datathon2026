@@ -103,8 +103,12 @@ struct AnswerCard: View {
                     }
                 }
 
+                // series from different tables on one chart; the separate line charts it replaces are left out
+                if let cmp = a.comparison {
+                    ChartBlock(chart: cmp, comp: nil, lang: L, compare: true).reveal(3, shown)
+                }
                 ForEach(Array(a.parts.enumerated()), id: \.offset) { i, p in
-                    if let c = p.chart, c.type != "kpi", c.data.count > 1 {
+                    if let c = p.chart, c.type != "kpi", c.data.count > 1, !(a.comparison != nil && c.type == "line") {
                         ChartBlock(chart: c, comp: p.computation, lang: L).reveal(3 + i, shown)
                     }
                 }

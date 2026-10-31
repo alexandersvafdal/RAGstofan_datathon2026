@@ -519,7 +519,10 @@ function renderAnswer(card, a) {
   }
   if (figures.childElementCount) card.append(figures);
 
+  // Series from different tables on one chart; the separate line charts it replaces are left out
+  if (a.comparison) card.append(chartBlock({ chart: { ...a.comparison, compare: true }, computation: null }, L));
   for (const p of a.parts) {
+    if (a.comparison && p.chart?.type === "line") continue;
     if (p.chart && p.chart.type !== "kpi" && p.chart.data.length > 1) card.append(chartBlock(p, L));
   }
 
@@ -665,6 +668,7 @@ function viewsFor(c, comp) {
   const isTime = c.data.every(d => IS_PERIOD(d.x));
   const monthly = isTime && c.data.every(d => /M\d\d$/.test(d.x));
   const quarterly = isTime && c.data.every(d => /Q\d$/.test(d.x));
+  if (c.compare) return ["line"];   // rebased series: stacking or summing them means nothing
   if (comp?.op === "share" && c.data.length === 2) return ["donut", "waffle", "bars"];
   // a slope reads left to right, so it suits two periods; two categories (men vs women) are compared as bars
   if (["difference", "pct_change"].includes(comp?.op) && c.data.length === 2) return isTime ? ["slope", "bars"] : ["bars"];

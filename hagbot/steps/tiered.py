@@ -21,7 +21,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-from ..catalog import Catalog, CatalogEntry, recency_factor
+from ..catalog import STOPWORDS, Catalog, CatalogEntry, recency_factor
 from ..config import ROOT
 from ..llm import LLM
 from ..vote import vote_json, voting_on
@@ -61,6 +61,31 @@ def match_concepts(text: str) -> list[dict]:
                 hits.append(c)
                 break
     return hits
+
+
+# Words that do not narrow a question about an index: when, how it moved, where. "What is the current wage index",
+# "how has the CPI changed in the last 12 months" are about the headline index; "public sector", "housing" are not.
+_GENERIC = ("current", "latest", "newest", "recent", "now", "today", "value", "level", "figure", "number", "chang",
+            "rise", "rose", "risen", "increas", "grow", "grew", "develop", "trend", "since", "over", "year", "month",
+            "annual", "last", "past", "iceland", "nuna", "nuverand", "nyjust", "nyjast", "sidast", "sidust", "gildi",
+            "stad", "breyt", "haekk", "throun", "thro", "arum", "arin", "manud", "undanfar", "island")
+
+
+def headline(hit: CatalogEntry, found: list[dict], catalog: Catalog, text: str) -> CatalogEntry:
+    """The headline table of a concept marked "headline" (CPI VIS01000, wage index LAU04000) over a neighbour in the
+    same folder that the model chose (by sector, for indexation), when the question asks for nothing more than the
+    index itself. A question naming a breakdown ("public sector", "á almennum markaði") keeps the model's choice."""
+    for c in found:
+        head = catalog.get(c["tables"][0]) if c.get("headline") and c["tables"] else None
+        if not head or head.id == hit.id or head.path != hit.path:
+            continue
+        concept = {t for term in c["_terms"] for t in term.split() if len(t) >= 3}
+        extra = [w for w in tokens(text) if w not in STOPWORDS and not w.isdigit() and len(w) >= 3
+                 and not w.startswith(_GENERIC)
+                 and not any(w.startswith(t) or t.startswith(w) for t in concept)]
+        if not extra:
+            return head
+    return hit
 
 
 def rank(preferred: list[CatalogEntry], searches: dict[str, list[CatalogEntry]]) \
@@ -167,6 +192,7 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
     # 2. the model checks the hitlist from the top
     for i in range(0, min(len(shortlist), BATCHES * BATCH), BATCH):
         if (hit := await _check(llm, shortlist[i:i + BATCH], question, original, start=i)):
+            hit = headline(hit, found, catalog, f"{question} {original}")
             signals = order.get(hit.id, (0, []))[1]
             tier = ("keywords" if any(x == "dictionary" for x in signals) else
                     "keyword search" if any(x.startswith("bm25") for x in signals) else "semantic search")

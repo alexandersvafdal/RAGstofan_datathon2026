@@ -109,6 +109,7 @@ class Answer(BaseModel):
     status: Literal["answered", "clarify", "error"]
     text: str
     parts: list[AnswerPart] = Field(default_factory=list)
+    comparison: ChartSpec | None = None  # series from different tables on one chart, each set to 100 at the start
     clarification: Clarification | None = None
     sources: list[TableRef] = Field(default_factory=list)
     steps: list[Step] = Field(default_factory=list)

@@ -51,6 +51,7 @@ struct Answer: Codable, Hashable {
     let status: String        // "answered", "clarify" or "error"
     let text: String
     let parts: [AnswerPart]
+    var comparison: ChartSpec? = nil   // series from different tables on one chart, each set to 100 at the start
     let clarification: Clarification?
     let sources: [TableRef]
     let steps: [Step]
