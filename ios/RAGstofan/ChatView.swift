@@ -8,6 +8,7 @@ struct ChatView: View {
     @Environment(\.pal) private var pal
     @State private var draft = ""
     @State private var showSettings = false
+    @State private var showHistory = false
     @FocusState private var focused: Bool
 
     var body: some View {
@@ -44,10 +45,13 @@ struct ChatView: View {
             .toolbarBackground(pal.bg, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
+                    Button { showHistory = true } label: { Image(systemName: "clock.arrow.circlepath") }
+                        .accessibilityLabel(model.ui == .is ? "Fyrri samtöl" : "Past conversations")
+                }
+                ToolbarItem(placement: .topBarLeading) {
                     if !model.exchanges.isEmpty {
                         Button { withAnimation(.smooth) { model.reset() } } label: { Image(systemName: "square.and.pencil") }
                             .accessibilityLabel(w.newChat)
-                            .disabled(model.busy)
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -58,12 +62,17 @@ struct ChatView: View {
             .sheet(isPresented: $showSettings) {
                 SettingsView().environment(model).environment(\.pal, pal).tint(pal.accent)
             }
+            .sheet(isPresented: $showHistory) {
+                HistoryView().environment(model).environment(\.pal, pal).tint(pal.accent)
+            }
         }
     }
 
     private func composer(_ w: Words) -> some View {
         let empty = draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        return HStack(spacing: 10) {
+        return VStack(spacing: 8) {
+          Tuning()
+          HStack(spacing: 10) {
             TextField(w.placeholder, text: $draft)
                 .focused($focused)
                 .submitLabel(.send)
@@ -85,6 +94,7 @@ struct ChatView: View {
             }
             .disabled(model.busy || empty)
             .accessibilityLabel("Send")
+          }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -96,7 +106,7 @@ struct ChatView: View {
         guard !q.isEmpty, !model.busy else { return }
         draft = ""
         focused = false
-        Task { await model.ask(q, tableId: tableId) }
+        model.send(q, tableId: tableId)
     }
 }
 
@@ -120,7 +130,7 @@ struct ExchangeView: View {
                 }
             }
             if let a = ex.answer {
-                AnswerCard(a: a, ask: ask)
+                AnswerCard(a: a, ask: ask, fast: ex.fast)
                     .transition(.opacity.combined(with: .offset(y: 12)))
             } else if let err = ex.error {
                 let w = Words(lang: ex.lang)
@@ -129,7 +139,7 @@ struct ExchangeView: View {
                         Text("\(w.failed). \(err)").foregroundStyle(pal.text)
                         Button(w.retry) {
                             model.exchanges.removeAll { $0.id == ex.id }
-                            ask(ex.question, ex.tableId)
+                            model.send(ex.question, tableId: ex.tableId, fast: ex.fast)
                         }
                         .buttonStyle(PillStyle())
                     }
@@ -139,5 +149,58 @@ struct ExchangeView: View {
                     .transition(.opacity)
             }
         }
+    }
+}
+
+/// How the next question is answered: model, thinking length and temperature, as small menus above the question box.
+/// Untouched, they are the server's defaults: the best model and the longest thinking.
+private struct Tuning: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.pal) private var pal
+
+    var body: some View {
+        let isl = model.ui == .is
+        let names = isl ? ["none": "Engin", "low": "Stutt", "medium": "Miðlungs", "high": "Löng"]
+                        : ["none": "Off", "low": "Short", "medium": "Medium", "high": "Long"]
+        let best = model.models?.default
+        let longest = model.models?.reasoningDefault ?? "high"
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                Menu {
+                    Picker(isl ? "Líkan" : "Model", selection: Binding(get: { model.activeModel ?? "" },
+                                                                        set: { model.modelChoice = $0 == best ? nil : $0 })) {
+                        ForEach(model.models?.models ?? [], id: \.self) { Text($0 == best ? "\($0) (\(isl ? "besta" : "best"))" : $0).tag($0) }
+                    }
+                } label: { chip("cpu", model.activeModel ?? "–") }
+                Menu {
+                    Picker(isl ? "Hugsun" : "Thinking", selection: Binding(get: { model.activeReasoning },
+                                                                            set: { model.reasoningChoice = $0 == longest ? nil : $0 })) {
+                        ForEach(model.models?.reasoning ?? ["none", "low", "medium", "high"], id: \.self) { Text(names[$0] ?? $0).tag($0) }
+                    }
+                } label: { chip("brain", "\(isl ? "Hugsun" : "Thinking"): \(names[model.activeReasoning] ?? model.activeReasoning)") }
+                Menu {
+                    Picker(isl ? "Hitastig" : "Temperature", selection: Binding(get: { model.temperatureChoice ?? 0 },
+                                                                                 set: { model.temperatureChoice = $0 == 0 ? nil : $0 })) {
+                        ForEach([0.0, 0.3, 0.7, 1.0], id: \.self) { Text(String(format: "%.1f", $0)).tag($0) }
+                    }
+                } label: { chip("thermometer.medium", String(format: "%.1f", model.temperatureChoice ?? 0)) }
+            }
+            .padding(.horizontal, 2)
+        }
+        .disabled(model.models == nil)
+    }
+
+    private func chip(_ icon: String, _ text: String) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon)
+            Text(text).lineLimit(1)
+            Image(systemName: "chevron.up.chevron.down").font(.system(size: 8, weight: .semibold))
+        }
+        .font(.caption)
+        .foregroundStyle(pal.text2)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(pal.card, in: Capsule())
+        .overlay(Capsule().stroke(pal.text.opacity(0.1)))
     }
 }

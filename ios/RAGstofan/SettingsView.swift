@@ -36,20 +36,6 @@ struct SettingsView: View {
                     Text(model.ui == .is ? "Síminn þarf að vera á sama neti og þjónninn." : "The phone has to be on the same network as the server.")
                 }
 
-                if let list = model.models, list.models.count > 1 {
-                    Section {
-                        Picker(model.ui == .is ? "Líkan" : "Model", selection: Binding(
-                            get: { model.modelChoice ?? list.default },
-                            set: { model.modelChoice = $0 == list.default ? nil : $0 })) {
-                            ForEach(list.models, id: \.self) { name in
-                                Text(name == list.default ? "\(name) (\(model.ui == .is ? "besta" : "best"))" : name).tag(name)
-                            }
-                        }
-                    } header: { Text(model.ui == .is ? "Líkan" : "Model") } footer: {
-                        Text(model.ui == .is ? "Sjálfgefið er besta líkanið sem við höfum mælt." : "The default is the best model we have measured.")
-                    }
-                }
-
                 Section(w.language) {
                     Picker(w.language, selection: $model.langChoice) {
                         ForEach(LangChoice.allCases) { Text($0.title).tag($0) }

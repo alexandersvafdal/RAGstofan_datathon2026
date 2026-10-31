@@ -38,6 +38,17 @@ struct LiveStepsView: View {
         let st = LiveState(ex.steps)
         Card {
             VStack(alignment: .leading, spacing: 0) {
+                if !ex.fast {
+                    // stop waiting: the fast model answers with thinking off. At the top, so it stays put as steps fill in
+                    HStack {
+                        Spacer()
+                        Button { model.answerNow(ex) } label: {
+                            Label(ex.lang == .is ? "Svara strax" : "Answer now", systemImage: "bolt.fill")
+                        }
+                        .buttonStyle(PillStyle())
+                    }
+                    .padding(.bottom, 4)
+                }
                 ForEach(Array(order.enumerated()), id: \.offset) { i, name in
                     let done = st.done.contains(name), now = st.current == name
                     HStack(alignment: .top, spacing: 12) {

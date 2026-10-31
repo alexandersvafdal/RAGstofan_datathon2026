@@ -7,11 +7,13 @@ struct AnswerCard: View {
     @Environment(\.pal) private var pal
     let a: Answer
     let ask: Ask
+    var fast = false
     @State private var picks: [String]
 
-    init(a: Answer, ask: @escaping Ask) {
+    init(a: Answer, ask: @escaping Ask, fast: Bool = false) {
         self.a = a
         self.ask = ask
+        self.fast = fast
         _picks = State(initialValue: followupPicks(a))
     }
 
@@ -60,6 +62,11 @@ struct AnswerCard: View {
                     }
                 }
 
+                if fast {
+                    Label(L == .is ? "Svarað í flýti með hraða líkaninu, án hugsunar." : "Answered quickly with the fast model, thinking off.",
+                          systemImage: "bolt.fill")
+                        .font(.footnote).foregroundStyle(pal.text2)
+                }
                 ForEach(Array(a.parts.compactMap(\.note).filter { !$0.isEmpty }.enumerated()), id: \.offset) { _, note in
                     Label { Text(prettyPeriods(note, L)) } icon: { Image(systemName: "info.circle") }
                         .font(.footnote)

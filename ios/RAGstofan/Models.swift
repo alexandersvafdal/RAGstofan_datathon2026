@@ -69,10 +69,19 @@ struct AskRequest: Encodable {
     let tableId: String?
     let history: [Turn]
     let model: String?        // nil: the server's default, the best one measured
+    let temperature: Double?  // nil: 0
+    let reasoning: String?    // thinking length none / low / medium / high; nil: the server's default (the longest)
+    let fast: Bool            // "Answer now": the fast model, thinking off
 }
 
-/// The models a question can go to; the default is the server's best.
-struct ModelList: Codable { let `default`: String; let models: [String] }
+/// The models a question can go to; the default is the server's best. Older servers send only the first two fields.
+struct ModelList: Codable {
+    let `default`: String
+    let models: [String]
+    let fast: String?
+    let reasoningDefault: String?
+    let reasoning: [String]?
+}
 
 struct Health: Codable { let model: String; let dataSource: String; let tablesInCatalog: Int }
 
