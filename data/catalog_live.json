@@ -2609,7 +2609,7 @@
  },
  {
   "id": "TEK02001",
-  "path": "Atvinnuvegir/fyrirtaeki/launakostnadur/launagreidslur",
+  "path": "Samfelag/launogtekjur/3_tekjur/0_stadgreidsla",
   "title_en": "Taxable wages by economic activity - from January 2008",
   "title_is": "Staðgreiðsluskyldar launagreiðslur eftir atvinnugreinum - frá janúar 2008",
   "dimensions": [
@@ -2654,7 +2654,7 @@
  },
  {
   "id": "TEK02003",
-  "path": "Atvinnuvegir/fyrirtaeki/launakostnadur/launagreidslur",
+  "path": "Samfelag/launogtekjur/3_tekjur/0_stadgreidsla",
   "title_en": "Taxable wages by economic activity and residence - from January 2008",
   "title_is": "Staðgreiðsluskyldar launagreiðslur eftir atvinnugreinum og búsetu - frá janúar 2008",
   "dimensions": [
@@ -2760,7 +2760,7 @@
  },
  {
   "id": "TEK02004",
-  "path": "Atvinnuvegir/fyrirtaeki/launakostnadur/launagreidslur",
+  "path": "Samfelag/launogtekjur/3_tekjur/0_stadgreidsla",
   "title_en": "Taxable wages by economic activity group and residence - from January 2008",
   "title_is": "Staðgreiðsluskyldar launagreiðslur eftir atvinnugreinahópum og búsetu - frá janúar 2008",
   "dimensions": [
