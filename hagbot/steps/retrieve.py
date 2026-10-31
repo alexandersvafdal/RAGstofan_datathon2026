@@ -23,6 +23,10 @@ class Retrieved(BaseModel):
     alternatives: list[CatalogEntry] = []
     ambiguous: bool = False
     candidates: list[str] = []
+    via: str = ""  # tiered finder: which tier found the table
+    concepts: list[str] = []  # tiered finder: dictionary concepts the question matched
+    ranking: list[dict] = []  # tiered finder: the ranked hitlist (id, title, score, signals)
+    votes: str = ""  # voting on: how many votes the chosen table got, e.g. "3/3"
 
 
 # Words with no table of their own, that mean different statistics: ask which one instead of guessing.

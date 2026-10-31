@@ -78,6 +78,7 @@ class AnswerPart(BaseModel):
     facts: list[Fact]
     chart: ChartSpec | None = None
     note: str = ""  # e.g. why the latest figure is from an earlier year, and where newer figures are
+    ranking: list[dict] = []  # the ranked hitlist the table was chosen from: id, title, score, signals
 
 
 class ClarifyOption(BaseModel):

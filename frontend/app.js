@@ -8,10 +8,14 @@ const I18N = {
     steps: ["Understanding the question", "Finding the right table", "Choosing the categories", "Reading the numbers", "Writing the answer"],
     working: "Working on it", how: "How I got this", data: "Data", source: "Source", checked: "Numbers checked against the table",
     calc: "Calculated", failed: "Something went wrong", retry: "Try again", seconds: "s", calls: "model calls",
-    pts: "pts", more: "Ask next", palette: "Colour", appearance: "Appearance",
+    pts: "pts", more: "Ask next", palette: "Colour", appearance: "Appearance", shortlist: "Shortlist", chosen: "chosen",
+    signal: { dictionary: "dictionary", bm25: "keywords", e5: "meaning (e5)", "bge-m3": "meaning (bge-m3)" },
     live: { plan: q => `Read as: ${q}`, split: n => `Split into ${n} questions`, searched: n => `Searched ${n} tables`,
             picked: "picked", numbers: n => `${n} ${n === 1 ? "number" : "numbers"} read`, checked: "Numbers checked against the table",
-            template: "Written from the numbers directly", error: "Hit a problem", followup: q => `Follow-up, read as: ${q}` },
+            template: "Written from the numbers directly", error: "Hit a problem", followup: q => `Follow-up, read as: ${q}`,
+            votes: v => `Votes: ${v}`,
+            via: t => ({ "keywords": "found through the keyword dictionary", "keyword search": "found by keyword search",
+                         "semantic search": "found by semantic search", "model browse": "found by the model browsing subjects" }[t] || t) },
   },
   is: {
     eyebrow: "Hagstofa Íslands · Gagnaþon 2026", hello: "Ísland í tölum.",
@@ -20,10 +24,14 @@ const I18N = {
     steps: ["Skil spurninguna", "Finn réttu töfluna", "Vel flokkana", "Les tölurnar", "Skrifa svarið"],
     working: "Augnablik", how: "Hvernig svarið varð til", data: "Gögn", source: "Heimild", checked: "Tölur bornar saman við töfluna",
     calc: "Reiknað", failed: "Eitthvað fór úrskeiðis", retry: "Reyna aftur", seconds: "s", calls: "köll í líkan",
-    pts: "pst.", more: "Spyrðu næst", palette: "Litir", appearance: "Útlit",
+    pts: "pst.", more: "Spyrðu næst", palette: "Litir", appearance: "Útlit", shortlist: "Stuttlisti", chosen: "valin",
+    signal: { dictionary: "orðasafn", bm25: "leitarorð", e5: "merking (e5)", "bge-m3": "merking (bge-m3)" },
     live: { plan: q => `Skilið sem: ${q}`, split: n => `Skipt í ${n} spurningar`, searched: n => `Leitaði í ${n} töflum`,
             picked: "valdi", numbers: n => `${n} ${n === 1 ? "tala lesin" : "tölur lesnar"}`, checked: "Tölur bornar saman við töfluna",
-            template: "Skrifað beint upp úr tölunum", error: "Vandamál kom upp", followup: q => `Framhaldsspurning, skilin sem: ${q}` },
+            template: "Skrifað beint upp úr tölunum", error: "Vandamál kom upp", followup: q => `Framhaldsspurning, skilin sem: ${q}`,
+            votes: v => `Atkvæði: ${v}`,
+            via: t => ({ "keywords": "fundin með orðasafninu", "keyword search": "fundin með leitarorðaleit",
+                         "semantic search": "fundin með merkingarleit", "model browse": "fundin af líkaninu eftir efnisflokkum" }[t] || t) },
   },
 };
 
@@ -371,13 +379,19 @@ function liveView(L) {
       parts = qs.length;
       add(el("span", { class: "ls-text" }, qs.length > 1 ? words.split(qs.length) : words.plan(qs[0])));
     } else if (st.name === "retrieve") {
-      const m = /^(\S+) from \[(.*)\]/.exec(st.detail);
+      const m = /^(\S+) from \[(.*?)\]/.exec(st.detail);
       const cands = m ? m[2].split(", ") : [];
-      add(el("span", { class: "ls-text" }, `${words.searched(document.querySelector("#status").dataset.tables || "1,857")} → ${words.picked} `, el("b", {}, m ? m[1] : st.detail)));
+      const via = /via ([a-z ]+?)(?: ·|$)/.exec(st.detail), concepts = /concepts: (.+)$/.exec(st.detail);
+      add(el("span", { class: "ls-text" }, `${words.searched(document.querySelector("#status").dataset.tables || "1,857")} → ${words.picked} `, el("b", {}, m ? m[1] : st.detail),
+        via ? ` · ${words.via(via[1])}` : "", concepts ? ` (${concepts[1]})` : ""));
+      const tv = /votes (\d+\/\d+)/.exec(st.detail);
+      if (tv) add(el("span", { class: "ls-text votes" }, words.votes(tv[1])));
       add(el("span", { class: "cands" }, cands.slice(0, 8).map((c, i) =>
         el("span", { class: "cand" + (m && c === m[1] ? " hit" : ""), style: `animation-delay:${i * 60}ms` }, c))));
     } else if (st.name === "select") {
       add(el("span", { class: "ls-text" }, readSelection(st.detail, L)));
+      const sv = /votes: ([^'"\]]+)/.exec(st.detail);
+      if (sv) add(el("span", { class: "ls-text votes" }, words.votes(sv[1])));
     } else if (st.name === "fetch") {
       const n = +(/^(\d+) rows/.exec(st.detail) || [0, 0])[1];
       const note = st.detail.split("; ")[1];
@@ -502,6 +516,7 @@ function renderAnswer(card, a) {
   if (meta.childElementCount) card.append(meta);
 
   if (a.parts.length) card.append(dataTable(a.parts, L));
+  if (a.parts.some(p => p.ranking?.length)) card.append(hitlistView(a.parts, L));
   if (a.steps.length) card.append(stepsView(a, L));
   card.append(followups(a, L));
 }
@@ -526,6 +541,25 @@ function dataTable(parts, L) {
       el("tbody", {}, p.rows.map(r => el("tr", {},
         dims.map(x => el("td", {}, /^\d{4}([MQ]\d+)?$/.test(r.labels[x]) ? fmtPeriod(r.labels[x], L) : r.labels[x])),
         el("td", { class: "num" }, r.value == null ? "–" : localize(r.value.toLocaleString("en-US"), L))))))));
+  }
+  return d;
+}
+
+// The ranked hitlist each table was chosen from: rank, table, score, and which signals found it
+function hitlistView(parts, L) {
+  const d = el("details", { class: "disclose" }, el("summary", {}, t("shortlist", L)));
+  const sig = t("signal", L);
+  for (const p of parts.filter(p => p.ranking?.length)) {
+    const top = Math.max(...p.ranking.map(r => r.score), 1e-9);
+    d.append(el("ol", { class: "hitlist" }, p.ranking.map((r, i) => el("li", { class: r.id === p.table.id ? "picked" : "" },
+      el("span", { class: "h-rank" }, String(i + 1)),
+      el("span", { class: "h-main" },
+        el("span", { class: "h-title" }, el("b", {}, r.id), " ", r.title),
+        el("span", { class: "h-signals" }, r.signals.map(x => {
+          const [kind, n] = x.split(" ");
+          return el("span", { class: `h-sig ${kind.replace(/[^a-z0-9]/g, "")}` }, `${sig[kind] || kind}${n ? " " + n : ""}`);
+        }), r.id === p.table.id ? el("span", { class: "h-chosen" }, `✓ ${t("chosen", L)}`) : null)),
+      el("span", { class: "h-bar" }, el("i", { style: `width:${Math.max(4, r.score / top * 100)}%` }))))));
   }
   return d;
 }
@@ -769,6 +803,20 @@ $("#ask").addEventListener("submit", e => {
   ask(q);
 });
 /* about: how it works and what it can't do yet */
+const FINDER = {
+  en: { title: "How a table is found", tiers: [
+      ["Keyword dictionary", "Everyday words map to Statistics Iceland's terms: “verðbólga”, “inflation” → consumer price index → its tables, plus a keyword search over all 1,857 tables."],
+      ["The model checks", "The language model reads the shortlist, eight tables at a time, and picks the one that answers the question — or says none of them does."],
+      ["Semantic search", "Built into the shortlist: e5 vectors search every table by meaning beside the keyword search, and the rankings are merged."],
+      ["The model browses", "Last resort: the model picks one of 34 subject areas, then a table inside it."]],
+    note: "Before any of this, words that mean different statistics (“tourists”) make it ask which one you mean." },
+  is: { title: "Svona finnst rétta taflan", tiers: [
+      ["Orðasafn", "Hversdagsorð vísa á hugtök Hagstofunnar: „verðbólga“, „inflation“ → vísitala neysluverðs → töflur hennar, auk leitarorðaleitar í öllum 1.857 töflunum."],
+      ["Líkanið staðfestir", "Mállíkanið les listann, átta töflur í senn, og velur þá sem svarar spurningunni — eða segir að engin geri það."],
+      ["Merkingarleit", "Hluti af listanum: e5 vigrar leita í öllum töflum eftir merkingu samhliða leitarorðaleitinni og röðunin er sameinuð."],
+      ["Líkanið leitar sjálft", "Síðasta úrræði: líkanið velur einn af 34 efnisflokkum og svo töflu innan hans."]],
+    note: "Á undan þessu öllu spyr hún hvort þú átt við þegar orð getur átt við ólíka tölfræði („ferðamenn“)." },
+};
 const ABOUT = {
   en: { title: "About RAGstofan", how: "How it works", cant: "What it can't do yet",
     steps: ["A language model reads your question and splits it if it asks for several things.",
@@ -802,6 +850,12 @@ function openAbout() {
     el("button", { class: "about-close", type: "button", "aria-label": "Close", onclick: () => dlg.close() }, "×"),
     el("h2", {}, a.title),
     el("h3", {}, a.how), el("ol", { class: "about-steps" }, a.steps.map(x => el("li", {}, x))),
+    el("h3", {}, FINDER[ui()].title),
+    el("div", { class: "finder" }, FINDER[ui()].tiers.map(([name, text], i) => el("div", { class: "tier" },
+      el("span", { class: "tier-n" }, String(i + 1)),
+      el("div", {}, el("b", {}, name), el("p", {}, text)),
+      i < 3 ? el("span", { class: "tier-next", "aria-hidden": "true" }, i === 0 ? "" : ui() === "is" ? "ef engin passar" : "if none fits") : null))),
+    el("p", { class: "finder-note" }, FINDER[ui()].note),
     el("h3", {}, a.cant), el("ul", { class: "about-limits" }, a.limits.map(x => el("li", {}, x)))));
   dlg.showModal();
 }
