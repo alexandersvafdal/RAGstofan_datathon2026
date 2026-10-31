@@ -22,8 +22,12 @@ from .steps.tiered import retrieve_tiered
 from .steps.select import select
 from .text import detect_language, normalize
 
-_PERCENT = re.compile(r"%|percent|prosent|volume change|change on previous|change from previous|annual growth|"
-                      r"magnbreyting|breyting fra fyrra|arleg fjolgun")
+# A label that is itself a percentage: "Annual change, %", "Unemployment rate", "Percentage of GDP". A % after a
+# number is a product's description, not its unit ("wine of alcoholic strength > 8.5%"), so it does not count.
+_PERCENT = re.compile(r"(?<![\d.])%|\bpercent|prosent|hlutfall|volume change|change on previous|change from previous|"
+                      r"annual growth|annual rate of change|\b(un)?employment rate|activity rate|participation rate|"
+                      r"vacancy rate|household rate|rate of individuals|overburden rate|magnbreyting|breyting fra fyrra|"
+                      r"arleg fjolgun|atvinnuleysi")
 _RELATIVE = r"\blast (year|month|quarter)\b|\bprevious year\b|\bsidasta (ar|manud|arsfjord)|\bi fyrra\b|\bfyrra ar"
 
 CLARIFY = {
@@ -202,9 +206,10 @@ class Pipeline:
 
         # Tables like THJ01000 mix indices, counts and yearly changes and give no unit; a chosen "volume change on
         # previous year" or "annual growth" is a percentage, so say so
-        if not meta.unit and all(any(_PERCENT.search(normalize(v.label_of(c))) for c in res.selections.get(v.code, []))
-                                 for v in meta.variables if not v.time and len(v.values) > 1) \
-                and any(not v.time and len(v.values) > 1 for v in meta.variables):
+        # (one dimension whose every chosen value is a percentage is enough: "Sex: Total, Unit: Unemployment rate")
+        if not meta.unit and any(res.selections.get(v.code) and
+                                 all(_PERCENT.search(normalize(v.label_of(c))) for c in res.selections[v.code])
+                                 for v in meta.variables if not v.time):
             meta = meta.model_copy(update={"unit": "%"})
         computation, facts = compute(meta, rows, res, lang)
         note = self._freshness_note(meta, res.selections, r.candidates, f"{sq.question} {original}", lang)
