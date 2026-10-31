@@ -4,3 +4,4 @@ httpx>=0.27
 python-multipart>=0.0.9   # the voice routes take recorded audio as a form upload
 pydantic>=2.8
 python-dotenv>=1.0
+mcp>=2.3          # mcp_server/: RAGstofan as an MCP server for Claude, ChatGPT and other clients

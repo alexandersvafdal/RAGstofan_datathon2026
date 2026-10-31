@@ -17,6 +17,7 @@ from .config import ROOT, settings
 from .indicators import Indicators, indicators
 from .pipeline import Pipeline
 from .schemas import Answer, AskRequest
+from .sources import table_url
 
 pipeline: Pipeline | None = None
 
@@ -191,6 +192,27 @@ async def tts(req: SpeakRequest):
 async def stt(audio: UploadFile = File(...), language: str | None = Form(None)):
     files = {"audio": (audio.filename or "question.webm", await audio.read(), audio.content_type or "application/octet-stream")}
     return (await _voice("POST", "/stt", files=files, data={"language": language} if language else None)).json()
+
+
+def _table_summary(e) -> dict:
+    return {"id": e.id, "title": e.title_en, "title_is": e.title_is, "path": e.path, "dimensions": e.dimensions,
+            "first_period": e.first_period, "last_period": e.last_period, "unit": e.unit,
+            "url": table_url(e.path, e.id)}
+
+
+@app.get("/api/tables")
+def search_tables(q: str, limit: int = 8):
+    """The catalogue's best matches for a search, as the retriever ranks them (keywords, BM25 and vectors).
+    A plain def: the search is synchronous, so FastAPI runs it off the event loop."""
+    return {"tables": [_table_summary(e) | {"score": round(s, 4)} for e, s in pipeline.catalog.search(q, k=max(1, min(limit, 25)))]}
+
+
+@app.get("/api/tables/{table_id}")
+def describe_table(table_id: str):
+    e = pipeline.catalog.get(table_id)
+    if not e:
+        raise HTTPException(404, f"no table {table_id}")
+    return _table_summary(e) | {"about": e.about_en, "values": e.values[:200], "values_total": len(e.values)}
 
 
 @app.post("/api/suggest")
