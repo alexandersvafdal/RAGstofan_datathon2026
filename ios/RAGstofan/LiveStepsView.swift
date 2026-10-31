@@ -38,7 +38,15 @@ struct LiveStepsView: View {
         let st = LiveState(ex.steps)
         Card {
             VStack(alignment: .leading, spacing: 0) {
-                if !ex.fast {
+                if ex.reconnecting {
+                    // the app slept through the answer: the server finished it and keeps it, so it is fetched now
+                    Label(ex.lang == .is ? "Sæki svarið… þjónninn hélt áfram á meðan." : "Fetching the answer… the server kept working on it.",
+                          systemImage: "arrow.triangle.2.circlepath")
+                        .font(.footnote).foregroundStyle(pal.text2)
+                        .symbolEffect(.pulse, isActive: true)
+                        .padding(.bottom, 8)
+                }
+                if !ex.fast && !ex.reconnecting {
                     // stop waiting: the fast model answers with thinking off. At the top, so it stays put as steps fill in
                     HStack {
                         Spacer()

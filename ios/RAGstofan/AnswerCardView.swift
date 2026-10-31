@@ -126,65 +126,89 @@ struct AnswerCard: View {
                         .reveal(4, shown)
                 }
 
-                Flow(spacing: 6) {
-                    ForEach(a.sources, id: \.id) { s in
-                        if let url = URL(string: s.url) {
-                            Link(destination: url) { Chip(text: Text("\(w.source) ") + Text(s.id).bold(), icon: "arrow.up.right.square", strong: true) }
+                // One quiet line under the answer: where it came from, then the two actions. Nothing here competes with it.
+                HStack(alignment: .center, spacing: 4) {
+                    Flow(spacing: 10) {
+                        ForEach(a.sources, id: \.id) { s in
+                            if let url = URL(string: s.url) {
+                                Link(destination: url) {
+                                    HStack(spacing: 3) {
+                                        Text(s.id).fontWeight(.semibold)
+                                        Image(systemName: "arrow.up.right").font(.caption2.weight(.semibold))
+                                    }
+                                    .foregroundStyle(pal.accent)
+                                }
+                                .accessibilityLabel("\(w.source) \(s.id)")
+                            }
                         }
+                        if a.textSource == "model" {
+                            Label(L == .is ? "Yfirfarið" : "Checked", systemImage: "checkmark.seal")
+                                .labelStyle(.titleAndIcon)
+                                .accessibilityLabel(w.checked)
+                        }
+                        if a.totalMs > 0 { Text(secs).monospacedDigit() }
                     }
-                    if a.textSource == "model" { Chip(text: Text(w.checked), icon: "checkmark.seal") }
-                    if a.totalMs > 0 { Chip(text: Text(secs), icon: "clock") }
+                    .font(.caption)
+                    .foregroundStyle(pal.text3)
+                    Spacer(minLength: 8)
                     if let ex = exchange, a.status != "error" {
                         // read aloud by the Spark's Piper voice, in the answer's language
                         let on = model.voice.speaking == ex.id.uuidString, loading = model.voice.loadingSpeech == ex.id.uuidString
                         Button { model.speak(ex) } label: {
-                            HStack(spacing: 4) {
+                            Group {
                                 if loading { ProgressView().controlSize(.mini) }
                                 else {
-                                    Image(systemName: on ? "speaker.wave.3.fill" : "speaker.wave.2")
+                                    Image(systemName: on ? "stop.fill" : "speaker.wave.2")
                                         .symbolEffect(.variableColor.iterative, isActive: on)
                                 }
-                                Text(on ? (L == .is ? "Stöðva" : "Stop") : (L == .is ? "Hlusta" : "Listen"))
                             }
-                            .font(.caption)
-                            .foregroundStyle(on ? pal.accent : pal.text2)
-                            .padding(.horizontal, 10).padding(.vertical, 6)
-                            .background(on ? pal.soft : pal.text.opacity(0.05), in: Capsule())
-                            .animation(.snappy, value: on)
+                            .frame(width: 34, height: 30)
+                            .foregroundStyle(on ? pal.accent : pal.text3)
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel(on ? (L == .is ? "Stöðva" : "Stop") : (L == .is ? "Hlusta" : "Listen"))
                     }
                     Button {
                         UIPasteboard.general.string = copyText
                         copied += 1
                     } label: {
-                        Chip(text: Text(copied > 0 ? (L == .is ? "Afritað" : "Copied") : (L == .is ? "Afrita" : "Copy")),
-                             icon: copied > 0 ? "checkmark" : "doc.on.doc")
+                        Image(systemName: copied > 0 ? "checkmark" : "doc.on.doc")
                             .contentTransition(.symbolEffect(.replace))
+                            .frame(width: 34, height: 30)
+                            .foregroundStyle(copied > 0 ? pal.accent : pal.text3)
+                            .contentShape(Rectangle())
                             .animation(.snappy, value: copied)
                     }
                     .buttonStyle(.plain)
                     .sensoryFeedback(.success, trigger: copied)
+                    .accessibilityLabel(L == .is ? "Afrita" : "Copy")
                 }
+                .font(.footnote)
                 .reveal(5, shown)
 
-                VStack(alignment: .leading, spacing: 18) {
-                    if !a.parts.isEmpty {
-                        Disclosure(title: w.data) { DataTables(parts: a.parts, lang: L) }
+                // The working (data, shortlist, steps) behind one row, for whoever wants to check it
+                if !a.parts.isEmpty || !a.steps.isEmpty {
+                    Disclosure(title: L == .is ? "Nánar" : "Details") {
+                        VStack(alignment: .leading, spacing: 20) {
+                            if !a.parts.isEmpty {
+                                DetailSection(title: w.data) { DataTables(parts: a.parts, lang: L) }
+                            }
+                            if a.parts.contains(where: { !($0.ranking ?? []).isEmpty }) {
+                                DetailSection(title: w.shortlist) { Shortlist(parts: a.parts, lang: L) }
+                            }
+                            if !a.steps.isEmpty {
+                                DetailSection(title: "\(w.how) · \(a.llmCalls) \(L == .is ? "köll" : "calls")") { StepsTimeline(a: a, lang: L) }
+                            }
+                        }
                     }
-                    if a.parts.contains(where: { !($0.ranking ?? []).isEmpty }) {
-                        Disclosure(title: w.shortlist) { Shortlist(parts: a.parts, lang: L) }
-                    }
-                    if !a.steps.isEmpty {
-                        Disclosure(title: "\(w.how) · \(secs) · \(a.llmCalls) \(L == .is ? "köll" : "calls")") { StepsTimeline(a: a, lang: L) }
-                    }
+                    .reveal(6, shown)
                 }
-                .reveal(6, shown)
 
                 Group {
                     if let ex = exchange, a.status == "answered", !ex.suggestionsFailed {
                         if let list = ex.suggestions, !list.isEmpty {
-                            Flow(spacing: 8) {
+                            VStack(spacing: 6) {
                                 ForEach(Array(list.enumerated()), id: \.offset) { i, s in
                                     SuggestionPill(s: s, lang: L, delay: Double(i) * 0.38) { ask(s.question, nil) }
                                 }
@@ -424,7 +448,16 @@ func followupPicks(_ a: Answer) -> [String] {
     return (same + other).map(text)
 }
 
-/// A follow-up that pops in a moment after the one before, with its kind as a small coloured label.
+/// Shrinks a little while pressed.
+private struct Pressable: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.snappy(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
+/// A follow-up row that pops in a moment after the one before; only its small kind label carries colour.
 private struct SuggestionPill: View {
     @Environment(\.pal) private var pal
     let s: Suggestion
@@ -449,15 +482,20 @@ private struct SuggestionPill: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(label.uppercased()).font(.system(size: 10, weight: .semibold)).tracking(0.4)
-                    .foregroundStyle(tint)
-                    .padding(.horizontal, 7).padding(.vertical, 3)
-                    .background(tint.opacity(0.15), in: Capsule())
-                Text(s.question)
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(label).font(.caption2.weight(.semibold)).foregroundStyle(tint)
+                    Text(s.question).font(.subheadline).foregroundStyle(pal.text).multilineTextAlignment(.leading)
+                }
+                Spacer(minLength: 4)
+                Image(systemName: "arrow.up.forward").font(.caption.weight(.semibold)).foregroundStyle(pal.text3)
             }
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(pal.text.opacity(0.04), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .contentShape(Rectangle())
         }
-        .buttonStyle(PillStyle())
+        .buttonStyle(Pressable())
         .opacity(shown ? 1 : 0)
         .scaleEffect(shown ? 1 : 0.85)
         .offset(y: shown ? 0 : 10)

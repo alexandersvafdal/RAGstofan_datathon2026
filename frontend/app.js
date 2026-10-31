@@ -6,7 +6,7 @@ const I18N = {
     sub: "Ask anything about Iceland's official statistics. Every answer comes with the figure, its unit and the table it came from.",
     today: "The latest numbers", asof: "Data as of", placeholder: "Ask about Icelandic statistics",
     steps: ["Understanding the question", "Finding the right table", "Choosing the categories", "Reading the numbers", "Writing the answer"],
-    working: "Working on it", how: "How I got this", data: "Data", source: "Source", checked: "Numbers checked against the table",
+    working: "Working on it", how: "How I got this", data: "Data", details: "Details", checkedShort: "Checked", source: "Source", checked: "Numbers checked against the table",
     calc: "Calculated", failed: "Something went wrong", retry: "Try again", seconds: "s", calls: "model calls",
     pts: "pts", more: "Ask next", palette: "Colour", appearance: "Appearance", model: "Model", thinking: "Thinking", temp: "Temperature",
     now: "Answer now", fastNote: "Answered quickly with the fast model, thinking off.",
@@ -27,7 +27,7 @@ const I18N = {
     sub: "Spurðu um opinbera tölfræði Íslands. Hverju svari fylgir talan, eining hennar og taflan sem hún kemur úr.",
     today: "Nýjustu tölur", asof: "Gögn frá", placeholder: "Spyrðu um íslenska tölfræði",
     steps: ["Skil spurninguna", "Finn réttu töfluna", "Vel flokkana", "Les tölurnar", "Skrifa svarið"],
-    working: "Augnablik", how: "Hvernig svarið varð til", data: "Gögn", source: "Heimild", checked: "Tölur bornar saman við töfluna",
+    working: "Augnablik", how: "Hvernig svarið varð til", data: "Gögn", details: "Nánar", checkedShort: "Yfirfarið", source: "Heimild", checked: "Tölur bornar saman við töfluna",
     calc: "Reiknað", failed: "Eitthvað fór úrskeiðis", retry: "Reyna aftur", seconds: "s", calls: "köll í líkan",
     pts: "pst.", more: "Spyrðu næst", palette: "Litir", appearance: "Útlit", model: "Líkan", thinking: "Hugsun", temp: "Hitastig",
     now: "Svara strax", fastNote: "Svarað í flýti með hraða líkaninu, án hugsunar.",
@@ -474,10 +474,11 @@ async function ask(question, tableId = null, fast = false, spoken = false) {
     await new Promise(r => setTimeout(r, reduceMotion ? 0 : 450));   // let the last tick land before the answer replaces it
     renderAnswer(card, answer);
     card.classList.add("arrive");
-    if (spoken && answer.status !== "error") card.querySelector(".chip.listen")?.click();   // asked by voice: answered aloud
+    if (spoken && answer.status !== "error") card.querySelector(".icon-btn.listen")?.click();   // asked by voice: answered aloud
     if (answer.status === "answered") history.push({
       question: answer.steps.find(st => st.name === "context")?.detail || question,   // the full question, so follow-ups chain
       answer: answer.text, tables: answer.sources.map(src => src.id) });
+    keepTurn(question, tableId, fast, answer);
   } catch (e) {
     if (stop.signal.aborted) return;   // replaced by the quick answer
     card.replaceChildren(
@@ -524,38 +525,47 @@ function renderAnswer(card, a) {
 
   for (const p of a.parts) if (p.note) card.append(el("p", { class: "note" }, prettyPeriods(p.note, L)));
 
-  const meta = el("div", { class: "meta-row" });
+  // One quiet line under the answer: where it came from on the left, listen and copy as icons on the right
+  const info = el("div", { class: "meta-info" });
   for (const s of a.sources) {
-    meta.append(el("a", { class: "chip", href: s.url, target: "_blank", rel: "noopener", title: s.title },
-      `${t("source", L)} `, el("b", {}, s.id)));
+    info.append(el("a", { class: "src", href: s.url, target: "_blank", rel: "noopener", title: s.title, "aria-label": `${t("source", L)} ${s.id}` },
+      s.id, el("span", { class: "arrow", "aria-hidden": "true" }, "↗")));
   }
-  if (a.text_source === "model") meta.append(el("span", { class: "chip ok" }, t("checked", L)));
-  if (a.total_ms) meta.append(el("span", { class: "chip" }, `${(a.total_ms / 1000).toFixed(1)} ${t("seconds", L)}`));
+  if (a.text_source === "model") info.append(el("span", { class: "ok", title: t("checked", L) }, t("checkedShort", L)));
+  if (a.total_ms) info.append(el("span", { class: "secs" }, `${(a.total_ms / 1000).toFixed(1)} ${t("seconds", L)}`));
+  const actions = el("div", { class: "meta-actions" });
   if (voiceList && a.status !== "error") {
     const key = `answer-${Math.random()}`;
-    const listen = el("button", { type: "button", class: "chip listen" });
-    listen.innerHTML = `<span class="wave"><i></i><i></i><i></i></span><span class="lbl">${t("listen", L)}</span>`;
-    const label = listen.querySelector(".lbl");
+    const listen = el("button", { type: "button", class: "icon-btn listen", title: t("listen", L), "aria-label": t("listen", L) });
+    listen.innerHTML = `<span class="wave"><i></i><i></i><i></i></span>`;
     listen.addEventListener("click", () => speak(key, prettyPeriods(a.text, L), L, null, s => {
       voiceStateOn(listen)(s);
-      label.textContent = s === "idle" ? t("listen", L) : t("stopVoice", L);
+      const lbl = s === "idle" ? t("listen", L) : t("stopVoice", L);
+      listen.title = lbl; listen.setAttribute("aria-label", lbl);
     }));
-    meta.append(listen);
+    actions.append(listen);
   }
-  const copy = el("button", { type: "button", class: "chip copy" }, t("copy", L));
+  const COPY = SVG('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>');
+  const copy = el("button", { type: "button", class: "icon-btn copy", title: t("copy", L), "aria-label": t("copy", L) });
+  copy.innerHTML = COPY;
   copy.addEventListener("click", async () => {
     const src = a.sources.map(s => `${s.id} ${s.url}`).join("\n");
     try { await navigator.clipboard.writeText(prettyPeriods(a.text, L) + (src ? `\n\n${t("source", L)}: ${src}` : "")); } catch {}
-    copy.textContent = `✓ ${t("copied", L)}`;
+    copy.innerHTML = ICON.check;
     copy.classList.add("done");
-    setTimeout(() => { copy.textContent = t("copy", L); copy.classList.remove("done"); }, 1800);
+    copy.title = t("copied", L);
+    setTimeout(() => { copy.innerHTML = COPY; copy.classList.remove("done"); copy.title = t("copy", L); }, 1800);
   });
-  meta.append(copy);
-  if (meta.childElementCount) card.append(meta);
+  actions.append(copy);
+  card.append(el("div", { class: "meta-row" }, info, actions));
 
-  if (a.parts.length) card.append(dataTable(a.parts, L));
-  if (a.parts.some(p => p.ranking?.length)) card.append(hitlistView(a.parts, L));
-  if (a.steps.length) card.append(stepsView(a, L));
+  // The working (data, shortlist, steps) behind one row, for whoever wants to check it
+  const sections = [
+    a.parts.length ? dataTable(a.parts, L) : null,
+    a.parts.some(p => p.ranking?.length) ? hitlistView(a.parts, L) : null,
+    a.steps.length ? stepsView(a, L) : null,
+  ].filter(Boolean);
+  if (sections.length) card.append(el("details", { class: "disclose" }, el("summary", {}, t("details", L)), ...sections));
   card.append(a.status === "answered" ? suggestions(a, L) : followups(a, L));
 }
 
@@ -571,6 +581,7 @@ function suggestions(a, L) {
     .then(({ questions }) => {
       if (!questions?.length) throw new Error("none");
       box.classList.remove("suggesting");
+      box.classList.add("rows");
       box.removeAttribute("aria-busy");
       box.replaceChildren(...questions.map((s, i) => {
         const pill = el("button", { class: "pill suggestion", type: "button", style: `animation-delay:${i * 380}ms`,
@@ -595,7 +606,7 @@ function followups(a, L) {
 }
 
 function dataTable(parts, L) {
-  const d = el("details", { class: "disclose" }, el("summary", {}, t("data", L)));
+  const d = el("section", { class: "d-sec" }, el("h4", {}, t("data", L)));
   for (const p of parts) {
     const dims = Object.keys(p.rows[0]?.labels || {});
     d.append(el("div", { class: "table-wrap" }, el("table", {},
@@ -609,7 +620,7 @@ function dataTable(parts, L) {
 
 // The ranked hitlist each table was chosen from: rank, table, score, and which signals found it
 function hitlistView(parts, L) {
-  const d = el("details", { class: "disclose" }, el("summary", {}, t("shortlist", L)));
+  const d = el("section", { class: "d-sec" }, el("h4", {}, t("shortlist", L)));
   const sig = t("signal", L);
   for (const p of parts.filter(p => p.ranking?.length)) {
     const top = Math.max(...p.ranking.map(r => r.score), 1e-9);
@@ -628,8 +639,8 @@ function hitlistView(parts, L) {
 
 function stepsView(a, L) {
   const max = Math.max(...a.steps.map(s => s.ms), 1);
-  return el("details", { class: "disclose" },
-    el("summary", {}, `${t("how", L)} · ${(a.total_ms / 1000).toFixed(1)} ${t("seconds", L)} · ${a.llm_calls} ${t("calls", L)}`),
+  return el("section", { class: "d-sec" },
+    el("h4", {}, `${t("how", L)} · ${a.llm_calls} ${t("calls", L)}`),
     el("ol", { class: "timeline" }, a.steps.map(s => el("li", {},
       el("span", { class: "s-name" }, s.name),
       el("span", { class: "s-bar" }, el("i", { style: `width:${Math.max(2, s.ms / max * 100)}%` })),
@@ -1189,3 +1200,131 @@ function flashNote(text) {
   setTimeout(() => n.remove(), 3200);
 }
 updateComposer();
+
+/* ---------- saved conversations (this browser only), search, private mode ---------- */
+const CHATS_KEY = "ragstofan-chats";
+let chats = [], current = null, privateMode = false;
+try { chats = JSON.parse(localStorage.getItem(CHATS_KEY) || "[]"); privateMode = localStorage.getItem("ragstofan-private") === "1"; } catch {}
+
+const DRAWER = {
+  en: { new: "New conversation", private: "Private mode", note: "Conversations are not saved while it is on.",
+        search: "Search conversations", none: "No saved conversations yet.", nothing: "Nothing found.",
+        groups: ["Today", "Yesterday", "This week", "Earlier"], chip: "Private", del: "Delete" },
+  is: { new: "Nýtt samtal", private: "Einkahamur", note: "Samtöl vistast ekki á meðan kveikt er á honum.",
+        search: "Leita í samtölum", none: "Engin vistuð samtöl enn.", nothing: "Ekkert fannst.",
+        groups: ["Í dag", "Í gær", "Þessa viku", "Eldra"], chip: "Einka", del: "Eyða" },
+};
+
+/** Remember an answered turn in the conversation on screen, unless private. The data rows are trimmed to keep it small. */
+function keepTurn(question, tableId, fast, answer) {
+  if (privateMode || answer.status === "error") return;
+  const slim = { ...answer, parts: answer.parts.map(p => ({ ...p, rows: p.rows.slice(0, 200) })) };
+  if (!current) { current = { id: crypto.randomUUID?.() || String(Date.now()), started: Date.now(), turns: [] }; }
+  current.turns.push({ question, tableId, fast, answer: slim });
+  current.updated = Date.now();
+  chats = [current, ...chats.filter(c => c.id !== current.id)].slice(0, 60);
+  saveChats();
+}
+function saveChats() {
+  try { localStorage.setItem(CHATS_KEY, JSON.stringify(chats)); }
+  catch { chats = chats.slice(0, Math.max(5, chats.length - 10)); try { localStorage.setItem(CHATS_KEY, JSON.stringify(chats)); } catch {} }
+}
+const fold = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+function openChat(c) {
+  stopSpeaking();
+  closeDrawer();
+  showChat();
+  const chat = $("#chat");
+  chat.replaceChildren();
+  history.length = 0;
+  for (const tr of c.turns) {
+    if (!tr.tableId && !tr.fast) chat.append(el("div", { class: "msg user" }, el("div", { class: "bubble" }, tr.question)));
+    const card = el("div", { class: "card" });
+    chat.append(el("div", { class: "msg bot" }, card));
+    renderAnswer(card, tr.answer);
+    if (tr.answer.status === "answered") history.push({
+      question: tr.answer.steps.find(st => st.name === "context")?.detail || tr.question,
+      answer: tr.answer.text, tables: tr.answer.sources.map(src => src.id) });
+  }
+  current = c;
+  setTimeout(() => chat.lastElementChild?.scrollIntoView({ block: "end" }), 50);
+}
+
+function newChat() {
+  stopSpeaking();
+  closeDrawer();
+  current = null;
+  history.length = 0;
+  $("#chat").replaceChildren();
+  $("#chat").classList.remove("on");
+  const home = $("#home");
+  home.hidden = false;
+  home.classList.remove("leaving");
+  pills.start();
+  window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+}
+
+function renderDrawer() {
+  const D = DRAWER[ui()] || DRAWER.en;
+  const d = $("#drawer");
+  d.querySelector(".d-new").textContent = `＋ ${D.new}`;
+  d.querySelector(".d-private-title").textContent = D.private;
+  d.querySelector(".d-private-note").textContent = D.note;
+  $("#private-mode").checked = privateMode;
+  $("#chat-search").placeholder = D.search;
+  $("#private-chip").textContent = D.chip;
+  $("#private-chip").hidden = !privateMode;
+  const q = fold($("#chat-search").value.trim());
+  const found = chats.filter(c => !q || c.turns.some(t => fold(t.question).includes(q) || fold(t.answer.text).includes(q)));
+  const list = $("#chat-list");
+  if (!found.length) { list.replaceChildren(el("p", { class: "d-empty" }, q ? D.nothing : D.none)); return; }
+  const now = new Date(), day = 864e5, today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const bucket = t => t >= today ? 0 : t >= today - day ? 1 : t >= today - 6 * day ? 2 : 3;
+  const groups = [[], [], [], []];
+  found.forEach(c => groups[bucket(c.updated)].push(c));
+  list.replaceChildren(...groups.flatMap((g, i) => !g.length ? [] : [el("div", { class: "d-group" }, D.groups[i]), ...g.map(c => {
+    const hit = q && c.turns.find(t => !fold(t.question).includes(q) && fold(t.answer.text).includes(q));
+    const row = el("div", { class: "d-row" + (current?.id === c.id ? " on" : "") },
+      el("button", { type: "button", class: "d-open", onclick: () => openChat(c) },
+        el("span", { class: "d-title" }, c.turns[0]?.question || "…"),
+        hit ? el("span", { class: "d-hit" }, prettyPeriods(hit.answer.text, ui())) : null,
+        el("span", { class: "d-meta" }, `${c.turns.length} · ${new Date(c.updated).toLocaleString(ui() === "is" ? "is-IS" : "en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`)),
+      el("button", { type: "button", class: "d-del", "aria-label": D.del, title: D.del, onclick: e => {
+        e.stopPropagation();
+        chats = chats.filter(x => x.id !== c.id);
+        if (current?.id === c.id) current = null;
+        saveChats();
+        renderDrawer();
+      } }, "✕"));
+    return row;
+  })]));
+}
+
+function openDrawer() {
+  renderDrawer();
+  $("#drawer-scrim").hidden = false;
+  requestAnimationFrame(() => { document.body.classList.add("drawer-open"); });
+  $("#drawer").setAttribute("aria-hidden", "false");
+  $("#menu-btn").setAttribute("aria-expanded", "true");
+  setTimeout(() => $("#chat-search").focus({ preventScroll: true }), 250);
+}
+function closeDrawer() {
+  document.body.classList.remove("drawer-open");
+  $("#drawer").setAttribute("aria-hidden", "true");
+  $("#menu-btn").setAttribute("aria-expanded", "false");
+  setTimeout(() => { if (!document.body.classList.contains("drawer-open")) $("#drawer-scrim").hidden = true; }, 300);
+}
+$("#menu-btn").addEventListener("click", e => { e.stopPropagation(); document.body.classList.contains("drawer-open") ? closeDrawer() : openDrawer(); });
+$("#drawer-scrim").addEventListener("click", closeDrawer);
+$("#drawer .d-close").addEventListener("click", closeDrawer);
+$("#drawer .d-new").addEventListener("click", newChat);
+$("#drawer").addEventListener("click", e => e.stopPropagation());
+$("#chat-search").addEventListener("input", renderDrawer);
+$("#private-mode").addEventListener("change", e => {
+  privateMode = e.target.checked;
+  try { localStorage.setItem("ragstofan-private", privateMode ? "1" : "0"); } catch {}
+  renderDrawer();
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+renderDrawer();

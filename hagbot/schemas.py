@@ -23,6 +23,8 @@ class AskRequest(BaseModel):
     temperature: float | None = None  # None: 0, the same answer every time
     reasoning: Literal["none", "low", "medium", "high"] | None = None  # thinking length; None: the server's default
     fast: bool = False  # "Answer now": the fast model with thinking off, whatever else is asked
+    request_id: str | None = None  # set by a client that may drop the connection (a phone going to sleep): the
+                                   # answer is then finished anyway and kept for GET /api/ask/<id>
 
 
 class TableRef(BaseModel):

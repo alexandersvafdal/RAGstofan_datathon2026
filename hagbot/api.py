@@ -93,13 +93,20 @@ async def ask_stream(req: AskRequest) -> StreamingResponse:
     {"type": "step", "name": ..., "ms": ..., "detail": ...} for each step, then {"type": "answer", "answer": {...}}."""
     queue: asyncio.Queue = asyncio.Queue()
     req = await _checked(req)
+    rid = req.request_id
 
     async def run():
         answer = await pipeline.answer(req, on_step=lambda st: queue.put_nowait({"type": "step", **st.model_dump()}))
+        if rid in _jobs:
+            _jobs[rid]["answer"] = answer.model_dump()
         queue.put_nowait({"type": "answer", "answer": answer.model_dump()})
 
+    _forget_old_jobs()
+    task = asyncio.create_task(run())
+    if rid:
+        _jobs[rid] = {"task": task, "answer": None, "t": time.monotonic()}
+
     async def lines():
-        task = asyncio.create_task(run())
         try:
             while True:
                 item = await queue.get()
@@ -107,10 +114,44 @@ async def ask_stream(req: AskRequest) -> StreamingResponse:
                 if item["type"] == "answer":
                     break
         finally:
-            if not task.done():
+            # a client that gave a request id may only have gone to sleep: finish and keep the answer for it.
+            # Without one, nobody can collect it, so stop.
+            if not task.done() and not rid:
                 task.cancel()
 
     return StreamingResponse(lines(), media_type="application/x-ndjson")
+
+
+# Answers asked for with a request id, kept 15 minutes so a phone that slept through the end can collect them
+_jobs: dict[str, dict] = {}
+JOB_TTL = 15 * 60
+
+
+def _forget_old_jobs():
+    for k in [k for k, j in _jobs.items() if time.monotonic() - j["t"] > JOB_TTL]:
+        _jobs.pop(k, None)
+
+
+@app.get("/api/ask/{request_id}")
+async def ask_result(request_id: str):
+    """{"status": "running"} until the answer is ready, then {"status": "done", "answer": {...}}."""
+    job = _jobs.get(request_id)
+    if not job:
+        raise HTTPException(404, "unknown or expired request")
+    if job["answer"] is not None:
+        return {"status": "done", "answer": job["answer"]}
+    if job["task"].done():   # it failed or was stopped
+        raise HTTPException(410, "the question was stopped")
+    return {"status": "running"}
+
+
+@app.delete("/api/ask/{request_id}")
+async def ask_cancel(request_id: str):
+    """Stop a question that is no longer wanted ("Answer now" asks again with the fast model)."""
+    job = _jobs.pop(request_id, None)
+    if job and not job["task"].done():
+        job["task"].cancel()
+    return {"cancelled": bool(job)}
 
 
 # Voice runs as its own service (voice/server.py, port 8001, own GPU environment). The website reaches it through

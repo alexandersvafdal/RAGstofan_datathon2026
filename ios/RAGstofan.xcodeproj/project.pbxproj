@@ -11,41 +11,73 @@
 		1226BE75FBC643D013910B2C /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA39FF538C38EB58A3D678DA /* ChatView.swift */; };
 		1D6BD7CF65986F682EFA345F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8FDDC7C362A1936F128FC17 /* HomeView.swift */; };
 		2D7D82EC270EDF49FF464A53 /* Voice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF0857C57757B9829FEF6F7 /* Voice.swift */; };
+		3B0CDDFC3131A392857FA1D3 /* Drawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C3FF196D7144996D1CE809 /* Drawer.swift */; };
 		3C67FBF9658A8E248C57B914 /* AnswerCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5753E6F863385393950F954 /* AnswerCardView.swift */; };
 		5296D8FAD80C127C050A2596 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE35528507CEC4BA63F9FA99 /* Models.swift */; };
 		5596417BCE37614715022813 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D562762DC4E10941A76EFB04 /* ChartsView.swift */; };
+		5760A3310D784E7971261254 /* RAGstofanWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DBF1BC73078A7182078E937F /* RAGstofanWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		59D6D20C0F448AA0AAB6A35A /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312816E8026544418145E65 /* API.swift */; };
 		5CE6F3BC895E6A620E28CF85 /* Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CDAABEEE6E5E910FAD995CF /* Format.swift */; };
 		604A3BDC1F6610CE2BC03652 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1EEDD6DBB495F2DD9A1808F /* AppModel.swift */; };
+		7B0E3437D81609E5B77BE966 /* QuestionActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3825E0462C81DFFF29711D45 /* QuestionActivity.swift */; };
 		9D57EFF39B29F20755C25D49 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E9B7AB9DC135B8DB208A7E68 /* Assets.xcassets */; };
 		AEA77DD9FDA13219497E1DC6 /* LiveStepsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F043438891375AD4385EBE28 /* LiveStepsView.swift */; };
-		B9ADF84D5A52868021CBDCC4 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672469DCCB04587F52A850DD /* HistoryView.swift */; };
 		BA862FFD4E4B56FB0876164C /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15150BB3247A7D9D3D9CB8F6 /* AboutView.swift */; };
 		CD2F6CD39D8631BF8B9CB30B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE56D7C883090CB8AC71AC04 /* SettingsView.swift */; };
 		DA5D051640A9595AD6D30F8D /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79DBF85333C10398228486AF /* OnboardingView.swift */; };
 		DC6925B296C19A7036C8A390 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = E532DCD1F74BB5CEDF5F8A0A /* Theme.swift */; };
+		ECA965F7F775307CF27CA686 /* QuestionActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3825E0462C81DFFF29711D45 /* QuestionActivity.swift */; };
+		F3931DE0E8E2F25F4396FD9A /* RAGstofanWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD726D68F319E3C2CA4442E5 /* RAGstofanWidgets.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		49B710A94242CB39B0D57E24 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3771AF8C0370DDC75B2F3FCA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3AF6F7936DD88F586491735F;
+			remoteInfo = RAGstofanWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F4CEA3FA1B9A0DEC73879350 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				5760A3310D784E7971261254 /* RAGstofanWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0CDAABEEE6E5E910FAD995CF /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
 		0E48C23FC723B727E153335A /* RAGstofanApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RAGstofanApp.swift; sourceTree = "<group>"; };
 		15150BB3247A7D9D3D9CB8F6 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		3825E0462C81DFFF29711D45 /* QuestionActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionActivity.swift; sourceTree = "<group>"; };
 		3EF0857C57757B9829FEF6F7 /* Voice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Voice.swift; sourceTree = "<group>"; };
-		672469DCCB04587F52A850DD /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		785C0AC1731E7605CA19D78F /* RAGstofan.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RAGstofan.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		79DBF85333C10398228486AF /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		838C0625B6A88C37609D7F80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		85C3FF196D7144996D1CE809 /* Drawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drawer.swift; sourceTree = "<group>"; };
 		A312816E8026544418145E65 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		A5753E6F863385393950F954 /* AnswerCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnswerCardView.swift; sourceTree = "<group>"; };
 		C1EEDD6DBB495F2DD9A1808F /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		CD726D68F319E3C2CA4442E5 /* RAGstofanWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RAGstofanWidgets.swift; sourceTree = "<group>"; };
 		CE56D7C883090CB8AC71AC04 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D562762DC4E10941A76EFB04 /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
+		DBF1BC73078A7182078E937F /* RAGstofanWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = RAGstofanWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E532DCD1F74BB5CEDF5F8A0A /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		E8FDDC7C362A1936F128FC17 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		E9B7AB9DC135B8DB208A7E68 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EA39FF538C38EB58A3D678DA /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		EE35528507CEC4BA63F9FA99 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		F043438891375AD4385EBE28 /* LiveStepsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStepsView.swift; sourceTree = "<group>"; };
+		FD1305EC4F39B2E17A32577E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -53,14 +85,26 @@
 			isa = PBXGroup;
 			children = (
 				785C0AC1731E7605CA19D78F /* RAGstofan.app */,
+				DBF1BC73078A7182078E937F /* RAGstofanWidgets.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3838C718F3D42B0E30EEF2D1 /* RAGstofanWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				FD1305EC4F39B2E17A32577E /* Info.plist */,
+				CD726D68F319E3C2CA4442E5 /* RAGstofanWidgets.swift */,
+			);
+			path = RAGstofanWidgets;
 			sourceTree = "<group>";
 		};
 		DE4943C9BEE05853AED9375A = {
 			isa = PBXGroup;
 			children = (
 				E9B14FFCAF22A0CB2838247E /* RAGstofan */,
+				3838C718F3D42B0E30EEF2D1 /* RAGstofanWidgets */,
+				F4A6A383004EF09999C84AF3 /* Shared */,
 				2C9821A1C5C1F6F301BABFD3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -75,8 +119,8 @@
 				E9B7AB9DC135B8DB208A7E68 /* Assets.xcassets */,
 				D562762DC4E10941A76EFB04 /* ChartsView.swift */,
 				EA39FF538C38EB58A3D678DA /* ChatView.swift */,
+				85C3FF196D7144996D1CE809 /* Drawer.swift */,
 				0CDAABEEE6E5E910FAD995CF /* Format.swift */,
-				672469DCCB04587F52A850DD /* HistoryView.swift */,
 				E8FDDC7C362A1936F128FC17 /* HomeView.swift */,
 				838C0625B6A88C37609D7F80 /* Info.plist */,
 				F043438891375AD4385EBE28 /* LiveStepsView.swift */,
@@ -90,19 +134,46 @@
 			path = RAGstofan;
 			sourceTree = "<group>";
 		};
+		F4A6A383004EF09999C84AF3 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				3825E0462C81DFFF29711D45 /* QuestionActivity.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		3AF6F7936DD88F586491735F /* RAGstofanWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B742C1EA958E4C826CB24069 /* Build configuration list for PBXNativeTarget "RAGstofanWidgets" */;
+			buildPhases = (
+				10D197E852CC1078EAA52EA7 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RAGstofanWidgets;
+			packageProductDependencies = (
+			);
+			productName = RAGstofanWidgets;
+			productReference = DBF1BC73078A7182078E937F /* RAGstofanWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		D8A4738E374E90ECC08AAF21 /* RAGstofan */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 96C3B0DFDEBB61CD9D893753 /* Build configuration list for PBXNativeTarget "RAGstofan" */;
 			buildPhases = (
 				658BC832A94CB21A0F75E5AE /* Sources */,
 				A228687C36B3EC5BC6FDC84A /* Resources */,
+				F4CEA3FA1B9A0DEC73879350 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				169027D312F47C525879BEB1 /* PBXTargetDependency */,
 			);
 			name = RAGstofan;
 			packageProductDependencies = (
@@ -120,6 +191,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					3AF6F7936DD88F586491735F = {
+						DevelopmentTeam = L76JG6N5NJ;
+						ProvisioningStyle = Automatic;
+					};
 					D8A4738E374E90ECC08AAF21 = {
 						DevelopmentTeam = L76JG6N5NJ;
 						ProvisioningStyle = Automatic;
@@ -141,6 +216,7 @@
 			projectRoot = "";
 			targets = (
 				D8A4738E374E90ECC08AAF21 /* RAGstofan */,
+				3AF6F7936DD88F586491735F /* RAGstofanWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -157,6 +233,15 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		10D197E852CC1078EAA52EA7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ECA965F7F775307CF27CA686 /* QuestionActivity.swift in Sources */,
+				F3931DE0E8E2F25F4396FD9A /* RAGstofanWidgets.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		658BC832A94CB21A0F75E5AE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -167,12 +252,13 @@
 				604A3BDC1F6610CE2BC03652 /* AppModel.swift in Sources */,
 				5596417BCE37614715022813 /* ChartsView.swift in Sources */,
 				1226BE75FBC643D013910B2C /* ChatView.swift in Sources */,
+				3B0CDDFC3131A392857FA1D3 /* Drawer.swift in Sources */,
 				5CE6F3BC895E6A620E28CF85 /* Format.swift in Sources */,
-				B9ADF84D5A52868021CBDCC4 /* HistoryView.swift in Sources */,
 				1D6BD7CF65986F682EFA345F /* HomeView.swift in Sources */,
 				AEA77DD9FDA13219497E1DC6 /* LiveStepsView.swift in Sources */,
 				5296D8FAD80C127C050A2596 /* Models.swift in Sources */,
 				DA5D051640A9595AD6D30F8D /* OnboardingView.swift in Sources */,
+				7B0E3437D81609E5B77BE966 /* QuestionActivity.swift in Sources */,
 				0E853FDBEE8000C5ECB9D7F1 /* RAGstofanApp.swift in Sources */,
 				CD2F6CD39D8631BF8B9CB30B /* SettingsView.swift in Sources */,
 				DC6925B296C19A7036C8A390 /* Theme.swift in Sources */,
@@ -182,7 +268,32 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		169027D312F47C525879BEB1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3AF6F7936DD88F586491735F /* RAGstofanWidgets */;
+			targetProxy = 49B710A94242CB39B0D57E24 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		2EEEB3642EAA77F315D60AEC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = RAGstofanWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RAGstofan;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.alexandersvarfdal.ragstofan.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		4505FA153AA4AD502302892B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -281,6 +392,23 @@
 			};
 			name = Debug;
 		};
+		89A499F3B5AB7A65C3EBA243 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = RAGstofanWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RAGstofan;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.alexandersvarfdal.ragstofan.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		DD47A688971B8C32465528E0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -356,6 +484,15 @@
 			buildConfigurations = (
 				850355864E3314DC3D362A08 /* Debug */,
 				4505FA153AA4AD502302892B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B742C1EA958E4C826CB24069 /* Build configuration list for PBXNativeTarget "RAGstofanWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2EEEB3642EAA77F315D60AEC /* Debug */,
+				89A499F3B5AB7A65C3EBA243 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

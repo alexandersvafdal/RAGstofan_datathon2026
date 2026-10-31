@@ -148,6 +148,19 @@ struct Chip: View {
     }
 }
 
+/// A small caps heading over one part of an opened Disclosure.
+struct DetailSection<Content: View>: View {
+    @Environment(\.pal) private var pal
+    let title: String
+    @ViewBuilder let content: Content
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title.uppercased()).font(.caption2.weight(.semibold)).tracking(0.8).foregroundStyle(pal.text3)
+            content
+        }
+    }
+}
+
 /// A section that opens on tap, like the website's <details>.
 struct Disclosure<Content: View>: View {
     @Environment(\.pal) private var pal
@@ -158,11 +171,11 @@ struct Disclosure<Content: View>: View {
         VStack(alignment: .leading, spacing: 12) {
             Button { withAnimation(.snappy) { open.toggle() } } label: {
                 HStack {
-                    Text(title).font(.subheadline.weight(.medium))
+                    Text(title).font(.footnote.weight(.medium))
                     Spacer()
-                    Image(systemName: "chevron.down").font(.caption.weight(.semibold)).rotationEffect(.degrees(open ? 180 : 0))
+                    Image(systemName: "chevron.down").font(.caption2.weight(.semibold)).rotationEffect(.degrees(open ? 180 : 0))
                 }
-                .foregroundStyle(pal.text2)
+                .foregroundStyle(pal.text3)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)

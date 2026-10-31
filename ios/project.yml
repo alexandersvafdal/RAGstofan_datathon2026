@@ -16,7 +16,9 @@ targets:
   RAGstofan:
     type: application
     platform: iOS
-    sources: [RAGstofan]
+    sources: [RAGstofan, Shared]
+    dependencies:
+      - target: RAGstofanWidgets   # the Live Activity, embedded in the app
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alexandersvarfdal.ragstofan
@@ -47,3 +49,22 @@ targets:
           NSAllowsArbitraryLoads: true
         NSLocalNetworkUsageDescription: RAGstofan connects to the team's statistics server on your local network.
         NSMicrophoneUsageDescription: RAGstofan listens after you tap the microphone button, so you can ask by voice.
+        NSSupportsLiveActivities: true
+
+  # Live Activities: each question's progress on the lock screen and in the Dynamic Island
+  RAGstofanWidgets:
+    type: app-extension
+    platform: iOS
+    sources: [RAGstofanWidgets, Shared]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.alexandersvarfdal.ragstofan.widgets
+        TARGETED_DEVICE_FAMILY: "1,2"
+        INFOPLIST_KEY_CFBundleDisplayName: RAGstofan
+        SKIP_INSTALL: YES
+    info:
+      path: RAGstofanWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: RAGstofan
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension

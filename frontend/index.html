@@ -8,18 +8,24 @@
     if (t.palette === "amber") t.palette = "hagstofan";  // Amber was replaced by Hagstofan
     if (t.palette && t.palette !== "warm") document.documentElement.dataset.palette = t.palette;
     if (t.mode && t.mode !== "auto") document.documentElement.dataset.theme = t.mode; } catch {}</script>
-  <link rel="stylesheet" href="style.css?v=30">
+  <link rel="stylesheet" href="style.css?v=31">
   <script src="https://cdn.jsdelivr.net/npm/vega@5.30.0/build/vega.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.21.0/build/vega-lite.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0/build/vega-embed.min.js"></script>
 </head>
 <body>
   <header class="nav">
+    <div class="nav-left">
+    <button id="menu-btn" class="theme-btn menu-btn" type="button" aria-label="Menu and past conversations" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
     <a class="brand" href="/" aria-label="RAGstofan home">
       <svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="12" width="4" height="9" rx="2"/><rect x="10" y="7" width="4" height="14" rx="2"/><rect x="17" y="3" width="4" height="18" rx="2"/></svg>
       <svg class="logo-h" viewBox="0 0 12.6 17.45" aria-hidden="true"><path d="M2.295,2.894C1.661,2.679,0.634,2.679,0,2.894v5.403h2.295z"/><path d="M7.419,0.162c-0.634-0.216-1.661-0.216-2.295,0v8.136h2.295z"/><path d="M12.544,9.963c0.081-0.238,0.081-0.623,0-0.86H0v5.403c0.634,0.216,1.661,0.216,2.295,0V9.963h2.829v7.275c0.634,0.216,1.661,0.216,2.295,0V9.963z"/></svg>
       RAGstofan
     </a>
+    <span id="private-chip" class="private-chip" hidden>Private</span>
+    </div>
     <div class="nav-right">
       <span id="status" class="status" title="Model and data source">…</span>
       <button id="about-btn" class="theme-btn about-btn" type="button" aria-label="About and limitations">i</button>
@@ -92,6 +98,18 @@
     <div class="tuning" id="tuning" aria-label="Answer settings"></div>
   </form>
 
-  <script src="app.js?v=33"></script>
+  <!-- the hamburger menu: new conversation, private mode, past conversations (this browser only) with search -->
+  <div id="drawer-scrim" class="drawer-scrim" hidden></div>
+  <aside id="drawer" class="drawer" aria-label="Past conversations" aria-hidden="true">
+    <div class="d-head"><b>RAGstofan</b><button type="button" class="d-close" aria-label="Close">✕</button></div>
+    <button type="button" class="d-new"></button>
+    <label class="d-private"><input type="checkbox" id="private-mode"><span class="switch"></span>
+      <span><b class="d-private-title"></b><small class="d-private-note"></small></span></label>
+    <div class="d-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+      <input id="chat-search" type="search" autocomplete="off"></div>
+    <div class="d-list" id="chat-list"></div>
+  </aside>
+
+  <script src="app.js?v=35"></script>
 </body>
 </html>

@@ -8,11 +8,12 @@ struct ChatView: View {
     @Environment(\.pal) private var pal
     @State private var draft = ""
     @State private var showSettings = false
-    @State private var showHistory = false
+    @State private var drawer = false
     @FocusState private var focused: Bool
 
     var body: some View {
         let w = Words(lang: model.ui)
+        ZStack(alignment: .leading) {
         NavigationStack {
             ScrollViewReader { proxy in
                 ScrollView {
@@ -39,20 +40,37 @@ struct ChatView: View {
                 }
             }
             .background(pal.bg.ignoresSafeArea())
+            // how questions are answered, at the top under the title
+            .safeAreaInset(edge: .top, spacing: 0) {
+                Tuning()
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity)
+                    .background(.ultraThinMaterial)
+            }
             .safeAreaInset(edge: .bottom) { composer(w) }
-            .navigationTitle("RAGstofan")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(pal.bg, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button { showHistory = true } label: { Image(systemName: "clock.arrow.circlepath") }
-                        .accessibilityLabel(model.ui == .is ? "Fyrri samtöl" : "Past conversations")
-                }
-                ToolbarItem(placement: .topBarLeading) {
-                    if !model.exchanges.isEmpty {
-                        Button { withAnimation(.smooth) { model.reset() } } label: { Image(systemName: "square.and.pencil") }
-                            .accessibilityLabel(w.newChat)
+                    Button { focused = false; withAnimation(.spring(duration: 0.4, bounce: 0.1)) { drawer = true } } label: {
+                        Image(systemName: "line.3.horizontal")
                     }
+                    .accessibilityLabel(model.ui == .is ? "Valmynd og fyrri samtöl" : "Menu and past conversations")
+                }
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 6) {
+                        Text("RAGstofan").font(.headline).foregroundStyle(pal.text)
+                        if model.privateMode {
+                            Label(model.ui == .is ? "Einka" : "Private", systemImage: "eye.slash")
+                                .font(.caption2.weight(.semibold)).labelStyle(.titleAndIcon)
+                                .foregroundStyle(pal.accent)
+                                .padding(.horizontal, 7).padding(.vertical, 3)
+                                .background(pal.soft, in: Capsule())
+                                .transition(.scale.combined(with: .opacity))
+                        }
+                    }
+                    .animation(.spring(duration: 0.35), value: model.privateMode)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showSettings = true } label: { Image(systemName: "slider.horizontal.3") }
@@ -62,9 +80,16 @@ struct ChatView: View {
             .sheet(isPresented: $showSettings) {
                 SettingsView().environment(model).environment(\.pal, pal).tint(pal.accent)
             }
-            .sheet(isPresented: $showHistory) {
-                HistoryView().environment(model).environment(\.pal, pal).tint(pal.accent)
-            }
+        }
+        // the hamburger menu: past conversations, search, new conversation, private mode
+        if drawer {
+            Color.black.opacity(0.35).ignoresSafeArea()
+                .onTapGesture { withAnimation(.spring(duration: 0.35)) { drawer = false } }
+                .transition(.opacity)
+            Drawer(close: { withAnimation(.spring(duration: 0.35)) { drawer = false } })
+                .transition(.move(edge: .leading))
+                .zIndex(1)
+        }
         }
     }
 
@@ -78,7 +103,6 @@ struct ChatView: View {
                   .onTapGesture { voice.error = nil }
                   .transition(.opacity)
           }
-          Tuning()
           HStack(spacing: 10) {
             ZStack {
                 if voice.state == .idle {

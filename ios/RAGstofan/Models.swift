@@ -72,7 +72,18 @@ struct AskRequest: Encodable {
     let temperature: Double?  // nil: 0
     let reasoning: String?    // thinking length none / low / medium / high; nil: the server's default (the longest)
     let fast: Bool            // "Answer now": the fast model, thinking off
+    let requestId: String     // the server finishes and keeps the answer under this if the phone drops the line
 }
+
+extension AskRequest {
+    func with(requestId: String) -> AskRequest {
+        AskRequest(question: question, language: language, tableId: tableId, history: history, model: model,
+                   temperature: temperature, reasoning: reasoning, fast: fast, requestId: requestId)
+    }
+}
+
+/// A question asked earlier with a request id: still running, or its answer.
+struct AskResult: Decodable { let status: String; let answer: Answer? }
 
 /// A follow-up question that leads on from an answer: compare, related, deeper or wider.
 struct Suggestion: Codable, Hashable { let kind: String; let question: String }

@@ -69,23 +69,85 @@ struct HomeView: View {
         }
     }
 
-    @ViewBuilder
     private var status: some View {
-        if let err = model.serverError {
-            Button(action: openSettings) {
-                Label(err, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.red)
-                    .multilineTextAlignment(.leading)
+        ConnectionBadge(openSettings: openSettings).padding(.top, 6)
+    }
+}
+
+/// The server's state on the home page. Connecting: a breathing dot. Connected: a check that springs in with the model
+/// and table count. Unreachable: a calm card that says why, counts down to the next automatic try, and can try now.
+struct ConnectionBadge: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.pal) private var pal
+    let openSettings: () -> Void
+    @State private var breathe = false
+
+    var body: some View {
+        let isl = model.ui == .is
+        ZStack {
+            switch model.connection {
+            case .connecting:
+                HStack(spacing: 8) {
+                    ZStack {
+                        Circle().fill(pal.accent.opacity(0.3)).frame(width: 14, height: 14)
+                            .scaleEffect(breathe ? 1.4 : 0.8).opacity(breathe ? 0 : 1)
+                        Circle().fill(pal.accent).frame(width: 7, height: 7)
+                    }
+                    .onAppear { withAnimation(.easeOut(duration: 1.2).repeatForever(autoreverses: false)) { breathe = true } }
+                    .onDisappear { breathe = false }
+                    Text(isl ? "Tengist þjóninum…" : "Connecting to the server…")
+                }
+                .font(.caption).foregroundStyle(pal.text3)
+                .transition(.blurReplace)
+            case .connected:
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                        .symbolEffect(.bounce, value: model.connection)
+                    if let h = model.health {
+                        Text("\(model.activeModel ?? h.model) · \(fmtNum(Double(h.tablesInCatalog), model.ui)) \(isl ? "töflur" : "tables")")
+                    }
+                }
+                .font(.caption).foregroundStyle(pal.text3)
+                .transition(.blurReplace)
+            case .offline:
+                VStack(spacing: 10) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "wifi.exclamationmark").font(.title3).foregroundStyle(.orange)
+                            .symbolEffect(.pulse, isActive: true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(isl ? "Næ ekki sambandi við þjóninn" : "Can't reach the server").font(.subheadline.weight(.semibold))
+                                .foregroundStyle(pal.text)
+                            TimelineView(.periodic(from: .now, by: 1)) { ctx in
+                                let left = max(0, Int((model.nextRetry ?? ctx.date).timeIntervalSince(ctx.date).rounded(.up)))
+                                Text(left > 0 ? (isl ? "Reyni aftur eftir \(left) s · athugaðu Wi-Fi eða Tailscale"
+                                                    : "Trying again in \(left) s · check Wi-Fi or Tailscale")
+                                              : (isl ? "Reyni aftur…" : "Trying again…"))
+                                    .contentTransition(.numericText(countsDown: true))
+                                    .animation(.snappy, value: left)
+                            }
+                            .font(.caption).foregroundStyle(pal.text3)
+                        }
+                    }
+                    HStack(spacing: 8) {
+                        Button { Task { await model.connect() } } label: {
+                            Label(isl ? "Reyna núna" : "Try now", systemImage: "arrow.clockwise")
+                        }
+                        .buttonStyle(PillStyle())
+                        Button(action: openSettings) {
+                            Label(isl ? "Þjónn" : "Server", systemImage: "server.rack")
+                        }
+                        .buttonStyle(PillStyle())
+                    }
+                }
+                .padding(14)
+                .background(pal.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.orange.opacity(0.25)))
+                .transition(.scale(scale: 0.92).combined(with: .opacity))
             }
-            .buttonStyle(.plain)
-            .padding(.top, 4)
-        } else if let h = model.health {
-            HStack(spacing: 6) {
-                Circle().fill(Color.green).frame(width: 7, height: 7)
-                Text("\(model.activeModel ?? h.model) · \(fmtNum(Double(h.tablesInCatalog), model.ui)) \(model.ui == .is ? "töflur" : "tables")")
-            }
-            .font(.caption).foregroundStyle(pal.text3).padding(.top, 4)
-        } else {
-            ProgressView().padding(.top, 4)
+        }
+        .animation(.spring(duration: 0.5, bounce: 0.25), value: model.connection)
+        .sensoryFeedback(trigger: model.connection) { _, new in
+            switch new { case .connected: .success; case .offline: .warning; default: nil }
         }
     }
 }

@@ -16,7 +16,7 @@ struct OnboardingView: View {
             TabView(selection: $page.animation(.spring(duration: 0.5, bounce: 0.15))) {
                 Welcome(t: t).tag(0)
                 HowItWorks(t: t).tag(1)
-                Connection(t: t).tag(2)
+                ConnectionPage(t: t).tag(2)
                 Look(t: t).tag(3)
                 Language(t: t).tag(4)
                 VoicePage(t: t).tag(5)
@@ -192,7 +192,7 @@ private struct HowItWorks: View {
 }
 
 /// Check that the server answers before going on; the address can be changed here.
-private struct Connection: View {
+private struct ConnectionPage: View {
     @Environment(AppModel.self) private var model
     @Environment(\.pal) private var pal
     let t: (String, String) -> String

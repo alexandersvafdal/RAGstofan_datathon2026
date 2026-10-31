@@ -70,18 +70,18 @@ private struct Switcher: View {
             ForEach(views, id: \.self) { v in
                 Text(Words(lang: lang).viewName(v))
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(selection == v ? pal.accentInk : pal.text2)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
+                    .foregroundStyle(selection == v ? pal.text : pal.text3)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
                     .background {
-                        if selection == v { Capsule().fill(pal.accent).matchedGeometryEffect(id: "on", in: ns) }
+                        if selection == v { Capsule().fill(pal.text.opacity(0.12)).matchedGeometryEffect(id: "on", in: ns) }
                     }
                     .contentShape(Capsule())
                     .onTapGesture { withAnimation(.spring(duration: 0.4, bounce: 0.25)) { selection = v } }
             }
         }
-        .padding(3)
-        .background(pal.text.opacity(0.06), in: Capsule())
+        .padding(2)
+        .background(pal.text.opacity(0.04), in: Capsule())
         .sensoryFeedback(.selection, trigger: selection)
     }
 }

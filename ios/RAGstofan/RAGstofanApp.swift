@@ -20,7 +20,7 @@ struct RootView: View {
             .environment(\.pal, pal)
             .tint(pal.accent)
             .preferredColorScheme(model.colorScheme)
-            .task { await model.connect() }
+            .task { await model.keepConnected() }   // connects, and retries quietly while the server is away
             .fullScreenCover(isPresented: Binding(get: { !model.onboarded }, set: { model.onboarded = !$0 })) {
                 OnboardingView().environment(model).environment(\.pal, pal).tint(pal.accent)
             }

@@ -93,6 +93,19 @@ struct API {
         return data
     }
 
+    /// The answer to a question whose stream was cut (the phone slept): nil while it is still being worked on.
+    func result(_ requestId: String) async throws -> Answer? {
+        let r: AskResult = try await get("api/ask/\(requestId)")
+        return r.status == "done" ? r.answer : nil
+    }
+
+    /// Tell the server a question is no longer wanted, so it stops working on it.
+    func cancel(_ requestId: String) async {
+        var req = URLRequest(url: base.appendingPathComponent("api/ask/\(requestId)"))
+        req.httpMethod = "DELETE"
+        _ = try? await Self.session.data(for: req)
+    }
+
     /// Follow-up questions for an answer already on screen, asked for afterwards so they never delay it.
     func suggest(_ answer: Answer) async throws -> [Suggestion] {
         var req = URLRequest(url: base.appendingPathComponent("api/suggest"))

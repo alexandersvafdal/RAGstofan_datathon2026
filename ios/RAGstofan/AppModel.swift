@@ -1,6 +1,12 @@
 // The app's state: server, language and theme settings, how questions are answered, the conversation, saved past
 // conversations, and the dashboard numbers.
 import SwiftUI
+import ActivityKit
+import UIKit
+import UserNotifications
+
+/// Whether the server answers: shown on the home page, retried on its own while it doesn't.
+enum Connection: Equatable { case connecting, connected, offline(String) }
 
 /// One exchange in the conversation: the question, the steps as they arrive, then the answer or an error.
 @MainActor @Observable
@@ -16,6 +22,8 @@ final class Exchange: Identifiable {
     var steps: [Step] = []
     var answer: Answer?
     var error: String?
+    let requestId = UUID().uuidString   // the server keeps the answer under this if the phone drops the line
+    var reconnecting = false            // the stream was cut (the app slept); collecting the answer from the server
     let started = Date()
     var stepStarted = Date()
 
@@ -58,6 +66,8 @@ final class AppModel {
     let voice = Voice()
     /// The chosen voice per language ("en", "is"); missing means the server's default.
     var voiceChoice: [String: String] { didSet { UserDefaults.standard.set(voiceChoice, forKey: "voices") } }
+    /// Private mode: nothing from this conversation is saved to history while it is on.
+    var privateMode: Bool { didSet { UserDefaults.standard.set(privateMode, forKey: "private") } }
     var voiceList: VoiceList?
 
     var exchanges: [Exchange] = []
@@ -66,6 +76,9 @@ final class AppModel {
     var indicators: Indicators?
     var health: Health?
     var serverError: String?
+    var connection: Connection = .connecting
+    var nextRetry: Date?                                   // when an unreachable server is tried again
+    private var activities: [String: Activity<QuestionActivity>] = [:]   // each question's Live Activity
     var busy = false
     private var running: Task<Void, Never>?
 
@@ -84,6 +97,7 @@ final class AppModel {
         conversations = Self.load()
         onboarded = d.bool(forKey: "onboarded")
         autoSpeak = d.object(forKey: "autoSpeak") as? Bool ?? true
+        privateMode = d.bool(forKey: "private")
         voiceChoice = d.dictionary(forKey: "voices") as? [String: String] ?? [:]
     }
 
@@ -93,10 +107,17 @@ final class AppModel {
     var apiClient: API? { api }
 
     func connect() async {
-        guard let api else { serverError = APIError.badServer(server).localizedDescription; return }
+        guard let api else {
+            serverError = APIError.badServer(server).localizedDescription
+            withAnimation(.spring(duration: 0.5)) { connection = .offline(serverError ?? "") }
+            return
+        }
+        if connection != .connected { withAnimation(.spring(duration: 0.4)) { connection = .connecting } }
         do {
             health = try await api.health()
             serverError = nil
+            nextRetry = nil
+            withAnimation(.spring(duration: 0.5, bounce: 0.3)) { connection = .connected }
             models = try? await api.models()
             voiceList = try? await api.voices()
             if let m = models, let c = modelChoice, !m.models.contains(c) { modelChoice = nil }   // gone from the server
@@ -104,6 +125,23 @@ final class AppModel {
         } catch {
             health = nil
             serverError = error.localizedDescription
+            withAnimation(.spring(duration: 0.5)) { connection = .offline(error.localizedDescription) }
+        }
+    }
+
+    /// Connect, and while the server can't be reached try again every few seconds, gently, without the user doing
+    /// anything. Runs for the life of the app.
+    func keepConnected() async {
+        await connect()
+        while !Task.isCancelled {
+            if case .offline = connection {
+                nextRetry = Date().addingTimeInterval(8)
+                try? await Task.sleep(for: .seconds(8))
+                await connect()
+            } else {
+                try? await Task.sleep(for: .seconds(30))
+                if connection == .connected, let api, (try? await api.health()) == nil { await connect() }
+            }
         }
     }
 
@@ -136,6 +174,8 @@ final class AppModel {
     /// Stop the question in progress (the server stops with it) and ask again with the fast model, thinking off.
     func answerNow(_ ex: Exchange) {
         running?.cancel()
+        if let api { Task { await api.cancel(ex.requestId) } }
+        endActivity(ex, answer: nil, dismiss: true)
         exchanges.removeAll { $0.id == ex.id }
         busy = false
         send(ex.question, tableId: ex.tableId, fast: true, spoken: ex.spoken)
@@ -147,34 +187,130 @@ final class AppModel {
         let lang: Lang = langChoice == .auto ? guessLang(q) : (langChoice == .is ? .is : .en)
         let request = AskRequest(question: q, language: langChoice == .auto ? nil : langChoice.rawValue,
                                  tableId: tableId, history: history, model: modelChoice,
-                                 temperature: temperatureChoice, reasoning: reasoningChoice, fast: fast)
+                                 temperature: temperatureChoice, reasoning: reasoningChoice, fast: fast,
+                                 requestId: "")
         let ex = Exchange(question: q, tableId: tableId, lang: lang, fast: fast)
         ex.spoken = spoken
         withAnimation(.smooth) { exchanges.append(ex) }
+        startActivity(ex)
         busy = true
+        askNotificationsOnce()
+        // a little extra time if the user leaves the app mid-answer; the server finishes regardless
+        var bg = UIBackgroundTaskIdentifier.invalid
+        bg = UIApplication.shared.beginBackgroundTask(withName: "answer") { UIApplication.shared.endBackgroundTask(bg) }
+        defer { UIApplication.shared.endBackgroundTask(bg) }
         do {
-            for try await event in api.ask(request) {
+            for try await event in api.ask(request.with(requestId: ex.requestId)) {
                 switch event {
                 case .step(let s):
                     ex.steps.append(s)
                     if s.name != "context" { ex.stepStarted = Date() }  // the next step's clock starts now
+                    updateActivity(ex, s)
                 case .answer(let a):
-                    withAnimation(.snappy) { ex.answer = a }
-                    save()
-                    if spoken && autoSpeak && a.status != "error" { speak(ex) }
-                    if a.status == "answered" {
-                        Task {
-                            do { let s = try await api.suggest(a); withAnimation(.snappy) { ex.suggestions = s } }
-                            catch { ex.suggestionsFailed = true }
-                        }
-                    }
+                    deliver(a, to: ex, api: api)
                 }
             }
         } catch {
             if Task.isCancelled { return }   // replaced by the quick answer
-            ex.error = error.localizedDescription
+            await collect(ex, api: api)      // the line was cut, most likely by the phone sleeping
         }
         busy = false
+    }
+
+    /// Show an answer, keep it, read it aloud if asked by voice, tell the user if they are elsewhere, fetch follow-ups.
+    private func deliver(_ a: Answer, to ex: Exchange, api: API) {
+        ex.reconnecting = false
+        let onLockScreen = activities[ex.requestId] != nil   // the Live Activity already shows the answer
+        endActivity(ex, answer: a)
+        withAnimation(.snappy) { ex.answer = a }
+        save()
+        if ex.spoken && autoSpeak && a.status != "error" && UIApplication.shared.applicationState == .active { speak(ex) }
+        if UIApplication.shared.applicationState != .active && !onLockScreen { notifyReady(ex, a) }
+        if a.status == "answered" {
+            Task {
+                do { let s = try await api.suggest(a); withAnimation(.snappy) { ex.suggestions = s } }
+                catch { ex.suggestionsFailed = true }
+            }
+        }
+    }
+
+    /// The stream was cut: the server goes on and keeps the answer, so ask for it until it is ready (or 15 minutes
+    /// pass). Asleep, the app simply resumes this loop when it wakes.
+    private func collect(_ ex: Exchange, api: API) async {
+        ex.reconnecting = true
+        let started = Date()
+        while Date().timeIntervalSince(started) < 15 * 60 {
+            if Task.isCancelled { return }
+            do {
+                if let a = try await api.result(ex.requestId) { deliver(a, to: ex, api: api); return }
+            } catch APIError.http(let code, _) where code == 404 || code == 410 {
+                break   // the server no longer has it (restarted, or the question was stopped)
+            } catch {}  // no connection yet: keep trying
+            try? await Task.sleep(for: .seconds(2))
+        }
+        ex.reconnecting = false
+        ex.error = ex.lang == .is ? "Svarið tapaðist á leiðinni. Reyndu aftur." : "The answer was lost on the way. Try again."
+        endActivity(ex, answer: nil)
+    }
+
+    // MARK: Live Activities: each question's steps on the lock screen and in the Dynamic Island
+
+    private static let stepOrder = ["plan", "retrieve", "select", "fetch", "compose"]
+
+    private func startActivity(_ ex: Exchange) {
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        // answers already read make way for the new question
+        for old in Activity<QuestionActivity>.activities where old.activityState == .ended {
+            Task { await old.end(nil, dismissalPolicy: .immediate) }
+        }
+        let attrs = QuestionActivity(question: ex.question, isIcelandic: ex.lang == .is, started: Date())
+        let state = QuestionActivity.ContentState(step: 0, stepName: Words(lang: ex.lang).steps[0], detail: "")
+        activities[ex.requestId] = try? Activity.request(attributes: attrs, content: .init(state: state, staleDate: nil))
+    }
+
+    private func updateActivity(_ ex: Exchange, _ s: Step) {
+        guard let act = activities[ex.requestId], Self.stepOrder.contains(s.name) else { return }
+        let done = Set(ex.steps.map(\.name)).intersection(Self.stepOrder).count
+        let step = min(done, QuestionActivity.steps - 1)
+        let w = Words(lang: ex.lang)
+        var detail = ""
+        switch s.name {
+        case "retrieve": detail = firstGroups(#"^(\S+) from"#, s.detail)?[1] ?? ""
+        case "fetch": detail = w.numbers(Int(firstGroups(#"^(\d+) rows"#, s.detail)?[1] ?? "0") ?? 0)
+        default: break
+        }
+        let state = QuestionActivity.ContentState(step: step, stepName: w.steps[step], detail: detail)
+        Task { await act.update(.init(state: state, staleDate: nil)) }
+    }
+
+    /// The answer stays on the lock screen for a while; a stopped question goes at once.
+    private func endActivity(_ ex: Exchange, answer: Answer?, dismiss: Bool = false) {
+        guard let act = activities.removeValue(forKey: ex.requestId) else { return }
+        let w = Words(lang: ex.lang)
+        let state = QuestionActivity.ContentState(step: QuestionActivity.steps, stepName: answer == nil ? w.failed : "",
+                                                  detail: "", answer: answer.map { prettyPeriods($0.text, ex.lang) },
+                                                  failed: answer == nil || answer?.status == "error")
+        Task {
+            await act.end(.init(state: state, staleDate: nil),
+                          dismissalPolicy: dismiss ? .immediate : .after(Date().addingTimeInterval(15 * 60)))
+        }
+    }
+
+    // MARK: "Your answer is ready" when the app is in the background
+
+    private func askNotificationsOnce() {
+        guard !UserDefaults.standard.bool(forKey: "askedNotifications") else { return }
+        UserDefaults.standard.set(true, forKey: "askedNotifications")
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+    }
+
+    private func notifyReady(_ ex: Exchange, _ a: Answer) {
+        let c = UNMutableNotificationContent()
+        c.title = ex.lang == .is ? "Svarið er tilbúið" : "Your answer is ready"
+        c.subtitle = ex.question
+        c.body = prettyPeriods(a.text, ex.lang)
+        c.sound = .default
+        UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: ex.requestId, content: c, trigger: nil))
     }
 
     func reset() {
@@ -204,6 +340,7 @@ final class AppModel {
 
     /// Store the conversation on screen, newest first, after each answer.
     private func save() {
+        if privateMode { return }   // private: nothing is kept
         let saved = exchanges.compactMap { e in
             e.answer.map { Conversation.Saved(question: e.question, tableId: e.tableId, lang: e.lang.rawValue, fast: e.fast, answer: $0) }
         }
@@ -214,6 +351,15 @@ final class AppModel {
         conversations.removeAll { $0.id == id }
         conversations.insert(Conversation(id: id, started: started, updated: Date(), exchanges: saved), at: 0)
         write()
+    }
+
+    /// Conversations whose questions or answers contain the search text (any case, any accents).
+    func search(_ text: String) -> [Conversation] {
+        let q = text.trimmingCharacters(in: .whitespaces)
+        guard !q.isEmpty else { return conversations }
+        return conversations.filter { c in
+            c.exchanges.contains { $0.question.localizedStandardContains(q) || $0.answer.text.localizedStandardContains(q) }
+        }
     }
 
     /// Show a past conversation; asking more continues it.
