@@ -23,7 +23,7 @@ BASE = {
     "en": "https://px.hagstofa.is/pxen/api/v1/en",
 }
 
-TABLES = "tables_20261030_224153.json"
+TABLES = "data/tables_20261030_224153.json"
 OUT_DIR = "downloads"
 LOG = "download_log.jsonl"
 
