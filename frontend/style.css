@@ -902,10 +902,98 @@ td.num { text-align: right; }
   *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
 }
 
-/* answer settings under the question box: model, thinking length, temperature */
-.tuning { max-width: 720px; margin: 8px auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; }
-.tuning label { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3); }
-.tuning select { font: inherit; font-size: 12px; color: var(--text-2); background: var(--card-glass); border: 1px solid var(--hairline);
-  border-radius: 999px; padding: 3px 8px; cursor: pointer; }
 /* "Answer now" under the live steps */
 .live .pill.now { position: static; opacity: 1; transform: none; align-self: flex-end; width: auto; margin-bottom: 8px; font-size: 13px; padding: 6px 12px; }
+
+/* ---------- answer settings as chips with menus, as in the app ---------- */
+.tuning { max-width: 720px; margin: 10px auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.tchip-wrap { position: relative; }
+.composer .tchip {
+  width: auto; height: auto; display: inline-flex; align-items: center; gap: 6px; padding: 7px 11px;
+  font: inherit; font-size: 12.5px; color: var(--text-2); background: var(--card-glass); border: 1px solid var(--hairline);
+  border-radius: 999px; box-shadow: 0 2px 8px rgba(0,0,0,.05); cursor: pointer; white-space: nowrap;
+  backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  transition: color .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease), transform .2s var(--ease);
+}
+.composer .tchip:hover { transform: translateY(-1px); background: var(--card); }
+.composer .tchip.changed { color: var(--accent); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.composer .tchip svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.composer .tchip .chev svg { width: 10px; height: 10px; opacity: .6; }
+.tchip b { font-weight: 600; }
+.tchip .num { font-variant-numeric: tabular-nums; }
+.tchip .meter { display: inline-flex; align-items: flex-end; gap: 1.5px; height: 12px; }
+.tchip .meter i { width: 2.5px; border-radius: 2px; background: color-mix(in srgb, var(--text) 20%, transparent); transition: background .3s var(--ease); }
+.tchip .meter i.on { background: var(--accent); }
+/* temperature: cool at 0, warmer and larger as it rises */
+.tchip .tdot { width: 9px; height: 9px; border-radius: 50%;
+  background: linear-gradient(to top, var(--series-1), var(--series-2)); filter: hue-rotate(calc(var(--t) * 40deg));
+  transform: scale(calc(.8 + var(--t) * .4)); transition: transform .3s var(--ease); }
+
+.tmenu {
+  position: absolute; bottom: calc(100% + 8px); left: 50%; min-width: 190px; padding: 6px; z-index: 20;
+  background: var(--card); border: 1px solid var(--hairline); border-radius: 16px; box-shadow: var(--shadow-hover);
+  opacity: 0; pointer-events: none; transform: translate(-50%, 6px) scale(.96); transform-origin: bottom center;
+  transition: opacity .18s var(--ease), transform .25s cubic-bezier(.2,.9,.3,1.3);
+}
+.tchip-wrap.open .tmenu { opacity: 1; pointer-events: auto; transform: translate(-50%, 0) scale(1); }
+.composer .tmenu button {
+  width: 100%; height: auto; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px;
+  background: transparent; color: var(--text); font: inherit; font-size: 13.5px; text-align: left; cursor: pointer;
+}
+.composer .tmenu button:hover { background: var(--accent-soft); transform: none; }
+.tmenu button small { color: var(--text-3); margin-left: 4px; }
+.tmenu .tick { width: 14px; display: inline-flex; color: var(--accent); }
+.composer .tmenu .tick svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- microphone and listening ---------- */
+.composer #mic svg { fill: none; stroke: var(--accent-ink); stroke-width: 2; }
+.composer #mic.unavailable { opacity: .45; }
+.composer.has-text #mic, .composer:not(.has-text) #send { display: none; }
+.composer.listening-on #mic, .composer.writing-on #mic { transform: scale(calc(1 + var(--level, 0) * .12)); }
+.composer.listening-on #mic svg { display: none; }
+.composer.listening-on #mic::after { content: ""; width: 14px; height: 14px; border-radius: 3px; background: var(--accent-ink); }
+.listening { display: none; flex: 1; align-items: center; gap: 12px; color: var(--text-2); font-size: 15px; padding: 10px 0; }
+.composer.listening-on .listening, .composer.writing-on .listening { display: flex; }
+.composer.listening-on #q, .composer.writing-on #q { display: none; }
+.composer.listening-on .composer-inner { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft), var(--shadow-hover); }
+.levels { display: inline-flex; align-items: center; gap: 3px; height: 28px; }
+.levels i { width: 4px; height: 6px; border-radius: 2px; background: var(--accent); transition: height .12s ease; }
+.composer.writing-on .levels i { animation: pulse 1s ease-in-out infinite; }
+.composer.writing-on .levels i:nth-child(2) { animation-delay: .1s } .composer.writing-on .levels i:nth-child(3) { animation-delay: .2s }
+.composer.writing-on .levels i:nth-child(4) { animation-delay: .3s } .composer.writing-on .levels i:nth-child(5) { animation-delay: .4s }
+@keyframes pulse { 50% { height: 18px; } }
+.l-text { flex: 1; }
+.composer .l-cancel { width: 28px; height: 28px; background: transparent; color: var(--text-3); font-size: 14px; }
+.composer.writing-on .l-cancel { display: none; }
+.flash { position: fixed; left: 50%; bottom: 150px; transform: translateX(-50%); z-index: 30; padding: 10px 16px; border-radius: 12px;
+  background: var(--card); color: var(--text); box-shadow: var(--shadow-hover); font-size: 14px; animation: rise .4s var(--ease); }
+
+/* ---------- Listen and Copy on answers ---------- */
+button.chip { font: inherit; font-size: 13px; line-height: inherit; cursor: pointer; border: 0; }
+.chip.listen .wave { display: inline-flex; align-items: center; gap: 2px; height: 12px; }
+.chip.listen .wave i { width: 2.5px; height: 5px; border-radius: 2px; background: currentColor; }
+.chip.listen.speaking { color: var(--accent); background: var(--accent-soft); }
+.chip.listen.speaking .wave i { animation: wave .9s ease-in-out infinite; }
+.chip.listen.speaking .wave i:nth-child(2) { animation-delay: .15s } .chip.listen.speaking .wave i:nth-child(3) { animation-delay: .3s }
+.chip.listen.loading-voice { opacity: .6; }
+@keyframes wave { 50% { height: 12px; } }
+.chip.copy.done { color: var(--accent); background: var(--accent-soft); }
+
+/* ---------- voice picker in the settings popover ---------- */
+.voices { display: flex; flex-direction: column; gap: 10px; max-height: 260px; overflow-y: auto; }
+.vgroup { display: flex; flex-direction: column; gap: 5px; }
+.vtitle { font-size: 10.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); }
+.vrow { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 12px; border: 1px solid var(--hairline);
+  background: var(--card); color: var(--text); font: inherit; font-size: 13px; text-align: left; cursor: pointer; transition: background .2s var(--ease); }
+.vrow:hover { background: var(--accent-soft); }
+.vrow.on { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); font-weight: 600; }
+.vplay { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--text) 7%, transparent); color: var(--accent); flex: none; }
+.vrow.on .vplay { background: var(--accent); color: var(--accent-ink); }
+.vplay svg { width: 11px; height: 11px; fill: currentColor; }
+.vrow.speaking .vplay { animation: breathe 1s ease-in-out infinite; }
+.vrow.loading-voice .vplay { opacity: .5; }
+@keyframes breathe { 50% { transform: scale(1.12); } }
+.vname { flex: 1; display: flex; flex-direction: column; }
+.vname small { font-weight: 400; font-size: 11px; color: var(--text-3); }
+.vrow .tick { color: var(--accent); width: 14px; }
+.vrow .tick svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }

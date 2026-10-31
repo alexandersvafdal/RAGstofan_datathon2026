@@ -43,6 +43,8 @@
             <button data-mode="light">Light</button>
             <button data-mode="dark">Dark</button>
           </div>
+          <h3 data-i18n="voice">Voice</h3>
+          <div class="voices" id="voices"></div>
         </div>
       </div>
       <div class="segmented" role="group" aria-label="Answer language">
@@ -77,20 +79,19 @@
   <form id="ask" class="composer">
     <div class="composer-inner">
       <input id="q" autocomplete="off" placeholder="Ask about Icelandic statistics" aria-label="Question">
+      <div class="listening" aria-live="polite"><span class="levels"><i></i><i></i><i></i><i></i><i></i></span><span class="l-text"></span>
+        <button type="button" class="l-cancel" aria-label="Cancel">✕</button></div>
+      <button type="button" id="mic" aria-label="Ask by voice">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+      </button>
       <button type="submit" id="send" aria-label="Ask">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
     </div>
-    <!-- how the next question is answered; the defaults are the best model and the longest thinking -->
-    <div class="tuning" aria-label="Answer settings">
-      <label><span data-i18n="model">Model</span><select id="model" aria-label="Language model"></select></label>
-      <label><span data-i18n="thinking">Thinking</span><select id="reasoning" aria-label="Thinking length"></select></label>
-      <label><span data-i18n="temp">Temperature</span><select id="temperature" aria-label="Temperature">
-        <option value="">0</option><option value="0.3">0.3</option><option value="0.7">0.7</option><option value="1">1.0</option>
-      </select></label>
-    </div>
+    <!-- how the next question is answered; untouched, the server's defaults: the best model, the longest thinking -->
+    <div class="tuning" id="tuning" aria-label="Answer settings"></div>
   </form>
 
-  <script src="app.js?v=31"></script>
+  <script src="app.js?v=32"></script>
 </body>
 </html>
