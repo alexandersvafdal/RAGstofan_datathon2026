@@ -152,6 +152,12 @@ async def stt(audio: UploadFile = File(...), language: str | None = Form(None)):
     return (await _voice("POST", "/stt", files=files, data={"language": language} if language else None)).json()
 
 
+@app.post("/api/suggest")
+async def suggest(ans: Answer) -> dict:
+    """Three follow-up questions for an answer the user is already reading (the client asks once it has shown it)."""
+    return {"questions": await pipeline.suggest(ans)}
+
+
 class PromptRequest(BaseModel):
     prompt: str
 

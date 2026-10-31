@@ -11,6 +11,8 @@ final class Exchange: Identifiable {
     let lang: Lang
     let fast: Bool
     var spoken = false   // asked by voice, so the answer is read aloud
+    var suggestions: [Suggestion]?   // follow-ups, arriving after the answer; nil while they are being written
+    var suggestionsFailed = false
     var steps: [Step] = []
     var answer: Answer?
     var error: String?
@@ -160,6 +162,12 @@ final class AppModel {
                     withAnimation(.snappy) { ex.answer = a }
                     save()
                     if spoken && autoSpeak && a.status != "error" { speak(ex) }
+                    if a.status == "answered" {
+                        Task {
+                            do { let s = try await api.suggest(a); withAnimation(.snappy) { ex.suggestions = s } }
+                            catch { ex.suggestionsFailed = true }
+                        }
+                    }
                 }
             }
         } catch {

@@ -181,9 +181,23 @@ struct AnswerCard: View {
                 }
                 .reveal(6, shown)
 
-                Flow(spacing: 8) {
-                    ForEach(Array(picks.enumerated()), id: \.offset) { i, q in
-                        Button(q) { ask(q, nil) }.buttonStyle(PillStyle()).reveal(7 + i, shown)
+                Group {
+                    if let ex = exchange, a.status == "answered", !ex.suggestionsFailed {
+                        if let list = ex.suggestions, !list.isEmpty {
+                            Flow(spacing: 8) {
+                                ForEach(Array(list.enumerated()), id: \.offset) { i, s in
+                                    SuggestionPill(s: s, lang: L, delay: Double(i) * 0.38) { ask(s.question, nil) }
+                                }
+                            }
+                        } else if ex.suggestions == nil {
+                            GhostPills()   // being written, just after the answer
+                        }
+                    } else {
+                        Flow(spacing: 8) {
+                            ForEach(Array(picks.enumerated()), id: \.offset) { i, q in
+                                Button(q) { ask(q, nil) }.buttonStyle(PillStyle()).reveal(7 + i, shown)
+                            }
+                        }
                     }
                 }
                 .padding(.top, 2)
@@ -408,4 +422,67 @@ func followupPicks(_ a: Answer) -> [String] {
     let same = POOL.filter { topics.contains($0.topic) && text($0) != a.question }.shuffled().prefix(2)
     let other = POOL.filter { !topics.contains($0.topic) }.shuffled().prefix(1)
     return (same + other).map(text)
+}
+
+/// A follow-up that pops in a moment after the one before, with its kind as a small coloured label.
+private struct SuggestionPill: View {
+    @Environment(\.pal) private var pal
+    let s: Suggestion
+    let lang: Lang
+    let delay: Double
+    let action: () -> Void
+    @State private var shown = false
+
+    private var label: String {
+        let en = ["compare": "Compare", "related": "Related", "deeper": "Dig deeper", "wider": "Bigger picture"]
+        let isl = ["compare": "Samanburður", "related": "Skylt efni", "deeper": "Nánar", "wider": "Víðara samhengi"]
+        return (lang == .is ? isl : en)[s.kind] ?? s.kind
+    }
+    private var tint: Color {
+        switch s.kind {
+        case "related": return pal.series2
+        case "deeper": return pal.series3
+        case "wider": return pal.text2
+        default: return pal.accent
+        }
+    }
+
+    var body: some View {
+        Button(action: action) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(label.uppercased()).font(.system(size: 10, weight: .semibold)).tracking(0.4)
+                    .foregroundStyle(tint)
+                    .padding(.horizontal, 7).padding(.vertical, 3)
+                    .background(tint.opacity(0.15), in: Capsule())
+                Text(s.question)
+            }
+        }
+        .buttonStyle(PillStyle())
+        .opacity(shown ? 1 : 0)
+        .scaleEffect(shown ? 1 : 0.85)
+        .offset(y: shown ? 0 : 10)
+        .onAppear {
+            withAnimation(.spring(duration: 0.55, bounce: 0.35).delay(delay)) { shown = true }
+        }
+        .sensoryFeedback(.selection, trigger: shown)
+    }
+}
+
+/// Shimmering placeholders while the follow-ups are written.
+private struct GhostPills: View {
+    @Environment(\.pal) private var pal
+    @State private var phase = false
+    var body: some View {
+        Flow(spacing: 8) {
+            ForEach([150.0, 200.0, 130.0, 170.0], id: \.self) { w in
+                Capsule()
+                    .fill(LinearGradient(colors: [pal.card, pal.soft, pal.card], startPoint: phase ? .trailing : .leading,
+                                         endPoint: phase ? .leading : .trailing))
+                    .overlay(Capsule().stroke(pal.text.opacity(0.08)))
+                    .frame(width: w, height: 36)
+            }
+        }
+        .onAppear { withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: true)) { phase = true } }
+        .transition(.opacity)
+    }
 }

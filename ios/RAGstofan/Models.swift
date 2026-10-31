@@ -74,6 +74,10 @@ struct AskRequest: Encodable {
     let fast: Bool            // "Answer now": the fast model, thinking off
 }
 
+/// A follow-up question that leads on from an answer: compare, related, deeper or wider.
+struct Suggestion: Codable, Hashable { let kind: String; let question: String }
+struct SuggestionList: Codable { let questions: [Suggestion] }
+
 /// A voice answers can be read in.
 struct VoiceOption: Codable, Hashable, Identifiable { let id: String; let name: String; let engine: String }
 struct VoiceList: Codable { let voices: [String: [VoiceOption]]; let `default`: [String: String] }

@@ -20,6 +20,7 @@ from .steps.ratio import POPULATION_TABLE, detect_ratio, ratio_parts
 from .steps.retrieve import period_end, retrieve
 from .steps.tiered import retrieve_tiered
 from .steps.select import select
+from .steps.suggest import suggest
 from .text import detect_language, normalize
 
 # A label that is itself a percentage: "Annual change, %", "Unemployment rate", "Percentage of GDP". A % after a
@@ -69,6 +70,14 @@ class Pipeline:
             other.llm = self.llm.with_options(model, req.temperature, reasoning)
             return await other._answer(req, on_step)
         return await self._answer(req, on_step)
+
+    async def suggest(self, ans: Answer) -> list[str]:
+        """Follow-up questions for an answer already shown: asked for afterwards, so they never delay it."""
+        if ans.status != "answered" or not ans.parts:
+            return []
+        metas = await asyncio.gather(*(self.source.meta(p.table.id) for p in ans.parts), return_exceptions=True)
+        pairs = [(p, m) for p, m in zip(ans.parts, metas) if not isinstance(m, Exception)]
+        return await suggest(self.llm, ans.question, ans.text, [p for p, _ in pairs], [m for _, m in pairs], ans.language)
 
     async def _answer(self, req: AskRequest, on_step: Callable[[Step], None] | None = None) -> Answer:
         lang = req.language or detect_language(req.question)

@@ -997,3 +997,19 @@ button.chip { font: inherit; font-size: 13px; line-height: inherit; cursor: poin
 .vname small { font-weight: 400; font-size: 11px; color: var(--text-3); }
 .vrow .tick { color: var(--accent); width: 14px; }
 .vrow .tick svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* follow-up suggestions: ghost pills shimmer while they are written, then each pops in after the one before */
+.followups .pill.ghost { position: static; opacity: 1; transform: none; width: 210px; height: 36px; padding: 0;
+  background: linear-gradient(90deg, var(--card) 0%, var(--accent-soft) 50%, var(--card) 100%); background-size: 200% 100%;
+  border: 1px solid var(--hairline); animation: shimmer 1.4s linear infinite, rise .5s var(--ease) backwards; }
+.followups .pill.ghost:nth-child(2) { width: 260px } .followups .pill.ghost:nth-child(3) { width: 180px } .followups .pill.ghost:nth-child(4) { width: 230px }
+@keyframes shimmer { to { background-position: -200% 0; } }
+.followups .pill.suggestion { display: inline-flex; align-items: center; gap: 8px; text-align: left;
+  animation: pop .55s cubic-bezier(.2,.9,.3,1.35) backwards; }
+@keyframes pop { from { opacity: 0; transform: translateY(10px) scale(.85); } to { opacity: 1; transform: none; } }
+.pill .kind { font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap;
+  padding: 2px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.pill .kind.related { background: color-mix(in srgb, var(--series-2) 18%, transparent); color: var(--series-2); }
+.pill .kind.deeper { background: color-mix(in srgb, var(--series-3) 18%, transparent); color: var(--series-3); }
+.pill .kind.wider { background: color-mix(in srgb, var(--text) 8%, transparent); color: var(--text-2); }
+@media (prefers-reduced-motion: reduce) { .followups .pill.suggestion, .followups .pill.ghost { animation: none; } }

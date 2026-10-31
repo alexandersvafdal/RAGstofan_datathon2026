@@ -556,7 +556,31 @@ function renderAnswer(card, a) {
   if (a.parts.length) card.append(dataTable(a.parts, L));
   if (a.parts.some(p => p.ranking?.length)) card.append(hitlistView(a.parts, L));
   if (a.steps.length) card.append(stepsView(a, L));
-  card.append(followups(a, L));
+  card.append(a.status === "answered" ? suggestions(a, L) : followups(a, L));
+}
+
+// Follow-up questions that lead somewhere, asked for once the answer is on screen so they never delay it. Ghost pills
+// shimmer meanwhile; then each suggestion pops in after the one before. If the server can't, the example questions do.
+const KIND = { en: { compare: "Compare", related: "Related", deeper: "Dig deeper", wider: "Bigger picture" },
+               is: { compare: "Samanburður", related: "Skylt efni", deeper: "Nánar", wider: "Víðara samhengi" } };
+function suggestions(a, L) {
+  const box = el("div", { class: "followups suggesting", "aria-label": t("more", L), "aria-busy": "true" },
+    ...[0, 1, 2, 3].map(i => el("span", { class: "pill ghost", style: `animation-delay:${i * 120}ms` })));
+  fetch("/api/suggest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) })
+    .then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(({ questions }) => {
+      if (!questions?.length) throw new Error("none");
+      box.classList.remove("suggesting");
+      box.removeAttribute("aria-busy");
+      box.replaceChildren(...questions.map((s, i) => {
+        const pill = el("button", { class: "pill suggestion", type: "button", style: `animation-delay:${i * 380}ms`,
+                                    onclick: () => ask(s.question) },
+          el("span", { class: `kind ${s.kind}` }, (KIND[L] || KIND.en)[s.kind] || s.kind), s.question);
+        return pill;
+      }));
+    })
+    .catch(() => box.replaceWith(followups(a, L)));
+  return box;
 }
 
 function followups(a, L) {
