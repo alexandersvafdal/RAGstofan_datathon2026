@@ -1,34 +1,49 @@
 # How RAGstofan answers a question
 
-A language model does three jobs: read the question, pick a table, pick categories. It never does arithmetic and
-never gets the last word on a number. Everything that can be checked is done in code.
+A language model reads the question, picks a table, picks categories and writes the answer. It never does
+arithmetic and never gets the last word on a number. Everything that can be checked is done in code.
 
 ```mermaid
 flowchart TD
+    subgraph key["Key"]
+        direction LR
+        KL[["LLM call"]]:::llm
+        KC["Code"]:::code
+        KQ{"Check in code"}:::code
+        KD[("Data")]:::data
+    end
+
     Q(["Question, English or Icelandic<br/><i>Hve mörgum fleiri karlar en konur búa á Íslandi?</i>"])
 
     subgraph understand["1 · Understand"]
         FU{"Follow-up?<br/>what about last year · hvað með árið áður"}:::code
-        RW["Rewrite as a question that stands alone,<br/>from the previous question and answer"]:::llm
+        RW[["LLM ① Rewrite as a question that stands alone,<br/>from the previous question and answer"]]:::llm
         TB{"Table already chosen?<br/>the user clicked a clarification button"}:::code
         R{"Ratio to population?<br/>per inhabitant · á hvern íbúa"}:::code
-        P["Plan<br/>split into 1–3 parts, reword in English,<br/>English search words for each part<br/><i>How many more men than women live in Iceland?</i>"]:::llm
+        RP["Split in code: numerator, and<br/>population from MAN00101"]:::code
+        P[["LLM ② Plan<br/>split into 1–3 parts, reword in English,<br/>English search words for each part"]]:::llm
     end
 
     subgraph find["2 · Find the table (each part in parallel)"]
         A{"Word with no single table?<br/>tourists · ferðamenn"}:::code
-        subgraph search["Search 1,857 tables, both searches in parallel · English wording + the original"]
+        MODE{"RETRIEVAL setting"}:::code
+        DICT["Keyword dictionary<br/>data/keywords.json: verðbólga → consumer price index → VIS01000<br/>adds the official term to the search"]:::code
+        subgraph search["Search 1,857 tables, in parallel · English wording + the original"]
             S1["BM25 keywords · top 120<br/>titles EN + IS, dimension names, option labels,<br/>prefix match, synonyms, all words must match"]:::code
             S2["e5 vectors · top 120<br/>meaning of each table's description:<br/>titles, dimensions IS + EN, period, options"]:::code
         end
         FS["Fuse by rank · top 30<br/>1 / (60 + rank) from each search, × recency"]:::code
-        N["Narrow by rule · top 15<br/>drop trend / seasonal / forecast / census unless asked,<br/>keep tables that have the place or month asked for"]:::code
-        T["Pick one table from the 15<br/>or say two fit equally"]:::llm
+        RK["Rank: dictionary tables first,<br/>then fused searches × recency"]:::code
+        N["Narrow by rule<br/>drop trend / seasonal / forecast / census unless asked,<br/>keep tables with the place, month or year asked for"]:::code
+        T[["LLM ③ Pick one table from the 15<br/>or say two fit equally"]]:::llm
+        CK[["LLM ③ Check the hitlist, 8 tables at a time, ≤ 2 rounds<br/>pick one, or say none fits · votes"]]:::llm
+        BR[["LLM ③ Browse: choose ≤ 2 subject areas"]]:::llm
+        CK2[["LLM ③ Check tables in those areas,<br/>8 at a time, ≤ 4 rounds · votes"]]:::llm
         F["Freshest sibling<br/>same table, newer edition"]:::code
     end
 
-    subgraph read["3 · Read the numbers"]
-        C["Choose categories<br/>Sex: Males, Females · Year: 2026"]:::llm
+    subgraph read["3 · Read the numbers (each part)"]
+        C[["LLM ④ Choose categories<br/>Sex: Males, Females · Year: 2026 · votes"]]:::llm
         V["Validate and fix every choice<br/>codes must exist · defaults: total, latest period ·<br/>Iceland = whole country · use the table's own % change ·<br/>trend wording → whole series · share needs a whole"]:::code
         D[("Data<br/>organisers' snapshot of 18 Oct 2026 on disk,<br/>live PX-API for what it lacks")]:::data
         E["Empty latest period?<br/>step back to the last one with numbers"]:::code
@@ -40,7 +55,7 @@ flowchart TD
         M["Merge parts from the same table<br/>into one chart with a line each"]:::code
         RD["Ratio: divide by the population in code"]:::code
         G["Chart type from the data's shape<br/>line · bars · slope · donut · heatmap …"]:::code
-        W["Write 1–3 sentences in the user's language"]:::llm
+        W[["LLM ⑤ Write 1–3 sentences in the user's language"]]:::llm
         X{"Every number in the text<br/>is in the table?"}:::code
         TPL["Fixed template from the numbers"]:::code
     end
@@ -53,22 +68,50 @@ flowchart TD
     FU -- no --> TB
     TB -- yes --> C
     TB -- no --> R
-    R -- yes --> RP["Numerator via the planner,<br/>population from MAN00101"]:::code --> A
-    R -- no --> P --> A
+    R -- yes --> RP --> P
+    R -- no --> P
+    P --> A
     A -- yes --> ASK
-    A -- no --> S1 & S2 --> FS --> N --> T
+    A -- no --> MODE
+    MODE -- "classic (default)" --> search
+    MODE -- tiered --> DICT --> search
+    search -- classic --> FS --> N
+    search -- tiered --> RK --> N
+    N -- "classic: top 15" --> T
+    N -- "tiered: top 16" --> CK
     T -- two fit equally --> ASK
-    T -- one --> F --> C --> V --> D --> E --> K --> NT --> M --> RD --> G --> W --> X
+    T -- one --> F
+    CK -- a table --> F
+    CK -- none fits --> BR --> CK2
+    CK2 -- a table --> F
+    CK2 -- "none fits: must pick" --> T
+    F --> C --> V --> D --> E --> K --> NT --> M --> RD --> G --> W --> X
     X -- yes --> OUT
     X -- no --> TPL --> OUT
 
-    classDef llm fill:#e0b37b,stroke:#8a6a3f,color:#1d1d1f
+    classDef llm fill:#e0b37b,stroke:#8a6a3f,stroke-width:2px,color:#1d1d1f
     classDef code fill:#d3edf5,stroke:#285971,color:#0b3f4d
     classDef data fill:#0b3f4d,stroke:#0b3f4d,color:#ffffff
 ```
 
-<sub>Gold: the language model (qwen2.5:14b through Ollama, or any OpenAI-compatible server). Blue: plain code. Each step
-is streamed to the browser the moment it finishes, so the user watches the route being taken.</sub>
+<sub>Gold, double-edged boxes are LLM calls (qwen2.5:14b through Ollama, or any OpenAI-compatible server); the circled
+number is the call's kind, counted in the table below. Blue is plain code. "votes": with `VOTES` > 1 or `VOTE_MODELS`
+set, that call is asked several times in parallel and the majority wins (off by default). The tiered finder is used
+with `RETRIEVAL=tiered`; the classic finder is the default. Each step is streamed to the browser the moment it finishes.</sub>
+
+### LLM calls per question
+
+| # | Call | When | Calls |
+|---|---|---|---|
+| ① | Rewrite a follow-up | the wording leans on the previous turn | 0–1 |
+| ② | Plan | always, unless the user clicked a table | 0–1 |
+| ③ | Pick the table, classic | per part; skipped when one table is left, or when the table is fixed (clicked, or population for a ratio) | 0–1 per part |
+| ③ | Find the table, tiered | per part: check 1–2 rounds; if none fits, browse 1 + check 1–4 rounds; if still none, the classic pick 1 | 1–8 per part |
+| ④ | Choose categories | per part | 1 per part |
+| ⑤ | Write the answer | when at least one part has numbers | 0–1 |
+
+A one-part question with the classic finder makes 4 calls (plan, pick, categories, write). Voting multiplies the
+calls marked "votes" by the number of votes; they run in parallel, so it costs compute more than time.
 
 ## Why Icelandic questions are reworded in English
 
@@ -98,6 +141,8 @@ languages. It would make sense with a model that is strong in Icelandic.
 | Follow-up rewrite | `hagbot/steps/followup.py` | rewrite only |
 | Search | `hagbot/catalog.py` (BM25 over three fields) and `hagbot/e5.py` (e5 vectors, on by default; optional bge-m3 in `hagbot/vectors.py`), run in parallel and fused by rank | no |
 | Narrow, ambiguity, pick table | `hagbot/steps/retrieve.py` | pick only |
+| Tiered finder (`RETRIEVAL=tiered`) | `hagbot/steps/tiered.py`, keyword dictionary `data/keywords.json` | check and browse |
+| Majority voting (`VOTES`, `VOTE_MODELS`) | `hagbot/vote.py` | repeats a call |
 | Choose and validate categories | `hagbot/steps/select.py` | choose only |
 | Data | `hagbot/sources.py` (local snapshot, live PX-API, fixtures) | no |
 | Calculate | `hagbot/steps/compute.py` | no |
