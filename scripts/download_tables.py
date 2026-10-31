@@ -2,7 +2,8 @@
 
 For each table the data is downloaded once: in Icelandic if the table has an "is" entry,
 otherwise in English. Metadata is saved in every language the table has. Each table is
-written to downloads/<path>.json and every attempt is appended to download_log.jsonl.
+written to downloads/<name>.json (no subfolders; _2, _3, ... is added when a name is already
+used by another table) and every attempt is appended to download_log.jsonl.
 
 Usage:
     python download_tables.py                      # all tables; skips tables already logged as "ok"
@@ -67,6 +68,20 @@ def full_query(variables):
         "response": {"format": "json-stat2"},
     }
 
+def flat_path(path):
+    """downloads/<name>.json, or <name>_2.json, _3, ... if that name is taken by a different table."""
+    os.makedirs(OUT_DIR, exist_ok=True)
+    name = os.path.basename(path).removesuffix(".px")
+    n = 1
+    while True:
+        out_path = os.path.join(OUT_DIR, f"{name}.json" if n == 1 else f"{name}_{n}.json")
+        if not os.path.exists(out_path):
+            return out_path
+        with open(out_path, encoding="utf-8") as f:
+            if json.load(f).get("table") == path:   # same table (e.g. --redo): overwrite it
+                return out_path
+        n += 1
+
 
 def download_table(entry):
     """Return (lang, saved file path) for one table, or raise on failure."""
@@ -108,8 +123,7 @@ def download_table(entry):
         "data": data,
         "metadata": meta,
     }
-    out_path = os.path.join(OUT_DIR, path.removesuffix(".px") + ".json")
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    out_path = flat_path(path)
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False)
     return lang, out_path, len(data["value"])
