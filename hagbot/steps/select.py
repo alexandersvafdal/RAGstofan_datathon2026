@@ -11,7 +11,7 @@ from ..vote import ask_all, majority, voting_on
 from ..sources import TableMeta, Variable
 from ..text import normalize, tokens
 
-Op = Literal["value", "series", "difference", "pct_change", "share"]
+Op = Literal["value", "series", "difference", "pct_change", "share", "max", "min"]
 
 
 class Selection(BaseModel):
@@ -19,7 +19,8 @@ class Selection(BaseModel):
     operation: Op = Field(description=(
         "value: report the number(s). series: show a trend or comparison over many values. "
         "difference / pct_change: change between the first and last selected value of compare_dimension. "
-        "share: part divided by whole within compare_dimension."))
+        "share: part divided by whole within compare_dimension. "
+        "max / min: the highest or lowest value along compare_dimension (\"when was it highest\")."))
     compare_dimension: str | None = Field(default=None, description="dimension code the operation runs along")
     part: str | None = Field(default=None, description="value code of the part, for share")
     whole: str | None = Field(default=None, description="value code of the whole (usually the total), for share")
@@ -33,6 +34,7 @@ class Resolved(BaseModel):
     whole: str | None = None
     order: list[str] | None = None  # for a difference between categories: [first, second], result = first − second
     notes: list[str] = []
+    window_note: dict[str, str] | None = None  # en/is, when the period asked for starts before the table does
 
 
 def _mention_order(var: Variable, codes: list[str], question: str) -> list[str] | None:
@@ -55,6 +57,7 @@ For every dimension choose the value codes the question needs, copied exactly fr
 - For "how much did X grow from A to B" select both periods and use difference or pct_change along the time dimension.
 - For "what share of ... is X" select X and the total, and use share with part=X and whole=total.
 - For trends ("how has ... changed", "over the years") select a range of periods and use series.
+- For "when was X highest / lowest" select the periods (or categories) to search and use max or min.
 - Inflation means the annual % change of the consumer price index. If the table has an option that already is the
   change asked for ("Annual change, %", "volume change on previous year"), select it with operation value.
 Never compute anything yourself."""
@@ -71,6 +74,14 @@ _TREND = (r"how (has|have|did) .{0,60}(chang|develop|evolv|grow|gone)|\bsince (1
           r"(years|decade|months)|over time|\btrend|\bdevelopment|hvernig (hefur|hafa) .{0,60}(throast|breyst|thrast)|"
           r"\bthroun|\bthroast|fra (18|19|20)\d\d(?! til)|undanfarin|sidustu (ar|aratug)")
 _TREND_DEFAULT = {"M": 60, "Q": 20, "": 15}  # periods shown when the question names no start
+# "the last 15 years", "síðustu 50 árum", "past 6 months", "last decade": a window ending at the latest period
+_WINDOW = re.compile(r"\b(?:last|past|previous|sidustu|seinustu|sidastlidin\w*|undanfarin\w*)\s+(\d{1,3})\s+"
+                     r"(years?|ar|arum|arin|ara|months?|manud\w*|quarters?|arsfjord\w*)\b")
+_DECADE = re.compile(r"\b(?:last|past|previous)\s+decade|\b(?:sidasta|sidustu|seinasta)\s+aratug")
+_EXTREME = [("max", re.compile(r"\b(highest|peak\w*|maximum|haest\w*|hamark\w*)\b")),
+            ("min", re.compile(r"\b(lowest|minimum|laegst\w*|lagmark\w*)\b"))]
+# the question asks when, so the extreme is searched over time ("which occupation earns the most" is not)
+_WHEN = r"\bwhen\b|which (year|month|period)|what (year|month)|hvenaer|hvada (ar|manud)|\bever\b|fra upphafi|all time"
 _TOTAL = re.compile(r"\b(total|alls|samtals|all)\b", re.I)
 _MAX_OPTIONS = 80
 
@@ -95,6 +106,21 @@ def _options_for_prompt(var: Variable, question: str) -> list[tuple[str, str]]:
             seen.add(p[0])
             out.append(p)
     return out[:_MAX_OPTIONS]
+
+
+_IS_UNIT = {"year": "árin", "month": "mánuðina", "quarter": "ársfjórðungana"}
+
+
+def _window(q: str) -> tuple[int, str] | None:
+    """(n, "year" | "month" | "quarter") for "the last n years" and the like, in a normalized question."""
+    if _DECADE.search(q):
+        return 10, "year"
+    m = _WINDOW.search(q)
+    if not m:
+        return None
+    unit = m.group(2)
+    return int(m.group(1)), "month" if unit.startswith(("month", "manud")) else \
+        "quarter" if unit.startswith(("quarter", "arsfjord")) else "year"
 
 
 def _default(var: Variable) -> list[str]:
@@ -186,8 +212,58 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "") -> Resolved:
             notes.append(f"operation {op} -> series (trend wording)")
         op = "series"
 
+    # "The last 15 years": from that calendar year to the latest period. A window reaching back before the table
+    # starts gets every period there is, and the answer says where the table begins.
+    # ("in the last 12 months" with inflation or wages is the published annual change, handled above)
+    window = None if re.search(_ANNUAL_ASK, q) else _window(q)
+    window_note = None
+    if window:
+        for var in meta.variables:
+            if not var.time:
+                continue
+            n, unit = window
+            step = "M" if "M" in var.values[-1] else "Q" if "Q" in var.values[-1] else ""
+            if unit == "year":
+                start_year = int(var.values[-1][:4]) - n
+                start = next((i for i, c in enumerate(var.values) if int(c[:4]) >= start_year), 0)
+                short = int(var.values[0][:4]) > start_year
+            else:
+                per = {"month": {"M": 1, "Q": 1 / 3, "": 1 / 12}, "quarter": {"M": 3, "Q": 1, "": 1 / 4}}[unit][step]
+                count = max(1, round(n * per))
+                start, short = max(0, len(var.values) - count), count > len(var.values)
+            out[var.code] = var.values[start:]
+            notes.append(f"{var.text}: the last {n} {unit}s, {var.values[start]} to {var.values[-1]}")
+            if short:
+                first = var.values[0]
+                window_note = {"en": f"The table only goes back to {first}, so this covers {first} to {var.values[-1]}, "
+                                     f"not the full {n} {unit}s asked for.",
+                               "is": f"Taflan nær aðeins aftur til {first}, svo þetta nær yfir {first} til {var.values[-1]}, "
+                                     f"ekki öll {n} {_IS_UNIT[unit]} sem spurt var um."}
+        if op == "value":
+            op = "series"
+
+    # "When was it highest": the extreme along the dimension that varies, time by default
+    extreme = next((o for o, rx in _EXTREME if rx.search(q)), None) if op in ("value", "series") else None
+    if op in ("max", "min") or extreme:
+        op = op if op in ("max", "min") else extreme
+        multi = [c for c, v in out.items() if len(v) > 1]
+        time_var = next((v for v in meta.variables if v.time), None)
+        compare = sel.compare_dimension if sel.compare_dimension in multi else \
+            (time_var.code if time_var and time_var.code in multi else (multi[0] if multi else None))
+        if time_var and (compare in (None, time_var.code)) and not window and re.search(_WHEN, q) \
+                and not re.search(r"\b(?:18|19|20)\d\d\b", question):
+            # no period named: search everything the table has, not just the periods the model was shown
+            out[time_var.code], compare = list(time_var.values), time_var.code
+            notes.append(f"{time_var.text}: {op} over every period, {time_var.values[0]} to {time_var.values[-1]}")
+        if compare:
+            sel = sel.model_copy(update={"compare_dimension": compare})
+            notes.append(f"operation {op} along {meta.var(compare).text}")
+        else:
+            notes.append(f"{op} needs several values to search; reporting values instead")
+            op = "value"
+
     # No year or period in the question: the latest period, whatever the model chose
-    if not re.search(r"\b(?:18|19|20)\d\d\b", question) and op in ("value", "share"):
+    if not re.search(r"\b(?:18|19|20)\d\d\b", question) and op in ("value", "share") and not window:
         for var in meta.variables:
             if var.time and out.get(var.code) != [var.values[-1]]:
                 notes.append(f"{var.text}: no period asked, using latest {var.values[-1]}")
@@ -235,7 +311,8 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "") -> Resolved:
         if not (part and whole and part in out[compare] and whole in out[compare]):
             notes.append("share needs a part and a whole; reporting values instead")
             op, part, whole = "value", None, None
-    return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes)
+    return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes,
+                    window_note=window_note)
 
 
 async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None) -> Resolved:

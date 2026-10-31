@@ -1,5 +1,6 @@
 """Model-agnostic chat client for any OpenAI-compatible endpoint (Ollama, vLLM on LUMI, hosted APIs)."""
 
+import copy
 import json
 import re
 import time
@@ -26,6 +27,18 @@ class LLM:
             headers={"Authorization": f"Bearer {api_key or settings.llm_api_key}"},
         )
         self.calls = 0
+
+    def with_model(self, model: str) -> "LLM":
+        """The same endpoint and connection, another model, its own call count."""
+        other = copy.copy(self)
+        other.model, other.calls = model, 0
+        return other
+
+    async def models(self) -> list[str]:
+        """The models the endpoint serves (OpenAI-compatible /models: Ollama, vLLM), embedding models left out."""
+        r = await self.client.get(f"{self.base_url}/models", timeout=5)
+        r.raise_for_status()
+        return sorted(m["id"] for m in r.json().get("data", []) if "embed" not in m["id"])
 
     async def chat(self, messages: list[dict], *, json_mode: bool = False, temperature: float = 0.0) -> str:
         body = {"model": self.model, "messages": messages, "temperature": temperature}

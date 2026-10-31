@@ -8,7 +8,7 @@ const I18N = {
     steps: ["Understanding the question", "Finding the right table", "Choosing the categories", "Reading the numbers", "Writing the answer"],
     working: "Working on it", how: "How I got this", data: "Data", source: "Source", checked: "Numbers checked against the table",
     calc: "Calculated", failed: "Something went wrong", retry: "Try again", seconds: "s", calls: "model calls",
-    pts: "pts", more: "Ask next", palette: "Colour", appearance: "Appearance", shortlist: "Shortlist", chosen: "chosen",
+    pts: "pts", more: "Ask next", palette: "Colour", appearance: "Appearance", model: "Model", shortlist: "Shortlist", chosen: "chosen",
     signal: { dictionary: "dictionary", bm25: "keywords", e5: "meaning (e5)", "bge-m3": "meaning (bge-m3)" },
     live: { plan: q => `Read as: ${q}`, split: n => `Split into ${n} questions`, searched: n => `Searched ${n} tables`,
             picked: "picked", numbers: n => `${n} ${n === 1 ? "number" : "numbers"} read`, checked: "Numbers checked against the table",
@@ -24,7 +24,7 @@ const I18N = {
     steps: ["Skil spurninguna", "Finn réttu töfluna", "Vel flokkana", "Les tölurnar", "Skrifa svarið"],
     working: "Augnablik", how: "Hvernig svarið varð til", data: "Gögn", source: "Heimild", checked: "Tölur bornar saman við töfluna",
     calc: "Reiknað", failed: "Eitthvað fór úrskeiðis", retry: "Reyna aftur", seconds: "s", calls: "köll í líkan",
-    pts: "pst.", more: "Spyrðu næst", palette: "Litir", appearance: "Útlit", shortlist: "Stuttlisti", chosen: "valin",
+    pts: "pst.", more: "Spyrðu næst", palette: "Litir", appearance: "Útlit", model: "Líkan", shortlist: "Stuttlisti", chosen: "valin",
     signal: { dictionary: "orðasafn", bm25: "leitarorð", e5: "merking (e5)", "bge-m3": "merking (bge-m3)" },
     live: { plan: q => `Skilið sem: ${q}`, split: n => `Skipt í ${n} spurningar`, searched: n => `Leitaði í ${n} töflum`,
             picked: "valdi", numbers: n => `${n} ${n === 1 ? "tala lesin" : "tölur lesnar"}`, checked: "Tölur bornar saman við töfluna",
@@ -450,7 +450,7 @@ async function ask(question, tableId = null) {
   setTimeout(() => bot.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "end" }), 380);
   $("#send").disabled = true;
   try {
-    const body = JSON.stringify({ question, language: lang === "auto" ? null : lang, table_id: tableId,
+    const body = JSON.stringify({ question, language: lang === "auto" ? null : lang, table_id: tableId, model: modelChoice,
                                   history: history.slice(-HISTORY_TURNS) });
     const answer = await askStream(body, st => progress.step(st));
     clearInterval(progress._timer);
@@ -787,11 +787,28 @@ function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", com
 }
 
 /* ---------- wiring ---------- */
+// The model questions go to: null means the server's default, the best one we measured. Kept per browser.
+let modelChoice = null;
+try { modelChoice = localStorage.getItem("ragstofan-model") || null; } catch {}
+
 async function health() {
   try {
     const h = await (await fetch("/api/health")).json();
-    $("#status").textContent = `${h.model} · ${h.data_source} data · ${h.tables_in_catalog} tables`;
+    const show = () => { $("#status").textContent = `${modelChoice || h.model} · ${h.data_source} data · ${h.tables_in_catalog} tables`; };
+    show();
     $("#status").dataset.tables = h.tables_in_catalog.toLocaleString("en-US");
+    const m = await (await fetch("/api/models")).json();
+    if (modelChoice && !m.models.includes(modelChoice)) modelChoice = null;   // gone from the server
+    const pick = $("#model");
+    pick.replaceChildren(...m.models.map(name => el("option", { value: name },
+      name === m.default ? `${name} (best)` : name)));
+    pick.value = modelChoice || m.default;
+    pick.onchange = () => {
+      modelChoice = pick.value === m.default ? null : pick.value;
+      try { modelChoice ? localStorage.setItem("ragstofan-model", modelChoice) : localStorage.removeItem("ragstofan-model"); } catch {}
+      show();
+    };
+    show();
   } catch { $("#status").textContent = "backend offline"; }
 }
 

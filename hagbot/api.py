@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -47,15 +48,38 @@ async def health():
     }
 
 
+_models: tuple[float, list[str]] = (0.0, [])
+
+
+@app.get("/api/models")
+async def models():
+    """The models a question can be asked with. The default is the one we measured best (LLM_MODEL)."""
+    global _models
+    if time.monotonic() - _models[0] > 60:
+        try:
+            _models = (time.monotonic(), await pipeline.llm.models())
+        except Exception:   # the endpoint cannot list models: offer only the default
+            _models = (time.monotonic(), [])
+    names = _models[1]
+    return {"default": settings.llm_model, "models": [settings.llm_model, *(m for m in names if m != settings.llm_model)]}
+
+
 @app.get("/api/indicators", response_model=Indicators)
 async def get_indicators() -> Indicators:
     """Headline numbers for the dashboard, read straight from the data (no model): instant from the local snapshot."""
     return await indicators(pipeline.source)
 
 
+async def _checked(req: AskRequest) -> AskRequest:
+    """A model the server does not have is dropped, and the default answers."""
+    if req.model and req.model not in (await models())["models"]:
+        req = req.model_copy(update={"model": None})
+    return req
+
+
 @app.post("/api/ask", response_model=Answer)
 async def ask(req: AskRequest) -> Answer:
-    return await pipeline.answer(req)
+    return await pipeline.answer(await _checked(req))
 
 
 @app.post("/api/ask/stream")
@@ -63,6 +87,7 @@ async def ask_stream(req: AskRequest) -> StreamingResponse:
     """The same answer as /api/ask, with each pipeline step sent the moment it finishes. One JSON object per line:
     {"type": "step", "name": ..., "ms": ..., "detail": ...} for each step, then {"type": "answer", "answer": {...}}."""
     queue: asyncio.Queue = asyncio.Queue()
+    req = await _checked(req)
 
     async def run():
         answer = await pipeline.answer(req, on_step=lambda st: queue.put_nowait({"type": "step", **st.model_dump()}))

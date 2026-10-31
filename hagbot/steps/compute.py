@@ -41,6 +41,21 @@ def compute(meta: TableMeta, rows: list[Row], res: Resolved, lang: str) -> tuple
     dim = res.compare_dimension
     order = meta.var(dim).values
     comp = None
+    if res.operation in ("max", "min"):
+        # the highest or lowest point of each line, labelled with where it is ("Highest: 2011M05, …")
+        word = {("max", "en"): "Highest", ("max", "is"): "Hæst", ("min", "en"): "Lowest", ("min", "is"): "Lægst"}
+        for group in _groups(rows, dim).values():
+            present = sorted(group, key=order.index)
+            best = (max if res.operation == "max" else min)((group[c] for c in present), key=lambda r: r.value)
+            first, last = (group[present[i]].labels[meta.var(dim).text] for i in (0, -1))
+            facts.append(Fact(label=f"{word[res.operation, lang]}: {row_label(meta, best, {dim})}", value=best.value,
+                              unit=unit, formatted=fmt_value(best.value, unit, lang)))
+            if comp is None:
+                expr = (f"{'hæsta' if res.operation == 'max' else 'lægsta'} af {len(present)} gildum, {first}–{last}"
+                        if lang == "is" else f"{'highest' if res.operation == 'max' else 'lowest'} of {len(present)} values, {first}–{last}")
+                comp = Computation(op=res.operation, expression=expr, result=best.value, unit=unit)
+        return comp, facts
+
     for group in _groups(rows, dim).values():
         if res.operation in ("difference", "pct_change"):
             present = sorted(group, key=order.index)

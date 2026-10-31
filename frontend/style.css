@@ -901,3 +901,7 @@ td.num { text-align: right; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
 }
+
+/* the model picker in the settings popover */
+.model-select { width: 100%; font: inherit; font-size: 14px; color: var(--text); background: var(--card);
+  border: 1px solid var(--hairline); border-radius: 10px; padding: 8px 10px; }

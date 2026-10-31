@@ -19,6 +19,7 @@ class AskRequest(BaseModel):
     language: Language | None = None  # None: detect from the question
     table_id: str | None = None  # set when the user picked a table in a clarification
     history: list[Turn] = []  # the conversation so far, oldest first (the browser keeps the last few)
+    model: str | None = None  # one of /api/models; None: the server's default, the best one we have measured
 
 
 class TableRef(BaseModel):

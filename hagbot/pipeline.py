@@ -1,6 +1,7 @@
 """Orchestrator: plan → (per sub-question, in parallel: retrieve → select → fetch → compute → chart) → compose."""
 
 import asyncio
+import copy
 import re
 from datetime import date
 from collections.abc import Callable
@@ -19,7 +20,11 @@ from .steps.ratio import POPULATION_TABLE, detect_ratio, ratio_parts
 from .steps.retrieve import period_end, retrieve
 from .steps.tiered import retrieve_tiered
 from .steps.select import select
-from .text import detect_language
+from .text import detect_language, normalize
+
+_PERCENT = re.compile(r"%|percent|prosent|volume change|change on previous|change from previous|annual growth|"
+                      r"magnbreyting|breyting fra fyrra|arleg fjolgun")
+_RELATIVE = r"\blast (year|month|quarter)\b|\bprevious year\b|\bsidasta (ar|manud|arsfjord)|\bi fyrra\b|\bfyrra ar"
 
 CLARIFY = {
     "en": "Several tables could answer this. Which one do you mean?",
@@ -52,6 +57,15 @@ class Pipeline:
         self.source = source or make_source(self.catalog)
 
     async def answer(self, req: AskRequest, on_step: Callable[[Step], None] | None = None) -> Answer:
+        """Answer with the model asked for, or the default. Another model runs on a copy of this pipeline, so
+        concurrent questions on different models do not disturb each other."""
+        if req.model and req.model != self.llm.model:
+            other = copy.copy(self)
+            other.llm = self.llm.with_model(req.model)
+            return await other._answer(req, on_step)
+        return await self._answer(req, on_step)
+
+    async def _answer(self, req: AskRequest, on_step: Callable[[Step], None] | None = None) -> Answer:
         lang = req.language or detect_language(req.question)
         total, steps = Timer(), StepLog(on_step)
         calls_before = self.llm.calls
@@ -185,8 +199,16 @@ class Pipeline:
                 detail += f"; {time_var.values[-1]} has no numbers yet, using {last}"
         steps.append(Step(name="fetch", ms=t.ms(), detail=detail))
 
+        # Tables like THJ01000 mix indices, counts and yearly changes and give no unit; a chosen "volume change on
+        # previous year" or "annual growth" is a percentage, so say so
+        if not meta.unit and all(any(_PERCENT.search(normalize(v.label_of(c))) for c in res.selections.get(v.code, []))
+                                 for v in meta.variables if not v.time and len(v.values) > 1) \
+                and any(not v.time and len(v.values) > 1 for v in meta.variables):
+            meta = meta.model_copy(update={"unit": "%"})
         computation, facts = compute(meta, rows, res, lang)
         note = self._freshness_note(meta, res.selections, r.candidates, f"{sq.question} {original}", lang)
+        if res.window_note:   # "the last 50 years" in a table that starts in 2003
+            note = " ".join(x for x in (res.window_note[lang], note) if x)
         return AnswerPart(
             sub_question=sq.question,
             table=TableRef(id=meta.id, title=meta.title, url=table_url(meta.path, meta.id)),
@@ -205,7 +227,8 @@ class Pipeline:
         on the same subject with newer figures: same subject area in Statistics Iceland's folders, the same subfolder
         first. It may measure or break things down differently, so it is only named."""
         time_var = next((v for v in meta.variables if v.time), None)
-        if not time_var or re.search(r"\b(?:18|19|20)\d\d\b", question):
+        # a named year, or "last year" / "í fyrra": that period was asked for, so newer figures elsewhere are beside the point
+        if not time_var or re.search(r"\b(?:18|19|20)\d\d\b", question) or re.search(_RELATIVE, normalize(question)):
             return ""
         latest = selections.get(time_var.code, [""])[-1]
         if not re.match(r"\d{4}", latest) or int(latest[:4]) >= date.today().year:
