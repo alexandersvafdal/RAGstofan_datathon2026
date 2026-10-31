@@ -37,6 +37,12 @@ class Settings:
     embed_base_url: str = os.getenv("EMBED_BASE_URL", "http://localhost:11434/v1")
     embed_model: str = os.getenv("EMBED_MODEL", "bge-m3")
     use_vectors: bool = os.getenv("USE_VECTORS", "0") == "1"  # off: on bare titles it lowered recall
+    # e5 vector search, in-process (hagbot/e5.py). Needs sentence-transformers and torch; the model is ~2.2 GB
+    use_e5: bool = os.getenv("USE_E5", "0") == "1"
+    e5_model: str = os.getenv("E5_MODEL", "intfloat/multilingual-e5-large")
+    e5_card: str = os.getenv("E5_CARD", "multi")  # "single" or "multi" passages per table, see hagbot/e5.py
+    e5_device: str = os.getenv("E5_DEVICE", "")  # "", "cpu" or "cuda"
+    tables_meta_path: Path = _path("TABLES_META_PATH", "data/tables_20261030_224153.json")
 
 
 settings = Settings()

@@ -1,0 +1,4 @@
+# Optional: e5 vector search (USE_E5=1). Install torch first for a CPU-only build:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+sentence-transformers>=3.0
+numpy>=1.26

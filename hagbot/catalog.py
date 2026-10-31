@@ -4,13 +4,15 @@ BM25 over three fields: the title/dimension text; the tables' option labels (mun
 weighted lower; and, when the catalog has them, a model-written description and everyday search words per table
 (scripts/enrich_catalog.py), weighted lower again. Query words match by prefix ("reykjavik" ~ "reykjavikurborg", "atvinnuleysid" ~ "atvinnuleysi"),
 words every question shares ("Iceland", "how many") are ignored, and recent tables rank above old ones.
-When vectors lie beside the catalog (hagbot/vectors.py), vector search runs too and the two rankings are fused.
+Vector searches run beside it when switched on: bge-m3 (hagbot/vectors.py, USE_VECTORS=1) and e5 (hagbot/e5.py,
+USE_E5=1). The searches run in parallel and their rankings are fused by reciprocal rank.
 """
 
 import json
 import math
 import re
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -123,9 +125,11 @@ class _Field:
 
 
 class Catalog:
-    def __init__(self, entries: list[CatalogEntry], vectors: "Vectors | None" = None):
+    def __init__(self, entries: list[CatalogEntry], dense: list | None = None):
+        """dense: vector searches, each with .name and .search(query, k) -> [(table_id, score)]."""
         self.entries = entries
-        self.vectors = vectors
+        self.dense = dense or []
+        self._pool = ThreadPoolExecutor(max_workers=1 + len(self.dense))
         self._by_id = {e.id: e for e in entries}
         self._main = _Field([tokens(f"{e.title_en} {e.title_is} {' '.join(e.dimensions)} {e.path}") for e in entries])
         self._values = _Field([tokens(" ".join(e.values)) for e in entries], presence_only=True)
@@ -136,8 +140,14 @@ class Catalog:
 
     @classmethod
     def load(cls, path: Path) -> "Catalog":
-        return cls([CatalogEntry(**e) for e in json.loads(path.read_text())],
-                   Vectors.load(path) if settings.use_vectors else None)
+        entries = [CatalogEntry(**e) for e in json.loads(path.read_text())]
+        dense = []
+        if settings.use_vectors and (v := Vectors.load(path)):
+            dense.append(v)
+        if settings.use_e5:
+            from .e5 import E5Search
+            dense.append(E5Search(entries, settings.tables_meta_path, settings.cache_dir))
+        return cls(entries, dense)
 
     def get(self, table_id: str) -> CatalogEntry | None:
         return self._by_id.get(table_id)
@@ -149,13 +159,22 @@ class Catalog:
                     if v != word and len(v) >= MIN_PREFIX and (v.startswith(word) or word.startswith(v))]
         return out
 
-    def search(self, query: str, k: int = 8) -> list[tuple[CatalogEntry, float]]:
-        keyword = self.keyword_search(query, 4 * k)
-        dense = self.vectors.search(query, 4 * k) if self.vectors else []
-        if not dense:
-            return keyword[:k]
+    def rankings(self, query: str, depth: int) -> dict[str, list[str]]:
+        """Each search's own ranked table ids, the searches run in parallel."""
+        jobs = {"bm25": self._pool.submit(lambda: [e.id for e, _ in self.keyword_search(query, depth)])}
+        for d in self.dense:
+            jobs[d.name] = self._pool.submit(lambda d=d: [t for t, _ in d.search(query, depth)])
+        return {name: job.result() for name, job in jobs.items()}
+
+    def search(self, query: str, k: int = 8, only: str | None = None) -> list[tuple[CatalogEntry, float]]:
+        """The first k tables of the fused ranking, or of one search's ranking ("bm25", "e5", "bge-m3")."""
+        ranked = self.rankings(query, 4 * k)
+        if only:
+            return [(self._by_id[t], 1.0 / r) for r, t in enumerate(ranked.get(only, []), 1) if t in self._by_id][:k]
+        if not any(ranked[d.name] for d in self.dense):
+            return self.keyword_search(query, k)  # no vector search, or its server is down
         fused: dict[str, float] = {}
-        for ranking in ([e.id for e, _ in keyword], [i for i, _ in dense]):
+        for ranking in ranked.values():
             for rank, table_id in enumerate(ranking, 1):
                 fused[table_id] = fused.get(table_id, 0.0) + 1 / (RRF_K + rank)
         index = {e.id: i for i, e in enumerate(self.entries)}
