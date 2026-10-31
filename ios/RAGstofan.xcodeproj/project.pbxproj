@@ -10,6 +10,7 @@
 		0E853FDBEE8000C5ECB9D7F1 /* RAGstofanApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E48C23FC723B727E153335A /* RAGstofanApp.swift */; };
 		1226BE75FBC643D013910B2C /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA39FF538C38EB58A3D678DA /* ChatView.swift */; };
 		1D6BD7CF65986F682EFA345F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8FDDC7C362A1936F128FC17 /* HomeView.swift */; };
+		2D7D82EC270EDF49FF464A53 /* Voice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF0857C57757B9829FEF6F7 /* Voice.swift */; };
 		3C67FBF9658A8E248C57B914 /* AnswerCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5753E6F863385393950F954 /* AnswerCardView.swift */; };
 		5296D8FAD80C127C050A2596 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE35528507CEC4BA63F9FA99 /* Models.swift */; };
 		5596417BCE37614715022813 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D562762DC4E10941A76EFB04 /* ChartsView.swift */; };
@@ -29,6 +30,7 @@
 		0CDAABEEE6E5E910FAD995CF /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
 		0E48C23FC723B727E153335A /* RAGstofanApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RAGstofanApp.swift; sourceTree = "<group>"; };
 		15150BB3247A7D9D3D9CB8F6 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		3EF0857C57757B9829FEF6F7 /* Voice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Voice.swift; sourceTree = "<group>"; };
 		672469DCCB04587F52A850DD /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		785C0AC1731E7605CA19D78F /* RAGstofan.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RAGstofan.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		79DBF85333C10398228486AF /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -83,6 +85,7 @@
 				0E48C23FC723B727E153335A /* RAGstofanApp.swift */,
 				CE56D7C883090CB8AC71AC04 /* SettingsView.swift */,
 				E532DCD1F74BB5CEDF5F8A0A /* Theme.swift */,
+				3EF0857C57757B9829FEF6F7 /* Voice.swift */,
 			);
 			path = RAGstofan;
 			sourceTree = "<group>";
@@ -173,6 +176,7 @@
 				0E853FDBEE8000C5ECB9D7F1 /* RAGstofanApp.swift in Sources */,
 				CD2F6CD39D8631BF8B9CB30B /* SettingsView.swift in Sources */,
 				DC6925B296C19A7036C8A390 /* Theme.swift in Sources */,
+				2D7D82EC270EDF49FF464A53 /* Voice.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -70,35 +70,90 @@ struct ChatView: View {
 
     private func composer(_ w: Words) -> some View {
         let empty = draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let voice = model.voice
+        let isl = model.ui == .is
         return VStack(spacing: 8) {
+          if let e = voice.error {
+              Label(e, systemImage: "mic.slash").font(.caption).foregroundStyle(.red)
+                  .onTapGesture { voice.error = nil }
+                  .transition(.opacity)
+          }
           Tuning()
           HStack(spacing: 10) {
-            TextField(w.placeholder, text: $draft)
-                .focused($focused)
-                .submitLabel(.send)
-                .onSubmit { send(draft, nil) }
-                .foregroundStyle(pal.text)
-                .padding(.horizontal, 18)
-                .frame(height: 48)
-                .background(pal.card, in: Capsule())
-                .overlay(Capsule().stroke(pal.text.opacity(0.1)))
-            Button { send(draft, nil) } label: {
+            ZStack {
+                if voice.state == .idle {
+                    TextField(w.placeholder, text: $draft)
+                        .focused($focused)
+                        .submitLabel(.send)
+                        .onSubmit { send(draft, nil) }
+                        .foregroundStyle(pal.text)
+                        .padding(.horizontal, 18)
+                        .transition(.opacity)
+                } else {
+                    // listening: the microphone's level, or a moment while Whisper writes it down
+                    HStack(spacing: 12) {
+                        if voice.state == .listening { LevelBars(level: voice.level) } else { ProgressView().tint(pal.accent) }
+                        Text(voice.state == .listening ? (isl ? "Hlusta…" : "Listening…") : (isl ? "Skrifa upp…" : "Writing it down…"))
+                            .font(.subheadline).foregroundStyle(pal.text2)
+                            .contentTransition(.interpolate)
+                        Spacer()
+                        if voice.state == .listening {
+                            Button { withAnimation(.snappy) { voice.cancelListening() } } label: {
+                                Image(systemName: "xmark").font(.subheadline.weight(.semibold)).foregroundStyle(pal.text3)
+                            }
+                            .accessibilityLabel(isl ? "Hætta við" : "Cancel")
+                        }
+                    }
+                    .padding(.horizontal, 18)
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                }
+            }
+            .frame(height: 48)
+            .background(pal.card, in: Capsule())
+            .overlay(Capsule().stroke(voice.state == .listening ? pal.accent.opacity(0.6) : pal.text.opacity(0.1),
+                                      lineWidth: voice.state == .listening ? 2 : 1))
+            Button(action: mainButton) {
                 ZStack {
-                    if model.busy { ProgressView().tint(pal.accentInk) }
+                    if model.busy || voice.state == .transcribing { ProgressView().tint(pal.accentInk) }
+                    else if voice.state == .listening { Image(systemName: "stop.fill").font(.system(size: 16, weight: .semibold)) }
+                    else if empty { Image(systemName: "mic.fill").font(.system(size: 18, weight: .semibold)) }
                     else { Image(systemName: "arrow.up").font(.system(size: 18, weight: .semibold)) }
                 }
+                .contentTransition(.symbolEffect(.replace))
                 .frame(width: 48, height: 48)
                 .foregroundStyle(pal.accentInk)
                 .background(pal.accent, in: Circle())
-                .opacity(empty && !model.busy ? 0.45 : 1)
+                .scaleEffect(voice.state == .listening ? 1 + voice.level * 0.12 : 1)
             }
-            .disabled(model.busy || empty)
-            .accessibilityLabel("Send")
+            .disabled(model.busy || voice.state == .transcribing)
+            .accessibilityLabel(voice.state == .listening ? (isl ? "Hætta að hlusta" : "Stop listening")
+                                : empty ? (isl ? "Spyrja með rödd" : "Ask by voice") : "Send")
+            .sensoryFeedback(.impact(weight: .medium), trigger: voice.state)
           }
+          .animation(.spring(duration: 0.35, bounce: 0.2), value: voice.state)
+          .animation(.spring(duration: 0.3), value: empty)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .background(.ultraThinMaterial)
+    }
+
+    /// One button: send what is typed, or start and stop listening when the box is empty.
+    private func mainButton() {
+        let voice = model.voice
+        if voice.state == .listening {
+            Task {
+                let lang = model.langChoice == .auto ? nil : model.langChoice.rawValue
+                if let heard = await voice.finishListening(api: model.apiClient, language: lang) {
+                    model.send(heard, spoken: true)
+                }
+            }
+        } else if draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            focused = false
+            Task { await voice.startListening() }
+        } else {
+            send(draft, nil)
+        }
     }
 
     private func send(_ question: String, _ tableId: String?) {
@@ -132,7 +187,7 @@ struct ExchangeView: View {
                 }
             }
             if let a = ex.answer {
-                AnswerCard(a: a, ask: ask, fast: ex.fast)
+                AnswerCard(a: a, ask: ask, fast: ex.fast, exchange: ex)
                     .transition(.opacity.combined(with: .offset(y: 12)))
             } else if let err = ex.error {
                 let w = Words(lang: ex.lang)

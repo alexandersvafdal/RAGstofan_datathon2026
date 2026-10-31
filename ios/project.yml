@@ -46,3 +46,4 @@ targets:
           NSAllowsLocalNetworking: true
           NSAllowsArbitraryLoads: true
         NSLocalNetworkUsageDescription: RAGstofan connects to the team's statistics server on your local network.
+        NSMicrophoneUsageDescription: RAGstofan listens after you tap the microphone button, so you can ask by voice.

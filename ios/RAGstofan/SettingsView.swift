@@ -36,6 +36,14 @@ struct SettingsView: View {
                     Text(model.ui == .is ? "Síminn þarf að vera á sama neti og þjónninn." : "The phone has to be on the same network as the server.")
                 }
 
+                Section {
+                    Toggle(model.ui == .is ? "Lesa svör upphátt þegar spurt er með rödd" : "Read answers aloud when I ask by voice",
+                           isOn: $model.autoSpeak)
+                } header: { Text(model.ui == .is ? "Rödd" : "Voice") } footer: {
+                    Text(model.ui == .is ? "Talgreining: Whisper. Talgerving: Piper (raddir Steinn og Joe). Allt opinn hugbúnaður á vél liðsins."
+                                         : "Speech recognition: Whisper. Speech: Piper (voices Steinn and Joe). All open source, on the team's machine.")
+                }
+
                 Section(w.language) {
                     Picker(w.language, selection: $model.langChoice) {
                         ForEach(LangChoice.allCases) { Text($0.title).tag($0) }

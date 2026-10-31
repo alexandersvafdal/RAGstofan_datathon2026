@@ -50,6 +50,47 @@ struct API {
         try await get("api/health")
     }
 
+    /// The voice service runs beside the server on port 8001 (voice/server.py on the Spark).
+    var voice: URL {
+        var c = URLComponents(url: base, resolvingAgainstBaseURL: false)!
+        c.port = 8001
+        c.path = ""
+        return c.url!
+    }
+
+    /// Speech to text: the recording goes up as a file, the words come back.
+    func stt(_ file: URL, language: String?) async throws -> String {
+        let boundary = "ragstofan-\(UUID().uuidString)"
+        var body = Data()
+        func part(_ s: String) { body.append(s.data(using: .utf8)!) }
+        if let language {
+            part("--\(boundary)\r\nContent-Disposition: form-data; name=\"language\"\r\n\r\n\(language)\r\n")
+        }
+        part("--\(boundary)\r\nContent-Disposition: form-data; name=\"audio\"; filename=\"question.m4a\"\r\nContent-Type: audio/mp4\r\n\r\n")
+        body.append(try Data(contentsOf: file))
+        part("\r\n--\(boundary)--\r\n")
+        var req = URLRequest(url: voice.appendingPathComponent("stt"))
+        req.httpMethod = "POST"
+        req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        req.timeoutInterval = 60
+        let (data, resp) = try await Self.session.upload(for: req, from: body)
+        try check(resp, data)
+        struct Heard: Decodable { let text: String }
+        return try Self.decoder.decode(Heard.self, from: data).text
+    }
+
+    /// Text to speech: a WAV in the answer's language.
+    func tts(_ text: String, language: String) async throws -> Data {
+        var req = URLRequest(url: voice.appendingPathComponent("tts"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONSerialization.data(withJSONObject: ["text": text, "language": language])
+        req.timeoutInterval = 60
+        let (data, resp) = try await Self.session.data(for: req)
+        try check(resp, data)
+        return data
+    }
+
     func models() async throws -> ModelList {
         try await get("api/models")
     }

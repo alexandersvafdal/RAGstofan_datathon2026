@@ -10,6 +10,7 @@ final class Exchange: Identifiable {
     let tableId: String?
     let lang: Lang
     let fast: Bool
+    var spoken = false   // asked by voice, so the answer is read aloud
     var steps: [Step] = []
     var answer: Answer?
     var error: String?
@@ -50,6 +51,9 @@ final class AppModel {
     var models: ModelList?
     /// The first-run introduction has been seen.
     var onboarded: Bool { didSet { UserDefaults.standard.set(onboarded, forKey: "onboarded") } }
+    /// Read the answer aloud when the question was asked by voice.
+    var autoSpeak: Bool { didSet { UserDefaults.standard.set(autoSpeak, forKey: "autoSpeak") } }
+    let voice = Voice()
 
     var exchanges: [Exchange] = []
     var conversations: [Conversation] = []
@@ -74,11 +78,13 @@ final class AppModel {
         temperatureChoice = d.object(forKey: "temperature") as? Double
         conversations = Self.load()
         onboarded = d.bool(forKey: "onboarded")
+        autoSpeak = d.object(forKey: "autoSpeak") as? Bool ?? true
     }
 
     var colorScheme: ColorScheme? { appearance == "light" ? .light : appearance == "dark" ? .dark : nil }
 
     private var api: API? { try? API(server: server) }
+    var apiClient: API? { api }
 
     func connect() async {
         guard let api else { serverError = APIError.badServer(server).localizedDescription; return }
@@ -108,8 +114,15 @@ final class AppModel {
     }
 
     /// Ask, keeping hold of the request so "Answer now" can stop it.
-    func send(_ question: String, tableId: String? = nil, fast: Bool = false) {
-        running = Task { await ask(question, tableId: tableId, fast: fast) }
+    func send(_ question: String, tableId: String? = nil, fast: Bool = false, spoken: Bool = false) {
+        running = Task { await ask(question, tableId: tableId, fast: fast, spoken: spoken) }
+    }
+
+    /// Read an answer aloud in its own language, or stop reading it.
+    func speak(_ ex: Exchange) {
+        guard let a = ex.answer else { return }
+        let lang: Lang = a.language == "is" ? .is : .en
+        Task { await voice.toggleSpeaking(ex.id, text: prettyPeriods(a.text, lang), language: a.language, api: api) }
     }
 
     /// Stop the question in progress (the server stops with it) and ask again with the fast model, thinking off.
@@ -117,10 +130,10 @@ final class AppModel {
         running?.cancel()
         exchanges.removeAll { $0.id == ex.id }
         busy = false
-        send(ex.question, tableId: ex.tableId, fast: true)
+        send(ex.question, tableId: ex.tableId, fast: true, spoken: ex.spoken)
     }
 
-    private func ask(_ question: String, tableId: String?, fast: Bool) async {
+    private func ask(_ question: String, tableId: String?, fast: Bool, spoken: Bool) async {
         let q = question.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty, let api else { return }
         let lang: Lang = langChoice == .auto ? guessLang(q) : (langChoice == .is ? .is : .en)
@@ -128,6 +141,7 @@ final class AppModel {
                                  tableId: tableId, history: history, model: modelChoice,
                                  temperature: temperatureChoice, reasoning: reasoningChoice, fast: fast)
         let ex = Exchange(question: q, tableId: tableId, lang: lang, fast: fast)
+        ex.spoken = spoken
         withAnimation(.smooth) { exchanges.append(ex) }
         busy = true
         do {
@@ -139,6 +153,7 @@ final class AppModel {
                 case .answer(let a):
                     withAnimation(.snappy) { ex.answer = a }
                     save()
+                    if spoken && autoSpeak && a.status != "error" { speak(ex) }
                 }
             }
         } catch {
@@ -149,6 +164,7 @@ final class AppModel {
     }
 
     func reset() {
+        voice.stopSpeaking()
         running?.cancel()
         busy = false
         exchanges.removeAll()

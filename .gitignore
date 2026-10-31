@@ -13,3 +13,7 @@ data/*.vectors.json
 ios/build/
 ios/*.xcodeproj/xcuserdata/
 ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# voice models and environment on the Spark
+.voice/
+.venv-voice/

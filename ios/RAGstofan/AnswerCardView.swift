@@ -37,14 +37,17 @@ struct AnswerCard: View {
     let a: Answer
     let ask: Ask
     var fast = false
+    var exchange: Exchange?
+    @Environment(AppModel.self) private var model
     @State private var picks: [String]
     @State private var shown = false
     @State private var copied = 0
 
-    init(a: Answer, ask: @escaping Ask, fast: Bool = false) {
+    init(a: Answer, ask: @escaping Ask, fast: Bool = false, exchange: Exchange? = nil) {
         self.a = a
         self.ask = ask
         self.fast = fast
+        self.exchange = exchange
         _picks = State(initialValue: followupPicks(a))
     }
 
@@ -131,6 +134,26 @@ struct AnswerCard: View {
                     }
                     if a.textSource == "model" { Chip(text: Text(w.checked), icon: "checkmark.seal") }
                     if a.totalMs > 0 { Chip(text: Text(secs), icon: "clock") }
+                    if let ex = exchange, a.status != "error" {
+                        // read aloud by the Spark's Piper voice, in the answer's language
+                        let on = model.voice.speaking == ex.id, loading = model.voice.loadingSpeech == ex.id
+                        Button { model.speak(ex) } label: {
+                            HStack(spacing: 4) {
+                                if loading { ProgressView().controlSize(.mini) }
+                                else {
+                                    Image(systemName: on ? "speaker.wave.3.fill" : "speaker.wave.2")
+                                        .symbolEffect(.variableColor.iterative, isActive: on)
+                                }
+                                Text(on ? (L == .is ? "Stöðva" : "Stop") : (L == .is ? "Hlusta" : "Listen"))
+                            }
+                            .font(.caption)
+                            .foregroundStyle(on ? pal.accent : pal.text2)
+                            .padding(.horizontal, 10).padding(.vertical, 6)
+                            .background(on ? pal.soft : pal.text.opacity(0.05), in: Capsule())
+                            .animation(.snappy, value: on)
+                        }
+                        .buttonStyle(.plain)
+                    }
                     Button {
                         UIPasteboard.general.string = copyText
                         copied += 1
