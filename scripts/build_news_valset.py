@@ -173,9 +173,56 @@ def add(drafts_path: str) -> None:
         print("  dropped, figure not in the article:", d)
 
 
+async def styled(drafts_path: str) -> None:
+    """Organiser-style questions (population, calculations, two tables). Each answer is computed here from its sources:
+    a figure that must appear verbatim in a cached release, or a table cell read from Statistics Iceland's data.
+    A formula is one expression ("a - b") or a list of expressions (one expected number each, for two-table questions).
+    The rows are appended to the holdout after the lookups made by `add`."""
+    from hagbot.catalog import Catalog
+    from hagbot.config import settings
+    from hagbot.sources import make_source
+
+    arts = {f.stem.split("__")[-1]: json.loads(f.read_text()) for f in CACHE.glob("*.json")}
+    source = make_source(Catalog.load(settings.catalog_path))
+    rows = [json.loads(line) for line in OUT.read_text().splitlines() if not json.loads(line)["id"].startswith("styled-")]
+    added, problems = 0, []
+    for n, d in enumerate(json.loads(Path(drafts_path).read_text())):
+        values, tol = {}, {}
+        for name, (where, what) in d["from"].items():
+            if where.startswith("table:"):
+                table = where.split(":", 1)[1]
+                got = await source.query(table, {k: [v] for k, v in what.items()})
+                values[name], tol[name] = (got[0].value if got and got[0].value is not None else None), 0.5
+            else:
+                text = arts.get(where, {}).get("text", "")
+                num = _number(what)
+                found = num and what.strip().rstrip("%").strip() in text
+                values[name], tol[name] = (num[0], num[1]) if found else (None, None)
+            if values[name] is None:
+                problems.append(f"{d['question_en'][:60]}: {where} {what} not found")
+        if any(v is None for v in values.values()):
+            continue
+        formulas = d["formula"] if isinstance(d["formula"], list) else [d["formula"]]
+        expected = [eval(f, {}, values) for f in formulas]  # formulas are our own short expressions over a, b
+        # tolerance: the rounding of the published inputs, carried through the formula, at least 0.05% of the answer
+        rel = max(tol[k] / abs(values[k]) for k in values if values[k]) if values else 0.0005
+        rel = max(rel * (2 if any(op in str(formulas) for op in "+-") else 1), 0.0005)
+        for lang in ("en", "is"):
+            rows.append({"id": f"styled-{n:02d}-{lang}", "level": d["level"], "language": lang,
+                         "question": d[f"question_{lang}"], "expected_tables": [],
+                         "expected_values": [round(v, 6) for v in expected], "tolerance": round(rel, 6),
+                         "unit": d["unit"], "how": f"{d['formula']} with " + ", ".join(f"{k}={values[k]:g}" for k in values),
+                         "sources": {k: v[0] for k, v in d["from"].items()}})
+        added += 1
+    OUT.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
+    print(f"{OUT}: {added} organiser-style questions added ({2 * added} with both languages), {len(rows)} rows in all")
+    for p in problems:
+        print("  skipped:", p)
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("stage", choices=["scrape", "draft", "add"])
+    ap.add_argument("stage", choices=["scrape", "draft", "add", "styled"])
     ap.add_argument("drafts", nargs="?")
     ap.add_argument("--limit", type=int, default=40)
     a = ap.parse_args()
@@ -183,5 +230,7 @@ if __name__ == "__main__":
         scrape(a.limit)
     elif a.stage == "add":
         add(a.drafts)
+    elif a.stage == "styled":
+        asyncio.run(styled(a.drafts))
     else:
         asyncio.run(draft())
