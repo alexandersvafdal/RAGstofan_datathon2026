@@ -17,6 +17,7 @@ from .steps.followup import looks_like_followup, rewrite
 from .steps.plan import Plan, SubQuestion, plan
 from .steps.ratio import POPULATION_TABLE, detect_ratio, ratio_parts
 from .steps.retrieve import period_end, retrieve
+from .steps.tiered import retrieve_tiered
 from .steps.select import select
 from .text import detect_language
 
@@ -145,10 +146,16 @@ class Pipeline:
                            alone: bool = True) -> AnswerPart:
         t = Timer()
         # a multi-part question's full wording would pull every part toward the same tables
-        r = await retrieve(self.llm, self.catalog, sq.question, sq.search_query, settings.retrieve_top_k, forced_table,
-                           original if alone else "")
+        if settings.retrieval == "tiered":
+            r = await retrieve_tiered(self.llm, self.catalog, sq.question, sq.search_query,
+                                      settings.retrieve_top_k, forced_table, original if alone else "")
+        else:
+            r = await retrieve(self.llm, self.catalog, sq.question, sq.search_query, settings.retrieve_top_k, forced_table,
+                               original if alone else "")
         steps.append(Step(name="retrieve", ms=t.ms(),
-                          detail=f"{r.table.id} from [{', '.join(r.candidates)}]" + (" (ambiguous)" if r.ambiguous else "")))
+                          detail=f"{r.table.id} from [{', '.join(r.candidates)}]" + (" (ambiguous)" if r.ambiguous else "")
+                                 + (f" via {r.via}" if r.via else "") + (f" · votes {r.votes}" if r.votes else "")
+                                 + (f" · concepts: {', '.join(r.concepts)}" if r.concepts else "")))
         if r.ambiguous:
             opts = [ClarifyOption(label=e.title_en if lang == "en" else (e.title_is or e.title_en), table_id=e.id)
                     for e in [r.table, *r.alternatives]]
@@ -190,6 +197,7 @@ class Pipeline:
             facts=facts,
             chart=choose_chart(meta, rows, res.selections, computation),
             note=note,
+            ranking=r.ranking,
         )
 
     def _freshness_note(self, meta, selections: dict[str, list[str]], candidates: list[str], question: str, lang: str) -> str:

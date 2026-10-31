@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from ..catalog import SYNONYMS
 from ..llm import LLM
+from ..vote import ask_all, majority, voting_on
 from ..sources import TableMeta, Variable
 from ..text import normalize, tokens
 
@@ -245,5 +246,26 @@ async def select(llm: LLM, meta: TableMeta, question: str, original: str | None 
         lines.append(f'- code "{var.code}" ({var.text}{", time" if var.time else ""}){more}: {opts}')
     asked = f"User asked: {original}\nThis part: {question}" if original and original != question else f"Question: {question}"
     user = f"{asked}\n\nTable {meta.id}: {meta.title}\nDimensions:\n" + "\n".join(lines)
-    sel = await llm.complete_json(SYSTEM, user, Selection)
-    return resolve(meta, sel, f"{original or ''} {question}")
+    if not voting_on():
+        sel = await llm.complete_json(SYSTEM, user, Selection)
+        return resolve(meta, sel, f"{original or ''} {question}")
+    sel, agreement = vote_selection(await ask_all(llm, SYSTEM, user, Selection))
+    res = resolve(meta, sel, f"{original or ''} {question}")
+    res.notes.insert(0, "votes: " + ", ".join(f"{(meta.var(k).text if k in {v.code for v in meta.variables} else k)} {a}"
+                                              for k, a in agreement.items()))
+    return res
+
+
+def vote_selection(samples: list[Selection]) -> tuple[Selection, dict[str, str]]:
+    """One Selection from several: per dimension the most common set of codes, and the most common operation
+    (with its compare dimension, part and whole). Returns it with each choice's agreement, e.g. {"Ár": "3/3"}."""
+    n, agreement, chosen = len(samples), {}, {}
+    for dim in dict.fromkeys(k for s in samples for k in s.selections):
+        picks = [tuple(sorted(s.selections.get(dim, []))) for s in samples]
+        win, c = majority(picks)
+        if win:
+            chosen[dim] = list(win)
+        agreement[dim] = f"{c}/{n}"
+    op, c = majority([(s.operation, s.compare_dimension, s.part, s.whole) for s in samples])
+    agreement["operation"] = f"{c}/{n}"
+    return Selection(selections=chosen, operation=op[0], compare_dimension=op[1], part=op[2], whole=op[3]), agreement

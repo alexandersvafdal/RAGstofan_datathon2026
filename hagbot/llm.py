@@ -30,7 +30,10 @@ class LLM:
     async def chat(self, messages: list[dict], *, json_mode: bool = False, temperature: float = 0.0) -> str:
         body = {"model": self.model, "messages": messages, "temperature": temperature}
         if settings.llm_reasoning_effort:
-            body["reasoning_effort"] = settings.llm_reasoning_effort
+            effort = settings.llm_reasoning_effort
+            if effort == "none" and "gpt-oss" in self.model:  # gpt-oss only takes low / medium / high
+                effort = "low"
+            body["reasoning_effort"] = effort
         if json_mode:
             body["response_format"] = {"type": "json_object"}
         self.calls += 1
@@ -43,7 +46,7 @@ class LLM:
             raise LLMError(f"LLM request failed: {type(e).__name__} {e}".strip()) from e
         return r.json()["choices"][0]["message"]["content"]
 
-    async def complete_json(self, system: str, user: str, schema: type[T], *, retries: int = 2) -> T:
+    async def complete_json(self, system: str, user: str, schema: type[T], *, retries: int = 2, temperature: float = 0.0) -> T:
         """Ask for JSON matching `schema`. On a parse or validation error, show the model the error and retry."""
         messages = [
             {"role": "system", "content": system + "\n\nReply with one JSON object only. JSON schema:\n"
@@ -52,7 +55,7 @@ class LLM:
         ]
         last_err = None
         for _ in range(retries + 1):
-            raw = await self.chat(messages, json_mode=True)
+            raw = await self.chat(messages, json_mode=True, temperature=temperature)
             try:
                 return schema.model_validate(_extract_json(raw))
             except (ValueError, ValidationError) as e:
