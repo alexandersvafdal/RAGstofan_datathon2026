@@ -9,6 +9,7 @@ USE_E5=1). The searches run in parallel and their rankings are fused by reciproc
 """
 
 import json
+import logging
 import math
 import re
 from collections import Counter
@@ -47,6 +48,7 @@ VALUES_WEIGHT = 0.6
 ABOUT_WEIGHT = 0.5
 PREFIX_WEIGHT = 0.8
 MIN_PREFIX = 4
+log = logging.getLogger(__name__)
 RRF_K = 60  # reciprocal rank fusion: a table's fused score is the sum of 1 / (RRF_K + rank) over the rankings
 
 
@@ -145,8 +147,11 @@ class Catalog:
         if settings.use_vectors and (v := Vectors.load(path)):
             dense.append(v)
         if settings.use_e5:
-            from .e5 import E5Search
-            dense.append(E5Search(entries, settings.tables_meta_path, settings.cache_dir))
+            try:
+                from .e5 import E5Search
+                dense.append(E5Search(entries, settings.tables_meta_path, settings.cache_dir))
+            except ImportError as err:
+                log.warning("e5 search off: %s. Install requirements-e5.txt or set USE_E5=0", err)
         return cls(entries, dense)
 
     def get(self, table_id: str) -> CatalogEntry | None:
