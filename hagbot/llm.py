@@ -29,6 +29,8 @@ class LLM:
 
     async def chat(self, messages: list[dict], *, json_mode: bool = False, temperature: float = 0.0) -> str:
         body = {"model": self.model, "messages": messages, "temperature": temperature}
+        if settings.llm_reasoning_effort:
+            body["reasoning_effort"] = settings.llm_reasoning_effort
         if json_mode:
             body["response_format"] = {"type": "json_object"}
         self.calls += 1
