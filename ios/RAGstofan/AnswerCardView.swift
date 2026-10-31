@@ -136,7 +136,7 @@ struct AnswerCard: View {
                     if a.totalMs > 0 { Chip(text: Text(secs), icon: "clock") }
                     if let ex = exchange, a.status != "error" {
                         // read aloud by the Spark's Piper voice, in the answer's language
-                        let on = model.voice.speaking == ex.id, loading = model.voice.loadingSpeech == ex.id
+                        let on = model.voice.speaking == ex.id.uuidString, loading = model.voice.loadingSpeech == ex.id.uuidString
                         Button { model.speak(ex) } label: {
                             HStack(spacing: 4) {
                                 if loading { ProgressView().controlSize(.mini) }

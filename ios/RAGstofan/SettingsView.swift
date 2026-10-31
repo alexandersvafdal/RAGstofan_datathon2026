@@ -37,11 +37,12 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    VoicePicker().listRowInsets(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
                     Toggle(model.ui == .is ? "Lesa svör upphátt þegar spurt er með rödd" : "Read answers aloud when I ask by voice",
                            isOn: $model.autoSpeak)
                 } header: { Text(model.ui == .is ? "Rödd" : "Voice") } footer: {
-                    Text(model.ui == .is ? "Talgreining: Whisper. Talgerving: Piper (raddir Steinn og Joe). Allt opinn hugbúnaður á vél liðsins."
-                                         : "Speech recognition: Whisper. Speech: Piper (voices Steinn and Joe). All open source, on the team's machine.")
+                    Text(model.ui == .is ? "Talgreining: Whisper. Talgerving: Piper (Steinn) og Kokoro. Allt opinn hugbúnaður á vél liðsins."
+                                         : "Speech recognition: Whisper. Speech: Kokoro and Piper (Steinn). All open source, on the team's machine.")
                 }
 
                 Section(w.language) {

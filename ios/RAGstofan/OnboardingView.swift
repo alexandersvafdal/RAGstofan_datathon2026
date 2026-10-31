@@ -6,7 +6,7 @@ struct OnboardingView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.pal) private var pal
     @State private var page = 0
-    private let pages = 5
+    private let pages = 6
 
     private var isl: Bool { model.ui == .is }
     private func t(_ en: String, _ is_: String) -> String { isl ? is_ : en }
@@ -19,6 +19,7 @@ struct OnboardingView: View {
                 Connection(t: t).tag(2)
                 Look(t: t).tag(3)
                 Language(t: t).tag(4)
+                VoicePage(t: t).tag(5)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
 
@@ -375,6 +376,23 @@ private struct Language: View {
                 }
             }
             .sensoryFeedback(.selection, trigger: model.langChoice)
+        }
+    }
+}
+
+/// Pick the voices answers are read in, hearing each first.
+private struct VoicePage: View {
+    @Environment(\.pal) private var pal
+    let t: (String, String) -> String
+    var body: some View {
+        Page(title: t("Pick a voice", "Veldu rödd"),
+             text: t("Ask with the microphone and hear the answer. Tap a voice to hear it.",
+                     "Spurðu með hljóðnemanum og heyrðu svarið. Ýttu á rödd til að heyra hana.")) {
+            Image(systemName: "waveform.and.mic")
+                .font(.system(size: 56, weight: .light)).foregroundStyle(pal.accent)
+                .symbolEffect(.variableColor.iterative.reversing)
+        } content: {
+            VoicePicker()
         }
     }
 }

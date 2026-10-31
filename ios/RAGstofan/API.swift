@@ -80,15 +80,24 @@ struct API {
     }
 
     /// Text to speech: a WAV in the answer's language.
-    func tts(_ text: String, language: String) async throws -> Data {
-        var req = URLRequest(url: voice.appendingPathComponent("tts"))
+    func tts(_ text: String, language: String, voice: String? = nil) async throws -> Data {
+        var req = URLRequest(url: self.voice.appendingPathComponent("tts"))
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.httpBody = try JSONSerialization.data(withJSONObject: ["text": text, "language": language])
+        var body = ["text": text, "language": language]
+        if let voice { body["voice"] = voice }
+        req.httpBody = try JSONSerialization.data(withJSONObject: body)
         req.timeoutInterval = 60
         let (data, resp) = try await Self.session.data(for: req)
         try check(resp, data)
         return data
+    }
+
+    /// The voices answers can be read in, per language.
+    func voices() async throws -> VoiceList {
+        let (data, resp) = try await Self.session.data(from: voice.appendingPathComponent("voices"))
+        try check(resp, data)
+        return try JSONDecoder().decode(VoiceList.self, from: data)
     }
 
     func models() async throws -> ModelList {

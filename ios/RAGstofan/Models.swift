@@ -74,6 +74,10 @@ struct AskRequest: Encodable {
     let fast: Bool            // "Answer now": the fast model, thinking off
 }
 
+/// A voice answers can be read in.
+struct VoiceOption: Codable, Hashable, Identifiable { let id: String; let name: String; let engine: String }
+struct VoiceList: Codable { let voices: [String: [VoiceOption]]; let `default`: [String: String] }
+
 /// The models a question can go to; the default is the server's best. Older servers send only the first two fields.
 struct ModelList: Codable {
     let `default`: String

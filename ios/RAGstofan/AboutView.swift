@@ -57,8 +57,8 @@ struct AboutView: View {
                 Card {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(t("Voice", "Rödd")).font(.headline).foregroundStyle(pal.text)
-                        Text(t("Speech recognition by Whisper large-v3-turbo (OpenAI, MIT licence). Spoken answers by Piper (GPL-3.0) with the voices Joe (CC0) and Steinn and Ugla, trained on Talrómur from Reykjavík University and Almannarómur (CC BY 4.0). Everything runs on the team's own machine.",
-                               "Talgreining með Whisper large-v3-turbo (OpenAI, MIT-leyfi). Talgerving með Piper (GPL-3.0) og röddunum Joe (CC0) og Steini og Uglu, þjálfuðum á Talrómi frá Háskólanum í Reykjavík og Almannarómi (CC BY 4.0). Allt keyrir á vél liðsins."))
+                        Text(t("Speech recognition by Whisper large-v3-turbo (OpenAI, MIT licence). Spoken answers in English by Kokoro-82M (Apache-2.0), and in Icelandic by Piper (GPL-3.0) with the voice Steinn, trained on Talrómur from Reykjavík University and Almannarómur (CC BY 4.0). Everything runs on the team's own machine.",
+                               "Talgreining með Whisper large-v3-turbo (OpenAI, MIT-leyfi). Talgerving á ensku með Kokoro-82M (Apache-2.0) og á íslensku með Piper (GPL-3.0) og röddinni Steini, þjálfaðri á Talrómi frá Háskólanum í Reykjavík og Almannarómi (CC BY 4.0). Allt keyrir á vél liðsins."))
                             .font(.footnote).foregroundStyle(pal.text2)
                     }
                 }

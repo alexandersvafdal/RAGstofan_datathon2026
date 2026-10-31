@@ -54,6 +54,9 @@ final class AppModel {
     /// Read the answer aloud when the question was asked by voice.
     var autoSpeak: Bool { didSet { UserDefaults.standard.set(autoSpeak, forKey: "autoSpeak") } }
     let voice = Voice()
+    /// The chosen voice per language ("en", "is"); missing means the server's default.
+    var voiceChoice: [String: String] { didSet { UserDefaults.standard.set(voiceChoice, forKey: "voices") } }
+    var voiceList: VoiceList?
 
     var exchanges: [Exchange] = []
     var conversations: [Conversation] = []
@@ -79,6 +82,7 @@ final class AppModel {
         conversations = Self.load()
         onboarded = d.bool(forKey: "onboarded")
         autoSpeak = d.object(forKey: "autoSpeak") as? Bool ?? true
+        voiceChoice = d.dictionary(forKey: "voices") as? [String: String] ?? [:]
     }
 
     var colorScheme: ColorScheme? { appearance == "light" ? .light : appearance == "dark" ? .dark : nil }
@@ -92,6 +96,7 @@ final class AppModel {
             health = try await api.health()
             serverError = nil
             models = try? await api.models()
+            voiceList = try? await api.voices()
             if let m = models, let c = modelChoice, !m.models.contains(c) { modelChoice = nil }   // gone from the server
             indicators = try await api.indicators()
         } catch {
@@ -122,7 +127,8 @@ final class AppModel {
     func speak(_ ex: Exchange) {
         guard let a = ex.answer else { return }
         let lang: Lang = a.language == "is" ? .is : .en
-        Task { await voice.toggleSpeaking(ex.id, text: prettyPeriods(a.text, lang), language: a.language, api: api) }
+        Task { await voice.toggleSpeaking(ex.id.uuidString, text: prettyPeriods(a.text, lang), language: a.language,
+                                          voice: voiceChoice[a.language], api: api) }
     }
 
     /// Stop the question in progress (the server stops with it) and ask again with the fast model, thinking off.
@@ -209,6 +215,16 @@ final class AppModel {
                                                fast: $0.fast, answer: $0.answer) }
         currentId = c.id
     }
+
+    /// Pick a voice and hear a short example in it.
+    func tryVoice(_ v: VoiceOption, language: String) {
+        voiceChoice[language] = v.id == voiceList?.default[language] ? nil : v.id
+        let sample = language == "is" ? "Íbúar Íslands voru 394.324 í byrjun árs 2026."
+                                      : "Iceland had 394,324 inhabitants at the start of 2026."
+        Task { await voice.toggleSpeaking("sample-\(v.id)", text: sample, language: language, voice: v.id, api: api) }
+    }
+
+    func activeVoice(_ language: String) -> String? { voiceChoice[language] ?? voiceList?.default[language] }
 
     func delete(_ ids: [UUID]) {
         conversations.removeAll { ids.contains($0.id) }
