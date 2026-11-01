@@ -4,16 +4,16 @@ import asyncio
 import copy
 import re
 from datetime import date
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 
 from .catalog import Catalog
 from .config import settings
 from .llm import LLM, Timer
-from .outcomes import AnswerFailure
-from .schemas import (Answer, AnswerIssue, AnswerPart, AskRequest, Clarification, ClarifyOption, Step, TableRef)
+from .outcomes import AnswerFailure, RETRYABLE_TABLE_FAILURES
+from .schemas import (Answer, AnswerIssue, AnswerPart, AskRequest, Clarification, ClarifyOption, Step, TableAttempt, TableRef)
 from .semantics import fingerprint, validate_specification
 from .specification import QuestionSpec, Requirement
-from .sources import DataSource, make_source, table_url
+from .sources import DataSource, TableMeta, make_source, table_url
 from .hierarchy import children
 from .steps.chart import choose_chart, comparison_chart
 from .steps.compose import compose
@@ -22,9 +22,9 @@ from .steps.constraints import has_requested_period
 from .steps.followup import looks_like_followup, rewrite
 from .steps.plan import Plan, SubQuestion, merge_period_parts, plan
 from .steps.ratio import POPULATION_TABLE, detect_ratio, difference_parts, ratio_parts, share_parts, stored_rate
-from .steps.retrieve import _INDEXATION_TABLE, period_end
+from .steps.retrieve import _INDEXATION_TABLE, Retrieved, RetrievalCache, period_end
 from .steps.tiered import retrieve_tiered
-from .steps.select import guess_op, select
+from .steps.select import Resolved, guess_op, select
 from .steps.suggest import suggest
 from .text import detect_language, normalize
 
@@ -43,8 +43,9 @@ CLARIFY = {
 
 
 class NeedsClarification(Exception):
-    def __init__(self, clarification: Clarification):
+    def __init__(self, clarification: Clarification, attempts: list[TableAttempt] | None = None):
         self.clarification = clarification
+        self.attempts = list(attempts or [])
 
 
 class StepLog(list):
@@ -219,39 +220,82 @@ class Pipeline:
                 "rows": rows,
                 "facts": [f for p in group for f in p.facts],
                 "verifications": [v for p in group for v in p.verifications],
+                "attempts": [a for p in group for a in p.attempts],
                 "selection": {k: list(dict.fromkeys(v for p in group for v in p.selection.get(k, []))) for k in first.selection},
                 "chart": (c := choose_chart(meta, rows, selections, None)) and c.model_copy(update={"title": first.table.title}),
             }))
         return out
 
+    async def _verified_query(self, sq: SubQuestion, original: str, lang: str, forced_table: str | None,
+                              steps: list[Step], alone: bool) -> tuple[Retrieved, TableMeta, Resolved, list[TableAttempt]]:
+        """Try a bounded number of distinct candidates without changing the specification or fetching cells."""
+        rejected, attempts, cache = set(), [], RetrievalCache()
+        limit = 1 if forced_table else settings.retrieve_max_attempts
+        question_sha = fingerprint(sq.specification.model_dump())
+        retriever = retrieve_tiered
+        # a multi-part question's full wording would pull every part toward the same tables
+        for _ in range(limit):
+            t = Timer()
+            try:
+                r = await retriever(self.llm, self.catalog, sq.question, sq.search_query, settings.retrieve_top_k,
+                                    forced_table, original if alone else "", excluded=frozenset(rejected), cache=cache)
+            except AnswerFailure as failure:
+                failure.attempts = list(attempts)
+                if attempts and failure.code in {"no_candidates", "no_verified_table"}:
+                    raise AnswerFailure("unverified", "no_compatible_candidate", attempts=attempts) from failure
+                raise
+            if r.table.id in rejected:
+                raise AnswerFailure("unverified", "repeated_candidate", r.table.id, attempts=attempts)
+            steps.append(Step(name="retrieve", ms=t.ms(),
+                              detail=f"{r.table.id} from [{', '.join(r.candidates)}]" + (" (ambiguous)" if r.ambiguous else "")
+                                     + (f" via {r.via}" if r.via else "") + (f" · votes {r.votes}" if r.votes else "")
+                                     + (f" · concepts: {', '.join(r.concepts)}" if r.concepts else "")))
+            if r.ambiguous:
+                opts = [ClarifyOption(label=e.title_en if lang == "en" else (e.title_is or e.title_en), table_id=e.id)
+                        for e in [r.table, *r.alternatives]]
+                raise NeedsClarification(Clarification(message=CLARIFY[lang], options=opts), attempts)
+
+            t, metadata_sha = Timer(), ""
+            try:
+                meta = await self.source.meta(r.table.id)
+                metadata_sha = fingerprint(meta.model_dump())
+                if meta.id != r.table.id:
+                    raise AnswerFailure("unverified", "mismatched_table_metadata", r.table.id)
+                filter_question = f"{original} {sq.question}" if alone else sq.question
+                res = await select(self.llm, meta, sq.question, original, filter_question=filter_question,
+                                   specification=sq.specification)
+                if res.verification is None:
+                    raise AnswerFailure("unverified", "missing_compatibility")
+            except AnswerFailure as failure:
+                attempts.append(TableAttempt(table_id=r.table.id, status="rejected", code=failure.code,
+                                             metadata_sha256=metadata_sha, question_sha256=question_sha, via=r.via))
+                failure.attempts = list(attempts)
+                if forced_table or failure.code not in RETRYABLE_TABLE_FAILURES or failure.status not in ("unavailable", "unverified"):
+                    raise
+                rejected.add(r.table.id)
+                if len(attempts) == limit:
+                    raise AnswerFailure("unverified", "candidate_limit_reached", attempts=attempts) from failure
+                steps.append(Step(name="retry", ms=t.ms(), detail=f"{r.table.id} rejected: {failure.code}; checking another table"))
+                continue
+            except Exception as error:
+                attempts.append(TableAttempt(table_id=r.table.id, status="error", code="technical_failure",
+                                             metadata_sha256=metadata_sha, question_sha256=question_sha, via=r.via))
+                raise AnswerFailure("error", "technical_failure", f"{type(error).__name__}: {error}", attempts=attempts) from error
+
+            attempts.append(TableAttempt(table_id=r.table.id, status="verified", metadata_sha256=metadata_sha,
+                                         question_sha256=question_sha, via=r.via))
+            chosen = {meta.var(c).text: [meta.var(c).label_of(v) for v in vals] for c, vals in res.selections.items()}
+            steps.append(Step(name="select", ms=t.ms(),
+                              detail=f"{res.operation} {chosen}; verified {len(res.verification.checks)} metadata requirements"
+                                     + (f" notes: {res.notes}" if res.notes else "")))
+            return r, meta, res, attempts
+        raise AnswerFailure("unverified", "candidate_limit_reached", attempts=attempts)
+
     async def _answer_part(self, sq: SubQuestion, original: str, lang: str, forced_table: str | None, steps: list[Step],
                            alone: bool = True) -> AnswerPart:
+        r, meta, res, attempts = await self._verified_query(sq, original, lang, forced_table, steps, alone)
         t = Timer()
-        # a multi-part question's full wording would pull every part toward the same tables
-        r = await retrieve_tiered(self.llm, self.catalog, sq.question, sq.search_query,
-                                  settings.retrieve_top_k, forced_table, original if alone else "")
-        steps.append(Step(name="retrieve", ms=t.ms(),
-                          detail=f"{r.table.id} from [{', '.join(r.candidates)}]" + (" (ambiguous)" if r.ambiguous else "")
-                                 + (f" via {r.via}" if r.via else "") + (f" · votes {r.votes}" if r.votes else "")
-                                 + (f" · concepts: {', '.join(r.concepts)}" if r.concepts else "")))
-        if r.ambiguous:
-            opts = [ClarifyOption(label=e.title_en if lang == "en" else (e.title_is or e.title_en), table_id=e.id)
-                    for e in [r.table, *r.alternatives]]
-            raise NeedsClarification(Clarification(message=CLARIFY[lang], options=opts))
-
-        t = Timer()
-        meta = await self.source.meta(r.table.id)
         filter_question = f"{original} {sq.question}" if alone else sq.question
-        res = await select(self.llm, meta, sq.question, original, filter_question=filter_question,
-                           specification=sq.specification)
-        if res.verification is None:
-            raise AnswerFailure("unverified", "missing_compatibility")
-        chosen = {meta.var(c).text: [meta.var(c).label_of(v) for v in vals] for c, vals in res.selections.items()}
-        steps.append(Step(name="select", ms=t.ms(),
-                          detail=f"{res.operation} {chosen}; verified {len(res.verification.checks)} metadata requirements"
-                                 + (f" notes: {res.notes}" if res.notes else "")))
-
-        t = Timer()
         rows = await self.source.query(meta.id, res.selections)
         detail = f"{len(rows)} rows"
         # A table's time dimension often lists a period before its numbers exist ("2026" with ".." until the year
@@ -285,7 +329,8 @@ class Pipeline:
         computation, facts = compute(meta, rows, res, lang)
         if not facts or (res.operation not in ("value", "series", "rank") and computation is None):
             raise AnswerFailure("unavailable", "incomplete_calculation", res.operation)
-        note = self._freshness_note(meta, res.selections, r.candidates, f"{sq.question} {original}", lang)
+        note = self._freshness_note(meta, res.selections, r.candidates, f"{sq.question} {original}", lang,
+                                    excluded={a.table_id for a in attempts if a.status == "rejected"})
         if res.window_note:   # "the last 50 years" in a table that starts in 2003
             note = " ".join(x for x in (res.window_note[lang], note) if x)
         if res.place_note:    # "Egilsstaðir" in a table of the 2008 municipalities
@@ -307,6 +352,7 @@ class Pipeline:
             computation=computation,
             facts=facts,
             verifications=[verification],
+            attempts=attempts,
             chart=chart.model_copy(update={"title": title}) if chart else None,
             note=note,
             ranking=r.ranking,
@@ -353,7 +399,8 @@ class Pipeline:
                 return m
         return None
 
-    def _freshness_note(self, meta, selections: dict[str, list[str]], candidates: list[str], question: str, lang: str) -> str:
+    def _freshness_note(self, meta, selections: dict[str, list[str]], candidates: list[str], question: str, lang: str,
+                        excluded: Collection[str] = ()) -> str:
         """When nobody asked for a period and the newest one here is from an earlier year, say so, and name a table
         on the same subject with newer figures: same subject area in Statistics Iceland's folders, the same subfolder
         first. It may measure or break things down differently, so it is only named."""
@@ -366,7 +413,7 @@ class Pipeline:
             return ""
         area = meta.path.split("/")[:3]
         pool = [e for e in self.catalog.entries
-                if e.id != meta.id and e.path.split("/")[:3] == area and re.match(r"\d{4}", e.last_period or "")
+                if e.id != meta.id and e.id not in excluded and e.path.split("/")[:3] == area and re.match(r"\d{4}", e.last_period or "")
                 and int(e.last_period[:4]) >= date.today().year and period_end(e.last_period) > period_end(latest)]
         # the same breakdown first (most categories in common), never a table published ahead for indexing loans
         own = set(entry.values) if (entry := self.catalog.get(meta.id)) else set()
@@ -397,11 +444,11 @@ def _stop(ans: Answer, errors: list[tuple[str, Exception]], expected_parts: int 
     for question, e in errors:
         if isinstance(e, NeedsClarification):
             issues.append(AnswerIssue(status="clarify", code="ambiguous_table", message=e.clarification.message,
-                                      sub_question=question))
+                                      sub_question=question, attempts=e.attempts))
         else:
             failure = e if isinstance(e, AnswerFailure) else AnswerFailure("error", "technical_failure")
             issues.append(AnswerIssue(status=failure.status, code=failure.code,
-                                      message=failure.message(ans.language), sub_question=question))
+                                      message=failure.message(ans.language), sub_question=question, attempts=failure.attempts))
     priority = {s: i for i, s in enumerate(("error", "out_of_scope", "unverified", "unavailable", "clarify"))}
     first = min(issues, key=lambda i: priority[i.status])
     ans.status, ans.issues, ans.text = first.status, issues, first.message

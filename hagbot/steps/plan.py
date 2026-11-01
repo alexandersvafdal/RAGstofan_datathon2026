@@ -52,6 +52,7 @@ Most questions need exactly one. Only split when the question asks about clearly
 If two lookups are operands of one requested calculation, set combination with their explicit indices: first is
 the part/minuend, second the whole/base. Difference is first minus second, pct_change is (first-second)/second*100,
 share is first/second*100. Never infer operand roles from which number is smaller. Otherwise combination is null.
+Each operand sub-question uses operation=value; the cross-table operation belongs to combination.
 Never split a comparison within one measure: "how many more men than women", "Reykjavík vs Kópavogur",
 "share of foreigners", "share of the population living in Reykjavík", "change from 2025 to 2026" are each ONE
 sub-question, because one table holds both sides (a municipality table also has the whole country as a total).

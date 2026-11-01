@@ -208,22 +208,18 @@ class CompatibilityTests(FailureAssertions, unittest.TestCase):
 
 
 class PipelineCompatibilityTests(unittest.IsolatedAsyncioTestCase):
-    async def test_bad_definition_stops_before_fetch_in_both_retrievers(self):
-        for mode in ("classic", "tiered"):
-            with self.subTest(mode=mode):
-                s = spec(requirement("measure", "income", quote="tekna"), requirement("statistic", "median", quote="Miðgildi"))
-                plan = Plan(sub_questions=[SubQuestion(question="Typical income?", search_query="income", specification=s)])
-                llm = ScriptedLLM(plan, selection(selections={"Year": ["2025"], "Measure": ["mean"]}, operation="value",
-                    compatibility=proof([("title", "income")], [("title", "median income")])))
-                source = SourceStub(table_meta=table())
-                pipeline = Pipeline(llm=llm, source=source, catalog=CatalogStub())
-                with patch("hagbot.pipeline.settings") as config:
-                    config.retrieval, config.retrieve_top_k = mode, 15
-                    answer = await pipeline.answer(AskRequest(question="Miðgildi tekna?", table_id="TEST001", language="en"))
-                self.assertEqual(answer.status, "unavailable")
-                self.assertEqual(answer.issues[0].code, "incompatible_definition")
-                self.assertEqual(source.queries, [])
-                self.assertEqual(llm.calls, 2)  # interpretation + selection/proof, no extra verification model call
+    async def test_bad_definition_stops_before_fetch_in_unified_finder(self):
+        s = spec(requirement("measure", "income", quote="tekna"), requirement("statistic", "median", quote="Miðgildi"))
+        plan = Plan(sub_questions=[SubQuestion(question="Typical income?", search_query="income", specification=s)])
+        llm = ScriptedLLM(plan, selection(selections={"Year": ["2025"], "Measure": ["mean"]}, operation="value",
+            compatibility=proof([("title", "income")], [("title", "median income")])))
+        source = SourceStub(table_meta=table())
+        answer = await Pipeline(llm=llm, source=source, catalog=CatalogStub()).answer(
+            AskRequest(question="Miðgildi tekna?", table_id="TEST001", language="en"))
+        self.assertEqual(answer.status, "unavailable")
+        self.assertEqual(answer.issues[0].code, "incompatible_definition")
+        self.assertEqual(source.queries, [])
+        self.assertEqual(llm.calls, 2)
 
     async def test_verified_query_carries_evidence_to_the_answer(self):
         s = spec(requirement("measure", "income"), requirement("statistic", "median"), requirement("period", "2025"))

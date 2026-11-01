@@ -48,6 +48,8 @@ and technical errors. Required parts must all succeed before an answer is publis
 [answer outcomes and integrity checks](docs/answer-outcomes.md) for the rules and offline regression tests.
 The next layer uses a [structured question specification and source metadata evidence](docs/semantic-validation.md)
 to check the selected statistical definition before fetching data.
+If a candidate fails a compatibility check, the system can check another within `RETRIEVE_MAX_ATTEMPTS`, retaining
+the question's requirements and reusing the search results. A forced table remains fixed.
 
 | Path | What |
 |---|---|

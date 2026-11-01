@@ -465,7 +465,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
                           Written(text="Population in 2026: 394,324 people."))
         pipeline = Pipeline(llm=llm, catalog=CatalogStub(entry("MAN00101", "2026")), source=FixtureSource())
         with patch("hagbot.pipeline.settings") as config:
-            config.retrieval, config.retrieve_top_k = "classic", 15
+            config.retrieve_top_k, config.retrieve_max_attempts = 15, 3
             answer = await pipeline.answer(AskRequest(question="Hver var mannfjöldinn árið 2026?", language="en"))
         self.assertEqual(answer.status, "answered")
         self.assertEqual(answer.parts[0].facts[0].value, 394324)

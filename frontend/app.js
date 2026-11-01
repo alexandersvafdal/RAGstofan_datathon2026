@@ -370,6 +370,13 @@ function liveView(L) {
   refresh();
 
   view.step = st => {
+    if (st.name === "retry") {
+      const row = rows.retrieve;
+      row.querySelector(".ls-detail").append(el("span", { class: "ls-text" },
+        L === "is" ? "Taflan passaði ekki við beiðnina; skoða aðra töflu." : "The table did not match the request; checking another."));
+      row.classList.add("has-detail");
+      return;
+    }
     if (st.name === "context") {   // a follow-up rewritten from the previous turn
       const d = rows.plan.querySelector(".ls-detail");
       d.append(el("span", { class: "ls-text" }, words.followup(st.detail)));

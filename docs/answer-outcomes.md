@@ -17,8 +17,8 @@ Only `answered` responses enter answered conversation history and receive genera
 
 ## Selection and retrieval
 
-Both retrievers reject invented table IDs and support rejecting every candidate. Even a single classic search
-hit must be checked. The tiered finder retains the keyword dictionary, expansion, ranking and subject browsing;
+The unified tiered finder rejects invented table IDs and supports rejecting every candidate. Its dictionary
+fast path still requires metadata validation before numeric fetching. It retains expansion, ranking and browsing;
 it no longer forces a classic selection after every candidate has been rejected. Automatic headline/newer-table
 replacements must pass a check too. An unknown forced table ID never triggers an unrelated search.
 
@@ -54,7 +54,7 @@ These are control-flow and data-integrity safeguards. They do not prove the mode
 phrase or selected the right statistical definition, nor detect every omitted sub-question. Scope classification
 and extraction of requirements beyond the deterministic checks still depend on the model. This intentionally
 increases abstentions; measure coverage and correctness with the actual serving model before deployment.
-Cache freshness, broader metadata extraction, candidate retries after compatibility rejection and live model
+Cache freshness, broader metadata extraction, profile-based discovery and live model
 calibration remain separate work. The first compatibility gate checks evidence and common statistical distinctions;
 it cannot establish the correctness of every semantic interpretation.
 

@@ -1,7 +1,8 @@
 # Structured questions and metadata compatibility
 
 This is the first implementation of the semantic validation milestone. It adds a shared gate after selection
-and before fetching data, while preserving the dictionary, rankers and classic/tiered candidate searches.
+and before fetching data, preserving the teammate's unified tiered finder, rankers and dictionary fast path.
+`RETRIEVAL` is no longer a production mode switch. Standalone legacy retrieval helpers remain covered by tests.
 
 ## Question specification
 
@@ -9,7 +10,7 @@ Each planned sub-question contains `specification` with:
 
 - `requirements`: exactly one measure, plus the requested statistic, population, geography, period, unit,
   frequency, adjustment, price basis and tax basis as applicable.
-- `operation`: value, series, difference, percentage change, share, maximum, minimum or ranking.
+- `operation`: value, series, difference, percentage change, share, sum, maximum, minimum or ranking.
 - `ambiguities`: unresolved interpretations that require clarification.
 
 Each requirement has `facet`, canonical English `value`, `origin` and supporting `quote`.
@@ -24,6 +25,11 @@ Example: “Miðgildi tekna” produces separate requirements for income (`quote
 
 Forced-table requests now run the planner too. The selected table supplies context but does not waive the
 question's requirements. The population operand of a per-capita question receives its own specification.
+Published per-capita rates retain the teammate's direct-table routing and pass the same evidence gate. A named
+place is also used for the population denominator when division is required. Cross-table shares/changes require
+explicit operand indices in `Plan.combination`; they do not infer roles from numeric magnitude. Incompatible units,
+misaligned share periods or zero denominators stop the calculation. Same-measure period parts merge only when
+their definitions match, preserving both period requirements.
 
 ## Table profiles and evidence
 
@@ -47,8 +53,9 @@ The gate rejects:
 - Known currency/unit/scale or frequency mismatches. Unit conversion is not inferred.
 - Numeric/geographic claims without matching evidence and an operation changed during resolution.
 
-An unsupported verdict with grounded evidence yields `unavailable` for the checked table. Incomplete or invalid
-evidence yields `unverified`. Existing date, category and completeness checks remain active.
+An unsupported verdict with grounded evidence rejects the checked table. Eligible metadata/coverage failures may
+lead to another candidate under the bounded policy below. Incomplete or malformed evidence still stops the query
+when the failure is not a candidate-compatibility issue. Existing date, category and completeness checks remain active.
 
 Voting may only attach a compatibility record to a query actually produced by a voter. If per-dimension majority
 voting constructs a new combination nobody checked, the system abstains.
@@ -60,6 +67,32 @@ requirement checks, and fingerprints of the metadata, specification and validate
 has a separate fingerprint. A permitted latest-populated-period fallback or ranking trim records an amendment.
 Merged same-table series retain all their verification records.
 
+## Bounded candidate retries
+
+`RETRIEVE_MAX_ATTEMPTS` limits the number of distinct tables whose metadata is checked per sub-question (default 3,
+allowed range 1–5). A forced table always has a limit of one. Once a candidate is rejected, its ID is excluded from
+candidate picks, dictionary preferred tables, headline/newer-sibling replacements, subject browsing and freshness
+recommendations for that sub-question.
+
+Only explicit compatibility/coverage failures or unknown/insufficient metadata evidence allow another candidate.
+The exact retryable codes are in `RETRYABLE_TABLE_FAILURES` in `hagbot/outcomes.py`. Ambiguity, invalid model codes,
+fabricated citations, changed operations and technical errors stop the request. A returned `none` is never turned
+into a forced pick. Missing cells after a valid query do not trigger a different data source search in this iteration.
+
+All attempts use the original specification and unchanged filters. BM25 and dense rankings are cached only within
+the sub-question, so retrying does not repeat embedding searches. Exclusion sets and caches are independent across
+parts and requests. Rejected candidates never have their numeric cells fetched; only a query that passes the same
+compatibility gate reaches the data source.
+
+Answer parts and failure issues expose `attempts` with table IDs, verdicts, reason codes and metadata/specification
+fingerprints. Streamed `retry` events report progress without being treated as terminal errors. Reaching the limit
+returns `unverified` with `candidate_limit_reached`; running out of checked/selected candidates returns `unverified`
+with `no_compatible_candidate`. Neither means the data is absent from all of Statistics Iceland's tables.
+
+The dictionary fast path skips the table-picker model call, not the metadata gate. Unnamed categories may collapse
+to a documented total and become alternative chips, while explicit requirements remain enforced. An unsupported
+place/date produces a rejection; a different location or nearest period cannot stand in under a note.
+
 The source citations and deterministic checks make decisions inspectable. They do not turn the model's semantic
 judgment into a formal proof. A real quote can still be misinterpreted, and an omitted requirement or an unknown
 statistical distinction can escape the common-rule checks.
@@ -67,7 +100,7 @@ statistical distinction can escape the common-rule checks.
 ## Remaining work in this milestone
 
 - Expand source metadata extraction, including PX definitions/footnotes not exposed in the current metadata view.
-- Use profiles to improve candidate discovery and try other candidates after a compatibility rejection.
+- Use profiles to improve candidate discovery beyond the existing catalog/dictionary rankings.
 - Calibrate acceptance and abstention with the serving model, measuring coverage and answer correctness separately.
 - Evaluate multi-table definition compatibility and source freshness before claiming deployment readiness.
 

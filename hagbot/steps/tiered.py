@@ -18,6 +18,7 @@ are dropped (narrow), and the newest edition of a chosen table is used (freshest
 
 import json
 import re
+from collections.abc import Collection
 from functools import lru_cache
 from pathlib import Path
 
@@ -29,7 +30,7 @@ from ..llm import LLM
 from ..outcomes import AnswerFailure
 from ..vote import vote_json, voting_on
 from ..text import normalize, tokens
-from .retrieve import AMBIGUOUS, MONTHS, Retrieved, SYSTEM as PICK_RULES, freshest_sibling, narrow
+from .retrieve import AMBIGUOUS, MONTHS, Retrieved, RetrievalCache, SYSTEM as PICK_RULES, freshest_sibling, narrow
 
 KEYWORDS = ROOT / "data" / "keywords.json"
 BATCH = 8   # tables the model sees per check
@@ -94,14 +95,15 @@ def beyond_concept(concept: dict, text: str) -> list[str]:
             and not any(w.startswith(t) or t.startswith(w) for t in own)]
 
 
-def headline(hit: CatalogEntry, found: list[dict], catalog: Catalog, text: str) -> CatalogEntry:
+def headline(hit: CatalogEntry, found: list[dict], catalog: Catalog, text: str,
+             excluded: Collection[str] = ()) -> CatalogEntry:
     """A concept's first dictionary table (its headline: the CPI, the wage index …) over a neighbour in the same folder
     that the model chose (by sector, for indexation), when the question asks for nothing more than the concept itself.
     Applies to every concept in the dictionary; a question naming a breakdown ("public sector", "á almennum markaði",
     "subcategories") keeps the model's choice."""
     for c in found:
         head = catalog.get(c["tables"][0]) if c["tables"] else None
-        if not head or head.id == hit.id or head.path != hit.path:
+        if not head or head.id in excluded or head.id == hit.id or head.path != hit.path:
             continue
         if not beyond_concept(c, text):
             return head
@@ -174,11 +176,16 @@ class Subjects(BaseModel):
     subjects: list[str] = Field(description="up to two subject IDs from the list, best first")
 
 
-async def _browse(llm: LLM, catalog: Catalog, question: str, original: str) -> tuple[CatalogEntry | None, list[str]]:
+async def _browse(llm: LLM, catalog: Catalog, question: str, original: str,
+                  excluded: Collection[str] = ()) -> tuple[CatalogEntry | None, list[str]]:
     """Last resort: the model chooses a subject area, then a table in it."""
     areas: dict[str, list[CatalogEntry]] = {}
     for e in catalog.entries:
+        if e.id in excluded:
+            continue
         areas.setdefault("/".join(e.path.split("/")[:2]), []).append(e)
+    if not areas:
+        return None, []
     listing = "\n".join(f"- {a}: e.g. " + "; ".join(x.title_en for x in es[:3]) for a, es in areas.items())
     asked = original or question
     pick = await llm.complete_json("You find where in Statistics Iceland's database a question's answer lives.",
@@ -192,8 +199,11 @@ async def _browse(llm: LLM, catalog: Catalog, question: str, original: str) -> t
 
 
 async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_query: str,
-                          k: int, forced_table: str | None = None, original: str = "") -> Retrieved:
+                          k: int, forced_table: str | None = None, original: str = "", *,
+                          excluded: Collection[str] = (), cache: RetrievalCache | None = None) -> Retrieved:
     if forced_table:
+        if forced_table in excluded:
+            raise AnswerFailure("unverified", "repeated_candidate", forced_table)
         if entry := catalog.get(forced_table):
             return Retrieved(table=entry, candidates=[entry.id])
         raise AnswerFailure("unavailable", "unknown_table", forced_table)
@@ -203,6 +213,8 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
     for pattern, settled, tables in AMBIGUOUS:
         entries = [e for e in (catalog.get(t) for t in tables) if e]
         if re.search(pattern, q_user) and not re.search(settled, q_user) and len(entries) > 1:
+            if any(e.id in excluded for e in entries):
+                raise AnswerFailure("clarify", "ambiguous_question")
             return Retrieved(table=entries[0], alternatives=entries[1:], ambiguous=True, candidates=[e.id for e in entries])
 
     text = f"{search_query} {question} {original}"
@@ -213,9 +225,11 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
     # batch with every subject's tables; then each subject sends only its headline, and the searches fill the rest.
     with_tables = [c for c in found if c["tables"]]
     per_concept = 1 if len(with_tables) >= 3 else None
-    preferred = [e for c in with_tables for t in c["tables"][:per_concept] if (e := catalog.get(t))]
+    preferred = [e for c in with_tables for t in [t for t in c["tables"] if t not in excluded][:per_concept]
+                 if (e := catalog.get(t))]
     query = " ".join([text, *(c["search"] for c in found)])
-    searches = {name: [e for e in (catalog.get(i) for i in ids) if e] for name, ids in catalog.rankings(query, 4 * k).items()}
+    rankings = cache.rankings(catalog, query, 4 * k) if cache is not None else catalog.rankings(query, 4 * k)
+    searches = {name: [e for e in (catalog.get(i) for i in ids if i not in excluded) if e] for name, ids in rankings.items()}
     ranked = rank(preferred, searches)
     shortlist = narrow([e for e, _, _ in ranked], f"{question} {original}")
     order = {e.id: (score, why) for e, score, why in ranked}
@@ -224,7 +238,7 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
 
     async def done(table: CatalogEntry, pool: list[CatalogEntry], tier: str) -> Retrieved:
         # Ranking rules may suggest a newer/headline table, but only a checked table can be returned.
-        replacement = freshest_sibling(headline(table, found, catalog, question),
+        replacement = freshest_sibling(headline(table, found, catalog, question, excluded),
                                         pool, f"{question} {original}")
         if replacement.id != table.id and await _check(llm, [replacement], question, original):
             table = replacement
@@ -249,7 +263,7 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
             return await done(hit, shortlist, tier)
 
     # 3. the model browses the subject areas
-    hit, browsed = await _browse(llm, catalog, question, original)
+    hit, browsed = await _browse(llm, catalog, question, original, excluded)
     if hit:
         pool = [e for e in (catalog.get(i) for i in browsed) if e]
         return await done(hit, pool, "model browse")

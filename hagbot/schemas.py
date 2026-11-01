@@ -77,6 +77,15 @@ class ChartSpec(BaseModel):
     data: list[ChartPoint] = Field(default_factory=list)
 
 
+class TableAttempt(BaseModel):
+    table_id: str
+    status: Literal["verified", "rejected", "error"]
+    code: str = ""
+    metadata_sha256: str = ""
+    question_sha256: str = ""
+    via: str = ""
+
+
 class AnswerPart(BaseModel):
     """The answer to one sub-question, from one table."""
 
@@ -88,6 +97,7 @@ class AnswerPart(BaseModel):
     computation: Computation | None = None
     facts: list[Fact]
     verifications: list[TableVerification] = Field(default_factory=list)
+    attempts: list[TableAttempt] = Field(default_factory=list)
     chart: ChartSpec | None = None
     note: str = ""  # e.g. why the latest figure is from an earlier year, and where newer figures are
     ranking: list[dict] = []  # the ranked hitlist the table was chosen from: id, title, score, signals
@@ -118,6 +128,7 @@ class AnswerIssue(BaseModel):
     code: str
     message: str
     sub_question: str = ""
+    attempts: list[TableAttempt] = Field(default_factory=list)
 
 
 class Answer(BaseModel):

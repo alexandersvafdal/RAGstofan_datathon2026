@@ -1,7 +1,7 @@
 """Regressions at the boundary between the teammate's finder/arithmetic and the correctness harness."""
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 from hagbot.outcomes import AnswerFailure
 from hagbot.pipeline import Pipeline
@@ -97,6 +97,29 @@ class TeammateIntegrationTests(unittest.TestCase):
 
 
 class PipelineIntegrationTests(unittest.IsolatedAsyncioTestCase):
+    async def test_planned_cross_table_roles_control_the_calculation(self):
+        for operation, values, expected in (("share", (120, 100), 120), ("pct_change", (300, 200), 50)):
+            with self.subTest(operation=operation):
+                parts = [SubQuestion(question=f"Population group {i}", search_query="population", specification=spec(
+                    requirement("measure", "population", quote="population"))) for i in (0, 1)]
+                planned = Plan(sub_questions=parts, combination=Combination(operation=operation, first=0, second=1))
+                pipeline = Pipeline(llm=ScriptedLLM(planned), source=SourceStub(), catalog=CatalogStub())
+                with patch.object(pipeline, "_answer_part", new=AsyncMock(side_effect=[part(value=v) for v in values])), \
+                     patch("hagbot.pipeline.compose", new=AsyncMock(return_value=("Calculated result", "template"))):
+                    answer = await pipeline.answer(AskRequest(question="What share of population?", language="en"))
+                self.assertEqual(answer.status, "answered")
+                self.assertEqual(answer.parts[0].computation.op, operation)
+                self.assertEqual(answer.parts[0].computation.result, expected)
+
+    async def test_cross_table_share_without_operand_roles_is_not_marked_answered(self):
+        parts = [SubQuestion(question=f"Population group {i}", search_query="population", specification=spec(
+            requirement("measure", "population", quote="population"))) for i in (0, 1)]
+        pipeline = Pipeline(llm=ScriptedLLM(Plan(sub_questions=parts)), source=SourceStub(), catalog=CatalogStub())
+        with patch.object(pipeline, "_answer_part", new=AsyncMock(side_effect=[part(value=120), part(value=100)])):
+            answer = await pipeline.answer(AskRequest(question="What share of population?", language="en"))
+        self.assertEqual(answer.status, "unverified")
+        self.assertEqual(answer.issues[0].code, "missing_combination_roles")
+
     async def test_dictionary_fast_path_still_requires_source_validation(self):
         s = spec(requirement("measure", "inflation", quote="verðbólgan"))
         plan = Plan(sub_questions=[SubQuestion(question="Inflation?", search_query="inflation", specification=s)])

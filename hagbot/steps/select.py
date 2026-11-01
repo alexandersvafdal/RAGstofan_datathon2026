@@ -596,6 +596,12 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
 
 async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None,
                  *, specification: QuestionSpec, filter_question: str | None = None) -> Resolved:
+    # Reject source coverage that is already known to be impossible before paying for a selection model call.
+    for var in meta.variables:
+        if not var.values:
+            raise AnswerFailure("unavailable", "empty_dimension", var.text)
+        if var.time:
+            period_requirements(meta, var, filter_question or question)
     lines = []
     p = profile(meta)
     for var in meta.variables:

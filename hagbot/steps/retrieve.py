@@ -1,6 +1,8 @@
 """Step 2: find the table. Keyword search gives candidates, the model picks one or asks back."""
 
 import re
+from collections.abc import Collection
+from dataclasses import dataclass, field
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -29,6 +31,26 @@ class Retrieved(BaseModel):
     concepts: list[str] = []  # tiered finder: dictionary concepts the question matched
     ranking: list[dict] = []  # tiered finder: the ranked hitlist (id, title, score, signals)
     votes: str = ""  # voting on: how many votes the chosen table got, e.g. "3/3"
+
+
+@dataclass
+class RetrievalCache:
+    """Search results reused only within one sub-question; exclusions are applied after the cached search."""
+
+    keywords: dict[tuple[str, int], list[tuple[CatalogEntry, float]]] = field(default_factory=dict)
+    ranked: dict[tuple[str, int], dict[str, list[str]]] = field(default_factory=dict)
+
+    def search(self, catalog: Catalog, query: str, depth: int) -> list[tuple[CatalogEntry, float]]:
+        key = (query, depth)
+        if key not in self.keywords:
+            self.keywords[key] = catalog.search(query, depth)
+        return self.keywords[key]
+
+    def rankings(self, catalog: Catalog, query: str, depth: int) -> dict[str, list[str]]:
+        key = (query, depth)
+        if key not in self.ranked:
+            self.ranked[key] = catalog.rankings(query, depth)
+        return self.ranked[key]
 
 
 # Words with no table of their own, that mean different statistics: ask which one instead of guessing.
@@ -215,8 +237,11 @@ Never choose a table just because it is the closest search hit."""
 
 
 async def retrieve(llm: LLM, catalog: Catalog, question: str, search_query: str, k: int,
-                   forced_table: str | None = None, original: str = "") -> Retrieved:
+                   forced_table: str | None = None, original: str = "", *, excluded: Collection[str] = (),
+                   cache: RetrievalCache | None = None) -> Retrieved:
     if forced_table:
+        if forced_table in excluded:
+            raise AnswerFailure("unverified", "repeated_candidate", forced_table)
         if entry := catalog.get(forced_table):
             return Retrieved(table=entry, candidates=[entry.id])
         raise AnswerFailure("unavailable", "unknown_table", forced_table)
@@ -224,9 +249,13 @@ async def retrieve(llm: LLM, catalog: Catalog, question: str, search_query: str,
     for pattern, settled, tables in AMBIGUOUS:
         entries = [e for e in (catalog.get(t) for t in tables) if e]
         if re.search(pattern, q) and not re.search(settled, q) and len(entries) > 1:
+            if any(e.id in excluded for e in entries):
+                raise AnswerFailure("clarify", "ambiguous_question")
             return Retrieved(table=entries[0], alternatives=entries[1:], ambiguous=True, candidates=[e.id for e in entries])
     # the original wording matches Icelandic titles even when the planner mistranslates it
-    hits = catalog.search(f"{search_query} {question} {original}", 2 * k)
+    query = f"{search_query} {question} {original}"
+    hits = cache.search(catalog, query, 2 * k) if cache is not None else catalog.search(query, 2 * k)
+    hits = [(e, score) for e, score in hits if e.id not in excluded]
     if not hits:
         raise AnswerFailure("unverified", "no_candidates", question)
     entries = narrow([e for e, _ in hits], f"{question} {original}")[:k]

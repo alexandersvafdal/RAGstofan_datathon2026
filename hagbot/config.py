@@ -35,6 +35,7 @@ class Settings:
     cache_dir: Path = _path("CACHE_DIR", ".cache")
 
     retrieve_top_k: int = int(os.getenv("RETRIEVE_TOP_K", "15"))
+    retrieve_max_attempts: int = int(os.getenv("RETRIEVE_MAX_ATTEMPTS", "3"))
     # Majority voting on the model's choices (table pick, categories). VOTES=1 is off. With VOTE_MODELS set
     # ("qwen3.8:27b,gpt-oss:20b,..."), each model votes once; otherwise the main model votes VOTES times, the first
     # at temperature 0 and the rest at VOTE_TEMPERATURE so they can differ.
@@ -59,6 +60,10 @@ class Settings:
     example_langs: str = os.getenv("EXAMPLE_LANGS", "en")
     example_min_sim: float = float(os.getenv("EXAMPLE_MIN_SIM", "0"))  # cosine below which an example does not vote
     tables_meta_path: Path = _path("TABLES_META_PATH", "data/tables_20261030_224153.json")
+
+    def __post_init__(self):
+        if not 1 <= self.retrieve_max_attempts <= 5:
+            raise ValueError("RETRIEVE_MAX_ATTEMPTS must be between 1 and 5")
 
 
 settings = Settings()

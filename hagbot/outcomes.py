@@ -1,6 +1,14 @@
 """Expected abstentions, separate from failures of the model or data service."""
 
-from .schemas import FailureStatus
+from .schemas import FailureStatus, TableAttempt
+
+# Only evidence/coverage failures justify looking in another table. Malformed model output, ambiguity and
+# infrastructure failures stop the request rather than turning a retry into a weaker interpretation.
+RETRYABLE_TABLE_FAILURES = frozenset({
+    "incompatible_table", "incompatible_definition", "incompatible_unit", "incompatible_frequency",
+    "requested_filter_unavailable", "requested_period_unavailable", "requested_base_unavailable",
+    "requested_window_unavailable", "empty_dimension", "unknown_compatibility", "insufficient_metadata_evidence",
+})
 
 
 MESSAGES = {
@@ -33,8 +41,9 @@ class AnswerFailure(Exception):
     Detail is for the trace; the public message never treats a retrieval miss as proof of nonexistence.
     """
 
-    def __init__(self, status: FailureStatus, code: str, detail: str = ""):
+    def __init__(self, status: FailureStatus, code: str, detail: str = "", *, attempts: list[TableAttempt] | None = None):
         self.status, self.code, self.detail = status, code, detail
+        self.attempts = list(attempts or [])
         super().__init__(f"{code}: {detail}" if detail else code)
 
     def message(self, lang: str) -> str:

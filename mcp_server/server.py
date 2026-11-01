@@ -71,6 +71,8 @@ def _answer(a: dict) -> dict:
             part["note"] = p["note"]
         if p.get("verifications"):
             part["verifications"] = p["verifications"]
+        if p.get("attempts"):
+            part["attempts"] = p["attempts"]
         parts.append(part)
     if parts:
         out["parts"] = parts
