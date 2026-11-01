@@ -32,6 +32,7 @@ class Settings:
     data_ttl_s: float = float(os.getenv("DATA_TTL_S", "300"))
     freshness_policy: str = os.getenv("FRESHNESS_POLICY", "snapshot")
     snapshot_at: str = os.getenv("SNAPSHOT_AT", "2026-10-18")
+    dataset_geography: str = os.getenv("DATASET_GEOGRAPHY", "Iceland")
     answer_timeout_s: float = float(os.getenv("ANSWER_TIMEOUT_S", "30"))
     query_cell_limit: int = int(os.getenv("QUERY_CELL_LIMIT", "100000"))
 

@@ -4,7 +4,7 @@ import re
 
 from .outcomes import AnswerFailure
 from .schemas import AnswerPart, StatisticalContext
-from .semantics import _tags, _unit
+from .semantics import _tags, _unit, _country_dimensions
 from .sources import TableMeta
 from .specification import QuestionSpec
 from .text import normalize, tokens
@@ -27,7 +27,7 @@ def context_for(meta: TableMeta, selected: dict[str, list[str]], spec: QuestionS
                             *(note for v in meta.variables for code in selected[v.code] for note in v.value_notes.get(code, []))])
     definitions = {}
     for facet in DEFINITIONS:
-        stated = [canonical(r.value) for r in spec.requirements if r.facet == facet]
+        stated = [canonical(r.value) for r in spec.requirements if r.facet == facet and r.origin != "default"]
         observed = _tags(facet, " ".join(labels)) or _tags(facet, source_text)
         if stated or observed:
             definitions[facet] = sorted(set(stated) | observed)
@@ -40,7 +40,8 @@ def context_for(meta: TableMeta, selected: dict[str, list[str]], spec: QuestionS
         if facet and not var.time:
             population[facet] = sorted({canonical(var.label_of(c)) for c in selected[var.code]})
     for req in spec.requirements:
-        if req.facet == "population":
+        if req.facet == "population" and canonical(req.value) not in {
+                "population", "total population", "all people", "all persons", "persons", "residents", "total"}:
             population.setdefault("requested", []).append(canonical(req.value))
     measure = canonical(next(r.value for r in spec.requirements if r.facet == "measure"))
     unit = _unit(meta.unit) if meta.unit_source == "source" else None
@@ -54,8 +55,18 @@ def context_for(meta: TableMeta, selected: dict[str, list[str]], spec: QuestionS
                  "january_1" if re.search(r"\b1\.?\s*(?:january|januar)\b|\bjanuary\s+1(?:st)?\b|beginning of (?:the )?year", text) else
                  "period_total" if measure in {"births", "deaths", "overnight stays", "exports", "imports", "gross domestic product"} else
                  "point_in_time" if re.search(r"end of|as of|at the end|lok (?:ars|manad)|i lok", text) else "unknown")
+    countries = _country_dimensions(meta)
+    scope = canonical(meta.dataset_scope.get("geography", "")) if not countries else ""
+    if len(countries) == 1 and len(selected[countries[0].code]) == 1:
+        country = canonical(countries[0].label_of(selected[countries[0].code][0]))
+        scope = country if country != "total" else ""
+    geographic = [v for v in meta.variables if re.search(r"countr(?:y|ies)|municipal|region|area|town|sveitarfel|landshlut|domicile|logheimil", normalize(v.text))
+                  and not re.search(r"birth|citizen|origin|rikisfang|faeding|uppruni", normalize(v.text))]
+    total = bool(scope) and all(len(selected[v.code]) == 1 and canonical(v.label_of(selected[v.code][0])) in {"total", scope}
+                                for v in geographic)
+    geography = sorted({canonical(r.value) for r in spec.requirements if r.facet == "geography"})
     return StatisticalContext(measure=measure, definitions=definitions,
-                              geography=sorted({canonical(r.value) for r in spec.requirements if r.facet == "geography"}),
+                              geography=geography or ([scope] if total else []), geography_scope=scope, geography_total=total,
                               population=population, periods=periods, reference=reference,
                               unit=unit[0] if unit else "", scale=unit[1] if unit else 1,
                               explicit=sorted({r.facet for r in spec.requirements if r.origin != "default"}))
@@ -111,7 +122,9 @@ def validate_combination(first: AnswerPart, second: AnswerPart, operation: str) 
             raise AnswerFailure("unavailable", "incompatible_comparison_period")
         # Cross-table containment needs explicit common geography; otherwise
         # use a table with both the requested place and its published total.
-        if not a.geography or a.geography != b.geography:
+        contains = (b.geography_total and b.geography_scope and a.geography_scope == b.geography_scope
+                    and b.geography == [b.geography_scope])
+        if not a.geography or (a.geography != b.geography and not contains):
             raise AnswerFailure("unverified", "unproven_geographic_containment")
         if not _population_subset(a.population, b.population):
             raise AnswerFailure("unavailable", "incompatible_share_population")

@@ -40,13 +40,17 @@ The source adapters preserve optional description, notes, update information and
 Catalog title fallbacks and unit hints cannot be cited as source evidence. Generated catalog enrichment,
 dictionary mappings and vector similarity do not enter the evidence profile.
 
-The selection model returns `compatibility.checks` in the same call that selects codes. Each requirement index
-must occur exactly once, with a supported/unsupported/unknown verdict and exact field/quote references.
+The selection model returns `compatibility.checks` in the same call that selects codes. Each meaningful requirement
+index must occur exactly once, with a supported/unsupported/unknown verdict and exact field/quote references.
+Unrequested policy preferences may be omitted; code records their actual support or uncertainty separately.
+Requirements may be established by fixed source definitions or dataset reporting context, without a redundant
+row or column. Context never overrides an explicit conflicting country selection or source definition.
 
 The gate rejects:
 
 - Missing/duplicate checks, invented fields, nonexistent quotes and citations of unselected values.
-- Unknown compatibility or support without evidence.
+- Unknown compatibility or support without evidence for meaningful constraints. Unrequested total/latest/adjustment
+  preferences are recorded separately and do not require invented fields.
 - Known definition conflicts: income/wealth, mean/median, employment/unemployment, price basis, tax basis,
   adjustment and CPI level versus the annual change used for inflation.
 - Additional conflicting selected statistics, even if the requested statistic is present too.

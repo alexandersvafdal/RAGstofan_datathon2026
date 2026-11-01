@@ -59,8 +59,7 @@ Each operand sub-question uses operation=value; the cross-table operation belong
 Never split a comparison within one measure: "how many more men than women", "Reykjavík vs Kópavogur",
 "share of foreigners", "share of the population living in Reykjavík", "change from 2025 to 2026" are each ONE
 sub-question, because one table holds both sides (a municipality table also has the whole country as a total).
-"How many people live in Kópavogur and Hafnarfjörður together?" is a supported lookup: ONE population
-sub-question with operation=sum and separate geography requirements for both named towns.
+Adding categories of one measure is a single lookup with operation=sum, keeping each requested category.
 A comparison of two different measures ("the wage index compared with the consumer price index", "launavísitala
 borin saman við vísitölu neysluverðs", "exports and imports") is TWO sub-questions, one per measure, over the same
 period; without a period, each asks for the development over the last years.
@@ -71,9 +70,15 @@ measure and every requested definition/filter: statistic (mean/median/total/rate
 period, unit, frequency, adjustment, price basis (current/constant prices), tax basis (gross/net).
 Each requirement records its origin and an exact quote from the original question (user) or supplied context.
 Translate value to canonical English, but do not translate the supporting quote. Never invent a required filter.
+Requirements describe meaning, not mandatory table columns. A place, period, population or statistical definition
+can already be fixed by the dataset or table. Generic "people/population" is the measure, not an extra population
+restriction; use population for a specific subgroup. Context such as a dataset's reporting country need not become
+a separate row/column filter. Preserve explicit distinctions, without inventing additional restrictions.
 Allowed policy defaults only: geography=Iceland, period=latest, adjustment=unadjusted, statistic=total.
 Defaults have origin=default and quote="". A mean, median, income measure, wealth measure or age threshold is never
 a default: clarify if the wording does not determine it. Record any unresolved ambiguities instead of guessing.
+Do not expand every possible facet into a requirement. Add only meaningful definitions/context for the question;
+unrequested latest/total/adjustment policies are preferences, not extra conditions the data must prove.
 Use operation=value for a published annual rate such as inflation or GDP growth; difference/pct_change are for
 explicit comparisons, sum for adding named categories, series for trends, rank for category listings.
 Do not omit a requirement when translating.

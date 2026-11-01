@@ -116,8 +116,9 @@ def validate_filters(meta: TableMeta, selected: dict[str, list[str]], requiremen
     quoted = " ".join(tokens(quoted_question or question))
     for req in requirements:
         mention = " ".join(tokens(req.mention))
-        if mention in (covered_scopes or set()):
-            # Scope established by source metadata needs no query dimension.
+        if mention in (covered_scopes or set()) and (req.dimension not in selected or not req.values):
+            # An independently verified table/dataset definition needs no
+            # synthetic filter. Explicit contradictory codes still fail below.
             continue
         if not mention or f" {mention} " not in f" {quoted} ":
             # Models sometimes put policy defaults in this explicit-filter manifest.
@@ -150,7 +151,7 @@ def validate_filters(meta: TableMeta, selected: dict[str, list[str]], requiremen
                 raise AnswerFailure("unverified", "requested_period_changed", question)
             continue
         # "in Iceland" is a geography, not a request to select Icelandic citizenship or birthplace.
-        origin = re.search(r"citizen|birth|origin|country|rikisfang|faedingarland|uppruni", normalize(var.text))
+        origin = re.search(r"citizen|birth|origin|rikisfang|faedingarland|uppruni", normalize(var.text))
         explicit_origin = re.search(r"citizen|born|birth|origin|rikisborg|faedd|faeding|uppruna", normalize(question))
         mentions = []
         geography = re.search(r"municipal|region|area|town|sveitarfel|landshlut|byggd", normalize(var.text))

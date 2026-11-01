@@ -39,6 +39,22 @@ fetching. No additional LLM validation round trips are introduced.
 
 ## Cross-table calculations
 
+Requirements describe meaning rather than mandatory columns. Dataset reporting context (`DATASET_GEOGRAPHY`),
+fixed table definitions and selected values can each establish a requirement. A national table does not need a
+country row; fixed currency, population and period definitions do not require redundant filters. Country-varying
+tables still require the correct country selection, and explicit source contradictions override reporting context.
+Context use is recorded in verification amendments. Missing synthetic filters are ignored only after independent
+compatibility verification; explicit contradictory codes remain errors.
+
+Unrequested total/latest/adjustment defaults are query preferences, not extra proof obligations. Their uncertainty
+can remain visible in the audit without vetoing otherwise supported data. Explicitly requested definitions still
+require evidence and cannot be silently substituted. Relative windows are derived from source periods rather than
+requiring the window length to appear as a source label.
+
+The planner owns operations. The selection model supplies codes and evidence for each lookup, without choosing
+another operation. Parent shares/differences cannot leak into scalar operand lookups. Cross-table geographic
+containment can use a common reporting scope and a verified country total without demanding identical place labels.
+
 Executed `StatisticalContext` records bind measure, definitions, population, geography, periods, temporal reference
 basis, unit/scale and explicit axes. Shares/differences/percentage changes require compatible measure, statistic,
 adjustment, price/tax basis, unit/scale, frequency, reference basis and source vintage. Different latest/default

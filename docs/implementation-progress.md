@@ -48,6 +48,13 @@ milestones do not claim universal semantic correctness or measured sub-30-second
 
 ## Historical false-refusal calibration and live preview verification
 
+The next general false-refusal correction accepts fixed table definitions and dataset reporting context without
+requiring redundant dimensions. Unrequested total/latest/adjustment preferences no longer veto supported data.
+Scalar operand lookups cannot inherit the parent calculation; geographic shares can use a verified national total
+within a common reporting scope. Explicit conflicting filters remain protected. All 176 offline regressions pass
+locally, including synthetic scope, unit, population, period and composed-share cases. Serving-model verification
+of this correction is still pending; these checks do not establish coverage or latency distributions.
+
 Before the implementation checkpoint above, runtime code through `acefe83` fixed observed false rejections without adding model calls:
 
 - Misreported implicit defaults no longer reject a query when the executed codes match the resolver's policy.

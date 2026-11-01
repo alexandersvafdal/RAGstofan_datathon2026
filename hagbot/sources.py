@@ -58,6 +58,7 @@ class TableMeta(BaseModel):
     retrieved_at: str = ""
     snapshot_at: str = ""
     revision: str = ""
+    dataset_scope: dict[str, str] = {}
     variables: list[Variable]
 
     def var(self, code: str) -> Variable:
@@ -111,7 +112,8 @@ class FixtureSource:
 
     async def meta(self, table_id: str) -> TableMeta:
         t = self._get(table_id)
-        return TableMeta(**{**t["meta"], "unit": t.get("unit", ""), "unit_source": "source", "source_kind": "fixture"})
+        return TableMeta(**{**t["meta"], "unit": t.get("unit", ""), "unit_source": "source", "source_kind": "fixture",
+                            "dataset_scope": {"geography": settings.dataset_geography} if settings.dataset_geography else {}})
 
     async def query(self, table_id: str, selection: dict[str, list[str]]) -> list[Row]:
         meta = await self.meta(table_id)
@@ -261,6 +263,7 @@ def _meta_from_api(table_id: str, d: dict, catalog: Catalog) -> TableMeta:
                      unit_source="source" if unit else "catalog" if entry and entry.unit else "unknown",
                      description=d.get("description") if isinstance(d.get("description"), str) else "",
                      source=d.get("source") if isinstance(d.get("source"), str) else "",
+                     dataset_scope={"geography": settings.dataset_geography} if settings.dataset_geography else {},
                      notes=notes, updated=d.get("updated") if isinstance(d.get("updated"), str) else "",
                      variables=variables)
 

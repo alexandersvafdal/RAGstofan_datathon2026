@@ -99,6 +99,8 @@ class StatisticalContext(BaseModel):
     measure: str
     definitions: dict[str, list[str]] = Field(default_factory=dict)
     geography: list[str] = Field(default_factory=list)
+    geography_scope: str = ""
+    geography_total: bool = False
     population: dict[str, list[str]] = Field(default_factory=dict)
     periods: list[str] = Field(default_factory=list)
     reference: str = "unknown"

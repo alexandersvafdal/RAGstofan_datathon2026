@@ -330,7 +330,7 @@ class Pipeline:
                                          question_sha256=question_sha, via=r.via))
             chosen = {meta.var(c).text: [meta.var(c).label_of(v) for v in vals] for c, vals in res.selections.items()}
             steps.append(Step(name="select", ms=t.ms(),
-                              detail=f"{res.operation} {chosen}; verified {len(res.verification.checks)} metadata requirements"
+                              detail=f"{res.operation} {chosen}; supported {sum(c.verdict == 'supported' for c in res.verification.checks)} metadata requirements"
                                      + (f" notes: {res.notes}" if res.notes else "")))
             return r, meta, res, attempts
         raise AnswerFailure("unverified", "candidate_limit_reached", attempts=attempts)

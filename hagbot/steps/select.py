@@ -21,13 +21,8 @@ from .constraints import RequestedFilter, has_requested_period, period_requireme
 Op = Literal["value", "series", "difference", "pct_change", "share", "sum", "max", "min"]
 
 
-class Selection(BaseModel):
+class SelectionCodes(BaseModel):
     selections: dict[str, list[str]] = Field(description="dimension code -> list of value codes")
-    operation: Op = Field(description=(
-        "value: report the number(s). series: show a trend or comparison over many values. "
-        "difference / pct_change: change between the first and last selected value of compare_dimension. "
-        "share: part divided by whole within compare_dimension. "
-        "max / min: the highest or lowest value along compare_dimension (\"when was it highest\")."))
     compare_dimension: str | None = Field(default=None, description="dimension code the operation runs along")
     part: str | None = Field(default=None, description="value code of the part, for share")
     whole: str | None = Field(default=None, description="value code of the whole (usually the total), for share")
@@ -35,6 +30,10 @@ class Selection(BaseModel):
         "Every explicit filter required by THIS part of the question, including unsupported filters. "
         "Quote the user's wording; do not record defaults as requested filters."))
     compatibility: Compatibility = Field(description="Check every indexed requirement against cited source metadata")
+
+
+class Selection(SelectionCodes):
+    operation: Op | Literal["rank"]
 
 
 class Resolved(BaseModel):
@@ -70,12 +69,17 @@ def _mention_order(var: Variable, codes: list[str], question: str) -> list[str] 
 
 
 SYSTEM = """You fill in a query against one Statistics Iceland table.
+The question specification supplies the operation. Do not choose another operation or perform a calculation
+belonging to a larger question. Fill only THIS lookup's codes and comparison roles.
 For every dimension choose the value codes the question needs, copied exactly from the options.
-Record EVERY explicit filter in requested_filters, quoting the question. Include an unavailable filter with
-values=[] (and dimension=null if the dimension is absent). Never replace it by a total, a nearby period or another
-category, or omit it because the table cannot answer it. For multiple parts, record only this part's requirements.
+Record explicit VALUE FILTERS in requested_filters, quoting the question. A requirement can instead be satisfied
+by fixed table definitions or dataset context; those do not need an extra column or row and are not missing filters.
+Include values=[] for an explicit restriction the source genuinely cannot represent. Never replace a requested
+value by a different category or nearby period. Record only THIS lookup's requirements.
 Do not put implicit defaults such as "latest" or "Total" in requested_filters unless the question states them.
 Check EVERY requirement of the independent question specification in compatibility, using its zero-based index.
+Default latest/total/adjustment preferences are resolved in code; they do not require invented supporting fields.
+Keep material explicit constraints distinct from these preferences and the dataset's reporting context.
 Use supported only when source metadata establishes that the SELECTED query represents the requirement. Cite
 exact field IDs and quotes. A listed but unselected mean/median/category cannot support the query. Unknown is a
 valid result: never guess definitions, adjustment, units or coverage. A catalog unit hint is not source evidence.
@@ -85,8 +89,10 @@ Copy selection codes from options[].code, never from a label. Copy evidence.fiel
 field IDs; a dimension field contains only its label, while each option has its own value field.
 For geography cite a geographic option or source text establishing the national scope. A sex/age "Total" alone
 does not establish the country. For the latest period, cite the selected time option's field and label.
-An explicit national survey source (e.g. "Icelandic Labour Force Survey") establishes Icelandic geographic scope;
-a separate country dimension is not needed. Such table-level scope is checked in compatibility, not requested_filters.
+The dataset:geography field supplies reporting context when the table does not vary by country. A national table
+need not contain a country row. Use its title/definition together with this context to assess coverage. Explicit
+source coverage or a country dimension takes precedence over dataset context. Country of birth/citizenship is
+not the place where a population lives. Verify contextual scope in compatibility, not as a synthetic value filter.
 For the measure cite the source title/description or selected measure option that actually names it: a municipality
 label proves the place, not that the table measures population. For example a population sum needs the population
 title for its measure check and each selected municipality's own option field for its geography checks.
@@ -263,7 +269,14 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             filter_question: str | None = None, specification: QuestionSpec | None = None) -> Resolved:
     """Map equivalent labels to codes; never repair an unavailable requested value into a default."""
     notes, out, beyond, alternatives = [], {}, None, {}
+    quoted_question = question
     own_question = filter_question or part or question
+    if specification:
+        periods = " ".join(req.value for req in specification.requirements if req.facet == "period" and req.origin != "default")
+        if periods:
+            own_question = f"{own_question} {periods}"
+    question = own_question  # calculations and category trimming belong to this lookup, not its parent request
+    part = own_question
     known_keys = {normalize(v.code) for v in meta.variables} | {normalize(v.text) for v in meta.variables}
     if unknown := [k for k in sel.selections if normalize(k) not in known_keys]:
         raise AnswerFailure("unverified", "invalid_dimension", str(unknown))
@@ -318,7 +331,8 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     # a place the question names that no option and no title of this table carries: say so, rather than answer as if
     place_note = None
     from .retrieve import named_places
-    texts = [t for v in meta.variables if not v.time for t in v.value_texts] + [meta.title]
+    texts = [t for v in meta.variables if not v.time for t in v.value_texts] + \
+        [meta.title, meta.description, meta.source, *meta.dataset_scope.values()]
     places = named_places(part or question)
     def has_place(label: str, place: str) -> bool:
         return any(_same_word(t, place) for t in tokens(label))
@@ -594,15 +608,25 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             op = "rank"
             notes.append(f"{var.text}: {'the largest ' + str(top) + ' of ' if top else ''}{len(kids)} categories"
                          + (f" under {var.label_of(named(var, question))!r}" if named(var, question) else ""))
-    validate_filters(meta, out, sel.requested_filters, own_question, quoted_question=question,
-                     defaults={var.code: _optional_default(var) for var in meta.variables},
-                     covered_scopes={" ".join(tokens(req.value)) for req in specification.requirements
-                                     if scope_evidence(meta, req, out) is not None} if specification else set())
     verification = None
     if specification is not None:
         if op != specification.operation:
             raise AnswerFailure("unverified", "operation_changed", f"{specification.operation} -> {op}")
         verification = validate_compatibility(meta, out, specification, sel.compatibility)
+    covered = set()
+    if verification:
+        for check in verification.checks:
+            req = specification.requirements[check.requirement]
+            if check.verdict == "supported" and any(not ref.field.startswith(("value:", "note-value:")) for ref in check.evidence):
+                covered.update(" ".join(tokens(value)) for value in (req.value, req.quote) if value)
+        quoted = " " + " ".join(tokens(quoted_question)) + " "
+        covered.update(" ".join(tokens(req.value)) for req in specification.requirements
+                       if req.origin == "default" and req.facet in {"period", "statistic", "adjustment"}
+                       and f" {' '.join(tokens(req.value))} " not in quoted)
+    validate_filters(meta, out, sel.requested_filters, own_question, quoted_question=quoted_question,
+                     defaults={var.code: _optional_default(var) for var in meta.variables},
+                     covered_scopes=covered | ({" ".join(tokens(req.value)) for req in specification.requirements
+                                               if scope_evidence(meta, req, out) is not None} if specification else set()))
     return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes,
                     window_note=window_note, breakdown=breakdown, top=top, verification=verification,
                     beyond=beyond, place_note=place_note, alternatives=alternatives)
@@ -620,10 +644,11 @@ async def select(llm: LLM, meta: TableMeta, question: str, original: str | None 
     p = profile(meta)
     for var in meta.variables:
         options = [{"code": c, "label": t, "field": f"value:{var.code}:{c}"}
-                   for c, t in _options_for_prompt(var, f"{original or ''} {question}")]
+                   for c, t in _options_for_prompt(var, filter_question or question)]
         dimensions.append({"code": var.code, "label": var.text, "field": f"dimension:{var.code}",
                            "time": var.time, "total_options": len(var.values), "options": options})
-    asked = f"User asked: {original}\nThis part: {question}" if original and original != question else f"Question: {question}"
+    quotes = list(dict.fromkeys(r.quote for r in specification.requirements if r.quote))
+    asked = f"This lookup only: {question}\nOriginal wording for quotation only: {json.dumps(quotes, ensure_ascii=False)}"
     fields = {k: v for k, v in p.fields.items() if not k.startswith(("value:", "dimension:"))}
     hint = f"\nCatalog unit hint (not citable evidence): {p.unit_hint}" if p.unit_hint else ""
     user = (f"{asked}\n\nQuestion specification (requirements are indexed from 0):\n{specification.model_dump_json()}\n\n"
@@ -632,10 +657,12 @@ async def select(llm: LLM, meta: TableMeta, question: str, original: str | None 
             "Dimensions (each field contains its label; an option's field contains only that option's label):\n"
             + json.dumps(dimensions, ensure_ascii=False))
     if not voting_on():
-        sel = await llm.complete_json(SYSTEM, user, Selection)
+        codes = await llm.complete_json(SYSTEM, user, SelectionCodes)
+        sel = Selection(**codes.model_dump(exclude={"operation"}), operation=specification.operation)
         return resolve(meta, sel, f"{original or ''} {question}", part=question, filter_question=filter_question,
                        specification=specification)
-    sel, agreement = vote_selection(await ask_all(llm, SYSTEM, user, Selection))
+    codes = await ask_all(llm, SYSTEM, user, SelectionCodes)
+    sel, agreement = vote_selection([Selection(**c.model_dump(exclude={"operation"}), operation=specification.operation) for c in codes])
     res = resolve(meta, sel, f"{original or ''} {question}", part=question, filter_question=filter_question,
                   specification=specification)
     res.notes.insert(0, "votes: " + ", ".join(f"{(meta.var(k).text if k in {v.code for v in meta.variables} else k)} {a}"

@@ -12,8 +12,9 @@ from pydantic import BaseModel
 from .outcomes import AnswerFailure
 from .catalog import _same_word
 from .sources import TableMeta, table_url
-from .specification import Compatibility, Evidence, QuestionSpec, Requirement, TableVerification
+from .specification import Compatibility, Evidence, QuestionSpec, Requirement, RequirementCheck, TableVerification
 from .text import normalize, tokens
+from .config import settings
 
 
 def fingerprint(value) -> str:
@@ -34,6 +35,8 @@ def profile(meta: TableMeta) -> TableProfile:
         fields["description"] = meta.description
     if meta.source:
         fields["source"] = meta.source
+    if meta.dataset_scope.get("geography") and not _country_dimensions(meta):
+        fields["dataset:geography"] = meta.dataset_scope["geography"]
     fields.update({f"note:{i}": note for i, note in enumerate(meta.notes)})
     if meta.unit and meta.unit_source == "source":
         fields["unit"] = meta.unit
@@ -59,7 +62,8 @@ def validate_specification(spec: QuestionSpec, question: str, context: str = "")
         raise AnswerFailure("clarify", "ambiguous_specification", "; ".join(spec.ambiguities))
     if sum(r.facet == "measure" for r in spec.requirements) != 1:
         raise AnswerFailure("unverified", "invalid_specification", "exactly one measure is required")
-    defaults = {"geography": {"iceland"}, "period": {"latest"}, "adjustment": {"unadjusted"}, "statistic": {"total"}}
+    defaults = {"geography": {normalize(settings.dataset_geography)} if settings.dataset_geography else set(),
+                "period": {"latest"}, "adjustment": {"unadjusted"}, "statistic": {"total"}}
     for req in spec.requirements:
         if req.origin == "default":
             if req.quote or normalize(req.value) not in defaults.get(req.facet, set()):
@@ -128,29 +132,43 @@ def _unit(text: str) -> tuple[str, int] | None:
     return next(iter(found)), scale
 
 
+def _country_dimensions(meta: TableMeta):
+    return [v for v in meta.variables if re.search(r"\bcountr(?:y|ies)\b|\bland\b|\blond\b", normalize(v.text))
+            and not re.search(r"birth|citizen|origin|rikisfang|faeding|uppruni", normalize(v.text))]
+
+
 def scope_evidence(meta: TableMeta, req: Requirement,
                    selections: dict[str, list[str]] | None = None) -> Evidence | None:
-    """A named national survey can establish scope without a country filter.
+    """Bind geography through selected categories, fixed source scope or dataset context.
 
-    The publisher's name alone (Statistics Iceland) is deliberately insufficient:
-    it also publishes international comparisons. A country/area dimension must
-    instead be checked against its selected option in the ordinary path.
+    Dataset context is a default reporting scope, not a waiver for a source
+    contradiction or for selecting the wrong country in a multi-country table.
     """
     if req.facet != "geography":
         return None
     geographic = [v for v in meta.variables if re.search(
-        r"country|municipal|region|area|town|sveitarfel|landshlut|domicile|logheimil", normalize(v.text))
+        r"countr(?:y|ies)|municipal|region|area|town|sveitarfel|landshlut|domicile|logheimil", normalize(v.text))
         and not re.search(r"birth|citizen|origin|rikisfang|faeding|uppruni", normalize(v.text))]
     names = tokens(req.value)
     if len(names) == 1 and len(names[0]) >= 4:
         for var in geographic:
             matches = [code for code, label in zip(var.values, var.value_texts)
                        if any(_same_word(word, names[0]) for word in tokens(label) if len(word) >= 4)]
+            if len(matches) == 1 and selections is not None and matches[0] not in selections.get(var.code, []):
+                raise AnswerFailure("unverified", "requested_filter_changed", req.value)
             if len(matches) == 1 and matches[0] in (selections or {}).get(var.code, []):
                 return Evidence(field=f"value:{var.code}:{matches[0]}", quote=var.label_of(matches[0]))
-    if (normalize(req.value) == "iceland" and not geographic
-            and re.fullmatch(r"icelandic labo[u]?r force survey", normalize(meta.source).strip())):
-        return Evidence(field="source", quote=meta.source)
+    if not geographic:
+        for field, text in (("title", meta.title), ("description", meta.description), ("source", meta.source)):
+            if field == "title" and meta.title_source != "source":
+                continue
+            if field == "source" and not re.search(r"\bsurvey\b|\bcensus\b|\bregister\b|\bstudy\b|rannsokn|talning", normalize(text)):
+                continue  # a publisher name alone is not table coverage
+            if names and all(any(_same_word(word, name) for word in tokens(text)) for name in names):
+                return Evidence(field=field, quote=text)
+    context = meta.dataset_scope.get("geography", "")
+    if not _country_dimensions(meta) and normalize(context) == normalize(req.value):
+        return Evidence(field="dataset:geography", quote=context)
     return None
 
 
@@ -168,15 +186,30 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
                 allowed[f"note-value:{var.code}:{code}:{i}"] = note
             if not var.time:
                 selected_labels.append(p.fields[key])
+    optional = {i for i, req in enumerate(spec.requirements) if req.origin == "default"
+                and req.facet in {"period", "statistic", "adjustment"}}
     indices = [check.requirement for check in proof.checks]
-    if sorted(indices) != list(range(len(spec.requirements))):
+    required = set(range(len(spec.requirements))) - optional
+    if len(indices) != len(set(indices)) or not required <= set(indices) or not set(indices) <= set(range(len(spec.requirements))):
         raise AnswerFailure("unverified", "incomplete_compatibility", str(indices))
     desired = {facet: set().union(*(_tags(facet, r.value) for r in spec.requirements if r.facet == facet))
                for facet in _AXES}
     checks, amendments = [], []
-    for check in proof.checks:
+    supplied = {check.requirement: check for check in proof.checks}
+    for index, req in enumerate(spec.requirements):
+        if index in optional:
+            # Defaults are query policies/preferences, not new user demands.
+            # Preserve uncertainty rather than invent evidence or reject a
+            # valid source because an optional definition was never requested.
+            refs = []
+            if req.facet == "period" and normalize(req.value) == "latest":
+                refs = [Evidence(field=f"value:{v.code}:{v.values[-1]}", quote=v.value_texts[-1])
+                        for v in meta.variables if v.time and v.values and selections[v.code] == [v.values[-1]]]
+            checks.append(RequirementCheck(requirement=index, verdict="supported" if refs else "unknown", evidence=refs))
+            amendments.append(f"policy default {req.facet}={req.value}; not an additional explicit constraint")
+            continue
+        check = supplied[index]
         check = check.model_copy(deep=True)
-        req = spec.requirements[check.requirement]
         for ref in check.evidence:
             quote = " ".join(tokens(ref.quote))
             if ref.field not in allowed or not quote or f" {quote} " not in f" {' '.join(tokens(allowed[ref.field]))} ":
@@ -190,12 +223,14 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
                 amendments.append(f"metadata citation {ref.field} -> {matches[0]} (unique exact source label)")
                 ref.field = matches[0]
         scope = scope_evidence(meta, req, selections)
-        if scope is not None:
+        if scope is not None and (scope.field != "dataset:geography" or check.verdict == "supported"):
             # The selected geographic option or explicit national survey scope
             # is code-verifiable, regardless of the model's vote.
             check.verdict = "supported"
             if scope not in check.evidence:
                 check.evidence.append(scope)
+            if scope.field == "dataset:geography":
+                amendments.append(f"{req.facet}: {req.value} satisfied by dataset reporting context")
         elif check.verdict == "unknown" or not check.evidence:
             raise AnswerFailure("unverified", "unknown_compatibility", f"{req.facet}: {req.value}")
         elif check.verdict == "unsupported":
@@ -237,12 +272,17 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
         if wanted and not wanted <= _tags(req.facet, cited):
             raise AnswerFailure("unverified", "insufficient_metadata_evidence", f"{req.facet}: {req.value}")
         if req.facet in ("population", "geography", "period"):
-            numbers = set(re.findall(r"\d+", req.value))
+            relative_period = req.facet == "period" and re.search(
+                r"\b(last|past|previous|latest|sidustu|seinustu|undanfarin\w*)\b", normalize(req.value)) \
+                and not re.search(r"\b(?:1\d|2\d)\d\d\b", req.value)
+            numbers = set() if relative_period else set(re.findall(r"\d+", req.value))
             if not numbers <= set(re.findall(r"\d+", cited)):
                 raise AnswerFailure("unverified", "insufficient_metadata_evidence", req.value)
         if req.facet == "geography":
             names = [w for w in tokens(req.value) if len(w) >= 4]
-            cited_words = tokens(cited)
+            geo_cited = " ".join(allowed[ref.field] for ref in check.evidence if ref.field != "source" or
+                                 re.search(r"\bsurvey\b|\bcensus\b|\bregister\b|\bstudy\b|rannsokn|talning", normalize(allowed[ref.field])))
+            cited_words = tokens(geo_cited)
             literal = names and all(any(a.startswith(b) or b.startswith(a) for b in cited_words if len(b) >= 4) for a in names)
             if not literal and scope is None:
                 raise AnswerFailure("unverified", "insufficient_metadata_evidence", req.value)
