@@ -34,12 +34,14 @@ cache expiry and source revision checks, snapshot/live provenance, cross-table s
 claims, an overall request deadline and a repeated evaluation runner. See [implementation details](correctness-implementation.md).
 The dictionary harness and shared tiered finder remain intact. Final rendering removes the writer-model call.
 
-Code changes are local and will reach only the feature preview through GitHub. The user explicitly authorized
-Spark regression tests on their feature branch; the main checkout and app remain outside this work.
-Local verification: 163 offline regression tests, JavaScript syntax and whitespace checks pass. Spark regression
-verification and profile provisioning follow publication; they do not constitute live-model evaluation.
+Implementation commit `1d11fc0` is published on `codex/answer-integrity` and was pulled from GitHub into the
+isolated Spark preview. That checkout is now on the exact `codex/answer-integrity` branch. The main checkout/app
+remain untouched. All 163 offline regression tests pass locally and on the Spark; JavaScript syntax and whitespace
+checks pass. All 1857 source profiles were provisioned with no failures. The restarted preview is healthy on
+port 8002 with snapshot policy (2026-10-18), profiles loaded and a 30-second request budget. These checks do not
+constitute live-model evaluation.
 
-Remaining progression is evaluation: provision profiles for the chosen source policy, run the repeated development
+Remaining progression is evaluation: run the repeated development
 set, inspect accuracy/coverage/false refusals and latency separately, calibrate on development evidence, then run a
 separate frozen/holdout measurement. No live evaluation of this implementation has been performed yet. These
 milestones do not claim universal semantic correctness or measured sub-30-second success.
