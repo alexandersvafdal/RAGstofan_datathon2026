@@ -54,6 +54,15 @@ our measuring, went into the table search.
 
 \section*{How we find the table}
 
+\textbf{In short.} Think of how a person would look for the right table. First they check whether they already know
+where it is: our \emph{dictionary} links everyday words to the right tables. If not, they search the list of tables
+by its words. If that fails, they read through the whole list and pick the most likely ones. We do the same, in that
+order. Every time a table comes up, the model is asked a plain question before we use it: \emph{can this table
+answer the question?} If the answer is no, we move on to the next way of looking. If no table can answer the whole
+question, it probably needs more than one, so we split it into smaller questions and look for a table for each.
+If we still cannot find one, we show the user the best candidates and let them choose. The rest of this section
+explains each piece.
+
 \textbf{The dictionary.} A large share of our effort went into a bilingual dictionary (\texttt{data/keywords.json})
 that maps the words people actually use to Statistics Iceland's subjects and tables. It holds 212 subjects with 2,810
 English and Icelandic words and inflections (\emph{verðbólga, verðbólgan, inflation, cost of living} $\rightarrow$
