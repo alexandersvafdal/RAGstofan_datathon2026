@@ -73,6 +73,7 @@ For every dimension choose the value codes the question needs, copied exactly fr
 Record EVERY explicit filter in requested_filters, quoting the question. Include an unavailable filter with
 values=[] (and dimension=null if the dimension is absent). Never replace it by a total, a nearby period or another
 category, or omit it because the table cannot answer it. For multiple parts, record only this part's requirements.
+Do not put implicit defaults such as "latest" or "Total" in requested_filters unless the question states them.
 Check EVERY requirement of the independent question specification in compatibility, using its zero-based index.
 Use supported only when source metadata establishes that the SELECTED query represents the requirement. Cite
 exact field IDs and quotes. A listed but unselected mean/median/category cannot support the query. Unknown is a
@@ -583,7 +584,8 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             op = "rank"
             notes.append(f"{var.text}: {'the largest ' + str(top) + ' of ' if top else ''}{len(kids)} categories"
                          + (f" under {var.label_of(named(var, question))!r}" if named(var, question) else ""))
-    validate_filters(meta, out, sel.requested_filters, own_question, quoted_question=question)
+    validate_filters(meta, out, sel.requested_filters, own_question, quoted_question=question,
+                     defaults={var.code: _optional_default(var) for var in meta.variables})
     verification = None
     if specification is not None:
         if op != specification.operation:

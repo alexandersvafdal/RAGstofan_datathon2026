@@ -38,7 +38,7 @@ class Plan(BaseModel):
 
 SYSTEM = """You plan lookups in Statistics Iceland's official statistics tables.
 First decide whether the WHOLE request is supported. Use outcome=lookup for statistical lookups, series,
-differences, percentage changes, shares, rankings and ratios to population using these tables.
+differences, percentage changes, sums of named categories, shares, rankings and ratios to population using these tables.
 Use outcome=clarify if a measure or population has materially different interpretations (e.g. 'how rich are old
 people': income or net wealth, and which age group?). Return no sub_questions for clarify.
 Use outcome=out_of_scope for personal/private records, general non-statistical tasks, causal explanations or
@@ -56,6 +56,8 @@ Each operand sub-question uses operation=value; the cross-table operation belong
 Never split a comparison within one measure: "how many more men than women", "Reykjavík vs Kópavogur",
 "share of foreigners", "share of the population living in Reykjavík", "change from 2025 to 2026" are each ONE
 sub-question, because one table holds both sides (a municipality table also has the whole country as a total).
+"How many people live in Kópavogur and Hafnarfjörður together?" is a supported lookup: ONE population
+sub-question with operation=sum and separate geography requirements for both named towns.
 A comparison of two different measures ("the wage index compared with the consumer price index", "launavísitala
 borin saman við vísitölu neysluverðs", "exports and imports") is TWO sub-questions, one per measure, over the same
 period; without a period, each asks for the development over the last years.

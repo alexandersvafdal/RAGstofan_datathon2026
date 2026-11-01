@@ -288,6 +288,33 @@ class SelectionTests(FailureAssertions, unittest.TestCase):
                 self.assert_failure(code, resolve, meta(), selection(selections={}, operation="value", requested_filters=[
                     RequestedFilter(dimension="Sex", mention=mention, values=values)]), "How many men?")
 
+    def test_implicit_defaults_in_filter_manifest_do_not_reject_valid_query(self):
+        result = resolve(meta(), selection(selections={}, operation="value", requested_filters=[
+            RequestedFilter(dimension="Year", mention="latest", values=["2025"]),
+            RequestedFilter(dimension="Sex", mention="Total", values=["0"])]), "Population?")
+        self.assertEqual(result.selections, {"Year": ["2025"], "Area": ["0"], "Sex": ["0"]})
+
+    def test_default_manifest_cannot_hide_explicit_year_or_gender(self):
+        for question, code in [("Population in 2024?", "requested_period_changed"),
+                               ("Population of women?", "requested_filter_changed")]:
+            with self.subTest(question=question):
+                self.assert_failure(code, resolve, meta(), selection(selections={"Year": ["2025"]}, operation="value", requested_filters=[
+                    RequestedFilter(dimension="Year", mention="latest", values=["2025"]),
+                    RequestedFilter(dimension="Sex", mention="Total", values=["0"])]), question)
+
+    def test_default_manifest_must_match_policy_and_executed_selection(self):
+        for dimension, mention, values, selections in [
+            ("Year", "latest", ["2024"], {"Year": ["2024"]}),
+            ("Year", "latest", ["2025"], {"Year": ["2024"]}),
+            ("Sex", "Total", ["1"], {"Sex": ["1"]}),
+            ("Sex", "invented", ["0"], {}),
+            (None, "latest", ["2025"], {}),
+        ]:
+            with self.subTest(dimension=dimension, values=values, selections=selections):
+                self.assert_failure("ungrounded_filter", resolve, meta(), selection(
+                    selections=selections, operation="value", requested_filters=[RequestedFilter(
+                        dimension=dimension, mention=mention, values=values)]), "Population in 2024?")
+
     def test_missing_dimension_with_no_total_asks_instead_of_selecting_first(self):
         table = meta(categories=False)
         table.variables.append(Variable(code="Kind", text="Kind", values=["a", "b"], value_texts=["A", "B"]))
