@@ -220,7 +220,7 @@ class Pipeline:
         t = Timer()
         # a multi-part question's full wording would pull every part toward the same tables
         r = await retrieve_tiered(self.llm, self.catalog, sq.question, sq.search_query,
-                                  settings.retrieve_top_k, forced_table, original if alone else "")
+                                  settings.retrieve_top_k, forced_table, original if alone else "", sq.breakdown_by)
         steps.append(Step(name="retrieve", ms=t.ms(),
                           detail=f"{r.table.id} from [{', '.join(r.candidates)}]" + (" (ambiguous)" if r.ambiguous else "")
                                  + (f" via {r.via}" if r.via else "") + (f" · votes {r.votes}" if r.votes else "")

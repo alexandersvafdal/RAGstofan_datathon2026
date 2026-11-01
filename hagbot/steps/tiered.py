@@ -191,7 +191,7 @@ async def _browse(llm: LLM, catalog: Catalog, question: str, original: str) -> t
 
 
 async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_query: str,
-                          k: int, forced_table: str | None = None, original: str = "") -> Retrieved:
+                          k: int, forced_table: str | None = None, original: str = "", breakdown_by: str = "") -> Retrieved:
     if forced_table and (entry := catalog.get(forced_table)):
         return Retrieved(table=entry, candidates=[entry.id])
     import re
@@ -214,7 +214,7 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
     query = " ".join([text, *(c["search"] for c in found)])
     searches = {name: [e for e in (catalog.get(i) for i in ids) if e] for name, ids in catalog.rankings(query, 4 * k).items()}
     ranked = rank(preferred, searches)
-    shortlist = narrow([e for e, _, _ in ranked], f"{question} {original}")
+    shortlist = narrow([e for e, _, _ in ranked], f"{question} {original}", breakdown_by)
     # A top-ranked table whose years miss the one asked ("prisoners in 2017", a table of 1995–2013) stays on the
     # list: the model may still say it is the subject, and the user is then told which years exist, rather than
     # the model settling on a table about something else that happens to have 2017.
@@ -238,7 +238,10 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
         # which may add "population" to a question about prisoners)
         named = [c for c in match_concepts(f"{question} {original}") if c["tables"]]
         subject = [e for e in off_period if any(e.id in c["tables"] for c in named)]
-        if subject and not any(table.id in c["tables"] for c in named) and table.path != subject[0].path:
+        lists_it = lambda e: not breakdown_by or any(t[:5] == w[:5] for d in e.dimensions for t in tokens(d) if len(t) >= 4
+                                                     for w in tokens(breakdown_by) if len(w) >= 4)
+        if (subject and not any(table.id in c["tables"] for c in named) and table.path != subject[0].path
+                and lists_it(subject[0])):
             table, tier = subject[0], f"{tier}, then the subject's table {subject[0].id} (no {next(iter(asked_years))})"
         table = freshest_sibling(table, pool, f"{question} {original}")
         return Retrieved(table=table, candidates=[e.id for e in pool], via=tier,

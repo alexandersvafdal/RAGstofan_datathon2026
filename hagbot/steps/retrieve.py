@@ -65,6 +65,7 @@ _DIMENSION_IS = {
     "aldri": "age", "aldur": "age", "aldurshopum": "age", "aldursflokkum": "age", "kyni": "sex", "kyn": "sex",
     "sveitarfelogum": "municipality", "sveitarfelagi": "municipality", "sveitarfelag": "municipality",
     "landshlutum": "region", "landshluta": "region", "landsvaedum": "region", "londum": "country", "landi": "country",
+    "lond": "country", "londin": "country", "londunum": "country", "landa": "country", "vidskiptalondum": "country",
     "rikisfangi": "citizenship", "uppruna": "origin", "faedingarlandi": "country", "atvinnugrein": "economic",
     "atvinnugreinum": "economic", "starfsstett": "occupation", "starfsstettum": "occupation", "menntun": "education",
     "menntunarstigi": "education", "manudum": "month", "arsfjordungum": "quarter", "tegund": "type", "tegundum": "type",
@@ -88,14 +89,15 @@ def _title_has(entry: CatalogEntry, word: str) -> bool:
 
 
 def _year_range(entry: CatalogEntry) -> tuple[int, int] | None:
-    """Some catalog entries lack time flags even though their titles state the observation years."""
+    """Some catalog entries lack time flags even though their titles state the observation years. A period may be
+    worded ("Change 2023-2024"): the years in it count, the last one as the end."""
     title_years = [int(y) for y in re.findall(r"\b(?:18|19|20)\d\d\b", entry.title_en)]
-    first = re.match(r"(\d{4})", entry.first_period)
-    last = re.match(r"(\d{4})", entry.last_period)
+    first = re.findall(r"(?<!\d)(?:18|19|20)\d\d(?!\d)", entry.first_period)   # 2025M09 too, so no \b
+    last = re.findall(r"(?<!\d)(?:18|19|20)\d\d(?!\d)", entry.last_period)
     if not first and not last and not title_years:
         return None
-    start = int(first[1]) if first else min(title_years) if title_years else int(last[1])
-    end = int(last[1]) if last else max(title_years) if title_years else start
+    start = int(first[0]) if first else min(title_years) if title_years else int(last[-1])
+    end = int(last[-1]) if last else max(title_years) if title_years else start
     if not last and re.search(r"\b(?:18|19|20)\d\d\s*[-–]\s*(?:$|by\b)", entry.title_en):
         end = 9999  # an explicitly open-ended title; category validation still checks the actual periods
     return start, end
@@ -107,8 +109,10 @@ def newest_base(entry: CatalogEntry) -> int | None:
     return max(years) if years else None
 
 
-def narrow(entries: list[CatalogEntry], question: str) -> list[CatalogEntry]:
-    """Code-side table rules the model follows unreliably. Each rule only applies if some candidate survives it."""
+def narrow(entries: list[CatalogEntry], question: str, breakdown_by: str = "") -> list[CatalogEntry]:
+    """Code-side table rules the model follows unreliably. Each rule only applies if some candidate survives it.
+    `breakdown_by` is the planner's reading of the category the user wants the figures split by ("countries"),
+    verified against the question; the "by X" pattern is the fallback."""
     def keep_if(pred):
         nonlocal entries
         kept = [e for e in entries if pred(e)]
@@ -124,8 +128,9 @@ def narrow(entries: list[CatalogEntry], question: str) -> list[CatalogEntry]:
             keep_if(has)
     # "by municipality", "eftir aldri", "by sector": the breakdown named must be one of the table's dimensions;
     # checked only when one of the top hits has it, so "stays were by foreigners" does not throw the right tables out
-    for word in breakdown_words(q):
-        has_dim = lambda e, w=word: any(_same_word(t, w) for d in e.dimensions for t in tokens(d))
+    by_words = list(dict.fromkeys([_DIMENSION_IS.get(t, t) for t in tokens(breakdown_by)] + breakdown_words(q)))
+    for word in by_words:
+        has_dim = lambda e, w=word: any(_same_word(t, w) or t[:5] == w[:5] for d in e.dimensions for t in tokens(d) if len(t) >= 4)
         if any(has_dim(e) for e in entries[:3]):
             keep_if(has_dim)
     # A month asked wants a monthly table, a quarterly one failing that, or a yearly table that reports that month
@@ -144,8 +149,9 @@ def narrow(entries: list[CatalogEntry], question: str) -> list[CatalogEntry]:
         keep_if(lambda e: (b := newest_base(e)) is None or b >= 2000)
     # "Subcategories of …", "the main drivers of …": tables listing coded categories (subindices, industries) first.
     # Reordered, not filtered: the model still judges the topic.
+    # Not when the user named the dimension to list ("countries"): that dimension, kept above, decides.
     from .select import _LIST, _TOP
-    if re.search(_LIST, q) or re.search(_TOP, q):
+    if (re.search(_LIST, q) or re.search(_TOP, q)) and not by_words:
         entries = sorted(entries, key=lambda e: sum(1 for v in e.values if code_of(v)) < 8)
     # Missing time flags must not discard a relevant dated table in favour of an unrelated one.
     keep_if(lambda e: _year_range(e) is not None)

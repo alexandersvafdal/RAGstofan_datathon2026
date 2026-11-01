@@ -80,9 +80,12 @@ def verify_facts(sq: SubQuestion, question: str) -> None:
         sq.period, sq.period_kind = "", "none"
     if sq.period_kind != "none" and not re.search(r"\b(?:18|19|20)\d\d\b", question) and sq.period_kind != "month":
         sq.period_kind = "none"   # a year or a range needs a year in the text; a month alone ("in August") may stand
-    # the breakdown word must be in the text too (countries / country, sveitarfélögum / sveitarfélög)
+    # the breakdown word must be in the text too (countries / country, sveitarfélögum / sveitarfélög), or be the
+    # English name of an Icelandic dimension word in it (the model writes "countries" for "löndum")
+    from .retrieve import _DIMENSION_IS
+    qwords = [w for w in qtokens if len(w) >= 4] + [_DIMENSION_IS[w] for w in qtokens if w in _DIMENSION_IS]
     if sq.breakdown_by and not any(_same_word(t, w) or t[:5] == w[:5] for t in tokens(sq.breakdown_by) if len(t) >= 4
-                                   for w in qtokens if len(w) >= 4):
+                                   for w in qwords):
         sq.breakdown_by = ""
     if sq.breakdown_by:
         sq.breakdown = True
