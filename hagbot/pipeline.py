@@ -120,7 +120,10 @@ class Pipeline:
                 t = Timer()
                 p = merge_period_parts(await plan(self.llm, req.question))
                 forced = [None] * len(p.sub_questions)
-                steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(s.question for s in p.sub_questions)))
+                steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(
+                    s.question + (f" [places {s.places}, period {s.period_kind} {s.period!r}, breakdown {s.breakdown}]"
+                                  if s.places or s.period_kind != "none" or s.breakdown else " [no facts]")
+                    for s in p.sub_questions)))
 
             results = await asyncio.gather(
                 *(self._answer_part(sq, ratio.numerator if ratio and i == 0 else req.question, lang, f, steps,
@@ -208,13 +211,14 @@ class Pipeline:
 
         t = Timer()
         meta = await self.source.meta(r.table.id)
-        res = await select(self.llm, meta, sq.question, original)
+        facts = sq if sq.places or sq.period_kind != "none" or sq.breakdown or sq.all_places else None
+        res = await select(self.llm, meta, sq.question, original, facts=facts)
         if res.beyond and (alt := await self._sibling_with(meta, r.candidates, res.beyond)):
             # "September 2026" in a table whose figures stop at August, while the table next door has September
             # (LAU04000 / LAU04001 in the snapshot): the neighbour answers, selected afresh
             swapped = f"{res.beyond} is after {meta.id}'s last period; switched to {alt.id}"
             meta = alt
-            res = await select(self.llm, meta, sq.question, original)
+            res = await select(self.llm, meta, sq.question, original, facts=facts)
             res.notes.append(swapped)
         chosen = {meta.var(c).text: [meta.var(c).label_of(v) for v in vals] for c, vals in res.selections.items()}
         steps.append(Step(name="select", ms=t.ms(),

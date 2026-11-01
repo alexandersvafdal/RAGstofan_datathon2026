@@ -234,9 +234,22 @@ def _asks_breakdown(text: str) -> bool:
     return bool(breakdown_words(text)) or bool(_BREAKDOWN_ALL.search(normalize(text)))
 
 
-def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | None = None) -> Resolved:
-    """Map whatever the model returned onto valid codes; fill gaps with defaults."""
+def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | None = None, facts=None) -> Resolved:
+    """Map whatever the model returned onto valid codes; fill gaps with defaults. `facts` is the planner's reading of
+    the question (places, period, breakdown; hagbot/steps/plan.py), checked against the text; without it (a table
+    the user clicked, a published rate) the same facts are read from the text by the patterns below."""
     notes, out, beyond, alternatives = [], {}, None, {}
+    from .retrieve import named_places
+    if facts is not None:
+        places_part, places_all = list(facts.places), list(facts.all_places or facts.places)
+        breakdown = facts.breakdown
+        subyear = facts.period_kind in ("month", "quarter")
+        period_text = facts.period or (part or question)
+    else:
+        places_part, places_all = named_places(part or question), named_places(f"{part or ''} {question}")
+        breakdown = _asks_breakdown(part or question)
+        subyear = _names_subyear(part or question)
+        period_text = part or question
     by_key = {normalize(k): k for k in sel.selections}
     for var in meta.variables:
         raw = sel.selections.get(var.code) or sel.selections.get(by_key.get(normalize(var.text), ""), [])
@@ -246,14 +259,14 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                 if not _resolve_value(var, v) and (near := _same_year_edge(var, v)):
                     codes.append(near)
                     notes.append(f"{var.text}: {v} is outside the table, using {near}")
-                    if v > near and _names_subyear(part or question):
+                    if v > near and subyear:
                         # "September 2026" in a table that stops at August: a neighbour may have it (pipeline switches).
                         # A bare "to 2026" means up to the latest figure, so the model's 2026M12 is no reason to switch.
                         beyond = v
             raw = [v for v in raw if _resolve_value(var, v) or not _same_year_edge(var, v)]
         if len(codes) < len(raw):
             notes.append(f"{var.text}: dropped unknown values {[v for v in raw if not _resolve_value(var, v)]}")
-        if not codes and var.time and (asked := _period_from_question(var, part or question)):
+        if not codes and var.time and (asked := _period_from_question(var, period_text)):
             codes = [asked]   # the model left the period out: the one the question names, not the latest
             notes.append(f"{var.text}: {asked} from the question")
         if not codes:
@@ -285,22 +298,21 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
         # could chart. Several categories stay when the question names one of them, asks for a breakdown ("by region",
         # "eftir landshlutum", "all regions"), or compares along this dimension.
         if (sel.operation in ("value", "series") and len(chosen) >= 2 and not coded(var) and var.code != sel.compare_dimension
-                and not any(mentioned(var.label_of(c)) for c in chosen) and not _asks_breakdown(part or question)
+                and not any(mentioned(var.label_of(c)) for c in chosen) and not breakdown
                 and (dflt := _default(var))[0] in chosen):
             notes.append(f"{var.text}: none of {[var.label_of(c) for c in chosen]} named in the question; using {[var.label_of(dflt[0])]}")
             out[var.code] = dflt
             alternatives[var.code] = [c for c in chosen if c not in dflt]
     # a place the question names that no option and no title of this table carries: say so, rather than answer as if
     place_note = None
-    from .retrieve import named_places
     texts = [t for v in meta.variables if not v.time for t in v.value_texts] + [meta.title]
-    places = named_places(part or question)
+    places = places_part
     def has_place(label: str, place: str) -> bool:
         return any(_same_word(t, place) for t in tokens(label))
     missing = [p for p in places if not any(has_place(label, p) for label in texts)]
     # the whole question's places, not this part's alone: "Reykjavík and Kópavogur together" is planned as one part
     # per town, yet both towns are selected in each and summed
-    places = named_places(f"{part or ''} {question}")
+    places = places_all
     for place in missing:
         shown = next((w for w in re.findall(r"[A-ZÁÐÉÍÓÚÝÞÆÖ][\wáðéíóúýþæö]+", part or question) if normalize(w).startswith(place[:5])), place)
         place_note = {"en": f"{shown} is not among this table's options; the figures are for the options selected.",
@@ -311,7 +323,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     # Kópavogur for Reykjavík): in a place dimension, only options the question names, or the total, may stay; with
     # none of them chosen, the named ones answer, or the total under the note. A breakdown ("by municipality") or a
     # ranking along the dimension keeps every category.
-    if places and sel.operation != "rank" and not _asks_breakdown(part or question):
+    if places and sel.operation != "rank" and not breakdown:
         for var in meta.variables:
             if var.time:
                 continue
@@ -571,7 +583,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                     alternatives=alternatives)
 
 
-async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None) -> Resolved:
+async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None, facts=None) -> Resolved:
     lines = []
     for var in meta.variables:
         opts = "; ".join(f"{c}={t}" for c, t in _options_for_prompt(var, f"{original or ''} {question}"))
@@ -581,9 +593,9 @@ async def select(llm: LLM, meta: TableMeta, question: str, original: str | None 
     user = f"{asked}\n\nTable {meta.id}: {meta.title}\nDimensions:\n" + "\n".join(lines)
     if not voting_on():
         sel = await llm.complete_json(SYSTEM, user, Selection)
-        return resolve(meta, sel, f"{original or ''} {question}", part=question)
+        return resolve(meta, sel, f"{original or ''} {question}", part=question, facts=facts)
     sel, agreement = vote_selection(await ask_all(llm, SYSTEM, user, Selection))
-    res = resolve(meta, sel, f"{original or ''} {question}", part=question)
+    res = resolve(meta, sel, f"{original or ''} {question}", part=question, facts=facts)
     res.notes.insert(0, "votes: " + ", ".join(f"{(meta.var(k).text if k in {v.code for v in meta.variables} else k)} {a}"
                                               for k, a in agreement.items()))
     return res

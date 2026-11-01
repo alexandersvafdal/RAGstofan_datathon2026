@@ -1,15 +1,26 @@
 """Step 1: split the question into lookups that each need one table."""
 
 import re
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from ..catalog import _same_word
 from ..llm import LLM
+from ..text import tokens
 
 
 class SubQuestion(BaseModel):
     question: str = Field(description="A self-contained question answerable from a single table, in English")
     search_query: str = Field(description="English keywords for finding the table: topic, measure, place, period")
+    # What the question says, read once by the model here and checked against its text in code (verify_facts), so
+    # the later steps act on the user's words rather than on patterns of their own.
+    places: list[str] = Field(default=[], description="Place names this sub-question names, exactly as the user wrote them (Reykjavík, Egilsstöðum); [] when none")
+    period_kind: Literal["none", "year", "month", "quarter", "range"] = Field(
+        default="none", description="The period the user names: a month (ágúst 2026), a quarter, a single year, a range of years/months (frá 2010 til 2026), or none")
+    period: str = Field(default="", description="The period words exactly as the user wrote them (ágúst 2026, 2010 til 2026); empty when none")
+    breakdown: bool = Field(default=False, description="true when the user wants the figures split by a category: 'by region', 'eftir aldri', 'all municipalities', 'each year'")
+    all_places: list[str] = []   # set in code: the places of every sub-question of the same question
 
 
 class Plan(BaseModel):
@@ -28,6 +39,8 @@ borin saman við vísitölu neysluverðs", "exports and imports") is TWO sub-que
 period; without a period, each asks for the development over the last years.
 Write sub-questions and search queries in English even if the user wrote Icelandic.
 Keep place names in their Icelandic spelling (Reykjavík, Kópavogur, Akureyri).
+For each sub-question also report what the user's own words say: the places named (as written), the period and its
+kind, and whether a breakdown by a category is wanted. Report only what is in the question; never add a place or period.
 Icelandic words that are easy to mistranslate:
 - búa, íbúar, mannfjöldi, hvað búa margir: population (people living somewhere)
 - fjölga, fjölgaði, fjölgun: population increase; fækka, fækkaði: population decrease
@@ -45,7 +58,26 @@ Do not answer the question."""
 
 
 async def plan(llm: LLM, question: str) -> Plan:
-    return await llm.complete_json(SYSTEM, f"Question: {question}", Plan)
+    p = await llm.complete_json(SYSTEM, f"Question: {question}", Plan)
+    for sq in p.sub_questions:
+        verify_facts(sq, question)
+    every = list(dict.fromkeys(pl for sq in p.sub_questions for pl in sq.places))
+    for sq in p.sub_questions:
+        sq.all_places = every
+    return p
+
+
+def verify_facts(sq: SubQuestion, question: str) -> None:
+    """A model's reading of the question must be anchored in its text: a place it reports stays only when a word of
+    the question is that word (modulo inflection: Egilsstaðir / Egilstöðum), a period only when its words are there.
+    Anything unanchored is dropped, so a hallucinated place or month cannot steer the later steps."""
+    qtokens = tokens(question)
+    sq.places = [pl for pl in sq.places if any(_same_word(t, w) or t[:5] == w[:5] for t in tokens(pl) if len(t) >= 5 for w in qtokens if len(w) >= 5)
+                 or any(_same_word(t, w) for t in tokens(pl) if len(t) >= 4 for w in qtokens)]   # Egilsstaðir / Egilstöðum
+    if sq.period and not all(w in qtokens or w.isdigit() and w in question for w in tokens(sq.period)):
+        sq.period, sq.period_kind = "", "none"
+    if sq.period_kind != "none" and not re.search(r"\b(?:18|19|20)\d\d\b", question) and sq.period_kind != "month":
+        sq.period_kind = "none"   # a year or a range needs a year in the text; a month alone ("in August") may stand
 
 
 _PERIOD = (r"\b(?:\d{1,2}\.?\s+)?(?:(?:january|february|march|april|may|june|july|august|september|october|november|december|"
@@ -69,4 +101,5 @@ def merge_period_parts(p: Plan) -> Plan:
     merged = re.sub(r"\b(?:in|on|for|at)\s+" + re.escape(pa[0]), f"from {first} to {second}", a.question, flags=re.I)
     if merged == a.question:
         merged = re.sub(re.escape(pa[0]), f"from {first} to {second}", a.question, flags=re.I)
-    return Plan(sub_questions=[SubQuestion(question=merged, search_query=a.search_query)])
+    return Plan(sub_questions=[SubQuestion(question=merged, search_query=a.search_query, places=a.places + [x for x in b.places if x not in a.places],
+                                           period_kind="range", period=f"{first} to {second}", breakdown=a.breakdown or b.breakdown)])
