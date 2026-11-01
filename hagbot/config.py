@@ -53,6 +53,14 @@ class Settings:
     e5_model: str = os.getenv("E5_MODEL", "intfloat/multilingual-e5-large")
     e5_card: str = os.getenv("E5_CARD", "multi")  # "single" or "multi" passages per table, see hagbot/e5.py
     e5_device: str = os.getenv("E5_DEVICE", "")  # "", "cpu" or "cuda"
+    # Search by example (hagbot/examples.py): generated dev questions vote for their tables. Off: with examples for
+    # 70 of 1300 tables it lowered batch-1 on the frozen half from 71% to 65% (tables without examples lose to
+    # tables with them), while leave-one-out on tables that do have examples gained 6 points. Worth turning on
+    # once eval/gen_dev_tables.jsonl covers every table. Never the frozen halves or the holdout.
+    use_examples: bool = os.getenv("USE_EXAMPLES", "0") == "1"
+    example_files: str = os.getenv("EXAMPLE_FILES", "eval/gen_dev_tables.jsonl,eval/gen_dev_siblings.jsonl")
+    example_langs: str = os.getenv("EXAMPLE_LANGS", "en")
+    example_min_sim: float = float(os.getenv("EXAMPLE_MIN_SIM", "0"))  # cosine below which an example does not vote
     tables_meta_path: Path = _path("TABLES_META_PATH", "data/tables_20261030_224153.json")
 
 
