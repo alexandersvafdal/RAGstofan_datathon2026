@@ -40,6 +40,7 @@ class Resolved(BaseModel):
     top: int | None = None        # rank: keep the n largest (by size, either sign); None lists them all
     beyond: str | None = None     # a period asked for that lies after this table's last one ("2026M09" in a table to 2026M08)
     place_note: dict[str, str] | None = None  # en/is, when a place the question names is not among the table's options
+    missing_period: str = ""                  # the year the question names that the table's periods do not reach
     aggregate_over: list[str] = []            # dimensions summed in code: a long list with no total (253 partner
                                               # countries) when the question names none of them
     alternatives: dict[str, list[str]] = {}   # dimension -> categories the model chose that the question did not name,
@@ -269,7 +270,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     """Map whatever the model returned onto valid codes; fill gaps with defaults. `facts` is the planner's reading of
     the question (places, period, breakdown; hagbot/steps/plan.py), checked against the text; without it (a table
     the user clicked, a published rate) the same facts are read from the text by the patterns below."""
-    notes, out, beyond, alternatives, aggregate_over = [], {}, None, {}, []
+    notes, out, beyond, alternatives, aggregate_over, missing_period = [], {}, None, {}, [], ""
     from .retrieve import _DIMENSION_IS, breakdown_words, named_places
     if facts is not None:   # the planner's places as normalized words, as the patterns would give them
         places_part = [t for pl in facts.places for t in tokens(pl) if len(t) >= 4]
@@ -303,6 +304,13 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
         if not codes and var.time and (asked := _period_from_question(var, period_text)):
             codes = [asked]   # the model left the period out: the one the question names, not the latest
             notes.append(f"{var.text}: {asked} from the question")
+        # one year named ("prisoners in 2017") that no period of the table falls in: whatever the model chose, the
+        # table cannot answer; the pipeline tries a neighbour, else says which years exist (no nearest-year guess)
+        if var.time and len(years := set(re.findall(r"\b(?:1[5-9]|20)\d\d\b", normalize(period_text)))) == 1:
+            y = next(iter(years))
+            if not any(v.startswith(y) or t.startswith(y) for v, t in zip(var.values, var.value_texts)):
+                missing_period = y
+                notes.append(f"{var.text}: {y} is not in the table ({var.value_texts[0]}–{var.value_texts[-1]})")
         if not codes and _partition(var) and var.code != sel.compare_dimension:
             codes = list(var.values)
             aggregate_over.append(var.code)
@@ -679,7 +687,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                          + (f" under {var.label_of(named(var, question))!r}" if named(var, question) else ""))
     return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes,
                     window_note=window_note, breakdown=breakdown, top=top, beyond=beyond, place_note=place_note,
-                    alternatives=alternatives, aggregate_over=aggregate_over)
+                    alternatives=alternatives, aggregate_over=aggregate_over, missing_period=missing_period)
 
 
 async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None, facts=None) -> Resolved:

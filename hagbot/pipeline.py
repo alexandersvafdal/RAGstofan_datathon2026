@@ -19,7 +19,7 @@ from .steps.followup import looks_like_followup, rewrite
 from .steps.plan import Plan, SubQuestion, merge_period_parts, plan
 from .steps.ratio import POPULATION_TABLE, detect_ratio, difference_parts, ratio_parts, share_parts, stored_rate
 from .steps.retrieve import _INDEXATION_TABLE, period_end
-from .steps.tiered import retrieve_tiered
+from .steps.tiered import _check, retrieve_tiered
 from .steps.select import guess_op, select
 from .steps.suggest import suggest
 from .text import detect_language, normalize
@@ -36,6 +36,27 @@ CLARIFY = {
     "en": "Several tables could answer this. Which one do you mean?",
     "is": "Fleiri en ein tafla gæti svarað þessu. Hverja áttu við?",
 }
+
+
+class NoFigures(Exception):
+    """The table found is on the right subject but has no figures for the period asked."""
+
+
+_MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+_MONTHS_IS = ["janúar", "febrúar", "mars", "apríl", "maí", "júní", "júlí", "ágúst", "september", "október", "nóvember", "desember"]
+
+
+def _say_period(p: str, lang: str) -> str:
+    """A period code as words: 2026M09 -> "September 2026" / "september 2026", 2026Q3 -> "Q3 2026" / "3. ársfjórðungur 2026"."""
+    m = re.match(r"(\d{4})(?:([MQ])(\d+))?", p or "")
+    if not m:
+        return p
+    year, kind, n = m.group(1), m.group(2), int(m.group(3) or 0)
+    if kind == "M" and 1 <= n <= 12:
+        return f"{(_MONTHS_IS if lang == 'is' else _MONTHS_EN)[n - 1]} {year}"
+    if kind == "Q":
+        return f"{n}. ársfjórðungur {year}" if lang == "is" else f"Q{n} {year}"
+    return year
 
 
 class NeedsClarification(Exception):
@@ -213,13 +234,32 @@ class Pipeline:
         meta = await self.source.meta(r.table.id)
         facts = sq if sq.places or sq.period_kind != "none" or sq.breakdown or sq.all_places else None
         res = await select(self.llm, meta, sq.question, original, facts=facts)
-        if res.beyond and (alt := await self._sibling_with(meta, r.candidates, res.beyond)):
+        if res.beyond:
             # "September 2026" in a table whose figures stop at August, while the table next door has September
-            # (LAU04000 / LAU04001 in the snapshot): the neighbour answers, selected afresh
-            swapped = f"{res.beyond} is after {meta.id}'s last period; switched to {alt.id}"
-            meta = alt
-            res = await select(self.llm, meta, sq.question, original, facts=facts)
-            res.notes.append(swapped)
+            # (LAU04000 / LAU04001 in the snapshot): the neighbour answers, selected afresh. With no neighbour the
+            # latest month answers, labelled as such (the figure may just not be out yet); a year the table never
+            # had is refused instead (missing_period).
+            if alt := await self._sibling_with(meta, r.candidates, res.beyond, sq.question, original):
+                swapped = f"{res.beyond} is after {meta.id}'s last period; switched to {alt.id}"
+                meta = alt
+                res = await select(self.llm, meta, sq.question, original, facts=facts)
+                res.notes.append(swapped)
+        if res.missing_period:
+            if alt := await self._sibling_with(meta, r.candidates, res.missing_period, sq.question, original):
+                swapped = f"{meta.id} has no {res.missing_period}; switched to {alt.id}"
+                meta = alt
+                res = await select(self.llm, meta, sq.question, original, facts=facts)
+                res.notes.append(swapped)
+            else:
+                time_var = next(v for v in meta.variables if v.time)
+                first, last = (_say_period(x, lang) for x in (time_var.value_texts[0], time_var.value_texts[-1]))
+                asked_p = _say_period(res.missing_period, lang)
+                entry = self.catalog.get(meta.id)
+                title = entry.title_is if lang == "is" and entry and entry.title_is else meta.title
+                steps.append(Step(name="select", ms=t.ms(), detail=f"{res.operation} notes: {res.notes}"))
+                raise NoFigures(f"Taflan {title} ({meta.id}) nær yfir {first} til {last}, ekki {asked_p}."
+                                if lang == "is" else
+                                f"{title} ({meta.id}) covers {first} to {last}, not {asked_p}.")
         chosen = {meta.var(c).text: [meta.var(c).label_of(v) for v in vals] for c, vals in res.selections.items()}
         steps.append(Step(name="select", ms=t.ms(),
                           detail=f"{res.operation} {chosen}" + (f" notes: {res.notes}" if res.notes else "")))
@@ -308,21 +348,28 @@ class Pipeline:
                             "question": f"{asked.rstrip('?. ')} — {label}"})
         return out
 
-    async def _sibling_with(self, meta, candidates: list[str], period: str):
-        """A table in the same folder, among the candidates, whose figures reach the period asked for: the one
-        sharing the most options with the chosen table first. None when no neighbour has it."""
+    async def _sibling_with(self, meta, candidates: list[str], period: str, question: str = "", original: str = ""):
+        """A table in the same folder, among the candidates, whose figures reach the period asked for ("2017",
+        "2026M09"). The model picks among those that have it (the check it uses on the hitlist), or says none:
+        the one sharing the most options with the chosen table is not always the one on the same subject."""
         own = self.catalog.get(meta.id)
         if not own:
             return None
         siblings = [e for cid in candidates if (e := self.catalog.get(cid)) and e.id != meta.id and e.path == own.path]
         siblings.sort(key=lambda e: -len(set(own.values) & set(e.values)))
-        for e in siblings[:3]:
+        with_period = []
+        for e in siblings[:6]:
             try:
                 m = await self.source.meta(e.id)
             except Exception:
                 continue
-            if any(v.time and period in v.values for v in m.variables):
-                return m
+            if any(v.time and any(x.startswith(period) or t.startswith(period) for x, t in zip(v.values, v.value_texts))
+                   for v in m.variables):
+                with_period.append((e, m))
+        if not with_period:
+            return None
+        hit = await _check(self.llm, [e for e, _ in with_period], question or meta.title, original)
+        return next((m for e, m in with_period if hit and e.id == hit.id), None)
         return None
 
     def _freshness_note(self, meta, selections: dict[str, list[str]], candidates: list[str], question: str, lang: str) -> str:

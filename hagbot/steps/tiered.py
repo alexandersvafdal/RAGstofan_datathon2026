@@ -28,7 +28,7 @@ from ..config import ROOT
 from ..llm import LLM
 from ..vote import vote_json, voting_on
 from ..text import normalize, tokens
-from .retrieve import AMBIGUOUS, MONTHS, Retrieved, SYSTEM as PICK_RULES, freshest_sibling, narrow, retrieve
+from .retrieve import AMBIGUOUS, MONTHS, Retrieved, SYSTEM as PICK_RULES, _year_range, freshest_sibling, narrow, retrieve
 
 KEYWORDS = ROOT / "data" / "keywords.json"
 BATCH = 8   # tables the model sees per check
@@ -139,7 +139,10 @@ CHECK = PICK_RULES.replace("You choose which Statistics Iceland table answers a 
 The tables are numbered in search order; the number is not a vote, the rules above decide.
 A table marked "headline table for X" is the standard table for that subject: choose it for a plain question about X,
 and a neighbour only when the question asks for a breakdown or a measure it lacks (constant prices, an index, quarters).
-If none of the listed tables can answer it (wrong topic, wrong place or period, wrong measure), answer "none"."""
+A table on the right subject whose years (in brackets) miss the period asked is still the answer when no listed table on
+that subject covers that period: the user is then told which years exist. A table on another subject never answers,
+whatever its years.
+If none of the listed tables is on the subject asked (wrong topic, wrong place, wrong measure), answer "none"."""
 
 
 async def _check(llm: LLM, entries: list[CatalogEntry], question: str, original: str, start: int = 0,
@@ -212,11 +215,31 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
     searches = {name: [e for e in (catalog.get(i) for i in ids) if e] for name, ids in catalog.rankings(query, 4 * k).items()}
     ranked = rank(preferred, searches)
     shortlist = narrow([e for e, _, _ in ranked], f"{question} {original}")
+    # A top-ranked table whose years miss the one asked ("prisoners in 2017", a table of 1995–2013) stays on the
+    # list: the model may still say it is the subject, and the user is then told which years exist, rather than
+    # the model settling on a table about something else that happens to have 2017.
+    asked_years = set(re.findall(r"\b(?:1[5-9]|20)\d\d\b", f"{question} {original}"))
+    off_period: list[CatalogEntry] = []
+    if len(asked_years) == 1:
+        year = int(next(iter(asked_years)))
+        for i, (e, _, _) in enumerate(ranked[:BATCH]):
+            if e not in shortlist and (span := _year_range(e)) and not (span[0] <= year <= span[1]):
+                shortlist.insert(min(i, len(shortlist)), e)
+                off_period.append(e)
     order = {e.id: (score, why) for e, score, why in ranked}
     hitlist = [{"id": e.id, "title": e.title_en, "score": round(order[e.id][0], 4), "signals": order[e.id][1]}
                for e in shortlist[:BATCHES * BATCH]]
 
     def done(table: CatalogEntry, pool: list[CatalogEntry], tier: str) -> Retrieved:
+        # The question's subject by the dictionary ("prisons" → DOM0502) is on the list only without the year asked,
+        # and the model settled on a table from another folder that has the year (religious registrations
+        # 1997–2017): the subject's table it is, and the answer then says which years it has.
+        # (the subject is read from the user's words and the planner's question, not the planner's search words,
+        # which may add "population" to a question about prisoners)
+        named = [c for c in match_concepts(f"{question} {original}") if c["tables"]]
+        subject = [e for e in off_period if any(e.id in c["tables"] for c in named)]
+        if subject and not any(table.id in c["tables"] for c in named) and table.path != subject[0].path:
+            table, tier = subject[0], f"{tier}, then the subject's table {subject[0].id} (no {next(iter(asked_years))})"
         table = freshest_sibling(table, pool, f"{question} {original}")
         return Retrieved(table=table, candidates=[e.id for e in pool], via=tier,
                          concepts=[c["concept"] for c in found], ranking=hitlist, votes=_last_votes[0] if voting_on() else "")
