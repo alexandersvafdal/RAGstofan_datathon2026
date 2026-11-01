@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from .outcomes import AnswerFailure
 from .catalog import _same_word
 from .sources import TableMeta, table_url
-from .specification import Compatibility, Evidence, QuestionSpec, TableVerification
+from .specification import Compatibility, Evidence, QuestionSpec, Requirement, TableVerification
 from .text import normalize, tokens
 
 
@@ -126,6 +126,32 @@ def _unit(text: str) -> tuple[str, int] | None:
     return next(iter(found)), scale
 
 
+def scope_evidence(meta: TableMeta, req: Requirement,
+                   selections: dict[str, list[str]] | None = None) -> Evidence | None:
+    """A named national survey can establish scope without a country filter.
+
+    The publisher's name alone (Statistics Iceland) is deliberately insufficient:
+    it also publishes international comparisons. A country/area dimension must
+    instead be checked against its selected option in the ordinary path.
+    """
+    if req.facet != "geography":
+        return None
+    geographic = [v for v in meta.variables if re.search(
+        r"country|municipal|region|area|town|sveitarfel|landshlut|domicile|logheimil", normalize(v.text))
+        and not re.search(r"birth|citizen|origin|rikisfang|faeding|uppruni", normalize(v.text))]
+    names = tokens(req.value)
+    if len(names) == 1 and len(names[0]) >= 4:
+        for var in geographic:
+            matches = [code for code, label in zip(var.values, var.value_texts)
+                       if any(_same_word(word, names[0]) for word in tokens(label) if len(word) >= 4)]
+            if len(matches) == 1 and matches[0] in (selections or {}).get(var.code, []):
+                return Evidence(field=f"value:{var.code}:{matches[0]}", quote=var.label_of(matches[0]))
+    if (normalize(req.value) == "iceland" and not geographic
+            and re.fullmatch(r"icelandic labo[u]?r force survey", normalize(meta.source).strip())):
+        return Evidence(field="source", quote=meta.source)
+    return None
+
+
 def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], spec: QuestionSpec,
                            proof: Compatibility) -> TableVerification:
     p = profile(meta)
@@ -151,9 +177,16 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
             quote = " ".join(tokens(ref.quote))
             if ref.field not in allowed or not quote or f" {quote} " not in f" {' '.join(tokens(allowed[ref.field]))} ":
                 raise AnswerFailure("unverified", "invalid_metadata_evidence", ref.field)
-        if check.verdict == "unknown" or not check.evidence:
+        scope = scope_evidence(meta, req, selections)
+        if scope is not None:
+            # The selected geographic option or explicit national survey scope
+            # is code-verifiable, regardless of the model's vote.
+            check.verdict = "supported"
+            if scope not in check.evidence:
+                check.evidence.append(scope)
+        elif check.verdict == "unknown" or not check.evidence:
             raise AnswerFailure("unverified", "unknown_compatibility", f"{req.facet}: {req.value}")
-        if check.verdict == "unsupported":
+        elif check.verdict == "unsupported":
             raise AnswerFailure("unavailable", "incompatible_table", f"{req.facet}: {req.value}")
         wanted = _tags(req.facet, req.value)
         selected = set().union(*(_tags(req.facet, label) for label in selected_labels))
@@ -194,22 +227,7 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
             names = [w for w in tokens(req.value) if len(w) >= 4]
             cited_words = tokens(cited)
             literal = names and all(any(a.startswith(b) or b.startswith(a) for b in cited_words if len(b) >= 4) for a in names)
-            # Icelandic inflections/official names are already recognized by
-            # the dictionary finder. Accept them as evidence only when they
-            # identify ONE option in a geographic dimension, and that exact
-            # option is selected and cited. Shared ambiguous stems still fail.
-            equivalent = False
-            if len(names) == 1:
-                for var in meta.variables:
-                    if not re.search(r"municipal|region|area|town|sveitarfel|landshlut|domicile|logheimil", normalize(var.text)):
-                        continue
-                    matches = [code for code, label in zip(var.values, var.value_texts)
-                               if any(_same_word(word, names[0]) for word in tokens(label) if len(word) >= 4)]
-                    if (len(matches) == 1 and matches[0] in selections[var.code]
-                            and any(ref.field == f"value:{var.code}:{matches[0]}" for ref in check.evidence)):
-                        equivalent = True
-                        break
-            if not literal and not equivalent:
+            if not literal and scope is None:
                 raise AnswerFailure("unverified", "insufficient_metadata_evidence", req.value)
         if req.facet == "unit":
             wanted_unit = _unit(req.value)

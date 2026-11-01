@@ -11,7 +11,7 @@ from hagbot.sources import TableMeta, Variable, _meta_from_api
 from hagbot.specification import Compatibility, Evidence, QuestionSpec, Requirement, RequirementCheck
 from hagbot.steps.compose import Written
 from hagbot.steps.plan import Plan, SubQuestion
-from hagbot.steps.select import vote_selection
+from hagbot.steps.select import resolve, vote_selection
 
 from test_answer_integrity import CatalogStub, FailureAssertions, ScriptedLLM, SourceStub, entry, selection
 
@@ -215,6 +215,37 @@ class CompatibilityTests(FailureAssertions, unittest.TestCase):
         m.var("Area").values.append("3")
         m.var("Area").value_texts.append("Kopavogs another municipality")
         self.assert_failure("insufficient_metadata_evidence", validate_compatibility, m, {"Area": ["1", "2"]}, s, evidence)
+
+    def test_national_survey_scope_needs_no_country_filter_or_model_vote(self):
+        m = TableMeta(id="LAB", title="Unemployment rate", path="People/labour", source="Icelandic Labour Force Survey",
+                      variables=[Variable(code="Unit", text="Unit", values=["rate"], value_texts=["Unemployment rate"])])
+        s = spec(requirement("measure", "unemployment rate"), requirement("geography", "Iceland", quote="", origin="default"))
+        evidence = proof([("title", "Unemployment rate")], [("source", "Icelandic Labour Force Survey")])
+        evidence.checks[1].verdict = "unsupported"
+        picked = selection(selections={"Unit": ["rate"]}, operation="value", compatibility=evidence,
+                           requested_filters=[{"dimension": None, "mention": "Iceland", "values": []}])
+        result = resolve(m, picked, "What is the unemployment rate?", specification=s)
+        self.assertEqual(result.verification.checks[1].verdict, "supported")
+        m.source = "Statistics Iceland"  # publishing international figures does not establish national scope
+        self.assert_failure("ungrounded_filter", resolve, m, picked, "What is the unemployment rate?", specification=s)
+        m.source = "Icelandic Labour Force Survey"
+        m.variables.append(Variable(code="Country", text="Country", values=["dk", "is"], value_texts=["Denmark", "Iceland"]))
+        picked.selections["Country"] = ["dk"]
+        self.assert_failure("ungrounded_filter", resolve, m, picked, "What is the unemployment rate?", specification=s)
+
+    def test_available_official_place_does_not_become_unavailable_due_to_model_manifest(self):
+        m = TableMeta(id="POP", title="Population by municipality", path="People/population", variables=[
+            Variable(code="Area", text="Municipality", values=["0", "1"], value_texts=["Total", "Kopavogsbaer"])])
+        s = spec(requirement("measure", "population"), requirement("geography", "Kópavogur"))
+        evidence = proof([("title", "Population")], [])
+        evidence.checks[1].verdict = "unknown"
+        picked = selection(selections={"Area": ["1"]}, operation="value", compatibility=evidence,
+                           requested_filters=[{"dimension": None, "mention": "Kópavogur", "values": []}])
+        result = resolve(m, picked, "Population in Kópavogur?", specification=s)
+        self.assertEqual(result.verification.checks[1].evidence[0].field, "value:Area:1")
+        picked.selections["Area"] = ["0"]
+        self.assert_failure("requested_filter_unavailable", resolve, m, picked, "Population in Kópavogur?",
+                            specification=s, status="unavailable")
 
     def test_cpi_level_is_not_inflation_but_annual_change_is(self):
         self.meta.title = "Consumer price index"

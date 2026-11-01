@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from ..catalog import SYNONYMS, _same_word
 from ..llm import LLM
 from ..outcomes import AnswerFailure
-from ..semantics import profile, validate_compatibility
+from ..semantics import profile, scope_evidence, validate_compatibility
 from ..specification import Compatibility, QuestionSpec, TableVerification
 from ..vote import ask_all, majority, voting_on
 from ..sources import TableMeta, Variable
@@ -85,6 +85,8 @@ Copy selection codes from options[].code, never from a label. Copy evidence.fiel
 field IDs; a dimension field contains only its label, while each option has its own value field.
 For geography cite a geographic option or source text establishing the national scope. A sex/age "Total" alone
 does not establish the country. For the latest period, cite the selected time option's field and label.
+An explicit national survey source (e.g. "Icelandic Labour Force Survey") establishes Icelandic geographic scope;
+a separate country dimension is not needed. Such table-level scope is checked in compatibility, not requested_filters.
 For the measure cite the source title/description or selected measure option that actually names it: a municipality
 label proves the place, not that the table measures population. For example a population sum needs the population
 title for its measure check and each selected municipality's own option field for its geography checks.
@@ -593,7 +595,9 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             notes.append(f"{var.text}: {'the largest ' + str(top) + ' of ' if top else ''}{len(kids)} categories"
                          + (f" under {var.label_of(named(var, question))!r}" if named(var, question) else ""))
     validate_filters(meta, out, sel.requested_filters, own_question, quoted_question=question,
-                     defaults={var.code: _optional_default(var) for var in meta.variables})
+                     defaults={var.code: _optional_default(var) for var in meta.variables},
+                     covered_scopes={" ".join(tokens(req.value)) for req in specification.requirements
+                                     if scope_evidence(meta, req, out) is not None} if specification else set())
     verification = None
     if specification is not None:
         if op != specification.operation:

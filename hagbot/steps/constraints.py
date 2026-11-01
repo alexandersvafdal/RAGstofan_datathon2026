@@ -110,11 +110,15 @@ def period_requirements(meta: TableMeta, var: Variable, question: str) -> list[s
 
 def validate_filters(meta: TableMeta, selected: dict[str, list[str]], requirements: list[RequestedFilter],
                      question: str, *, quoted_question: str = "",
-                     defaults: dict[str, list[str]] | None = None) -> None:
+                     defaults: dict[str, list[str]] | None = None,
+                     covered_scopes: set[str] | None = None) -> None:
     """Validate both extracted requirements and clear literal mentions independently of model defaults."""
     quoted = " ".join(tokens(quoted_question or question))
     for req in requirements:
         mention = " ".join(tokens(req.mention))
+        if mention in (covered_scopes or set()):
+            # Scope established by source metadata needs no query dimension.
+            continue
         if not mention or f" {mention} " not in f" {quoted} ":
             # Models sometimes put policy defaults in this explicit-filter manifest.
             # Accept only a recognizable default whose exact codes match both the
