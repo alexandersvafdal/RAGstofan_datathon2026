@@ -62,7 +62,7 @@ flowchart TD
         W[["LLM ⑤ Write 1–3 sentences in the user's language"]]:::llm
         X{"Every number in the text<br/>is in the table?"}:::code
         TPL["Fixed template from the numbers"]:::code
-        CA[["LLM ⑥ Read the answer back against the question<br/>right subject? the measure, place and period asked?<br/>no: it opens with 'No answer was found … the closest I came up with'"]]:::llm
+        CA[["LLM ⑥ Read the answer back against the question<br/>answers · uncertain · wrong<br/>uncertain: 'This may not answer the question exactly' first ·<br/>wrong: 'No answer was found … here is what is connected' first"]]:::llm
     end
 
     OUT(["Answer: number, unit, source table, chart, drill-down chips,<br/>and every step with its time"])
@@ -116,7 +116,7 @@ browser the moment it finishes.</sub>
 | ③ | Find the table | per part: none when the table is fixed (clicked, or population for a ratio) or the dictionary decides alone; otherwise check 1–2 rounds; if none fits, browse 1 + check 1–4 rounds; if still none, a forced pick 1; a round-2 pick adds a head-to-head re-check 1; a year or month the table lacks adds a neighbour pick 1 | 0–10 per part |
 | ④ | Choose categories | per part; again if it switches to a neighbouring table | 1–2 per part |
 | ⑤ | Write the answer | when at least one part has numbers | 0–1 |
-| ⑥ | Check the answer against the question (subject, measure, place, period) | after every written answer; a miss is said up front, the figures kept as the closest found | 0–1 |
+| ⑥ | Check the answer against the question: answers, uncertain or wrong | after every written answer; uncertain is qualified up front, wrong is said to be no answer with the figures kept as connected | 0–1 |
 | ⑦ | Follow-up suggestions | after the answer is on screen (`/api/suggest`), so it adds no answer time | 0–1 |
 
 A one-part question makes 4–5 calls before the answer (plan, find 0–1, categories, write, check), and one more for suggestions. Voting multiplies the

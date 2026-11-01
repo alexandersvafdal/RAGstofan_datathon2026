@@ -184,11 +184,13 @@ class Pipeline:
             t = Timer()
             try:
                 v = await check_answer(self.llm, req.question, parts, ans.text)
-                ans.verdict = "ok" if v.table_fits and v.answers else "doubtful"
+                ans.verdict = {"answers": "ok", "uncertain": "uncertain", "wrong": "wrong"}[v.fit]
                 ans.verdict_reason = v.reason
-                steps.append(Step(name="check", ms=t.ms(), detail=f"table fits: {v.table_fits}, answers: {v.answers}; {v.reason}"))
-                if ans.verdict == "doubtful":
-                    ans.text = f"{DOUBTFUL[lang]} {ans.text}"
+                steps.append(Step(name="check", ms=t.ms(), detail=f"{v.fit}; {v.reason}"))
+                if ans.verdict == "wrong":
+                    ans.text = f"{WRONG[lang]} {ans.text}"
+                elif ans.verdict == "uncertain":
+                    ans.text = f"{UNCERTAIN[lang]} {ans.text}"
             except Exception as e:   # the check is a safeguard; without it the answer stands as written
                 steps.append(Step(name="check", ms=t.ms(), detail=f"skipped: {type(e).__name__}: {e}"))
             ans.parts, ans.status = parts, "answered"
@@ -416,8 +418,10 @@ class Pipeline:
         return note
 
 
-DOUBTFUL = {"en": "No answer was found for this question. The closest I came up with:",
-            "is": "Ekkert svar fannst við þessari spurningu. Það næsta sem ég komst:"}
+WRONG = {"en": "No answer was found for this question. Here is what I found that is connected:",
+         "is": "Ekkert svar fannst við þessari spurningu. Hér er það sem ég fann sem tengist henni:"}
+UNCERTAIN = {"en": "This may not answer the question exactly.",
+             "is": "Þetta svarar spurningunni ef til vill ekki nákvæmlega."}
 
 
 def _no_answer(lang: str, errors: list[Exception]) -> str:

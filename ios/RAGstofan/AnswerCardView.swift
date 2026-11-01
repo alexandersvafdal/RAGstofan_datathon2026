@@ -169,7 +169,7 @@ struct AnswerCard: View {
                 // One quiet line under the answer: whether the numbers were checked and how long it took, then the actions
                 HStack(alignment: .center, spacing: 4) {
                     Flow(spacing: 10) {
-                        if a.textSource == "model" && a.verdict != "doubtful" {
+                        if a.textSource == "model" && (a.verdict ?? "ok") == "ok" {
                             Label(L == .is ? "Yfirfarið" : "Checked", systemImage: "checkmark.seal")
                                 .labelStyle(.titleAndIcon)
                                 .accessibilityLabel(w.checked)
