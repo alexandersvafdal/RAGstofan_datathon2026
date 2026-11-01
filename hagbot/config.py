@@ -24,6 +24,8 @@ class Settings:
     llm_reasoning_effort: str = os.getenv("LLM_REASONING_EFFORT", "none")   # off unless .env says otherwise
     # "Answer now": a quick model with thinking off, for when the default is taking too long
     fast_model: str = os.getenv("FAST_MODEL", "gpt-oss:20b")
+    # The models the picker offers, in order ("qwen3.6:35b-a3b,qwen3.8:27b,..."). Empty: every model the endpoint serves.
+    models: str = os.getenv("MODELS", "")
 
     data_source: str = os.getenv("DATA_SOURCE", "fixtures")
     px_base_url: str = os.getenv("PX_BASE_URL", "https://px.hagstofa.is")

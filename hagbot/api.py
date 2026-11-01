@@ -67,10 +67,13 @@ async def models():
             _models = (time.monotonic(), [])
     # The default first, then the rest from the largest down. The parameter count is read from the tag ("27b", "0.8b")
     # and names a size class the picker shows under each model: large (20B and up), medium (5B), small (1B), tiny.
+    # MODELS in .env narrows the list to the ones named (an endpoint can serve more than the picker should show).
     def params(m: str) -> float:
         x = re.search(r"(\d+(?:\.\d+)?)b\b", m)
         return float(x.group(1)) if x else 0.0
-    names = [settings.llm_model, *sorted((m for m in _models[1] if m != settings.llm_model), key=lambda m: (-params(m), m))]
+    served = _models[1]
+    offered = [m for m in (x.strip() for x in settings.models.split(",")) if m and (m in served or not served)] or served
+    names = [settings.llm_model, *sorted((m for m in offered if m != settings.llm_model), key=lambda m: (-params(m), m))]
     size = lambda b: "large" if b >= 20 else "medium" if b >= 5 else "small" if b >= 1 else "tiny"
     return {"default": settings.llm_model, "models": names, "fast": settings.fast_model,
             "sizes": {m: size(params(m)) for m in names if params(m)}}

@@ -99,7 +99,7 @@ flowchart TD
 ```
 
 <sub>Gold, double-edged boxes are LLM calls (through Ollama or any OpenAI-compatible server; `.env.example` sets
-qwen2.5:14b; the Spark serves qwen3.8:27b by default, with Qwen 3.6 35B-A3B, Qwen 3.5 9B, 4B and 0.8B in the picker; every call at temperature 0 with thinking off); the circled
+qwen2.5:14b; the Spark serves qwen3.6:35b-a3b by default, with Qwen 3.8 27B, gpt-oss 20B, Qwen 3.5 9B and 4B in the picker; every call at temperature 0 with thinking off); the circled
 number is the call's kind, counted in the table below. Blue is plain code. "votes": with `VOTES` > 1 or `VOTE_MODELS`
 set, that call is asked several times in parallel and the majority wins (off by default). Each step is streamed to the
 browser the moment it finishes.</sub>
