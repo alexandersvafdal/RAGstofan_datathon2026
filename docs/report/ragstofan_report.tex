@@ -38,42 +38,46 @@ calculation on top. RAGstofan lets anyone ask in plain English or Icelandic (``\
 konur búa á Íslandi?}'') and get back the official figure, its unit, the table it came from with a link, a chart,
 and every step that produced it.
 
-Our goals were:
-\begin{itemize}
-  \item \textbf{The right number from the right official table}, for questions in either language.
-  \item \textbf{Never an invented number.} The language model reads, plans and chooses; Python does every
-        calculation, and every number in the written answer is checked against the data before it is shown.
-  \item \textbf{Transparent answers}: the source table, the categories chosen, any calculation and each step's time
-        are shown, so a user can check them.
-  \item \textbf{Open models only}: any OpenAI-compatible endpoint. We ran Qwen models through Ollama on a GB10 GPU
-        server (``the Spark''); the same code runs on a laptop.
-\end{itemize}
+\section*{Our approach: a strong harness around the model}
 
-\section*{How it works}
+We did not rely on a large model knowing the answer. We built a \textbf{harness}: a pipeline in which the language
+model makes small, checkable decisions, each with a fixed output schema, and code does everything that can be
+checked or computed. The model reads, plans and chooses; it never does arithmetic and never has the last word on a
+number. Code checks each of its choices against the table, does every calculation in Python, and compares every
+number in the written answer with the data before it is shown. The harness runs on open models through any
+OpenAI-compatible endpoint (Qwen models through Ollama on a GB10 GPU server, ``the Spark''; the same code runs on a
+laptop), and every answer shows its source table, categories, calculation and steps, so a user can check it.
 
-Figure~\ref{fig:arch} shows the path of a question. A language model is used only where judgement is needed (gold
-boxes); everything that can be checked is done in code (blue).
+\textbf{Our main focus was finding the correct table.} Once the right table is found, reading the right number from
+it is a much smaller problem; with the wrong table, no model can give the right answer. Most of our work, and most of
+our measuring, went into the table search.
 
+\section*{How we find the table}
+
+\textbf{The dictionary.} A large share of our effort went into a bilingual dictionary (\texttt{data/keywords.json})
+that maps the words people actually use to Statistics Iceland's subjects and tables. It holds 212 subjects with 2,810
+English and Icelandic words and inflections (\emph{verðbólga, verðbólgan, inflation, cost of living} $\rightarrow$
+consumer price index $\rightarrow$ VIS01000), and for 171 of them the tables that answer it, checked against the
+catalogue's metadata. It closes the gap between everyday language and official titles, which keyword and vector
+search cannot close on their own.
+
+\textbf{Three methods, each confirmed.} The whole question is first treated as one part, to be answered from one
+table. Three methods each suggest a table, and the model answers yes or no: does this table hold the figures asked
+for?
 \begin{enumerate}
-  \item \textbf{Understand.} A follow-up (``and last year?'') is rewritten into a question that stands alone. A
-        planner restates the question in English with search words and reads its facts: places, period and the
-        breakdown wanted. Code drops any fact that is not in the user's own words.
-  \item \textbf{Find the table, one table first.} The whole question is first treated as one part. Three methods each
-        suggest a table, and the model confirms or rejects each with a yes or no: a hand-written \emph{keyword
-        dictionary} of 212 subjects (\emph{verðbólga} $\rightarrow$ consumer price index $\rightarrow$ VIS01000);
-        \emph{search} over all tables, with BM25 keyword search and multilingual e5 vectors run in parallel and fused
-        by rank, after code rules drop variants nobody asked for; and \emph{every table}, where the model names its
-        best three from a list of all tables sized to its context window. If no table is confirmed, the question is
-        split into 2, 3 and then 4 parts; if a part still has none, the user picks from each method's top three.
-  \item \textbf{Read the numbers.} The model chooses the categories (year, place, sex, \dots). Code checks every
-        choice against the table, fills defaults (the total, the latest period) and applies the user's words (only
-        the places named, quantity or value).
-  \item \textbf{Calculate in code}: differences, percentage changes, shares, sums, rankings, highest and lowest, and
-        figures per inhabitant across two tables.
-  \item \textbf{Answer.} The chart type follows the shape of the data. The model writes one to three sentences; if
-        any number in them is not in the data, a template written from the data replaces the answer. A last check
-        reads the answer back against the question and says so up front when it is unsure.
+  \item the \textbf{dictionary}: the table of the most specific subject the question names;
+  \item \textbf{search} over all tables: BM25 keyword search (over titles, dimensions and category labels, in both
+        languages) and multilingual e5 vectors run in parallel and are fused by rank; code rules then drop variants
+        nobody asked for (seasonally adjusted, forecasts, old index bases, tables without the place or year asked);
+  \item \textbf{every table}: the model names its best three from a list of all tables, sized to its context window.
 \end{enumerate}
+If no table is confirmed, the question is split into 2, 3 and then 4 parts, each searched the same way; if a part
+still has none, the user picks from each method's top three.
+
+\textbf{After the table.} The model chooses the categories (year, place, sex, \dots); code checks each choice and
+applies the user's own words (only the places named, the period asked, quantity or value). Code does the arithmetic
+(differences, changes, shares, sums, rankings, figures per inhabitant across two tables), picks the chart, and checks
+the written answer's numbers. Figure~\ref{fig:arch} shows the whole path.
 
 \textbf{Connection to Statistics Iceland.} A crawler walked the PX-API's table tree once and stored every table's
 ID, titles in both languages, dimensions, periods and category labels (the catalogue that search runs over). For a
@@ -154,6 +158,24 @@ yes from any method, or the user's pick, leads to reading the numbers (bottom ro
 \label{fig:arch}
 \end{figure}
 
+\section*{Test sets we built}
+
+Beyond the organisers' 60 questions, we built our own question sets to test table finding at scale, without writing
+answer keys by hand:
+\begin{itemize}
+  \item \textbf{Questions written from the tables.} A language model read each sampled table's titles and dimensions
+        from the catalogue and wrote three questions about it, in English and Icelandic: a plain lookup, a change
+        between two periods, and a question about one of its categories. The table it was written from is the right
+        answer. It also reworded each organiser question three ways (shorter, colloquial, with a typo), and wrote
+        questions that only one of two near-identical tables can answer (base year, monthly vs yearly, old vs new
+        series), the confusion behind most of our misses. In all about 1,300 questions over 141 tables, split by table
+        into a half we fix against and a frozen half we only measure on.
+  \item \textbf{Questions from Statistics Iceland's news.} We read the newest news releases on Statistics Iceland's
+        website, and a language model wrote questions and answers from each, in English and Icelandic. A question was
+        kept only if its answer appears word for word in the article, so the answer key is Statistics Iceland's own.
+        These 108 questions use real topics and real phrasing, and are kept for measuring only.
+\end{itemize}
+
 \section*{Results}
 
 \textbf{Benchmark.} We measured against the organisers' 60 questions over Statistics Iceland's data (release of
@@ -195,10 +217,6 @@ unreliably. On 20 unseen questions the first score was 11/20; after fixing what 
 \textbf{Search alone.} Without any model, on 90 questions (our 30 plus the organisers' 60), the right table was among
 the top 15 search hits for 74 with BM25, 62 with e5 and 78 with the two fused; e5 found the right table for 6 questions where BM25 did not.
 The model's checks then choose among these.
-
-\textbf{Larger tests.} We also generated about 1,300 questions from the catalogue (three per table across 141 tables,
-paraphrases of the organisers' questions, and 60 pairs of near-identical tables), split by table into a half we fix
-against and a frozen half we only measure on, and 108 questions taken from Icelandic news.
 
 \section*{Limits and next steps}
 
