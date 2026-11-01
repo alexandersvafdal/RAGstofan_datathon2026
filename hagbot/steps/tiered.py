@@ -98,6 +98,8 @@ Answer false when it is about another subject or another measure, or lacks a pla
 Answer false when the question asks for a whole (all greenhouse gases, total exports, everyone) and the table only
 splits it into parts with no total among its options (one gas at a time, one sector at a time): adding up parts in
 different units, or parts that overlap, is not the whole.
+When the question asks for two or more different measures (inflation and wage growth, exports and imports), a table
+holding only one of them answers false.
 A figure per inhabitant, per capita or per 1,000 inhabitants needs a table that publishes that rate (an option or
 title saying "per inhabitant", "per capita", "per 1,000"); a table of totals answers false, since the division by the
 population is done elsewhere.
@@ -120,7 +122,9 @@ def describe(e: CatalogEntry, question: str, options: int = 30) -> str:
 
 async def fits(llm: LLM, e: CatalogEntry, question: str, original: str) -> tuple[bool, str]:
     """Does this one table answer? The model's yes or no, and its reason (what the table has and lacks)."""
-    asked = f"User asked: {original}\nThis part: {question}" if original and original != question else f"Question: {question}"
+    # `original` comes only with a one-part plan: then the table must answer the user's whole question, and the
+    # planner's rewording (which may have dropped a measure: "inflation and wage growth" -> "inflation") only helps read it
+    asked = (f"Question: {original}\n(Read as: {question})" if original and original != question else f"Question: {question}")
     v = await llm.complete_json(FITS, f"{asked}\n\nTable:\n{describe(e, f'{question} {original}')}", Fits)
     return v.answers, v.reason.strip()
 

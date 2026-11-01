@@ -66,6 +66,8 @@ def difference_parts(first: AnswerPart, second: AnswerPart, lang: str) -> tuple[
     on the later part. None unless both sides are one number with a year in the label."""
     if any(len(p.facts) != 1 or p.computation for p in (first, second)):
         return None
+    if first.table.id != second.table.id:   # two measures (inflation, wage growth) are not one measure at two times
+        return None
     ya, yb = (re.search(r"\b(?:18|19|20)\d\d(?:M\d\d|Q\d)?\b", p.facts[0].label) for p in (first, second))
     if not ya or not yb or ya.group(0) == yb.group(0):
         return None
