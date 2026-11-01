@@ -83,9 +83,27 @@ async def _checked(req: AskRequest) -> AskRequest:
     return req
 
 
+def _log_question(req: AskRequest, answer: Answer, seconds: float) -> None:
+    """One line per question asked, in logs/questions.jsonl: the raw material for new test questions. Never the
+    history, only the question as typed and what came of it."""
+    try:
+        path = ROOT / "logs" / "questions.jsonl"
+        path.parent.mkdir(exist_ok=True)
+        with path.open("a") as f:
+            f.write(json.dumps({"t": time.strftime("%Y-%m-%dT%H:%M:%S"), "question": req.question,
+                                "language": answer.language, "model": answer.model, "status": answer.status,
+                                "tables": [s.id for s in answer.sources], "seconds": round(seconds, 1)},
+                               ensure_ascii=False) + "\n")
+    except OSError:
+        pass
+
+
 @app.post("/api/ask", response_model=Answer)
 async def ask(req: AskRequest) -> Answer:
-    return await pipeline.answer(await _checked(req))
+    t0 = time.monotonic()
+    answer = await pipeline.answer(await _checked(req))
+    _log_question(req, answer, time.monotonic() - t0)
+    return answer
 
 
 @app.post("/api/ask/stream")
@@ -97,7 +115,9 @@ async def ask_stream(req: AskRequest) -> StreamingResponse:
     rid = req.request_id
 
     async def run():
+        t0 = time.monotonic()
         answer = await pipeline.answer(req, on_step=lambda st: queue.put_nowait({"type": "step", **st.model_dump()}))
+        _log_question(req, answer, time.monotonic() - t0)
         if rid in _jobs:
             _jobs[rid]["answer"] = answer.model_dump()
         queue.put_nowait({"type": "answer", "answer": answer.model_dump()})

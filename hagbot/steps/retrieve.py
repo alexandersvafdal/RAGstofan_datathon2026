@@ -99,9 +99,14 @@ def narrow(entries: list[CatalogEntry], question: str) -> list[CatalogEntry]:
         has = lambda e: bool(e.matching_values(place)) or _title_has(e, place)
         if any(has(e) for e in entries[:3]):
             keep_if(has)
-    # a month asked needs a monthly table; "1 January" is the date yearly population figures refer to, not a month
-    if re.search(MONTHS, re.sub(r"\b1\.? ?(january|januar|jan)\b", " ", q)):
-        keep_if(lambda e: "M" in e.last_period)
+    # A month asked wants a monthly table, a quarterly one failing that, or a yearly table that reports that month
+    # ("beneficiaries in December", "students in autumn"). "1 January" / "Jan 1" is the date yearly population
+    # figures refer to, not a month. Monthly tables go first; the rest stay, in their order.
+    month_q = re.sub(r"\b1\.? ?(january|januar|jan)\b|\b(january|januar|jan)\.? 1(st)?\b", " ", q)
+    if asked_months := set(re.findall(MONTHS, month_q)):
+        names_month = lambda e: any(re.search(rf"\b{m}", e.title_en.lower()) for m in asked_months if len(m) > 3)
+        keep_if(lambda e: "M" in e.last_period or "Q" in e.last_period or names_month(e))
+        entries = sorted(entries, key=lambda e: "M" not in e.last_period)
     # An index is read on its current base: tables that only carry old bases (building cost on 1983 and earlier,
     # CPI "previous bases") answer only a question that names one of those bases
     if asked := asked_bases(question):

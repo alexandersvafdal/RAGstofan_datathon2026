@@ -180,11 +180,9 @@ struct AnswerCard: View {
                         let on = model.voice.speaking == ex.id.uuidString, loading = model.voice.loadingSpeech == ex.id.uuidString
                         Button { model.speak(ex) } label: {
                             Group {
-                                if loading { ProgressView().controlSize(.mini) }
-                                else {
-                                    Image(systemName: on ? "stop.fill" : "speaker.wave.2")
-                                        .symbolEffect(.variableColor.iterative, isActive: on)
-                                }
+                                if loading { ProgressView().controlSize(.small).tint(pal.accent) }
+                                else if on { SpeakingBars().scaleEffect(0.75) }
+                                else { Image(systemName: "speaker.wave.2") }
                             }
                             .frame(width: 34, height: 30)
                             .foregroundStyle(on ? pal.accent : pal.text3)

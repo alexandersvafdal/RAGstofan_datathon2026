@@ -47,7 +47,9 @@ def concepts() -> list[dict]:
 
 def match_concepts(text: str) -> list[dict]:
     """Concepts whose terms occur in the text: one-word terms match a word that starts with them (exactly, for
-    terms of three letters or fewer), several-word terms match as a phrase from a word start."""
+    terms of three letters or fewer), several-word terms match as a phrase from a word start. Icelandic puts the
+    head noun last in a compound ("örorkulífeyrir", "mjólkurkýr", "launakostnaður"), so a term of six letters or
+    more also matches inside a longer word."""
     words = tokens(text)
     padded = " " + " ".join(words) + " "
     hits = []
@@ -56,11 +58,15 @@ def match_concepts(text: str) -> list[dict]:
             if " " in t:
                 ok = f" {t}" in padded
             else:
-                ok = any(w == t if len(t) <= 3 else w.startswith(t) for w in words)
+                ok = any(w == t if len(t) <= 3 else w.startswith(t) or (len(t) >= 6 and len(w) >= len(t) + 3 and t in w)
+                         for w in words)
             if ok:
                 hits.append(c)
                 break
-    return hits
+    # "presidential election" also matches "election", "building cost index" also matches "prices": the wider
+    # concept steps aside for the narrower one it is listed as broader of, so its tables do not crowd the hitlist
+    narrower = {b for c in hits for b in c.get("broader", [])}
+    return [c for c in hits if c["id"] not in narrower]
 
 
 # Words that do not narrow a question about an index: when, how it moved, where. "What is the current wage index",
@@ -68,7 +74,12 @@ def match_concepts(text: str) -> list[dict]:
 _GENERIC = ("current", "latest", "newest", "recent", "now", "today", "value", "level", "figure", "number", "chang",
             "rise", "rose", "risen", "increas", "grow", "grew", "develop", "trend", "since", "over", "year", "month",
             "annual", "last", "past", "iceland", "nuna", "nuverand", "nyjust", "nyjast", "sidast", "sidust", "gildi",
-            "stad", "breyt", "haekk", "throun", "thro", "arum", "arin", "manud", "undanfar", "island")
+            "stad", "breyt", "haekk", "throun", "thro", "arum", "arin", "manud", "undanfar", "island",
+            # "give me the wage index as it is today and also show me how it has moved": asking words, not a breakdown
+            "give", "show", "tell", "also", "how", "has", "have", "been", "plot", "chart", "graph", "line", "please",
+            "gef", "synd", "syn", "seg", "lika", "hvernig", "hefur", "hafa", "eins", "dag", "sidan", "linurit",
+            # pronouns too short for the stopword list: "gefðu mér … hvernig hún hefur þróast"
+            "mer", "hun", "hann", "thad", "thess", "mig", "okkur", "its", "it", "me", "us", "this", "that")
 
 
 def headline(hit: CatalogEntry, found: list[dict], catalog: Catalog, text: str) -> CatalogEntry:
@@ -175,8 +186,12 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
     text = f"{search_query} {question} {original}"
     found = match_concepts(text)
 
-    # 1. the ranked hitlist: dictionary + each of the catalog's searches (BM25, e5, bge-m3 when on), times recency
-    preferred = [e for c in found for t in c["tables"] if (e := catalog.get(t))]
+    # 1. the ranked hitlist: dictionary + each of the catalog's searches (BM25, e5, bge-m3 when on), times recency.
+    # A question touching several subjects ("labour costs in construction, fishing and finance") would fill the first
+    # batch with every subject's tables; then each subject sends only its headline, and the searches fill the rest.
+    with_tables = [c for c in found if c["tables"]]
+    per_concept = 1 if len(with_tables) >= 3 else None
+    preferred = [e for c in with_tables for t in c["tables"][:per_concept] if (e := catalog.get(t))]
     query = " ".join([text, *(c["search"] for c in found)])
     searches = {name: [e for e in (catalog.get(i) for i in ids) if e] for name, ids in catalog.rankings(query, 4 * k).items()}
     ranked = rank(preferred, searches)

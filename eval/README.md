@@ -7,6 +7,9 @@
 | `organizers.jsonl` | 60 (30 EN, 30 IS) | the organisers | The official yardstick: `questions/examples.jsonl` from the gagnvist-starter repo, 10 easy, 10 calculation and 10 two-table questions per language, answers from the 18 Oct 2026 data release. Search fixes have been made by studying its misses, so it is no longer blind. |
 | `holdout_news.jsonl` | 108 (54 EN, 54 IS) | us, 31 Oct | **Final holdout**, two parts. *News lookups* (`news-…`, 30 per language): one headline figure from each of 30 Statistics Iceland news releases, answer = the release's own wording (`holdout_news_drafts.json`). *Organiser-style* (`styled-…`, 24 per language): population and demography in the organisers' mix of single numbers, calculations and two-table questions; each answer computed by the build script from release figures or from table MAN02005/MAN00101 (`holdout_styled_drafts.json`). Built by `scripts/build_news_valset.py`. |
 
+| `gen_dev_*.jsonl`, `gen_frozen_*.jsonl` | ~1,300 | `scripts/build_gen_valset.py`, 1 Nov | Generated, graded on the table (no answer key). Three sources: `tables` (3 questions × 2 languages for 141 catalogue tables, 6 per id prefix), `paraphrase` (the organisers' 60 reworded three ways, same answers), `siblings` (60 near-identical table pairs, one question per side). Split by table so the two halves share no table: fix against `gen_dev_*`, measure on `gen_frozen_*`. `retrieval_eval --by language area kind` shows the weak spots. |
+| `../logs/questions.jsonl` | grows | the server | Every question asked through the app or the site, with the tables it got. Mine it for new dev questions; label the right table by hand. |
+
 **The holdout is for measuring only.** Never change the bot because of a question in it, or its score stops saying
 anything about new questions. `retrieval_eval` leaves it out unless it is named.
 

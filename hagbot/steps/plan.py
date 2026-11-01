@@ -29,6 +29,7 @@ Icelandic words that are easy to mistranslate:
 - atvinnuþátttaka: activity rate; starfandi: employed
 - verðbólga: inflation (annual % change of the consumer price index); vísitala neysluverðs: consumer price index
 - hagvöxtur: economic growth (GDP volume change); landsframleiðsla: GDP
+- verg landsframleiðsla: gross domestic product at current prices ("verg" = gross, NOT real); á föstu verðlagi, raunvirði: at constant prices
 - verðmæti: value in ISK (not a price index); útflutningur, útflutt: exports
 - gistinætur: overnight stays; farþegar: passengers; fólksbílar: passenger cars; sjávarafurðir: marine products
 - laun: wages; innflutningur: imports; útflutningur: exports

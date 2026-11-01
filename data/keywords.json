@@ -145,23 +145,15 @@
       "aliases": [
         "GDP",
         "gross domestic product",
-        "economic growth",
-        "hagvöxtur",
-        "hagvöxt",
-        "hagvexti",
-        "hagvaxtar",
         "landsframleiðsla",
         "landsframleiðslu",
         "verg landsframleiðsla",
         "vergrar landsframleiðslu",
         "economic output",
         "national output",
-        "growth of the economy",
         "VLF",
         "landsframleiðslan",
-        "landsframleiðslunnar",
-        "hagvöxturinn",
-        "hagvaxtarhraði"
+        "landsframleiðslunnar"
       ],
       "search_terms": "gross domestic product",
       "table_paths": [
@@ -173,7 +165,7 @@
         "landsframleiðsla",
         "landsframleiðslu"
       ],
-      "note": "Growth needs a volume change; GDP levels and growth are not interchangeable.",
+      "note": "The GDP level at current prices; growth (volume change) is its own concept, economic_growth.",
       "role": "topic",
       "broader": [
         "economy"
@@ -183,32 +175,71 @@
       "terms": [
         "GDP",
         "gross domestic product",
-        "economic growth",
-        "hagvöxtur",
-        "hagvöxt",
-        "hagvexti",
-        "hagvaxtar",
         "landsframleiðsla",
         "landsframleiðslu",
         "verg landsframleiðsla",
         "vergrar landsframleiðslu",
         "economic output",
         "national output",
-        "growth of the economy",
         "VLF",
         "landsframleiðslan",
         "landsframleiðslunnar",
-        "hagvöxturinn",
-        "hagvaxtarhraði",
         "gdp",
         "gross domestic",
         "economy",
-        "hagvoxt",
         "landsframleidsl"
       ],
       "tables": [
-        "THJ01000",
-        "THJ01601"
+        "THJ01102",
+        "THJ01601",
+        "THJ01000"
+      ]
+    },
+    {
+      "id": "economic_growth",
+      "role": "topic",
+      "aliases": [
+        "economic growth",
+        "GDP growth",
+        "real growth",
+        "growth of the economy",
+        "hagvöxtur",
+        "hagvöxt",
+        "hagvexti",
+        "hagvaxtar",
+        "hagvöxturinn",
+        "hagvaxtarhraði"
+      ],
+      "search_terms": "gross domestic product volume change",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar"
+      ],
+      "table_phrases": [
+        "volume change",
+        "gross domestic product"
+      ],
+      "broader": [
+        "gdp"
+      ],
+      "note": "Growth is the volume change on the previous year, in the overview table; the level is in the GDP table (gdp).",
+      "concept": "economic growth",
+      "search": "gross domestic product volume change",
+      "terms": [
+        "economic growth",
+        "GDP growth",
+        "real growth",
+        "growth of the economy",
+        "hagvöxtur",
+        "hagvöxt",
+        "hagvexti",
+        "hagvaxtar",
+        "hagvöxturinn",
+        "hagvaxtarhraði",
+        "hagvoxt",
+        "hagvaxt"
+      ],
+      "tables": [
+        "THJ01000"
       ]
     },
     {
@@ -1223,7 +1254,10 @@
         "number of students",
         "fjöldi nemenda"
       ],
-      "tables": []
+      "tables": [
+        "SKO00000",
+        "SKO00005a"
+      ]
     },
     {
       "id": "male",
@@ -1361,7 +1395,10 @@
         "á hverja 1000 íbúa",
         "á hverja 1 000 íbúa"
       ],
-      "tables": []
+      "tables": [
+        "MAN00101",
+        "MAN00000"
+      ]
     },
     {
       "id": "demography",
@@ -1413,7 +1450,9 @@
         "fjöldi innflytjenda",
         "innflytjendafjöldi"
       ],
-      "tables": []
+      "tables": [
+        "MAN43000"
+      ]
     },
     {
       "id": "life_expectancy",
@@ -1487,7 +1526,9 @@
         "fjölskyldugerð",
         "fjölskyldur á Íslandi"
       ],
-      "tables": []
+      "tables": [
+        "MAN07108"
+      ]
     },
     {
       "id": "marriages",
@@ -1530,7 +1571,9 @@
         "gift fólk",
         "hjónavígslur"
       ],
-      "tables": []
+      "tables": [
+        "MAN06100"
+      ]
     },
     {
       "id": "divorces",
@@ -1569,7 +1612,9 @@
         "hjúskaparslit",
         "fráskilin"
       ],
-      "tables": []
+      "tables": [
+        "MAN06202"
+      ]
     },
     {
       "id": "households",
@@ -1634,7 +1679,10 @@
         "mannfjöldaspána",
         "framtíðarmannfjöldi"
       ],
-      "tables": []
+      "tables": [
+        "MAN09012",
+        "MAN09010"
+      ]
     },
     {
       "id": "census",
@@ -1661,7 +1709,9 @@
         "manntals",
         "manntalið"
       ],
-      "tables": []
+      "tables": [
+        "CEN9901"
+      ]
     },
     {
       "id": "financial_wellbeing",
@@ -2403,7 +2453,9 @@
         "barnabætur",
         "húsnæðisbætur"
       ],
-      "tables": []
+      "tables": [
+        "THJ05165"
+      ]
     },
     {
       "id": "real_wages",
@@ -2715,7 +2767,9 @@
         "nýbyggingar",
         "byggingarleyfi"
       ],
-      "tables": []
+      "tables": [
+        "IDN03001"
+      ]
     },
     {
       "id": "homelessness",
@@ -2790,7 +2844,10 @@
         "atvinnuþátttakan",
         "þátttaka á vinnumarkaði"
       ],
-      "tables": []
+      "tables": [
+        "VIN00911",
+        "VIN00910"
+      ]
     },
     {
       "id": "vacancies",
@@ -2920,7 +2977,9 @@
         "framleiðni vinnuafls",
         "vinnuaflsframleiðni"
       ],
-      "tables": []
+      "tables": [
+        "THJ11011"
+      ]
     },
     {
       "id": "preschool",
@@ -2965,7 +3024,9 @@
         "leikskólabörn",
         "leikskólastig"
       ],
-      "tables": []
+      "tables": [
+        "SKO01000"
+      ]
     },
     {
       "id": "primary_school",
@@ -3012,7 +3073,9 @@
         "grunnskol",
         "skol"
       ],
-      "tables": []
+      "tables": [
+        "SKO02101"
+      ]
     },
     {
       "id": "secondary_school",
@@ -3052,7 +3115,9 @@
         "menntaskóli",
         "framhaldsskólanemar"
       ],
-      "tables": []
+      "tables": [
+        "SKO03108"
+      ]
     },
     {
       "id": "university",
@@ -3097,7 +3162,9 @@
         "háskólanám",
         "háskólastig"
       ],
-      "tables": []
+      "tables": [
+        "SKO04108"
+      ]
     },
     {
       "id": "graduations",
@@ -3235,7 +3302,9 @@
         "heilsufari",
         "heilsufars"
       ],
-      "tables": []
+      "tables": [
+        "THJ05531"
+      ]
     },
     {
       "id": "healthcare",
@@ -3285,7 +3354,9 @@
         "heilsugæslu",
         "læknisheimsóknir"
       ],
-      "tables": []
+      "tables": [
+        "THJ05551"
+      ]
     },
     {
       "id": "hospitals",
@@ -3431,7 +3502,9 @@
         "öryrkjar",
         "öryrkja"
       ],
-      "tables": []
+      "tables": [
+        "FEL02003"
+      ]
     },
     {
       "id": "elderly_care",
@@ -3621,7 +3694,10 @@
         "krabbameinum",
         "krabbameinstilfelli"
       ],
-      "tables": []
+      "tables": [
+        "HEI06104",
+        "HEI06105"
+      ]
     },
     {
       "id": "accidents",
@@ -3659,7 +3735,9 @@
         "slasaðir",
         "slösuðust"
       ],
-      "tables": []
+      "tables": [
+        "SAM03201"
+      ]
     },
     {
       "id": "economy",
@@ -3697,7 +3775,9 @@
         "þjóðarbúið",
         "þjóðarbúskapur"
       ],
-      "tables": []
+      "tables": [
+        "THJ01000"
+      ]
     },
     {
       "id": "economic_forecast",
@@ -3731,7 +3811,9 @@
         "hagspár",
         "efnahagsspá"
       ],
-      "tables": []
+      "tables": [
+        "THJ07000"
+      ]
     },
     {
       "id": "prices",
@@ -3783,7 +3865,9 @@
         "ódýrara",
         "verðvísitala"
       ],
-      "tables": []
+      "tables": [
+        "VIS01000"
+      ]
     },
     {
       "id": "producer_prices",
@@ -3819,7 +3903,9 @@
         "vísitala framleiðsluverðs",
         "vísitölu framleiðsluverðs"
       ],
-      "tables": []
+      "tables": [
+        "VIS08000b"
+      ]
     },
     {
       "id": "construction_prices",
@@ -3863,7 +3949,10 @@
         "byggingarvisital",
         "byggingarkostn"
       ],
-      "tables": []
+      "tables": [
+        "VIS13001",
+        "VIS13000"
+      ]
     },
     {
       "id": "household_consumption",
@@ -3910,7 +3999,9 @@
         "neysluútgjöld",
         "heimilisútgjöld"
       ],
-      "tables": []
+      "tables": [
+        "THJ02103"
+      ]
     },
     {
       "id": "savings",
@@ -3950,7 +4041,9 @@
         "sparnaðar",
         "sparnaðarhlutfall"
       ],
-      "tables": []
+      "tables": [
+        "THJ01202"
+      ]
     },
     {
       "id": "public_finances",
@@ -3989,7 +4082,10 @@
         "halli",
         "rikissjod"
       ],
-      "tables": []
+      "tables": [
+        "THJ05111",
+        "THJ05812"
+      ]
     },
     {
       "id": "taxes",
@@ -4038,7 +4134,9 @@
         "virðisaukaskattur",
         "VSK"
       ],
-      "tables": []
+      "tables": [
+        "THJ05132"
+      ]
     },
     {
       "id": "government_spending",
@@ -4077,7 +4175,9 @@
         "samneysla",
         "samneyslu"
       ],
-      "tables": []
+      "tables": [
+        "THJ05143"
+      ]
     },
     {
       "id": "government_revenue",
@@ -4108,7 +4208,9 @@
         "tekjur hins opinbera",
         "ríkistekjur"
       ],
-      "tables": []
+      "tables": [
+        "THJ05132"
+      ]
     },
     {
       "id": "government_debt",
@@ -4143,7 +4245,9 @@
         "skuldir hins opinbera",
         "skuldir sveitarfélaga"
       ],
-      "tables": []
+      "tables": [
+        "THJ05181"
+      ]
     },
     {
       "id": "trade",
@@ -4234,7 +4338,9 @@
         "rekstur fyrirtækja",
         "atvinnulíf"
       ],
-      "tables": []
+      "tables": [
+        "FYR08000"
+      ]
     },
     {
       "id": "business_finances",
@@ -4345,7 +4451,9 @@
         "nýstofnuð fyrirtæki",
         "lífslíkur fyrirtækja"
       ],
-      "tables": []
+      "tables": [
+        "FYR09002"
+      ]
     },
     {
       "id": "bankruptcies",
@@ -4433,7 +4541,10 @@
         "ferðalög",
         "ferðalaga"
       ],
-      "tables": []
+      "tables": [
+        "SAM01601",
+        "SAM02001"
+      ]
     },
     {
       "id": "hotels",
@@ -4473,7 +4584,10 @@
         "gistihús",
         "gistihúsum"
       ],
-      "tables": []
+      "tables": [
+        "SAM01201",
+        "SAM01102"
+      ]
     },
     {
       "id": "cruise_ships",
@@ -4513,7 +4627,9 @@
         "skemmtiferðaskipum",
         "farþegar skemmtiferðaskipa"
       ],
-      "tables": []
+      "tables": [
+        "SAM02002"
+      ]
     },
     {
       "id": "transport",
@@ -4547,7 +4663,9 @@
         "umferðar",
         "umferðinni"
       ],
-      "tables": []
+      "tables": [
+        "SAM03105"
+      ]
     },
     {
       "id": "public_transport",
@@ -4631,7 +4749,9 @@
         "býla",
         "bújarðir"
       ],
-      "tables": []
+      "tables": [
+        "LAN1101"
+      ]
     },
     {
       "id": "livestock",
@@ -4691,7 +4811,9 @@
         "svín",
         "alifuglar"
       ],
-      "tables": []
+      "tables": [
+        "LAN10102"
+      ]
     },
     {
       "id": "fisheries",
@@ -4738,7 +4860,9 @@
         "sjávarafurðir",
         "sjávarafurða"
       ],
-      "tables": []
+      "tables": [
+        "SJA01101"
+      ]
     },
     {
       "id": "fish_catch",
@@ -4925,7 +5049,10 @@
         "atkvaed",
         "kjosend"
       ],
-      "tables": []
+      "tables": [
+        "KOS02121",
+        "KOS07100"
+      ]
     },
     {
       "id": "presidential_elections",
@@ -4963,7 +5090,10 @@
         "forsetakosningar",
         "forsetakosningum"
       ],
-      "tables": []
+      "tables": [
+        "KOS07100",
+        "KOS07102"
+      ]
     },
     {
       "id": "parliamentary_elections",
@@ -5003,7 +5133,9 @@
         "alþingiskosningum",
         "alþingiskjöri"
       ],
-      "tables": []
+      "tables": [
+        "KOS02121"
+      ]
     },
     {
       "id": "local_elections",
@@ -5040,7 +5172,9 @@
         "sveitarstjórnarkjör",
         "borgarstjórnarkosningar"
       ],
-      "tables": []
+      "tables": [
+        "KOS03101"
+      ]
     },
     {
       "id": "voter_turnout",
@@ -5072,7 +5206,10 @@
         "kjörsóknin",
         "þátttaka í kosningum"
       ],
-      "tables": []
+      "tables": [
+        "KOS02004",
+        "KOS02005"
+      ]
     },
     {
       "id": "crime",
@@ -5121,7 +5258,9 @@
         "lögreglu",
         "brotatíðni"
       ],
-      "tables": []
+      "tables": [
+        "DOM0501"
+      ]
     },
     {
       "id": "prisons",
@@ -5163,7 +5302,9 @@
         "afplánun",
         "fangelsisvist"
       ],
-      "tables": []
+      "tables": [
+        "DOM0502"
+      ]
     },
     {
       "id": "culture",
@@ -5292,7 +5433,9 @@
         "kvikmyndahús",
         "bíógestir"
       ],
-      "tables": []
+      "tables": [
+        "MEN06103"
+      ]
     },
     {
       "id": "libraries",
@@ -5374,7 +5517,9 @@
         "bókaútgáfa",
         "útgefnar bækur"
       ],
-      "tables": []
+      "tables": [
+        "MEN01103"
+      ]
     },
     {
       "id": "media",
@@ -5405,7 +5550,9 @@
         "fjölmiðlun",
         "fjölmiðlunar"
       ],
-      "tables": []
+      "tables": [
+        "MEN10001"
+      ]
     },
     {
       "id": "advertising",
@@ -5531,7 +5678,9 @@
         "nýsköpunar",
         "rannsóknir og þróun"
       ],
-      "tables": []
+      "tables": [
+        "FYR05200"
+      ]
     },
     {
       "id": "internet",
@@ -5615,7 +5764,9 @@
         "þróunarstarf",
         "rannsóknastarfsemi"
       ],
-      "tables": []
+      "tables": [
+        "FYR05103"
+      ]
     },
     {
       "id": "environment",
@@ -5810,7 +5961,9 @@
         "orkuframleiðslu",
         "orkumál"
       ],
-      "tables": []
+      "tables": [
+        "UMH40100"
+      ]
     },
     {
       "id": "electricity",
@@ -5855,7 +6008,9 @@
         "virkjanir",
         "virkjana"
       ],
-      "tables": []
+      "tables": [
+        "UMH40210"
+      ]
     },
     {
       "id": "energy_prices",
@@ -5943,7 +6098,9 @@
         "þjóðgarðar",
         "þjóðgarða"
       ],
-      "tables": []
+      "tables": [
+        "UMH01101"
+      ]
     },
     {
       "id": "green_economy",
@@ -5981,7 +6138,9 @@
         "umhverfisskatta",
         "umhverfisgjöld"
       ],
-      "tables": []
+      "tables": [
+        "UMH51001"
+      ]
     },
     {
       "id": "older_adults",
@@ -6976,7 +7135,9 @@
         "menguðum",
         "mengað"
       ],
-      "tables": []
+      "tables": [
+        "UMH31118"
+      ]
     },
     {
       "id": "religion",
@@ -7021,7 +7182,9 @@
         "þjóðkirkja",
         "þjóðkirkjunnar"
       ],
-      "tables": []
+      "tables": [
+        "MAN10200"
+      ]
     },
     {
       "id": "sports",
@@ -7113,7 +7276,9 @@
         "minjasöfn",
         "safngestir"
       ],
-      "tables": []
+      "tables": [
+        "MEN07002"
+      ]
     },
     {
       "id": "music",
@@ -7147,7 +7312,9 @@
         "tónleika",
         "hljómsveitir"
       ],
-      "tables": []
+      "tables": [
+        "MEN05205"
+      ]
     },
     {
       "id": "telecommunications",
@@ -7233,7 +7400,9 @@
         "þungunarrof",
         "þungunarrofa"
       ],
-      "tables": []
+      "tables": [
+        "HEI05101"
+      ]
     },
     {
       "id": "interest_rates",
@@ -7377,7 +7546,9 @@
         "verðbréf",
         "verðbréfa"
       ],
-      "tables": []
+      "tables": [
+        "THJ10001"
+      ]
     },
     {
       "id": "weather",
@@ -7419,7 +7590,9 @@
         "veðrátta",
         "veðurstöðvar"
       ],
-      "tables": []
+      "tables": [
+        "UMH11120"
+      ]
     },
     {
       "id": "temperature",

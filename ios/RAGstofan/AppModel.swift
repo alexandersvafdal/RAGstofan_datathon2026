@@ -89,7 +89,9 @@ final class AppModel {
         let d = UserDefaults.standard
         server = d.string(forKey: "server") ?? "http://10.10.40.10:8000"
         langChoice = LangChoice(rawValue: d.string(forKey: "lang") ?? "") ?? .auto
-        paletteName = PaletteName(rawValue: d.string(forKey: "palette") ?? "") ?? .warm
+        // Sterling became the default on 1 Nov 2026: every install moves to it once, then keeps what the user picks
+        if !d.bool(forKey: "sterlingDefault") { d.set(PaletteName.sterling.rawValue, forKey: "palette"); d.set(true, forKey: "sterlingDefault") }
+        paletteName = PaletteName(rawValue: d.string(forKey: "palette") ?? "") ?? .sterling
         appearance = d.string(forKey: "appearance") ?? "auto"
         modelChoice = d.string(forKey: "model")
         reasoningChoice = d.string(forKey: "reasoning")

@@ -7,6 +7,7 @@ struct ChatView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.pal) private var pal
     @State private var draft = ""
+    @State private var fromVoice = false   // the draft is what the microphone heard, waiting for a look
     @State private var showSettings = false
     @State private var drawer = false
     @State private var tuning = false
@@ -107,6 +108,24 @@ struct ChatView: View {
                   .onTapGesture { voice.error = nil }
                   .transition(.opacity)
           }
+          // the answer being made into speech, or read: one bar with a stop, like a mini player
+          if let id = voice.loadingSpeech ?? voice.speaking, !id.hasPrefix("sample-") {
+              VoiceBar(loading: voice.loadingSpeech != nil, isl: isl) { voice.stopSpeaking() }
+                  .transition(.move(edge: .bottom).combined(with: .opacity))
+          }
+          // what the microphone heard sits in the box for a look before it goes
+          if fromVoice && !empty {
+              HStack(spacing: 6) {
+                  Image(systemName: "waveform").foregroundStyle(pal.accent)
+                  Text(isl ? "Heyrði þetta. Lagaðu eða sendu." : "Heard this. Edit it or send.")
+                  Spacer()
+                  Button { draft = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(pal.text3) }
+                      .accessibilityLabel(isl ? "Hreinsa" : "Clear")
+              }
+              .font(.caption).foregroundStyle(pal.text2)
+              .padding(.horizontal, 6)
+              .transition(.opacity)
+          }
           HStack(spacing: 10) {
             ZStack {
                 if voice.state == .idle {
@@ -164,6 +183,9 @@ struct ChatView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .background(.ultraThinMaterial)
+        .animation(.spring(duration: 0.35, bounce: 0.15), value: voice.loadingSpeech ?? voice.speaking)
+        .animation(.snappy, value: fromVoice && !empty)
+        .onChange(of: draft) { if draft.isEmpty { fromVoice = false } }
     }
 
     /// One button: send what is typed, or start and stop listening when the box is empty.
@@ -172,8 +194,11 @@ struct ChatView: View {
         if voice.state == .listening {
             Task {
                 let lang = model.langChoice == .auto ? nil : model.langChoice.rawValue
+                // into the box, not straight off: the user reads what Whisper heard, fixes it, then sends
                 if let heard = await voice.finishListening(api: model.apiClient, language: lang) {
-                    model.send(heard, spoken: true)
+                    draft = heard
+                    fromVoice = true
+                    focused = true
                 }
             }
         } else if draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -187,9 +212,59 @@ struct ChatView: View {
     private func send(_ question: String, _ tableId: String?) {
         let q = question.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty, !model.busy else { return }
+        let spoken = fromVoice           // asked by voice: the answer is read aloud too
         draft = ""
+        fromVoice = false
         focused = false
-        model.send(q, tableId: tableId)
+        model.send(q, tableId: tableId, spoken: spoken)
+    }
+}
+
+/// Speech on its way or playing: a spinner while the Spark makes it, dancing bars while it reads, and a stop.
+private struct VoiceBar: View {
+    @Environment(\.pal) private var pal
+    let loading: Bool
+    let isl: Bool
+    let stop: () -> Void
+    var body: some View {
+        HStack(spacing: 10) {
+            ZStack {
+                if loading { ProgressView().controlSize(.small).tint(pal.accent) }
+                else { SpeakingBars() }
+            }
+            .frame(width: 28, height: 24)
+            Text(loading ? (isl ? "Bý til röddina…" : "Preparing the voice…") : (isl ? "Les svarið…" : "Reading the answer…"))
+                .font(.subheadline.weight(.medium)).foregroundStyle(pal.text)
+                .contentTransition(.interpolate)
+            Spacer()
+            Button(action: stop) {
+                Image(systemName: "stop.fill").font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(pal.accentInk)
+                    .frame(width: 28, height: 28)
+                    .background(pal.accent, in: Circle())
+            }
+            .accessibilityLabel(isl ? "Stöðva" : "Stop")
+        }
+        .padding(.leading, 14).padding(.trailing, 8).padding(.vertical, 8)
+        .background(pal.soft, in: Capsule())
+        .overlay(Capsule().stroke(pal.accent.opacity(0.25)))
+        .animation(.snappy, value: loading)
+    }
+}
+
+/// Five bars that sway on their own, the sign that the phone is talking.
+struct SpeakingBars: View {
+    @Environment(\.pal) private var pal
+    var body: some View {
+        TimelineView(.animation) { tl in
+            let t = tl.date.timeIntervalSinceReferenceDate
+            HStack(spacing: 3) {
+                ForEach(0..<5, id: \.self) { i in
+                    let h = 0.35 + 0.65 * abs(sin(t * (2.6 + Double(i) * 0.7) + Double(i)))
+                    Capsule().fill(pal.accent).frame(width: 3, height: 6 + 16 * h)
+                }
+            }
+        }
     }
 }
 

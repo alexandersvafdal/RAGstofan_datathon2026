@@ -8,7 +8,7 @@ struct Palette {
 }
 
 enum PaletteName: String, CaseIterable, Identifiable {
-    case warm, graphite, blue, navy, glacier, aurora, lava, hagstofan
+    case sterling, warm, graphite, blue, navy, glacier, aurora, lava, hagstofan
     var id: String { rawValue }
     var title: String { self == .hagstofan ? "Hagstofan" : rawValue.capitalized }
 }
@@ -24,6 +24,9 @@ private func p(_ v: [UInt32]) -> Palette {
 
 //                       bg        card      text      text2     text3     accent    accent2   ink       s1        s2        s3        warn
 private let table: [PaletteName: (light: Palette, dark: Palette)] = [
+    // Sterling, the default: ivory and ink with deep navy, brass for the second series; near-black navy at night
+    .sterling: (p([0xf5f3ee, 0xfdfcfa, 0x12161f, 0x474d57, 0x6b6f77, 0x0b1f3a, 0xa88a57, 0xf5f3ee, 0x0b1f3a, 0xa88a57, 0x5b7a8c, 0xf1eadb]),
+                p([0x0b0e14, 0x141922, 0xece8e1, 0xb4b0a8, 0x83868f, 0xc8a96a, 0x3a5a85, 0x14110b, 0xc8a96a, 0x8da9c9, 0x7e9e93, 0x221e15])),
     .warm: (p([0xf6f3ee, 0xfffdf9, 0x2b2620, 0x5a5248, 0x8c8377, 0x3f6b4d, 0x6e9a78, 0xffffff, 0x3f6b4d, 0xc27c3e, 0x6f7f99, 0xf6ecd6]),
             p([0x171511, 0x211e19, 0xf2ede4, 0xcfc7ba, 0x9a9184, 0x8fbf9a, 0x5f8f6b, 0x14180f, 0x8fbf9a, 0xe0a06a, 0x9fb0cc, 0x2e2718])),
     .graphite: (p([0xf5f5f7, 0xffffff, 0x1d1d1f, 0x48484a, 0x86868b, 0x3a3a3c, 0x8e8e93, 0xffffff, 0x3a3a3c, 0xa1a1a6, 0x6e6e73, 0xf2f2f4]),
@@ -43,11 +46,11 @@ private let table: [PaletteName: (light: Palette, dark: Palette)] = [
 ]
 
 func palette(_ name: PaletteName, dark: Bool) -> Palette {
-    let pair = table[name] ?? table[.warm]!
+    let pair = table[name] ?? table[.sterling]!
     return dark ? pair.dark : pair.light
 }
 
-private struct PaletteKey: EnvironmentKey { static let defaultValue = palette(.warm, dark: false) }
+private struct PaletteKey: EnvironmentKey { static let defaultValue = palette(.sterling, dark: false) }
 
 extension EnvironmentValues {
     var pal: Palette {
