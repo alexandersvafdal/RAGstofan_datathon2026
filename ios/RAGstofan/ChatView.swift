@@ -321,6 +321,17 @@ func prettyModel(_ name: String) -> String {
     return n
 }
 
+/// The size class the server gives a model (large / medium / small / tiny) in the user's language.
+func sizeName(_ size: String?, _ isl: Bool) -> String? {
+    switch size {
+    case "large": return isl ? "Stórt" : "Large"
+    case "medium": return isl ? "Meðalstórt" : "Medium"
+    case "small": return isl ? "Lítið" : "Small"
+    case "tiny": return isl ? "Örlítið" : "Tiny"
+    default: return nil
+    }
+}
+
 /// The model in use as the screen's title, with a chevron: it opens the panel to pick a model.
 /// A tinted dot says something differs from the recommended settings; the Private tag sits beside it.
 private struct ModelTitle: View {
@@ -382,10 +393,13 @@ private struct TuningPanel: View {
                                     .foregroundStyle(on ? pal.accent : pal.text3)
                                 VStack(alignment: .leading, spacing: 1) {
                                     Text(prettyModel(m)).font(.subheadline.weight(on ? .semibold : .regular)).foregroundStyle(pal.text)
-                                    if m == best || m == fast {
-                                        Text(m == best ? (isl ? "Mælt með · nákvæmast" : "Recommended · most accurate")
-                                                       : (isl ? "Hraðast" : "Fastest"))
-                                            .font(.caption).foregroundStyle(m == best ? pal.accent : pal.text3)
+                                    let size = sizeName(model.models?.sizes?[m], isl)
+                                    if m == best {
+                                        Text(isl ? "Mælt með · nákvæmast" : "Recommended · most accurate")
+                                            .font(.caption).foregroundStyle(pal.accent)
+                                    } else if m == fast || size != nil {
+                                        Text([m == fast ? (isl ? "Hraðast" : "Fastest") : nil, size].compactMap { $0 }.joined(separator: " · "))
+                                            .font(.caption).foregroundStyle(pal.text3)
                                     }
                                 }
                                 Spacer()

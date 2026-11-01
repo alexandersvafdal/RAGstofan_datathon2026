@@ -104,6 +104,7 @@ struct ModelList: Codable {
     let `default`: String
     let models: [String]
     let fast: String?
+    let sizes: [String: String]?   // model → large / medium / small / tiny, from the parameter count in the tag
 }
 
 struct Health: Codable { let model: String; let dataSource: String; let tablesInCatalog: Int }

@@ -1110,8 +1110,12 @@ function renderTuning(open = false) {
 
   const row = x => {
     const b = el("button", { type: "button", class: "mrow" + (x === active ? " on" : ""), role: "menuitemradio", "aria-checked": String(x === active) });
+    const SIZE = is ? { large: "Stórt", medium: "Meðalstórt", small: "Lítið", tiny: "Örlítið" }
+                    : { large: "Large", medium: "Medium", small: "Small", tiny: "Tiny" };
+    const size = SIZE[(m.sizes || {})[x]] || "";
     const tag = x === best ? `<small class="rec">${is ? "Mælt með · nákvæmast" : "Recommended · most accurate"}</small>`
-      : x === m.fast ? `<small>${is ? "Hraðast" : "Fastest"}</small>` : "";
+      : x === m.fast ? `<small>${[is ? "Hraðast" : "Fastest", size].filter(Boolean).join(" · ")}</small>`
+      : size ? `<small>${size}</small>` : "";
     b.innerHTML = `<span class="mic">${x === best ? ICON.sparkle : ICON.cpu}</span><span class="mname">${prettyModel(x)}${tag}</span><span class="tick">${x === active ? ICON.check : ""}</span>`;
     b.addEventListener("click", pick(() => { modelChoice = x === best ? null : x; remember("ragstofan-model", modelChoice); statusLine(); }));
     return b;
