@@ -10,7 +10,7 @@ from hagbot.sources import TableMeta, Variable
 from hagbot.specification import Compatibility, Evidence, QuestionSpec, Requirement, RequirementCheck
 from hagbot.steps.compose import Written
 from hagbot.steps.compute import compute
-from hagbot.steps.plan import Combination, Plan, SubQuestion, merge_period_parts
+from hagbot.steps.plan import Combination, Plan, SubQuestion, merge_period_parts, merge_population_sum
 from hagbot.steps.ratio import difference_parts, share_parts
 from hagbot.steps.select import resolve
 
@@ -49,6 +49,27 @@ class TeammateIntegrationTests(unittest.TestCase):
         with self.assertRaises(AnswerFailure) as error:
             resolve(meta(), selection(selections={"Area": ["0", "1"]}, operation="sum", compare_dimension="Area"))
         self.assertEqual(error.exception.code, "overlapping_total")
+
+    def test_split_population_sum_merges_all_places_and_preserves_definitions(self):
+        parts = [SubQuestion(question=f"Population in {place}?", search_query=f"population {place}", specification=spec(
+            requirement("measure", "population"), requirement("geography", place), requirement("period", "2025")))
+            for place in ("Reykjavík", "Akureyri")]
+        merged = merge_population_sum(Plan(sub_questions=parts), "Population in Reykjavík and Akureyri together in 2025?")
+        self.assertEqual(len(merged.sub_questions), 1)
+        self.assertEqual(merged.sub_questions[0].specification.operation, "sum")
+        self.assertEqual([r.value for r in merged.sub_questions[0].specification.requirements if r.facet == "geography"],
+                         ["Reykjavík", "Akureyri"])
+        self.assertIn("2025", [r.value for r in merged.sub_questions[0].specification.requirements])
+        parts[1].specification.requirements[-1].value = "2024"
+        self.assertEqual(len(merge_population_sum(Plan(sub_questions=parts), "Population together?").sub_questions), 2)
+
+    def test_sum_merge_cannot_override_scope_or_sum_unlike_measures(self):
+        outside = Plan(outcome="out_of_scope")
+        self.assertEqual(merge_population_sum(outside, "Population together?"), outside)
+        parts = [SubQuestion(question=f"{measure} in {place}?", search_query=measure, specification=spec(
+            requirement("measure", measure), requirement("geography", place)))
+            for measure, place in (("population", "Reykjavík"), ("income", "Akureyri"))]
+        self.assertEqual(len(merge_population_sum(Plan(sub_questions=parts), "Population and income together?").sub_questions), 2)
 
     def test_spelled_out_time_window_is_preserved(self):
         with self.assertRaises(AnswerFailure) as error:

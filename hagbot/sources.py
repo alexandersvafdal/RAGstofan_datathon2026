@@ -47,6 +47,7 @@ class TableMeta(BaseModel):
     unit: str = ""
     unit_source: Literal["source", "catalog", "unknown"] = "unknown"
     description: str = ""
+    source: str = ""
     notes: list[str] = []
     updated: str = ""
     variables: list[Variable]
@@ -174,6 +175,7 @@ def _meta_from_api(table_id: str, d: dict, catalog: Catalog) -> TableMeta:
                      path=entry.path if entry else "", unit=unit or (entry.unit if entry else ""),
                      unit_source="source" if unit else "catalog" if entry and entry.unit else "unknown",
                      description=d.get("description") if isinstance(d.get("description"), str) else "",
+                     source=d.get("source") if isinstance(d.get("source"), str) else "",
                      notes=notes, updated=d.get("updated") if isinstance(d.get("updated"), str) else "",
                      variables=variables)
 
@@ -196,6 +198,40 @@ def _px_items(value: str) -> list[str]:
     return items
 
 
+def _px_statements(head: bytes) -> dict[str, str]:
+    head = head.removeprefix(b"\xef\xbb\xbf")
+    enc = re.search(rb'CODEPAGE="([^"]+)"', head)
+    enc = _CODEPAGES.get(enc.group(1).decode().lower(), enc.group(1).decode()) if enc else "utf-8"
+    header, statements, pos = head.decode(enc, errors="replace"), {}, 0
+    while (match := _STATEMENT.search(header, pos)):
+        end, quoted = match.end(), False
+        while end < len(header) and (quoted or header[end] != ";"):
+            quoted ^= header[end] == '"'
+            end += 1
+        statements.setdefault(match.group(1) + match.group(2), header[match.end():end].strip())
+        pos = end + 1
+    return statements
+
+
+def _px_metadata(path: Path, lang: str) -> dict[str, str]:
+    """Read source definitions without loading the (potentially huge) numeric DATA section."""
+    chunks = bytearray()
+    with path.open("rb") as stream:
+        while chunk := stream.read(65536):
+            previous = len(chunks)
+            chunks.extend(chunk)
+            if marker := re.search(rb"(?m)^DATA\s*=", chunks[max(0, previous - 16):]):
+                del chunks[max(0, previous - 16) + marker.start():]
+                break
+    statements = _px_statements(bytes(chunks))
+    def text(key):
+        # English snapshots also contain Icelandic: use an explicit translation
+        # before the default language, never join definitions across languages.
+        raw = statements.get(f"{key}[{lang}]", statements.get(key, ""))
+        return " ".join(_px_items(raw))
+    return {"unit": text("UNITS"), "source": text("SOURCE"), "description": text("CONTENTS"), "note": text("NOTE")}
+
+
 class PxTable:
     """One data.px read into memory: its numbers, and for each dimension (in file order) its code and category codes.
 
@@ -209,19 +245,7 @@ class PxTable:
         m = re.search(rb"(?m)^DATA=\s*", raw)
         if not m:
             raise SourceError(f"{path}: no DATA section")
-        head = raw[: m.start()].removeprefix(b"\xef\xbb\xbf")
-        enc = re.search(rb'CODEPAGE="([^"]+)"', head)
-        enc = _CODEPAGES.get(enc.group(1).decode().lower(), enc.group(1).decode()) if enc else "utf-8"
-        header = head.decode(enc, errors="replace")
-        st: dict[str, str] = {}
-        pos = 0
-        while (sm := _STATEMENT.search(header, pos)):
-            end, quoted = sm.end(), False
-            while end < len(header) and (quoted or header[end] != ";"):
-                quoted ^= header[end] == '"'
-                end += 1
-            st.setdefault(sm.group(1) + sm.group(2), header[sm.end():end].strip())
-            pos = end + 1
+        st = _px_statements(raw[:m.start()])
         names = _px_items(st.get("STUB", "")) + _px_items(st.get("HEADING", ""))
         other = [[] for _ in names]
         for lang in {k[4:8] for k in st if k.startswith("STUB[")}:
@@ -272,6 +296,7 @@ class LocalPxSource:
                     self._folders[key] = self.root / r["folder"]
         self._tables: OrderedDict[str, PxTable] = OrderedDict()  # the last few tables read, newest last
         self.keep = keep
+        self._metadata: dict[str, TableMeta] = {}
 
     def _folder(self, table_id: str) -> Path | None:
         entry = self.catalog.get(table_id)
@@ -281,8 +306,18 @@ class LocalPxSource:
         folder = self._folder(table_id)
         if not folder:
             return await self.live.meta(table_id)
-        return _meta_from_api(table_id, json.loads((folder / "metadata.json").read_text(encoding="utf-8-sig")),
-                              self.catalog)
+        if table_id not in self._metadata:
+            meta = _meta_from_api(table_id, json.loads((folder / "metadata.json").read_text(encoding="utf-8-sig")),
+                                  self.catalog)
+            extra = await asyncio.to_thread(_px_metadata, folder / "data.px", self.lang)
+            if extra["unit"]:
+                meta.unit, meta.unit_source = extra["unit"], "source"
+            meta.source = meta.source or extra["source"]
+            meta.description = meta.description or extra["description"]
+            if extra["note"] and extra["note"] not in meta.notes:
+                meta.notes.append(extra["note"])
+            self._metadata[table_id] = meta
+        return self._metadata[table_id].model_copy(deep=True)
 
     def _table(self, table_id: str, meta: TableMeta) -> PxTable:
         if table_id in self._tables:

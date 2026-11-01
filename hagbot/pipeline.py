@@ -20,7 +20,7 @@ from .steps.compose import compose
 from .steps.compute import compute, validate_rows
 from .steps.constraints import has_requested_period
 from .steps.followup import looks_like_followup, rewrite
-from .steps.plan import Plan, SubQuestion, merge_period_parts, plan
+from .steps.plan import Plan, SubQuestion, merge_period_parts, merge_population_sum, plan
 from .steps.ratio import POPULATION_TABLE, detect_ratio, difference_parts, ratio_parts, share_parts, stored_rate
 from .steps.retrieve import _INDEXATION_TABLE, Retrieved, RetrievalCache, period_end
 from .steps.tiered import retrieve_tiered
@@ -116,6 +116,8 @@ class Pipeline:
                 context = f"Selected table {entry.id}: {entry.title_en}"
                 p = await plan(self.llm, req.question, context=context)
                 _check_plan(p, req.question, context)
+                p = merge_population_sum(p, req.question)
+                _check_plan(p, req.question, context)
                 forced = [target] * len(p.sub_questions)
                 if stored:
                     ratio = None  # read the published rate, after the same specification/evidence checks
@@ -142,6 +144,7 @@ class Pipeline:
                 p = await plan(self.llm, req.question)
                 _check_plan(p, req.question)
                 p = merge_period_parts(p, req.question)
+                p = merge_population_sum(p, req.question)
                 _check_plan(p, req.question)
                 forced = [None] * len(p.sub_questions)
                 steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(s.question for s in p.sub_questions)))

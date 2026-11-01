@@ -31,6 +31,8 @@ def profile(meta: TableMeta) -> TableProfile:
     fields = {"title": meta.title} if meta.title_source == "source" else {}
     if meta.description:
         fields["description"] = meta.description
+    if meta.source:
+        fields["source"] = meta.source
     fields.update({f"note:{i}": note for i, note in enumerate(meta.notes)})
     if meta.unit and meta.unit_source == "source":
         fields["unit"] = meta.unit

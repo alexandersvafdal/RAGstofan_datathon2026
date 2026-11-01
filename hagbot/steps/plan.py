@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, model_validator
 
 from ..llm import LLM
 from ..specification import QuestionSpec
+from ..text import normalize
 
 
 class SubQuestion(BaseModel):
@@ -97,6 +98,40 @@ async def plan(llm: LLM, question: str, *, context: str = "") -> Plan:
 
 _PERIOD = (r"\b(?:\d{1,2}\.?\s+)?(?:(?:january|february|march|april|may|june|july|august|september|october|november|december|"
            r"q[1-4]|first quarter|second quarter|third quarter|fourth quarter)\s+)?(?:18|19|20)\d\d\b")
+
+
+def merge_population_sum(p: Plan, question: str) -> Plan:
+    """Coalesce a split population sum only when every other definition agrees.
+
+    This recovers a model's unnecessary split, without changing a scope decision
+    or adding unlike statistics/rates. The resulting table must still represent
+    every named place and pass the usual metadata/selection checks.
+    """
+    if (p.outcome != "lookup" or p.combination is not None or len(p.sub_questions) < 2
+            or not re.search(r"\b(together|combined|altogether|samtals|samanlagt|til samans)\b", normalize(question))):
+        return p
+    parts = p.sub_questions
+    def definition(part):
+        return sorted((r.facet, normalize(r.value), r.origin) for r in part.specification.requirements
+                      if r.facet != "geography")
+    for part in parts:
+        spec = part.specification
+        measures = [normalize(r.value) for r in spec.requirements if r.facet == "measure"]
+        places = [r for r in spec.requirements if r.facet == "geography"]
+        if (measures != ["population"] or spec.operation not in ("value", "sum") or spec.ambiguities
+                or not places or any(r.origin == "default" for r in places) or definition(part) != definition(parts[0])):
+            return p
+        if any((r.facet == "statistic" and normalize(r.value) not in {"total", "count", "number"}) or
+               (r.facet == "unit" and normalize(r.value) not in {"persons", "people", "inhabitants"})
+               for r in spec.requirements):
+            return p
+    requirements = {}
+    for part in parts:
+        for req in part.specification.requirements:
+            requirements.setdefault((req.facet, normalize(req.value), req.origin), req)
+    spec = parts[0].specification.model_copy(update={"requirements": list(requirements.values()), "operation": "sum"})
+    return Plan(sub_questions=[SubQuestion(question=question, search_query=" ".join(dict.fromkeys(
+        part.search_query for part in parts)), specification=spec)])
 
 
 def merge_period_parts(p: Plan, question: str = "") -> Plan:
