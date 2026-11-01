@@ -961,6 +961,9 @@ td.num { text-align: right; }
   backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
   transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
 }
+/* on the front page: in the page, between the intro and the latest numbers */
+.ask-slot { margin: 8px auto 0; max-width: 720px; }
+.composer.inline { position: static; padding: 0; background: none; z-index: auto; }
 .composer-inner:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft), var(--shadow-hover); }
 .composer input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 17px; padding: 10px 0; outline: none; }
 .composer input::placeholder { color: var(--text-3); }

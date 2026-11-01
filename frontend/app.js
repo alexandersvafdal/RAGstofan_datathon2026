@@ -319,12 +319,21 @@ let miniResize;
 addEventListener("resize", () => { clearTimeout(miniResize); miniResize = setTimeout(() => document.querySelectorAll(".tile .mini").forEach(drawMini), 150); });
 
 /* ---------- conversation ---------- */
+// The question box: in the front page above the latest numbers, at the bottom of the screen in a conversation
+function placeComposer(onHome) {
+  const form = $("#ask"), focused = document.activeElement === $("#q");
+  if (onHome) $("#ask-slot").append(form);
+  else $("#chat").after(form);
+  form.classList.toggle("inline", onHome);
+  if (focused) $("#q").focus({ preventScroll: true });
+}
+
 function showChat() {
   const home = $("#home");
   if (home.hidden) return;
   pills.stop();
   home.classList.add("leaving");
-  setTimeout(() => { home.hidden = true; $("#chat").classList.add("on"); }, reduceMotion ? 0 : 350);
+  setTimeout(() => { home.hidden = true; placeComposer(false); $("#chat").classList.add("on"); }, reduceMotion ? 0 : 350);
 }
 
 // Live progress: each step lights up when the server reports it done, with what it actually found.
@@ -1342,6 +1351,7 @@ function newChat() {
   const home = $("#home");
   home.hidden = false;
   home.classList.remove("leaving");
+  placeComposer(true);
   pills.start();
   window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
 }
@@ -1409,3 +1419,5 @@ $("#private-mode").addEventListener("change", e => {
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
 renderDrawer();
+
+placeComposer(!$("#home").hidden);
