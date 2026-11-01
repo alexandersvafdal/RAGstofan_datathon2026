@@ -62,6 +62,7 @@ struct Answer: Codable, Hashable {
     let sources: [TableRef]
     let steps: [Step]
     let textSource: String
+    let verdict: String?      // the answer read back against the question: ok / doubtful; older servers send none
     let llmCalls: Int
     let totalMs: Int
     let model: String

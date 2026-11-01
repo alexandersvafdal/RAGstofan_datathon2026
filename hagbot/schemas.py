@@ -118,6 +118,11 @@ class Answer(BaseModel):
     steps: list[Step] = Field(default_factory=list)
     # "model": the model's sentence passed the number check; "template": it failed or errored, facts restated
     text_source: Literal["model", "template", "none"] = "none"
+    # the model's second reading of the finished answer against the question (hagbot/steps/check.py): "doubtful"
+    # when the table is off the subject or the answer misses the measure, place or period asked; the text then
+    # opens by saying no answer was found and this is the closest
+    verdict: Literal["ok", "doubtful", "unchecked"] = "unchecked"
+    verdict_reason: str = ""
     llm_calls: int = 0
     total_ms: int = 0
     model: str = ""

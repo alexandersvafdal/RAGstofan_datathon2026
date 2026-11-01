@@ -62,10 +62,11 @@ flowchart TD
         W[["LLM ⑤ Write 1–3 sentences in the user's language"]]:::llm
         X{"Every number in the text<br/>is in the table?"}:::code
         TPL["Fixed template from the numbers"]:::code
+        CA[["LLM ⑥ Read the answer back against the question<br/>right subject? the measure, place and period asked?<br/>no: it opens with 'No answer was found … the closest I came up with'"]]:::llm
     end
 
     OUT(["Answer: number, unit, source table, chart, drill-down chips,<br/>and every step with its time"])
-    SG[["LLM ⑥ Follow-up suggestions, after the answer is shown<br/>compare · related · dig deeper · bigger picture"]]:::llm
+    SG[["LLM ⑦ Follow-up suggestions, after the answer is shown<br/>compare · related · dig deeper · bigger picture"]]:::llm
     ASK(["Ask the user which table they mean"])
 
     Q --> FU
@@ -91,8 +92,8 @@ flowchart TD
     SW -- no --> D
     SB -. "none" .-> OUT
     D --> E --> K --> NT --> M --> RD --> G --> W --> X
-    X -- yes --> OUT
-    X -- no --> TPL --> OUT
+    X -- yes --> CA
+    X -- no --> TPL --> CA --> OUT
     OUT -.-> SG
 
     classDef llm fill:#e0b37b,stroke:#8a6a3f,stroke-width:2px,color:#1d1d1f
@@ -115,9 +116,10 @@ browser the moment it finishes.</sub>
 | ③ | Find the table | per part: none when the table is fixed (clicked, or population for a ratio) or the dictionary decides alone; otherwise check 1–2 rounds; if none fits, browse 1 + check 1–4 rounds; if still none, a forced pick 1; a round-2 pick adds a head-to-head re-check 1; a year or month the table lacks adds a neighbour pick 1 | 0–10 per part |
 | ④ | Choose categories | per part; again if it switches to a neighbouring table | 1–2 per part |
 | ⑤ | Write the answer | when at least one part has numbers | 0–1 |
-| ⑥ | Follow-up suggestions | after the answer is on screen (`/api/suggest`), so it adds no answer time | 0–1 |
+| ⑥ | Check the answer against the question (subject, measure, place, period) | after every written answer; a miss is said up front, the figures kept as the closest found | 0–1 |
+| ⑦ | Follow-up suggestions | after the answer is on screen (`/api/suggest`), so it adds no answer time | 0–1 |
 
-A one-part question makes 3–4 calls before the answer (plan, find 0–1, categories, write), and one more for suggestions. Voting multiplies the
+A one-part question makes 4–5 calls before the answer (plan, find 0–1, categories, write, check), and one more for suggestions. Voting multiplies the
 calls marked "votes" by the number of votes; they run in parallel, so it costs compute more than time.
 
 ## Why Icelandic questions are reworded in English

@@ -14,6 +14,7 @@ from .sources import DataSource, make_source, table_url
 from .hierarchy import children
 from .steps.chart import choose_chart, comparison_chart
 from .steps.compose import compose
+from .steps.check import check_answer
 from .steps.compute import aggregate_rows, compute
 from .steps.followup import looks_like_followup, rewrite
 from .steps.plan import Plan, SubQuestion, merge_period_parts, plan
@@ -178,6 +179,18 @@ class Pipeline:
             t = Timer()
             ans.text, ans.text_source = await compose(self.llm, req.question, parts, lang)
             steps.append(Step(name="compose", ms=t.ms(), detail=ans.text_source))
+            # the finished answer read back against the question: wrong subject or a miss on the measure, place or
+            # period asked, and the user is told so up front, the figures kept as the closest found
+            t = Timer()
+            try:
+                v = await check_answer(self.llm, req.question, parts, ans.text)
+                ans.verdict = "ok" if v.table_fits and v.answers else "doubtful"
+                ans.verdict_reason = v.reason
+                steps.append(Step(name="check", ms=t.ms(), detail=f"table fits: {v.table_fits}, answers: {v.answers}; {v.reason}"))
+                if ans.verdict == "doubtful":
+                    ans.text = f"{DOUBTFUL[lang]} {ans.text}"
+            except Exception as e:   # the check is a safeguard; without it the answer stands as written
+                steps.append(Step(name="check", ms=t.ms(), detail=f"skipped: {type(e).__name__}: {e}"))
             ans.parts, ans.status = parts, "answered"
             ans.comparison = comparison_chart(parts, lang)
             ans.sources = list({p.table.id: p.table for p in parts}.values())
@@ -401,6 +414,10 @@ class Pipeline:
             if newer:
                 note += f" Newer figures, to {newer.last_period}, are in {newer.id} ({newer.title_en}), which may break them down differently."
         return note
+
+
+DOUBTFUL = {"en": "No answer was found for this question. The closest I came up with:",
+            "is": "Ekkert svar fannst við þessari spurningu. Það næsta sem ég komst:"}
 
 
 def _no_answer(lang: str, errors: list[Exception]) -> str:
