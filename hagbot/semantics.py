@@ -169,14 +169,22 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
         raise AnswerFailure("unverified", "incomplete_compatibility", str(indices))
     desired = {facet: set().union(*(_tags(facet, r.value) for r in spec.requirements if r.facet == facet))
                for facet in _AXES}
-    checks = []
+    checks, amendments = [], []
     for check in proof.checks:
         check = check.model_copy(deep=True)
         req = spec.requirements[check.requirement]
         for ref in check.evidence:
             quote = " ".join(tokens(ref.quote))
             if ref.field not in allowed or not quote or f" {quote} " not in f" {' '.join(tokens(allowed[ref.field]))} ":
-                raise AnswerFailure("unverified", "invalid_metadata_evidence", ref.field)
+                # A valid source label can be attached to the wrong field ID.
+                # Rebind only a unique, exact label in the selected metadata;
+                # never rescue an unselected option or invent missing text.
+                matches = [field for field, text in allowed.items() if quote and " ".join(tokens(text)) == quote]
+                unselected = ref.field.startswith("value:") and ref.field in p.fields and ref.field not in allowed
+                if unselected or len(matches) != 1:
+                    raise AnswerFailure("unverified", "invalid_metadata_evidence", ref.field)
+                amendments.append(f"metadata citation {ref.field} -> {matches[0]} (unique exact source label)")
+                ref.field = matches[0]
         scope = scope_evidence(meta, req, selections)
         if scope is not None:
             # The selected geographic option or explicit national survey scope
@@ -208,10 +216,10 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
         if req.facet == "measure" and wanted and not wanted <= _tags("measure", cited):
             # The code already checked the selected query's measure above. When
             # the model cites a real but unhelpful field (e.g. a town label for
-            # population), an unambiguous source title/description can provide
+            # population), an unambiguous source title or selected label can provide
             # the missing evidence. Never repair fabricated citations, unknown
             # verdicts, or contradictory selected measures.
-            for field in ("title", "description"):
+            for field in ("title", "description", *(key for key in allowed if key.startswith("value:"))):
                 text = allowed.get(field, "")
                 if _tags("measure", text) == wanted:
                     check.evidence.append(Evidence(field=field, quote=text))
@@ -246,4 +254,5 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
         checks.append(check)
     return TableVerification(table_id=meta.id, metadata_sha256=p.metadata_sha256,
                              question_sha256=fingerprint(spec.model_dump()), selection_sha256=fingerprint(selections),
-                             executed_selection_sha256=fingerprint(selections), specification=spec, checks=checks)
+                             executed_selection_sha256=fingerprint(selections), specification=spec, checks=checks,
+                             amendments=amendments)

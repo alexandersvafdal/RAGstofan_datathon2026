@@ -143,6 +143,21 @@ class CompatibilityTests(FailureAssertions, unittest.TestCase):
         self.assert_failure("invalid_metadata_evidence", validate_compatibility, self.meta, self.selected,
                             spec(), proof([("title", "Net wealth")]))
 
+    def test_exact_selected_source_label_can_correct_a_misnamed_field(self):
+        evidence = proof([("dimension:Measure", "Median income")])
+        verified = validate_compatibility(self.meta, self.selected, spec(), evidence)
+        self.assertEqual(verified.checks[0].evidence[0].field, "value:Measure:median")
+        self.assertIn("unique exact source label", verified.amendments[0])
+        self.assertEqual(evidence.checks[0].evidence[0].field, "dimension:Measure")
+
+    def test_citation_rebinding_rejects_ambiguous_or_unselected_labels(self):
+        self.meta.description = "Median income"
+        self.assert_failure("invalid_metadata_evidence", validate_compatibility, self.meta, self.selected,
+                            spec(), proof([("dimension:Measure", "Median income")]))
+        self.meta.title = "Mean income"  # available in the title, but cannot rescue an unselected-option citation
+        self.assert_failure("invalid_metadata_evidence", validate_compatibility, self.meta, self.selected,
+                            spec(), proof([("value:Measure:mean", "Mean income")]))
+
     def test_metadata_unknown_is_an_abstention(self):
         self.assert_failure("unknown_compatibility", validate_compatibility, self.meta, self.selected, spec(),
                             Compatibility(checks=[RequirementCheck(requirement=0, verdict="unknown")]), status="unverified")
