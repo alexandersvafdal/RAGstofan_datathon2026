@@ -243,6 +243,13 @@ def guess_op(question: str) -> str | None:
 _BREAKDOWN_ALL = re.compile(r"\b(all|allar|allir|oll|ollum|each|every|hvert|hverju|hverjum|per|a milli|milli)\b")
 
 
+def _names_dim(var: Variable, words: list[str]) -> bool:
+    """The user's breakdown word names this dimension: "countries" / Country, "sveitarfélögum" / Municipality
+    (Icelandic words mapped by breakdown_words), by a shared five-letter stem."""
+    own = [t for t in tokens(var.text) if len(t) >= 4]
+    return any(t == w or t[:5] == w[:5] for t in own for w in words if len(w) >= 4)
+
+
 def _asks_breakdown(text: str) -> bool:
     """"by region", "eftir landshlutum", "in all regions", "each year": the question wants the categories apart."""
     from .retrieve import breakdown_words
@@ -254,16 +261,18 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     the question (places, period, breakdown; hagbot/steps/plan.py), checked against the text; without it (a table
     the user clicked, a published rate) the same facts are read from the text by the patterns below."""
     notes, out, beyond, alternatives, aggregate_over = [], {}, None, {}, []
-    from .retrieve import named_places
+    from .retrieve import _DIMENSION_IS, breakdown_words, named_places
     if facts is not None:   # the planner's places as normalized words, as the patterns would give them
         places_part = [t for pl in facts.places for t in tokens(pl) if len(t) >= 4]
         places_all = [t for pl in (facts.all_places or facts.places) for t in tokens(pl) if len(t) >= 4]
         breakdown = facts.breakdown
         subyear = facts.period_kind in ("month", "quarter")
         period_text = facts.period or (part or question)
+        by_words = [_DIMENSION_IS.get(t, t) for t in tokens(facts.breakdown_by)]
     else:
         places_part, places_all = named_places(part or question), named_places(f"{part or ''} {question}")
         breakdown = _asks_breakdown(part or question)
+        by_words = breakdown_words(normalize(part or question))
         subyear = _names_subyear(part or question)
         period_text = part or question
     by_key = {normalize(k): k for k in sel.selections}
@@ -292,6 +301,8 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
         if not codes:
             codes = _default(var)
             notes.append(f"{var.text}: defaulted to {[var.label_of(c) for c in codes]}")
+            if not var.time and _total_of(var) is None and 2 <= len(var.values) < 10:   # Unit: Fob value / Quantity
+                alternatives[var.code] = [c for c in var.values if c not in codes]   # the user may want another
         out[var.code] = sorted(set(codes), key=var.values.index)
 
     q = normalize(question)
@@ -608,12 +619,20 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     # table's coded dimension (COICOP, NACE … read from the labels), at one period. A category the question names is
     # opened one level down; "largest/main" keeps the biggest few. Works for any table whose categories carry codes.
     breakdown, top = None, None
-    if (re.search(_LIST, q) or re.search(_TOP, q)) and op not in ("difference", "pct_change", "share"):
-        cand = [v for v in meta.variables if not v.time and coded(v)]
+    # the dimension the user's own breakdown word names ("by countries", "eftir sveitarfélögum"), coded or not
+    want = [v for v in meta.variables if not v.time and _names_dim(v, by_words)]
+    one_period = all(len(out[v.code]) == 1 for v in meta.variables if v.time)
+    if ((re.search(_LIST, q) or re.search(_TOP, q) or (want and op == "value" and one_period))
+            and op not in ("difference", "pct_change", "share")):
+        cand = want or [v for v in meta.variables if not v.time and coded(v)]
         var = max(cand, key=lambda v: len(coded(v))) if cand else None
         kids = (children(var, named(var, question)) or children(var, None)) if var else []
+        if var and not kids and var in want:   # a plain list (partner countries): every option but the total
+            kids = [c for c in var.values if c != _total_of(var)]
         if var and len(kids) >= 2:
             out[var.code], breakdown, compare = kids, var.code, var.code
+            if var.code in aggregate_over:   # listed one by one, not summed
+                aggregate_over.remove(var.code)
             if re.search(_EFFECT_ASK, q):   # drivers: the measure saying how much each part moved the whole
                 for v in meta.variables:
                     hits = [c for c, t in zip(v.values, v.value_texts) if re.search(_EFFECT_OPTION, normalize(t))]
@@ -630,6 +649,8 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             if re.search(_TOP, q):
                 m = re.search(r"\b(\d{1,2})\b", re.sub(r"\b(?:18|19|20)\d\d\b", "", q))
                 top = int(m.group(1)) if m else 6
+            elif len(kids) > 12 and not _BREAKDOWN_ALL.search(q):   # 253 partner countries: the largest ten, unless all asked
+                top = 10
             op = "rank"
             notes.append(f"{var.text}: {'the largest ' + str(top) + ' of ' if top else ''}{len(kids)} categories"
                          + (f" under {var.label_of(named(var, question))!r}" if named(var, question) else ""))

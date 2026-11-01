@@ -20,6 +20,7 @@ class SubQuestion(BaseModel):
         default="none", description="The period the user names: a month (ágúst 2026), a quarter, a single year, a range of years/months (frá 2010 til 2026), or none")
     period: str = Field(default="", description="The period words exactly as the user wrote them (ágúst 2026, 2010 til 2026); empty when none")
     breakdown: bool = Field(default=False, description="true when the user wants the figures split by a category: 'by region', 'eftir aldri', 'all municipalities', 'each year'")
+    breakdown_by: str = Field(default="", description="The user's own word for that category, as written ('countries', 'sveitarfélögum', 'age groups'); empty when none")
     all_places: list[str] = []   # set in code: the places of every sub-question of the same question
 
 
@@ -40,7 +41,8 @@ period; without a period, each asks for the development over the last years.
 Write sub-questions and search queries in English even if the user wrote Icelandic.
 Keep place names in their Icelandic spelling (Reykjavík, Kópavogur, Akureyri).
 For each sub-question also report what the user's own words say: the places named (as written), the period and its
-kind, and whether a breakdown by a category is wanted. Report only what is in the question; never add a place or period.
+kind, and whether a breakdown by a category is wanted and the user's word for it. Report only what is in the question;
+never add a place or period.
 Icelandic words that are easy to mistranslate:
 - búa, íbúar, mannfjöldi, hvað búa margir: population (people living somewhere)
 - fjölga, fjölgaði, fjölgun: population increase; fækka, fækkaði: population decrease
@@ -78,6 +80,12 @@ def verify_facts(sq: SubQuestion, question: str) -> None:
         sq.period, sq.period_kind = "", "none"
     if sq.period_kind != "none" and not re.search(r"\b(?:18|19|20)\d\d\b", question) and sq.period_kind != "month":
         sq.period_kind = "none"   # a year or a range needs a year in the text; a month alone ("in August") may stand
+    # the breakdown word must be in the text too (countries / country, sveitarfélögum / sveitarfélög)
+    if sq.breakdown_by and not any(_same_word(t, w) or t[:5] == w[:5] for t in tokens(sq.breakdown_by) if len(t) >= 4
+                                   for w in qtokens if len(w) >= 4):
+        sq.breakdown_by = ""
+    if sq.breakdown_by:
+        sq.breakdown = True
 
 
 _PERIOD = (r"\b(?:\d{1,2}\.?\s+)?(?:(?:january|february|march|april|may|june|july|august|september|october|november|december|"

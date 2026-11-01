@@ -121,7 +121,7 @@ class Pipeline:
                 p = merge_period_parts(await plan(self.llm, req.question))
                 forced = [None] * len(p.sub_questions)
                 steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(
-                    s.question + (f" [places {s.places}, period {s.period_kind} {s.period!r}, breakdown {s.breakdown}]"
+                    s.question + (f" [places {s.places}, period {s.period_kind} {s.period!r}, breakdown {s.breakdown}{' by ' + s.breakdown_by if s.breakdown_by else ''}]"
                                   if s.places or s.period_kind != "none" or s.breakdown else " [no facts]")
                     for s in p.sub_questions)))
 

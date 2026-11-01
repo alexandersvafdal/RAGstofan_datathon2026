@@ -16,14 +16,14 @@ flowchart TD
     Q(["Question, English or Icelandic<br/><i>Hve mörgum fleiri karlar en konur búa á Íslandi?</i>"])
 
     subgraph understand["1 · Understand"]
-        FU{"Follow-up?<br/>what about last year · hvað með árið áður"}:::code
-        RW[["LLM ① Rewrite as a question that stands alone,<br/>from the previous question and answer"]]:::llm
+        FU{"Follow-up?<br/>what about last year · hvað með árið áður · the highest category"}:::code
+        RW[["LLM ① Rewrite as a question that stands alone,<br/>from the previous question and answer;<br/>'that category' becomes the name the answer gave"]]:::llm
         TB{"Table already chosen?<br/>the user clicked a clarification button"}:::code
         R{"Ratio to population?<br/>per inhabitant · á hvern íbúa"}:::code
         SR{"Rate published in a table?<br/>GDP per capita · Vehicles per 1,000 inhabitants<br/>(not when the population date is named)"}:::code
         RP["Split in code: numerator, and the population<br/>of the place asked on 1 January (MAN00101 for Iceland)"]:::code
         P[["LLM ② Plan<br/>split into 1–3 parts, reword in English, English search words,<br/>and per part the facts: places · period and its kind · breakdown wanted"]]:::llm
-        VF["Check the facts in code<br/>a place or period not in the question's own words is dropped ·<br/>one measure at two periods becomes one part"]:::code
+        VF["Check the facts in code<br/>a place, period or breakdown word not in the question's own words is dropped ·<br/>one measure at two periods becomes one part"]:::code
     end
 
     subgraph find["2 · Find the table (each part in parallel)"]
@@ -46,7 +46,7 @@ flowchart TD
 
     subgraph read["3 · Read the numbers (each part)"]
         C[["LLM ④ Choose categories<br/>Sex: Males, Females · Year: 2026 · votes"]]:::llm
-        V["Validate and fix every choice, using the plan's facts<br/>codes must exist · defaults: total, latest period · period from the question ·<br/>only the places named · categories not named → the total, the rest as chips ·<br/>a long list with no total (253 partner countries) → summed in code ·<br/>Iceland = whole country · current index base · the table's own % change ·<br/>trend wording → whole series · highest / lowest · share needs a whole"]:::code
+        V["Validate and fix every choice, using the plan's facts<br/>codes must exist · defaults: total, latest period · period from the question ·<br/>only the places named · categories not named → the total, the rest as chips ·<br/>a long list with no total (253 partner countries) → summed in code ·<br/>'by countries' → ranked along that dimension, the largest ten ·<br/>Iceland = whole country · current index base · the table's own % change ·<br/>trend wording → whole series · highest / lowest · share needs a whole"]:::code
         SW{"Month or quarter asked is after<br/>the table's last period?"}:::code
         SB["Switch to the neighbouring table that has it<br/>(LAU04000 → LAU04001), choose again"]:::code
         D[("Data<br/>organisers' snapshot of 18 Oct 2026 on disk,<br/>live PX-API for what it lacks")]:::data

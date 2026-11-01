@@ -18,7 +18,11 @@ from ..text import normalize, tokens
 _FOLLOW = re.compile(
     r"^(what about|how about|and |and\b|same |also |but |then |in that case|"
     r"hvad med|en |og |sama |lika |einnig )|\b(last year|the year before|previous year|year before|that year|the same|it|that|those|them|"
-    r"i fyrra|arid adur|arinu adur|sama ar|thad|thar|theim|thvi|thessu|thessi)\b"
+    r"i fyrra|arid adur|arinu adur|sama ar|thad|thar|theim|thvi|thessu|thessi)\b|"
+    # "the highest category", "the largest one", "stærsta flokksins": a definite superlative points at what an earlier
+    # answer named (a new question with one is rewritten too, and returned unchanged when it stands on its own)
+    r"\b(the|of the|for the|in the) (highest|largest|biggest|lowest|smallest|top|main|leading|first|second|other|former|latter)\b|"
+    r"\b(haesta|staersta|mesta|laegsta|minnsta|helsta|fyrsta|annars|hins|hinn|hinu)\b"
 )
 _MAX_WORDS = 3  # "In 2024?", "Og konur?": too short to stand on its own
 # Words that say how to look at something but not what: a question made only of these (and stopwords, years, months)
@@ -60,6 +64,9 @@ Keep the user's language (English or Icelandic). Take the topic, place, measure 
 question and answer; change only what the follow-up changes (a year, a month, a place, a group).
 Keep the previous question's period ("the last 10 years", "since 2016", "síðustu 10 ár") unless the follow-up changes it.
 Name the measure in words; never write table ids in the question.
+A follow-up that refers to something the previous answer named ("that category", "the highest one", "it", "þar",
+"the municipality") is rewritten with the name from the answer (Aluminium and aluminium products, Kópavogur),
+keeping the answer's measure (FOB value, tonnes, index) unless the follow-up changes it.
 "Last year" / "í fyrra" / "the year before" means the year before the period in the previous answer.
 If the question is already complete on its own, return it unchanged. Do not answer it."""
 
