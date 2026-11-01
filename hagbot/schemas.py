@@ -4,6 +4,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from .specification import TableVerification
+
 Language = Literal["en", "is"]
 FailureStatus = Literal["clarify", "out_of_scope", "unavailable", "unverified", "error"]
 AnswerStatus = Literal["answered", "clarify", "out_of_scope", "unavailable", "unverified", "error"]
@@ -85,6 +87,7 @@ class AnswerPart(BaseModel):
     unit: str
     computation: Computation | None = None
     facts: list[Fact]
+    verifications: list[TableVerification] = Field(default_factory=list)
     chart: ChartSpec | None = None
     note: str = ""  # e.g. why the latest figure is from an earlier year, and where newer figures are
     ranking: list[dict] = []  # the ranked hitlist the table was chosen from: id, title, score, signals

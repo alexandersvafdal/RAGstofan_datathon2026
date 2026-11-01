@@ -28,6 +28,11 @@ Requirements must be grounded in the question and survive resolution. Independen
 explicit years, months, quarters, relative periods, literal category names and gender aliases. For one-part
 questions the original wording is checked alongside the planner's wording.
 
+The planner now also produces a table-independent `QuestionSpec`. The selection must supply a compatibility
+check and source metadata citations for every requirement, before any cells are fetched. User-selected tables
+go through interpretation and compatibility checks too. See [semantic validation](semantic-validation.md) for
+the specification, evidence rules and current limits.
+
 Unknown codes cannot be dropped, unavailable periods cannot be moved to a table edge, and requested windows
 cannot be shortened. Missing selections may use totals, the latest period, or a dimension's only value.
 An unspecified dimension with multiple options and no total requires clarification. Equivalent code/label forms
@@ -49,7 +54,9 @@ These are control-flow and data-integrity safeguards. They do not prove the mode
 phrase or selected the right statistical definition, nor detect every omitted sub-question. Scope classification
 and extraction of requirements beyond the deterministic checks still depend on the model. This intentionally
 increases abstentions; measure coverage and correctness with the actual serving model before deployment.
-Cache freshness and a complete statistical compatibility gate remain separate work.
+Cache freshness, broader metadata extraction, candidate retries after compatibility rejection and live model
+calibration remain separate work. The first compatibility gate checks evidence and common statistical distinctions;
+it cannot establish the correctness of every semantic interpretation.
 
 Run offline regression tests, without model, vector or PX-API calls:
 

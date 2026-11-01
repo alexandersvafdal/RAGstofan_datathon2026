@@ -13,12 +13,14 @@ from pydantic import ValidationError
 from hagbot.catalog import CatalogEntry
 from hagbot.outcomes import AnswerFailure
 from hagbot.pipeline import NeedsClarification, Pipeline
+from hagbot.semantics import fingerprint
 from hagbot.schemas import Answer, AnswerPart, AskRequest, Clarification, Fact, Row, TableRef
 from hagbot.sources import TableMeta, Variable
+from hagbot.specification import Compatibility, Evidence, QuestionSpec, Requirement, RequirementCheck
 from hagbot.steps.compose import Written
 from hagbot.steps.compute import compute
 from hagbot.steps.constraints import RequestedFilter
-from hagbot.steps.plan import Plan, SubQuestion
+from hagbot.steps.plan import Plan, SubQuestion as PlannedSubQuestion
 from hagbot.steps.retrieve import Pick, retrieve
 from hagbot.steps.select import Resolved, Selection, resolve, vote_selection
 from hagbot.steps.tiered import Subjects, Verdict, retrieve_tiered
@@ -26,7 +28,19 @@ from hagbot.steps.tiered import Subjects, Verdict, retrieve_tiered
 
 def selection(**fields):
     fields.setdefault("requested_filters", [])
+    fields.setdefault("compatibility", Compatibility(checks=[RequirementCheck(
+        requirement=0, verdict="supported", evidence=[Evidence(field="title", quote="Population")])]))
     return Selection(**fields)
+
+
+def specification(measure="population", quote="Population"):
+    return QuestionSpec(requirements=[Requirement(facet="measure", value=measure, origin="user", quote=quote)], operation="value")
+
+
+def SubQuestion(question, search_query, **fields):
+    measure = next((m for m in ("unemployment", "births", "deaths") if m in question.lower()), "population")
+    fields.setdefault("specification", specification(measure, measure))
+    return PlannedSubQuestion(question=question, search_query=search_query, **fields)
 
 
 def entry(table_id="TEST001", last="2025"):
@@ -348,6 +362,8 @@ class ComputationTests(FailureAssertions, unittest.TestCase):
 
 class PipelineTests(unittest.IsolatedAsyncioTestCase):
     def pipeline(self, *replies, source=None):
+        if replies and isinstance(replies[0], Selection):
+            replies = (Plan(sub_questions=[SubQuestion(question="Population?", search_query="population")]), *replies)
         return Pipeline(llm=ScriptedLLM(*replies), catalog=CatalogStub(), source=source or SourceStub())
 
     async def test_explicit_scope_and_ambiguity_stop_before_retrieval(self):
@@ -400,6 +416,10 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(answer.status, "answered")
         self.assertEqual(answer.parts[0].selection, {"Year": ["2024"]})
         self.assertEqual(answer.parts[0].rows[0].key, {"Year": "2024"})
+        verification = answer.parts[0].verifications[0]
+        self.assertEqual(verification.executed_selection_sha256, fingerprint({"Year": ["2024"]}))
+        self.assertNotEqual(verification.selection_sha256, verification.executed_selection_sha256)
+        self.assertTrue(verification.amendments)
         self.assertEqual(len(source.queries), 2)
 
     async def test_explicit_period_with_missing_data_never_falls_back(self):
@@ -435,7 +455,8 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_complete_pipeline_with_repository_fixture(self):
         from hagbot.sources import FixtureSource
-        planned = Plan(sub_questions=[SubQuestion(question="Population in 2026?", search_query="population")])
+        planned = Plan(sub_questions=[SubQuestion(question="Population in 2026?", search_query="population",
+                                                 specification=specification(quote="mannfjöldinn"))])
         llm = ScriptedLLM(planned, Pick(table_id="MAN00101", confidence="high"),
                           selection(selections={"Ár": ["2026"], "Kyn": ["0"]}, operation="value"),
                           Written(text="Population in 2026: 394,324 people."))
@@ -497,7 +518,7 @@ class ApiTests(unittest.IsolatedAsyncioTestCase):
                 with patch.object(api, "pipeline", pipeline), patch.object(api, "_log_question"), \
                      patch.object(pipeline, "_answer_part", new=AsyncMock(side_effect=AnswerFailure("unverified", "no_verified_table"))):
                     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=api.app), base_url="http://test") as client:
-                        response = await client.post(path, json={"question": "A question", "language": "en"})
+                        response = await client.post(path, json={"question": "Population?", "language": "en"})
                 self.assertEqual(response.status_code, 200)
                 if path.endswith("stream"):
                     events = [json.loads(line) for line in response.text.splitlines()]

@@ -46,6 +46,8 @@ Every LLM step has a Pydantic output schema (`hagbot/steps/*.py`). The model nev
 The answer contract also distinguishes clarification, out-of-scope requests, unavailable data, unverified answers
 and technical errors. Required parts must all succeed before an answer is published. See
 [answer outcomes and integrity checks](docs/answer-outcomes.md) for the rules and offline regression tests.
+The next layer uses a [structured question specification and source metadata evidence](docs/semantic-validation.md)
+to check the selected statistical definition before fetching data.
 
 | Path | What |
 |---|---|

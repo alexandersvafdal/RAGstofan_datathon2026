@@ -69,6 +69,8 @@ def _answer(a: dict) -> dict:
             part["computation"] = p["computation"]
         if p.get("note"):
             part["note"] = p["note"]
+        if p.get("verifications"):
+            part["verifications"] = p["verifications"]
         parts.append(part)
     if parts:
         out["parts"] = parts

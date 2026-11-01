@@ -17,7 +17,7 @@ import time
 from collections import OrderedDict
 from math import prod
 from pathlib import Path
-from typing import Protocol
+from typing import Literal, Protocol
 
 import httpx
 from pydantic import BaseModel
@@ -42,8 +42,13 @@ class Variable(BaseModel):
 class TableMeta(BaseModel):
     id: str
     title: str
+    title_source: Literal["source", "catalog", "unknown"] = "source"
     path: str
     unit: str = ""
+    unit_source: Literal["source", "catalog", "unknown"] = "unknown"
+    description: str = ""
+    notes: list[str] = []
+    updated: str = ""
     variables: list[Variable]
 
     def var(self, code: str) -> Variable:
@@ -87,7 +92,7 @@ class FixtureSource:
 
     async def meta(self, table_id: str) -> TableMeta:
         t = self._get(table_id)
-        return TableMeta(**t["meta"], unit=t.get("unit", ""))
+        return TableMeta(**{**t["meta"], "unit": t.get("unit", ""), "unit_source": "source"})
 
     async def query(self, table_id: str, selection: dict[str, list[str]]) -> list[Row]:
         meta = await self.meta(table_id)
@@ -158,8 +163,15 @@ def _meta_from_api(table_id: str, d: dict, catalog: Catalog) -> TableMeta:
                  time=v.get("time", False), elimination=v.get("elimination", False))
         for v in d["variables"]
     ]
+    unit = d.get("unit") if isinstance(d.get("unit"), str) else ""
+    notes = d.get("notes", d.get("note", []))
+    notes = [notes] if isinstance(notes, str) else [n for n in notes if isinstance(n, str)] if isinstance(notes, list) else []
     return TableMeta(id=table_id, title=d.get("title") or (entry.title_en if entry else table_id),
-                     path=entry.path if entry else "", unit=entry.unit if entry else "",
+                     title_source="source" if d.get("title") else "catalog" if entry else "unknown",
+                     path=entry.path if entry else "", unit=unit or (entry.unit if entry else ""),
+                     unit_source="source" if unit else "catalog" if entry and entry.unit else "unknown",
+                     description=d.get("description") if isinstance(d.get("description"), str) else "",
+                     notes=notes, updated=d.get("updated") if isinstance(d.get("updated"), str) else "",
                      variables=variables)
 
 

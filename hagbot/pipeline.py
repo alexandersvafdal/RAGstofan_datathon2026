@@ -11,6 +11,8 @@ from .config import settings
 from .llm import LLM, Timer
 from .outcomes import AnswerFailure
 from .schemas import (Answer, AnswerIssue, AnswerPart, AskRequest, Clarification, ClarifyOption, Step, TableRef)
+from .semantics import fingerprint, validate_specification
+from .specification import QuestionSpec, Requirement
 from .sources import DataSource, make_source, table_url
 from .hierarchy import children
 from .steps.chart import choose_chart, comparison_chart
@@ -97,24 +99,37 @@ class Pipeline:
                 req = req.model_copy(update={"question": full})
             ratio = None if req.table_id else detect_ratio(req.question)
             forced: list[str | None]
-            if req.table_id:  # the user already chose a table: skip planning
-                p = Plan(sub_questions=[SubQuestion(question=req.question, search_query=req.question)])
-                forced = [req.table_id]
+            if req.table_id:
+                entry = self.catalog.get(req.table_id)
+                if entry is None:
+                    raise AnswerFailure("unavailable", "unknown_table", req.table_id)
+                # Choosing a table narrows retrieval; it does not waive interpreting or validating the question.
+                t = Timer()
+                context = f"Selected table {entry.id}: {entry.title_en}"
+                p = await plan(self.llm, req.question, context=context)
+                _check_plan(p, req.question, context)
+                forced = [req.table_id] * len(p.sub_questions)
+                steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(s.question for s in p.sub_questions)))
             elif ratio:  # "X per inhabitant": X from its own table, divided by the population in code
                 t = Timer()
                 numerator_plan = await plan(self.llm, ratio.numerator)
-                _check_plan(numerator_plan)
+                _check_plan(numerator_plan, ratio.numerator)
                 if len(numerator_plan.sub_questions) != 1:
                     raise AnswerFailure("out_of_scope", "multiple_ratio_numerators")
                 num = numerator_plan.sub_questions[0]
-                pop = SubQuestion(question=ratio.population_question(lang), search_query="population 1 January")
+                requirements = [Requirement(facet="measure", value="population", origin="context", quote="people"),
+                                Requirement(facet="geography", value="Iceland", origin="context", quote="Iceland")]
+                requirements.append(Requirement(facet="period", value=ratio.year or "latest",
+                                                origin="context" if ratio.year else "default", quote=ratio.year or ""))
+                pop = SubQuestion(question=ratio.population_question(lang), search_query="population 1 January",
+                                  specification=QuestionSpec(requirements=requirements, operation="value"))
                 p = Plan(sub_questions=[num, pop])
                 forced = [None, POPULATION_TABLE]
                 steps.append(Step(name="plan", ms=t.ms(), detail=f"{num.question} | {pop.question}"))
             else:
                 t = Timer()
                 p = await plan(self.llm, req.question)
-                _check_plan(p)
+                _check_plan(p, req.question)
                 forced = [None] * len(p.sub_questions)
                 steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(s.question for s in p.sub_questions)))
 
@@ -178,6 +193,7 @@ class Pipeline:
                 "sub_question": " | ".join(p.sub_question for p in group),
                 "rows": rows,
                 "facts": [f for p in group for f in p.facts],
+                "verifications": [v for p in group for v in p.verifications],
                 "selection": {k: list(dict.fromkeys(v for p in group for v in p.selection.get(k, []))) for k in first.selection},
                 "chart": (c := choose_chart(meta, rows, selections, None)) and c.model_copy(update={"title": first.table.title}),
             }))
@@ -205,10 +221,14 @@ class Pipeline:
         t = Timer()
         meta = await self.source.meta(r.table.id)
         filter_question = f"{original} {sq.question}" if alone else sq.question
-        res = await select(self.llm, meta, sq.question, original, filter_question=filter_question)
+        res = await select(self.llm, meta, sq.question, original, filter_question=filter_question,
+                           specification=sq.specification)
+        if res.verification is None:
+            raise AnswerFailure("unverified", "missing_compatibility")
         chosen = {meta.var(c).text: [meta.var(c).label_of(v) for v in vals] for c, vals in res.selections.items()}
         steps.append(Step(name="select", ms=t.ms(),
-                          detail=f"{res.operation} {chosen}" + (f" notes: {res.notes}" if res.notes else "")))
+                          detail=f"{res.operation} {chosen}; verified {len(res.verification.checks)} metadata requirements"
+                                 + (f" notes: {res.notes}" if res.notes else "")))
 
         t = Timer()
         rows = await self.source.query(meta.id, res.selections)
@@ -251,6 +271,9 @@ class Pipeline:
         entry = self.catalog.get(meta.id)
         title = entry.title_is if lang == "is" and entry and entry.title_is else meta.title
         chart = choose_chart(meta, rows, res.selections, computation)
+        verification = res.verification.model_copy(update={"executed_selection_sha256": fingerprint(res.selections)})
+        if verification.executed_selection_sha256 != verification.selection_sha256:
+            verification = verification.model_copy(update={"amendments": [*verification.amendments, detail]})
         return AnswerPart(
             sub_question=sq.question,
             table=TableRef(id=meta.id, title=title, url=table_url(meta.path, meta.id),
@@ -260,6 +283,7 @@ class Pipeline:
             unit=meta.unit,
             computation=computation,
             facts=facts,
+            verifications=[verification],
             chart=chart.model_copy(update={"title": title}) if chart else None,
             note=note,
             ranking=r.ranking,
@@ -313,9 +337,11 @@ class Pipeline:
         return note
 
 
-def _check_plan(p: Plan) -> None:
+def _check_plan(p: Plan, question: str, context: str = "") -> None:
     if p.outcome != "lookup":
         raise AnswerFailure(p.outcome, "ambiguous_question" if p.outcome == "clarify" else "unsupported_request")
+    for sub_question in p.sub_questions:
+        validate_specification(sub_question.specification, question, context)
 
 
 def _stop(ans: Answer, errors: list[tuple[str, Exception]], expected_parts: int = 1) -> Answer:

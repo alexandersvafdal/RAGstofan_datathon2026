@@ -5,11 +5,13 @@ from typing import Literal
 from pydantic import BaseModel, Field, model_validator
 
 from ..llm import LLM
+from ..specification import QuestionSpec
 
 
 class SubQuestion(BaseModel):
     question: str = Field(description="A self-contained question answerable from a single table, in English")
     search_query: str = Field(description="English keywords for finding the table: topic, measure, place, period")
+    specification: QuestionSpec
 
 
 class Plan(BaseModel):
@@ -40,6 +42,16 @@ Never split a comparison within one measure: "how many more men than women", "Re
 "share of foreigners", "change from 2025 to 2026" are each ONE sub-question, because one table holds both sides.
 Write sub-questions and search queries in English even if the user wrote Icelandic.
 Keep place names in their Icelandic spelling (Reykjavík, Kópavogur, Akureyri).
+For each part, write its structured specification BEFORE considering any candidate table. Include exactly one
+measure and every requested definition/filter: statistic (mean/median/total/rate/index), population, geography,
+period, unit, frequency, adjustment, price basis (current/constant prices), tax basis (gross/net).
+Each requirement records its origin and an exact quote from the original question (user) or supplied context.
+Translate value to canonical English, but do not translate the supporting quote. Never invent a required filter.
+Allowed policy defaults only: geography=Iceland, period=latest, adjustment=unadjusted, statistic=total.
+Defaults have origin=default and quote="". A mean, median, income measure, wealth measure or age threshold is never
+a default: clarify if the wording does not determine it. Record any unresolved ambiguities instead of guessing.
+Use operation=value for a published annual rate such as inflation or GDP growth; difference/pct_change are for
+explicit comparisons, series for trends, rank for category listings. Do not omit a requirement when translating.
 Icelandic words that are easy to mistranslate:
 - búa, íbúar, mannfjöldi, hvað búa margir: population (people living somewhere)
 - fjölga, fjölgaði, fjölgun: population increase; fækka, fækkaði: population decrease
@@ -54,5 +66,6 @@ Icelandic words that are easy to mistranslate:
 Do not answer the question."""
 
 
-async def plan(llm: LLM, question: str) -> Plan:
-    return await llm.complete_json(SYSTEM, f"Question: {question}", Plan)
+async def plan(llm: LLM, question: str, *, context: str = "") -> Plan:
+    user = f"Question: {question}" + (f"\nContext supplied by the user: {context}" if context else "")
+    return await llm.complete_json(SYSTEM, user, Plan)
