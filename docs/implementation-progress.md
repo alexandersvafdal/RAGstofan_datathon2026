@@ -46,14 +46,31 @@ set, inspect accuracy/coverage/false refusals and latency separately, calibrate 
 separate frozen/holdout measurement. No live evaluation of this implementation has been performed yet. These
 milestones do not claim universal semantic correctness or measured sub-30-second success.
 
-## Historical false-refusal calibration and live preview verification
+## General scope correction and current smoke verification
 
 The next general false-refusal correction accepts fixed table definitions and dataset reporting context without
 requiring redundant dimensions. Unrequested total/latest/adjustment preferences no longer veto supported data.
 Scalar operand lookups cannot inherit the parent calculation; geographic shares can use a verified national total
-within a common reporting scope. Explicit conflicting filters remain protected. All 176 offline regressions pass
-locally, including synthetic scope, unit, population, period and composed-share cases. Serving-model verification
-of this correction is still pending; these checks do not establish coverage or latency distributions.
+within a common reporting scope. Explicit conflicting filters remain protected. Implementation `0de43bc` is
+published and pulled into the isolated Spark preview, remaining on `codex/answer-integrity`. All 176 offline
+regressions pass locally and on Spark, including synthetic scope, unit, population, period and composed-share cases.
+
+Real-model smoke checks through the running web API (30-second budget):
+
+| Question | Result | Calls | Time |
+| --- | --- | --- | --- |
+| What share of Iceland’s people live in Reykjavík? | Answered: 139,804 / 394,324 = 35.5%, 2026, MAN02005 + MAN00101 | 4 | 18.23 s |
+| Hver er mannfjöldi Íslands? | Answered: 394,324, 2026, MAN00101 | 2 | 8.25 s |
+| What is the unemployment rate? | Answered: 5.1%, September 2026, VIN00001 | 2 | 9.23 s |
+| Write me a poem about the sea | out_of_scope | 1 | 0.69 s |
+
+The first web run of the share question timed out at 30 seconds after accepting national scope. A separate
+diagnostic with a 75-second process budget answered correctly in 21.34 seconds; the subsequent web run above
+also answered. The web budget remains 30 seconds. These are individual samples, with variable model-serving
+latency, not coverage measurements, latency percentiles or a sub-30-second guarantee. No extra model calls are
+introduced by this correction. The dictionary harness and main checkout/app remain unchanged.
+
+## Historical false-refusal calibration and live preview verification
 
 Before the implementation checkpoint above, runtime code through `acefe83` fixed observed false rejections without adding model calls:
 
