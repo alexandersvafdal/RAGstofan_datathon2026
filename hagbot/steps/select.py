@@ -203,7 +203,7 @@ def _total_of(var: Variable) -> str | None:
     None when the dimension has no such option (a table of municipalities only)."""
     pairs = list(zip(var.values, var.value_texts))
     for pattern in (re.compile(r"^(total|alls|samtals|all)$"), re.compile(r"whole country|landid allt|all of iceland|^iceland$|^island$"),
-                    re.compile(r"\b(total|alls|samtals|allir|allar|oll)\b")):
+                    re.compile(r"\b(total|alls|samtals|allir|allar|oll)\b|^(all|allt) \w")):   # "All species", "All products"
         for code, label in pairs:
             if pattern.search(normalize(label)):
                 return code
@@ -344,8 +344,10 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                 notes.append(f"{var.text}: dropped {[var.label_of(c) for c in chosen if c not in in_question]} (not named in the question)")
                 alternatives[var.code] = [c for c in chosen if c not in in_question]   # offered as chips
                 out[var.code] = chosen = in_question
+        # (named among its siblings: "Aluminium" names "360 Aluminium and aluminium products", whose other words
+        # the question need not repeat)
         if (len(chosen) == 1 and _partition(var) and var.code != sel.compare_dimension and var.code not in aggregate_over
-                and not mentioned(var.label_of(chosen[0]))):
+                and not mentioned(var.label_of(chosen[0]), var.value_texts)):
             notes.append(f"{var.text}: {var.label_of(chosen[0])!r} is not named in the question and the table has no total; "
                          f"summed over all {len(var.values)} options")
             out[var.code] = chosen = list(var.values)
