@@ -115,6 +115,31 @@ struct AnswerCard: View {
                     }
                 }
 
+                // categories that open further: each asks for its own subcategories from the same table
+                let drills = a.parts.flatMap { $0.drill ?? [] }
+                if !drills.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(L == .is ? "SKOÐA UNDIRFLOKKA" : "OPEN A CATEGORY")
+                            .font(.caption2.weight(.semibold)).tracking(0.8).foregroundStyle(pal.text3)
+                        Flow(spacing: 6) {
+                            ForEach(drills, id: \.self) { d in
+                                Button { ask(d.question, d.tableId) } label: {
+                                    HStack(spacing: 3) {
+                                        Text(d.label).lineLimit(1)
+                                        Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(pal.accent)
+                                    }
+                                    .font(.footnote).foregroundStyle(pal.text2)
+                                    .padding(.horizontal, 11).padding(.vertical, 6)
+                                    .overlay(Capsule().stroke(pal.text.opacity(0.12)))
+                                    .contentShape(Capsule())
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                    .reveal(4, shown)
+                }
+
                 if fast {
                     Label(L == .is ? "Svarað í flýti með hraða líkaninu, án hugsunar." : "Answered quickly with the fast model, thinking off.",
                           systemImage: "bolt.fill")

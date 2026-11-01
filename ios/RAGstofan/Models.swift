@@ -38,7 +38,10 @@ struct AnswerPart: Codable, Hashable {
     let chart: ChartSpec?
     let note: String?
     let ranking: [RankedTable]?
+    var drill: [Drill]? = nil   // categories that open further, each with the question that lists its subcategories
 }
+
+struct Drill: Codable, Hashable { let label: String; let question: String; let tableId: String }
 
 struct ClarifyOption: Codable, Hashable { let label: String; let tableId: String }
 struct Clarification: Codable, Hashable { let message: String; let options: [ClarifyOption] }

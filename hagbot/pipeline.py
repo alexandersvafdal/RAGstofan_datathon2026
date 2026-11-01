@@ -11,13 +11,14 @@ from .config import settings
 from .llm import LLM, LLMError, Timer
 from .schemas import (Answer, AnswerPart, AskRequest, Clarification, ClarifyOption, Step, TableRef)
 from .sources import DataSource, make_source, table_url
+from .hierarchy import children
 from .steps.chart import choose_chart, comparison_chart
 from .steps.compose import compose
 from .steps.compute import compute
 from .steps.followup import looks_like_followup, rewrite
 from .steps.plan import Plan, SubQuestion, plan
 from .steps.ratio import POPULATION_TABLE, detect_ratio, ratio_parts
-from .steps.retrieve import period_end, retrieve
+from .steps.retrieve import _INDEXATION_TABLE, period_end, retrieve
 from .steps.tiered import retrieve_tiered
 from .steps.select import select
 from .steps.suggest import suggest
@@ -212,12 +213,18 @@ class Pipeline:
                 res.selections[time_var.code] = [last]
                 rows = [r for r in wide if r.key[time_var.code] == last]
                 detail += f"; {time_var.values[-1]} has no numbers yet, using {last}"
+        if res.operation == "rank":   # categories with a number, largest first when only the top few were asked for
+            rows = [r for r in rows if r.value is not None]
+            if res.top:
+                rows = sorted(rows, key=lambda r: -abs(r.value))[:res.top]
+                res.selections[res.compare_dimension] = [r.key[res.compare_dimension] for r in rows]
+                detail += f"; the largest {len(rows)}"
         steps.append(Step(name="fetch", ms=t.ms(), detail=detail))
 
         # Tables like THJ01000 mix indices, counts and yearly changes and give no unit; a chosen "volume change on
         # previous year" or "annual growth" is a percentage, so say so
         # (one dimension whose every chosen value is a percentage is enough: "Sex: Total, Unit: Unemployment rate")
-        if not meta.unit and any(res.selections.get(v.code) and
+        if meta.unit != "%" and any(res.selections.get(v.code) and
                                  all(_PERCENT.search(normalize(v.label_of(c))) for c in res.selections[v.code])
                                  for v in meta.variables if not v.time):
             meta = meta.model_copy(update={"unit": "%"})
@@ -241,7 +248,24 @@ class Pipeline:
             chart=chart.model_copy(update={"title": title}) if chart else None,
             note=note,
             ranking=r.ranking,
+            drill=self._drill(meta, res, rows, lang),
         )
+
+    @staticmethod
+    def _drill(meta, res, rows, lang: str) -> list[dict]:
+        """Categories listed that open further: each with the question that lists its own subcategories from this
+        table. Read from the classification codes, so any coded table gets it."""
+        if not res.breakdown:
+            return []
+        var = meta.var(res.breakdown)
+        out = []
+        for r in rows:
+            code = r.key.get(var.code)
+            if code and children(var, code):
+                label = r.labels[var.text]
+                out.append({"label": label, "table_id": meta.id,
+                            "question": f"Hverjir eru undirflokkar {label}?" if lang == "is" else f"What are the subcategories of {label}?"})
+        return out
 
     def _freshness_note(self, meta, selections: dict[str, list[str]], candidates: list[str], question: str, lang: str) -> str:
         """When nobody asked for a period and the newest one here is from an earlier year, say so, and name a table
@@ -258,7 +282,11 @@ class Pipeline:
         pool = [e for e in self.catalog.entries
                 if e.id != meta.id and e.path.split("/")[:3] == area and re.match(r"\d{4}", e.last_period or "")
                 and int(e.last_period[:4]) >= date.today().year and period_end(e.last_period) > period_end(latest)]
-        newer = min(pool, key=lambda e: (e.path != meta.path, e.id not in candidates, -period_end(e.last_period)), default=None)
+        # the same breakdown first (most categories in common), never a table published ahead for indexing loans
+        own = set(entry.values) if (entry := self.catalog.get(meta.id)) else set()
+        pool = [e for e in pool if not re.search(_INDEXATION_TABLE, e.title_en, re.I)]
+        newer = min(pool, key=lambda e: (-len(own & set(e.values)), e.path != meta.path, e.id not in candidates,
+                                         -period_end(e.last_period)), default=None)
         if lang == "is":
             note = f"{latest} er nýjasta tímabilið í þessari töflu."
             if newer:

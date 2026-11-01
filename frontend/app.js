@@ -568,6 +568,12 @@ function renderAnswer(card, a) {
     if (p.chart && p.chart.type !== "kpi" && p.chart.data.length > 1) card.append(chartBlock(p, L));
   }
 
+  // categories that open further: each asks for its own subcategories from the same table
+  for (const p of a.parts) if (p.drill?.length) card.append(el("div", { class: "drill" },
+    el("span", { class: "drill-head" }, L === "is" ? "Skoða undirflokka" : "Open a category"),
+    el("div", { class: "drill-chips" }, p.drill.map(d =>
+      el("button", { type: "button", class: "drill-chip", onclick: () => ask(d.question, d.table_id) }, d.label, el("span", { "aria-hidden": "true" }, " ›"))))));
+
   for (const p of a.parts) if (p.note) card.append(el("p", { class: "note" }, prettyPeriods(p.note, L)));
 
   // Where the numbers come from: the table in the answer's language, a link, and how recent its data is

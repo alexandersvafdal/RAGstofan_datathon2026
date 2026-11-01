@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from ..catalog import MIN_PREFIX, STOPWORDS, Catalog, CatalogEntry
 from ..llm import LLM
+from ..hierarchy import code_of
 from ..text import asked_bases, base_year, normalize, tokens
 
 
@@ -107,6 +108,11 @@ def narrow(entries: list[CatalogEntry], question: str) -> list[CatalogEntry]:
         keep_if(lambda e: any(base_year(v) in asked for v in [e.title_en, *e.values]))   # CPI: "base 1988=100" in the title
     else:
         keep_if(lambda e: (b := newest_base(e)) is None or b >= 2000)
+    # "Subcategories of …", "the main drivers of …": tables listing coded categories (subindices, industries) first.
+    # Reordered, not filtered: the model still judges the topic.
+    from .select import _LIST, _TOP
+    if re.search(_LIST, q) or re.search(_TOP, q):
+        entries = sorted(entries, key=lambda e: sum(1 for v in e.values if code_of(v)) < 8)
     # Missing time flags must not discard a relevant dated table in favour of an unrelated one.
     keep_if(lambda e: _year_range(e) is not None)
     asked_years = set(int(y) for y in re.findall(r"\b(?:18|19|20)\d\d\b", question))
@@ -139,6 +145,10 @@ def freshest_sibling(table: CatalogEntry, entries: list[CatalogEntry], question:
     if re.search(r"\b(?:18|19|20)\d\d\b", question) or re.search(MONTHS, q):
         return table
     indexation_ok = bool(re.search(_INDEXATION_ASKED, q))
+    # a question about categories keeps a table that lists them, however much later a total-only neighbour ends
+    from .select import _LIST, _TOP
+    categories = bool(re.search(_LIST, q) or re.search(_TOP, q))
+    def coded_n(e): return sum(1 for v in e.values if code_of(v))
     words = [w for w in tokens(question) if len(w) >= MIN_PREFIX and w not in STOPWORDS]
     def text(e): return tokens(f"{e.title_en} {' '.join(e.values)}")
     needed = [w for w in words if any(t.startswith(w) for t in text(table))]
@@ -148,6 +158,7 @@ def freshest_sibling(table: CatalogEntry, entries: list[CatalogEntry], question:
               if e.path.rsplit("/", 1)[0] == parent and period_end(e.last_period) > period_end(table.last_period)
               and (newest_base(e) or 0) >= base
               and (indexation_ok or not re.search(_INDEXATION_TABLE, e.title_en, re.I))
+              and not (categories and coded_n(table) >= 8 and coded_n(e) < 8)
               and all(any(t.startswith(w) for t in text(e)) for w in needed)]
     return max(better, key=lambda e: period_end(e.last_period)) if better else table
 
@@ -162,6 +173,8 @@ Rules:
 - Prefer original (unadjusted) figures unless the question asks for seasonally adjusted or trend figures.
 - Prefer monthly tables when a month is asked, yearly tables when only a year is asked.
 - A place or category the question names should be among the table's options ("Has options").
+- A question asking for subcategories, components, a breakdown or the main drivers needs a table that lists those
+  categories (subindices, by category, effect or contribution of each), not one that only has the total.
 Copy the table ID exactly."""
 
 

@@ -63,8 +63,8 @@ def _series_sentence(p: AnswerPart, lang: str) -> str | None:
     """A trend in one sentence per line: where it started, where it is now, and its highest point."""
     facts = p.facts[:-1] if p.computation else p.facts   # the calculated change is said on its own, below
     periods = [_PERIOD.search(f.label) for f in facts]
-    if len(facts) <= 3 or not all(periods):
-        return None
+    if len(facts) <= 3 or not all(periods) or len({m.group(0) for m in periods}) < 2:
+        return None   # few facts, or categories at one period (a list, not a trend)
     lines: dict[str, list] = {}  # one line per series: the label without its period
     for f, m in zip(facts, periods):
         lines.setdefault(re.sub(r"(\s*,)+", ",", _PERIOD.sub("", f.label)).strip(" ,"), []).append((m.group(0), f))
@@ -89,7 +89,8 @@ def template(parts: list[AnswerPart], lang: str) -> str:
             r = p.facts[-1]
             out.append(f"{r.label}: {r.formatted} ({p.computation.expression}). {src}, {p.table.id}.")
             continue
-        facts = _series_sentence(p, lang) or "; ".join(f"{f.label}: {f.formatted}" for f in p.facts[-3:])
+        listed = p.facts if len(p.facts) <= 15 and not p.computation else p.facts[-3:]   # a category list: all of it
+        facts = _series_sentence(p, lang) or "; ".join(f"{f.label}: {f.formatted}" for f in listed)
         out.append(f"{facts}. {src}, {p.table.id}.")
     return " ".join(out)
 

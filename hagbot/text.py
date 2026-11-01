@@ -4,7 +4,8 @@ import re
 import unicodedata
 
 _IS_CHARS = set("þðæöáéíóúýÞÐÆÖÁÉÍÓÚÝ")
-_IS_WORDS = {"hvað", "hve", "hversu", "margir", "margar", "búa", "árið", "og", "í", "á", "er", "var", "hvert", "hver"}
+_IS_WORDS = {"hvað", "hve", "hversu", "margir", "margar", "búa", "árið", "og", "í", "á", "er", "var", "hvert", "hver",
+             "hverjir", "hverjar", "eru", "undirflokkar"}
 
 
 def normalize(s: str) -> str:

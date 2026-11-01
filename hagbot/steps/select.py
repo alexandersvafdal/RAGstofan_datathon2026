@@ -9,6 +9,7 @@ from ..catalog import SYNONYMS
 from ..llm import LLM
 from ..vote import ask_all, majority, voting_on
 from ..sources import TableMeta, Variable
+from ..hierarchy import children, coded, named
 from ..text import asked_bases, base_year, normalize, tokens
 
 Op = Literal["value", "series", "difference", "pct_change", "share", "max", "min"]
@@ -28,13 +29,15 @@ class Selection(BaseModel):
 
 class Resolved(BaseModel):
     selections: dict[str, list[str]]
-    operation: Op
+    operation: Op | Literal["rank"]  # rank: categories of a coded dimension, listed or largest first (set in code)
     compare_dimension: str | None = None
     part: str | None = None
     whole: str | None = None
     order: list[str] | None = None  # for a difference between categories: [first, second], result = first − second
     notes: list[str] = []
     window_note: dict[str, str] | None = None  # en/is, when the period asked for starts before the table does
+    breakdown: str | None = None  # rank: the coded dimension listed, so its categories can be opened further
+    top: int | None = None        # rank: keep the n largest (by size, either sign); None lists them all
 
 
 def _mention_order(var: Variable, codes: list[str], question: str) -> list[str] | None:
@@ -83,6 +86,14 @@ _EXTREME = [("max", re.compile(r"\b(highest|peak\w*|maximum|haest\w*|hamark\w*)\
 # the question asks when, so the extreme is searched over time ("which occupation earns the most" is not)
 _WHEN = r"\bwhen\b|which (year|month|period)|what (year|month)|hvenaer|hvada (ar|manud)|\bever\b|fra upphafi|all time"
 _TOTAL = re.compile(r"\b(total|alls|samtals|all)\b", re.I)
+# "Hverjir eru undirflokkar …", "what are the categories of …": list a dimension's categories
+_LIST = (r"undirflokk|undirvisitol|\bflokk(ar|um|a|i)\b|skipting|sundurlid|samsetning|categor|sub-?ind|breakdown|"
+         r"\bcomponents?\b|consist|made up of|split (by|into)|broken down")
+# "helstu áhrifaþættir", "the biggest industries", "top 5": the largest few, ranked
+_TOP = (r"\b(helstu|staerstu|mestu|mikilvaegustu|biggest|largest|main|top|most important|leading)\b|"
+        r"ahrifathaett|ahrifavald|\bdrivers?\b|\bdrives?\b|contribut")
+_EFFECT_ASK = r"ahrif|driver|drives?\b|contribut|effect|impact"
+_EFFECT_OPTION = r"\beffect\b|contribution|ahrif"
 _MAX_OPTIONS = 80
 
 
@@ -360,8 +371,37 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
         if not (part and whole and part in out[compare] and whole in out[compare]):
             notes.append("share needs a part and a whole; reporting values instead")
             op, part, whole = "value", None, None
+    # "Hverjir eru undirflokkar neysluvísitölunnar", "main drivers of …", "biggest industries": the categories of the
+    # table's coded dimension (COICOP, NACE … read from the labels), at one period. A category the question names is
+    # opened one level down; "largest/main" keeps the biggest few. Works for any table whose categories carry codes.
+    breakdown, top = None, None
+    if (re.search(_LIST, q) or re.search(_TOP, q)) and op not in ("difference", "pct_change", "share"):
+        cand = [v for v in meta.variables if not v.time and coded(v)]
+        var = max(cand, key=lambda v: len(coded(v))) if cand else None
+        kids = (children(var, named(var, question)) or children(var, None)) if var else []
+        if var and len(kids) >= 2:
+            out[var.code], breakdown, compare = kids, var.code, var.code
+            if re.search(_EFFECT_ASK, q):   # drivers: the measure saying how much each part moved the whole
+                for v in meta.variables:
+                    hits = [c for c, t in zip(v.values, v.value_texts) if re.search(_EFFECT_OPTION, normalize(t))]
+                    if not v.time and v.code != var.code and hits:
+                        out[v.code] = hits[:1]
+            for v in meta.variables:
+                if v.code == var.code:
+                    continue
+                if v.time:   # one period: the latest unless the question names one
+                    named_period = [c for c in out[v.code] if c[:4] in question]
+                    out[v.code] = [named_period[-1] if named_period else v.values[-1]]
+                elif len(out[v.code]) > 1:   # one measure per category
+                    out[v.code] = out[v.code][:1]
+            if re.search(_TOP, q):
+                m = re.search(r"\b(\d{1,2})\b", re.sub(r"\b(?:18|19|20)\d\d\b", "", q))
+                top = int(m.group(1)) if m else 6
+            op = "rank"
+            notes.append(f"{var.text}: {'the largest ' + str(top) + ' of ' if top else ''}{len(kids)} categories"
+                         + (f" under {var.label_of(named(var, question))!r}" if named(var, question) else ""))
     return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes,
-                    window_note=window_note)
+                    window_note=window_note, breakdown=breakdown, top=top)
 
 
 async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None) -> Resolved:

@@ -35,7 +35,7 @@ def compute(meta: TableMeta, rows: list[Row], res: Resolved, lang: str) -> tuple
     varying = {c for c, v in res.selections.items() if len(v) > 1}
     facts = [Fact(label=row_label(meta, r, varying), value=r.value, unit=unit, formatted=fmt_value(r.value, unit, lang))
              for r in rows]
-    if res.operation in ("value", "series") or not rows:
+    if res.operation in ("value", "series", "rank") or not rows:   # rank: the rows arrive ranked and trimmed
         return None, facts
 
     dim = res.compare_dimension

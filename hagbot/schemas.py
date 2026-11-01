@@ -86,6 +86,8 @@ class AnswerPart(BaseModel):
     chart: ChartSpec | None = None
     note: str = ""  # e.g. why the latest figure is from an earlier year, and where newer figures are
     ranking: list[dict] = []  # the ranked hitlist the table was chosen from: id, title, score, signals
+    # categories listed that have subcategories: label, the question that opens them, and the table to ask it of
+    drill: list[dict] = []
 
 
 class ClarifyOption(BaseModel):

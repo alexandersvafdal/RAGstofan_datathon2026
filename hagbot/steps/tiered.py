@@ -72,11 +72,12 @@ _GENERIC = ("current", "latest", "newest", "recent", "now", "today", "value", "l
 
 
 def headline(hit: CatalogEntry, found: list[dict], catalog: Catalog, text: str) -> CatalogEntry:
-    """The headline table of a concept marked "headline" (CPI VIS01000, wage index LAU04000) over a neighbour in the
-    same folder that the model chose (by sector, for indexation), when the question asks for nothing more than the
-    index itself. A question naming a breakdown ("public sector", "á almennum markaði") keeps the model's choice."""
+    """A concept's first dictionary table (its headline: the CPI, the wage index …) over a neighbour in the same folder
+    that the model chose (by sector, for indexation), when the question asks for nothing more than the concept itself.
+    Applies to every concept in the dictionary; a question naming a breakdown ("public sector", "á almennum markaði",
+    "subcategories") keeps the model's choice."""
     for c in found:
-        head = catalog.get(c["tables"][0]) if c.get("headline") and c["tables"] else None
+        head = catalog.get(c["tables"][0]) if c["tables"] else None
         if not head or head.id == hit.id or head.path != hit.path:
             continue
         concept = {t for term in c["_terms"] for t in term.split() if len(t) >= 3}
