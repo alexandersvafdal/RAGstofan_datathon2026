@@ -6,7 +6,7 @@ from collections import defaultdict
 from ..schemas import Computation, Fact, Row
 from ..sources import TableMeta
 from ..text import fmt_number, fmt_value
-from .select import Resolved
+from .select import Resolved, row_unit
 
 _TOTAL = re.compile(r"^(total|alls|samtals)$", re.I)
 
@@ -47,11 +47,12 @@ def _groups(rows: list[Row], dim: str) -> dict[tuple, dict[str, Row]]:
 
 
 def compute(meta: TableMeta, rows: list[Row], res: Resolved, lang: str) -> tuple[Computation | None, list[Fact]]:
-    unit = meta.unit
     rows = [r for r in rows if r.value is not None]
     varying = {c for c, v in res.selections.items() if len(v) > 1}
-    facts = [Fact(label=row_label(meta, r, varying), value=r.value, unit=unit, formatted=fmt_value(r.value, unit, lang))
-             for r in rows]
+    # each row in its own unit: a "Percentage of …" option makes the row a percentage whatever the table's unit says
+    facts = [Fact(label=row_label(meta, r, varying), value=r.value, unit=row_unit(meta, r.labels),
+                  formatted=fmt_value(r.value, row_unit(meta, r.labels), lang)) for r in rows]
+    unit = row_unit(meta, rows[0].labels) if rows and len({row_unit(meta, r.labels) for r in rows}) == 1 else meta.unit
     if res.operation in ("value", "series", "rank") or not rows:   # rank: the rows arrive ranked and trimmed
         return None, facts
 

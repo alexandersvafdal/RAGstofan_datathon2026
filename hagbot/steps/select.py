@@ -220,6 +220,36 @@ def _total_of(var: Variable) -> str | None:
     return None
 
 
+# A figure that is already a ratio: a percentage, share, rate, index, average or median. Read from the labels of the
+# options chosen and the table's unit. Such figures are not summed over a dimension and not divided by a total: the
+# "percentage of immigrants" row is the share asked for, and a share of it over the population would be nonsense.
+_RATIO = re.compile(r"(?<![\d.])%|\bpercent|prosent|hlutfall|hlutf\b|\bshare\b|proportion|\brate\b|\btidni|"
+                    r"\bper (1 ?000|100|10 ?000|capita|ibua)|a hverja|\bindex|visitala|\baverage|\bmean\b|median|"
+                    r"midgildi|\bmedal", re.I)
+
+
+def ratio_measure(meta: TableMeta, out: dict[str, list[str]], only: dict[str, list[str]] = {}) -> str | None:
+    """The chosen option (or the table's unit) that makes the figures ratios rather than counts, else None. `only`
+    narrows the options looked at in a dimension (the part of a share, not its whole)."""
+    if _RATIO.search(normalize(meta.unit)):
+        return meta.unit
+    for v in meta.variables:
+        if v.time:
+            continue
+        for c in only.get(v.code, out.get(v.code, [])):
+            if _RATIO.search(normalize(v.label_of(c))):
+                return v.label_of(c)
+    return None
+
+
+def row_unit(meta: TableMeta, labels: dict[str, str]) -> str:
+    """The unit of one row: "%" when an option of the row says so (a "Percentage of …" measure in a table whose
+    unit is a count), else the table's unit."""
+    if any(re.search(r"(?<![\d.])%|\bpercent|prosent|hlutfall", normalize(t)) for t in labels.values()):
+        return "%"
+    return meta.unit
+
+
 def _partition(var: Variable) -> bool:
     """A long list of options with no total (partner countries, products): the whole is their sum, so when the
     question names none of them the code sums them all rather than answer for the first one alphabetically."""
@@ -685,6 +715,26 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             op = "rank"
             notes.append(f"{var.text}: {'the largest ' + str(top) + ' of ' if top else ''}{len(kids)} categories"
                          + (f" under {var.label_of(named(var, question))!r}" if named(var, question) else ""))
+    # Units. A figure that is already a ratio (a percentage, rate, index, average: ratio_measure) is the answer as it
+    # stands: it is not divided by a total, not added up over a dimension, and not compared with a count.
+    if op == "share" and compare:
+        ratio = ratio_measure(meta, out, {compare: [part]})
+        if ratio:
+            notes.append(f"share: {ratio!r} is already a ratio; shown as it is, not divided by {meta.var(compare).label_of(whole)!r}")
+            out[compare] = [part]
+            op, compare, part, whole = "value", None, None, None
+    if op in ("difference", "pct_change") and compare and not meta.var(compare).time:
+        kinds = {bool(ratio_measure(meta, out, {compare: [c]})) for c in out[compare]}
+        if len(kinds) > 1:
+            notes.append(f"{op}: the options compared are in different units (a ratio and a count); reporting values instead")
+            op, compare, order = "value", None, None
+    ratio = ratio_measure(meta, out)
+    if ratio and op == "sum":
+        notes.append(f"sum: {ratio!r} is a ratio and cannot be added up; reporting values instead")
+        op = "value"
+    if ratio and aggregate_over:
+        notes.append(f"{ratio!r} is a ratio and cannot be summed over {', '.join(meta.var(c).text for c in aggregate_over)}")
+        aggregate_over = []
     return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes,
                     window_note=window_note, breakdown=breakdown, top=top, beyond=beyond, place_note=place_note,
                     alternatives=alternatives, aggregate_over=aggregate_over, missing_period=missing_period)
