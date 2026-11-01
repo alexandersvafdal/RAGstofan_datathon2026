@@ -170,6 +170,12 @@ _QUARTER_NUM = {"first": 1, "1st": 1, "fyrsta": 1, "fyrsti": 1, "second": 2, "2n
                 "third": 3, "3rd": 3, "thridja": 3, "thridji": 3, "fourth": 4, "4th": 4, "fjorda": 4, "fjordi": 4}
 
 
+def _names_subyear(text: str) -> bool:
+    """Does the question name a month or a quarter ("August 2026", "2026M08", "second quarter of 2026")?"""
+    q = normalize(text)
+    return bool(re.search(r"\b(" + "|".join([*_MONTH_NUM, *_QUARTER_NUM]) + r")\b|\b(?:18|19|20)\d\d\s?[mq]\d|quarter|arsfjordung|fjordung", q))
+
+
 def _period_from_question(var: Variable, text: str) -> str | None:
     """The period a question names, as this table codes it: "August 2026" -> 2026M08, "second quarter of 2026" ->
     2026Q2, "in 2025" -> 2025. Only when the question names one year, so a range is left to the model."""
@@ -240,7 +246,9 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                 if not _resolve_value(var, v) and (near := _same_year_edge(var, v)):
                     codes.append(near)
                     notes.append(f"{var.text}: {v} is outside the table, using {near}")
-                    if v > near:
+                    if v > near and _names_subyear(part or question):
+                        # "September 2026" in a table that stops at August: a neighbour may have it (pipeline switches).
+                        # A bare "to 2026" means up to the latest figure, so the model's 2026M12 is no reason to switch.
                         beyond = v
             raw = [v for v in raw if _resolve_value(var, v) or not _same_year_edge(var, v)]
         if len(codes) < len(raw):

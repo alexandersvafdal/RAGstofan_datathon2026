@@ -1,0 +1,133 @@
+{
+ "label": "wagecpi-beyond",
+ "results": [
+  {
+   "id": "wage-vs-cpi-is",
+   "level": "hard",
+   "language": "is",
+   "question": "hver er launavísitala borin saman við vísitölu neysluverðs",
+   "expected_tables": [
+    "LAU04000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.81,
+   "llm_calls": 5,
+   "tables": [
+    "LAU04000",
+    "VIS01000"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) var launavísitalan 1.149,3 í ágúst 2026 (tafla LAU04000) og vísitala neysluverðsins 697,3 í september 2026 (tafla VIS01000).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1520,
+     "detail": "What is the wage index (launavísitala)? | What is the consumer price index (vísitala neysluverðs)?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 63,
+     "detail": "VIS01000 from [VIS01000, VIS02508, VIS02201, VIS02002, VIS02502, VIS01101, VIS01102, VIS01104, VIS02000, VIS02500, VIS02202, VIS01303, VIS02506, VIS01304, VIS01103, VIS01106, VIS01301, VIS01004, VIS02001, VIS08010b, VIS08000b, VIS02200, VIS08003b, LAU04109, VIS01300, VIS01305, VIS01503, SJA06100b, LAU04209, VIS06140, UTA07001, LAU04800, THJ02105, VIS02301, VIS02300, VIS02400, VIS08011, LAU09917, VIN02500, VIS06126, VIS08003, VIS01306, THJ05813, LAU04201, LAU04101, LAU04107, LAU04105, LAU04103, LAU04203, LAU04207, UMH34050, VIS08000, LAU04205, SJA01106, LAU04001, VIS06141, LAU04003, SJA06100, THJ01104, THJ03204, THJ03105, THJ03106, VIS06123, LAU04007, MID00101, MID00102, MID00104, MEN10001, VIS03201, VIS06128, VIS08002, SJA06102, SJA06101] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1770,
+     "detail": "LAU04000 from [LAU04000, VIN02002, VIN02001, LAU04101, LAU04201, LAU04103, LAU04203, LAU04200, LAU04003, LAU04800, LAU04001, LAU04107, LAU04105, LAU04205, LAU04207, LAU04109, LAU04802, VIN02092, LAU04007, LAU04005, VIN02091, LAU04209, VIN02004, VIN02003, VIN02005, LAU09923, VIN02100, TEK02003, LAU09917, LAU09927, LAU09925, LAU09901, LAU09903, LAU09902, VIN02010, LAU09915, VIN02500, VIN02016, VIN02012, VIN02011, VIN02017, VIN02013, VIN02014, VIN02015, VIN02019, VIN02202, TEK02001, VIN02200, THJ06021, THJ06029, TEK02004, VIS01103, VIS02508, FYR01202, VIS01004, VIS01104, TEK02011, VIS08010b, THJ06024e, FYR01204, VIS01303, VIN02205, VIN02204, VIN02201, VIN02203] via keywords · concepts: wage index, wages"
+    },
+    {
+     "name": "select",
+     "ms": 2631,
+     "detail": "value {'Month': ['2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 3,
+     "detail": "1 rows"
+    },
+    {
+     "name": "select",
+     "ms": 2202,
+     "detail": "value {'Month': ['2026M08'], 'Unit': ['Value of index']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1310,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wage-vs-cpi-en",
+   "level": "hard",
+   "language": "en",
+   "question": "how does the wage index compare with the consumer price index",
+   "expected_tables": [
+    "LAU04000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 9.92,
+   "llm_calls": 5,
+   "tables": [
+    "LAU04000",
+    "VIS01000"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands), the wage index annual change ranged from 5.7% in 2026M08 to 12.4% in 2022M12 (Table LAU04000). The consumer price index rose from 511.2 in 2021M10 to 697.3 in 2026M09 (Table VIS01000).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1530,
+     "detail": "What is the development of the wage index (launavísitala) over recent years? | What is the development of the consumer price index (vísitala neysluverðs) over recent years?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 82,
+     "detail": "VIS01000 from [VIS01000, VIS02508, VIS02201, VIS02002, VIS02202, VIS02502, VIS01102, VIS01104, VIS02000, VIS01301, VIS02506, VIS01303, VIS02500, VIS01304, VIS08000b, VIS01101, VIS01305, VIS01103, VIS02001, VIS08003b, VIS02200, VIS01004, VIS08010b, VIS01306, SJA06100b, VIS01106, THJ02105, VIS01300, VIS01503, LAU04209, VIS06140, VIS02301, SJA01106, VIS02400, VIS02300, VIS08011, LAU09917, THJ05813, VIS06126, LAU04201, UMH34050, THJ05242, THJ05142, THJ08421, LAU04200, THJ03204, THJ03105, VIS08003, THJ01104, THJ01000, LAU04101, THJ03201, VIN00001, LAU04203, VIN02001, LAU04207, LAU04109, PEN01105, VIS06123, UTA07001, LAN10203, LIF01122, VIS05304, PEN02102, SKU01010, LIF01123, LIF01121, PEN01101, SJA07102, THJ02102, THJ95144, VIN02500, SJA06102, VIS08002, VIS03201, SJA06101] via dictionary · concepts: consumer price index, trend, latest"
+    },
+    {
+     "name": "select",
+     "ms": 2173,
+     "detail": "series {'Month': ['2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08', '2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: ['Month: a trend, 2021M10 to 2026M09']"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "60 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3868,
+     "detail": "LAU04000 from [VIN02001, LAU04000, VIN02002, LAU04201, LAU04200, LAU04203, LAU04101, LAU04205, LAU04207, LAU04103, LAU04001, LAU04800, LAU04107, LAU04105, LAU04209, LAU04003, LAU04802, VIN02092, LAU04109, VIN02004, LAU04007, LAU04005, VIN02003, VIN02005, LAU09917, LAU09923, VIN02091, VIN02010, LAU09901, LAU09927, LAU09903, LAU09902, LAU09925, VIS02508, LAU09915, VIN02016, VIN02011, VIN02012, VIN02500, VIN02017, VIN02013, VIN02100, VIN02014, VIN02015, VIN02019, FYR01202, THJ11011, THJ06021, THJ06029, VIS01104, VIS01103, FYR01204, VIS08000b, THJ05813, THJ01000, THJ06019, FYR08000, VIN01401, VIS01303, PEN01105, LIF01121, THJ06024e, VIS02200, VIN02204, VIN02205, VIN02200, VIN02202, VIN02201, VIN02203, VIN05101] via keyword search · concepts: wage index, wages, trend, latest"
+    },
+    {
+     "name": "select",
+     "ms": 2222,
+     "detail": "series {'Month': ['2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08'], 'Unit': ['Annual change, %']} notes: ['Month: a trend, 2021M09 to 2026M08']"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "60 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2295,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}
