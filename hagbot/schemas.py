@@ -5,6 +5,8 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 Language = Literal["en", "is"]
+FailureStatus = Literal["clarify", "out_of_scope", "unavailable", "unverified", "error"]
+AnswerStatus = Literal["answered", "clarify", "out_of_scope", "unavailable", "unverified", "error"]
 
 
 class Turn(BaseModel):
@@ -106,15 +108,25 @@ class Step(BaseModel):
     detail: str = ""
 
 
+class AnswerIssue(BaseModel):
+    """Why a required part could not be answered. Codes are stable; messages are localized."""
+
+    status: FailureStatus
+    code: str
+    message: str
+    sub_question: str = ""
+
+
 class Answer(BaseModel):
     question: str
     language: Language
-    status: Literal["answered", "clarify", "error"]
+    status: AnswerStatus
     text: str
     parts: list[AnswerPart] = Field(default_factory=list)
     comparison: ChartSpec | None = None  # series from different tables on one chart, each set to 100 at the start
     clarification: Clarification | None = None
     sources: list[TableRef] = Field(default_factory=list)
+    issues: list[AnswerIssue] = Field(default_factory=list)
     steps: list[Step] = Field(default_factory=list)
     # "model": the model's sentence passed the number check; "template": it failed or errored, facts restated
     text_source: Literal["model", "template", "none"] = "none"

@@ -527,6 +527,15 @@ function renderAnswer(card, a) {
   card.replaceChildren(el("p", { class: "answer-text" + (a.status === "error" ? " error" : "") },
     ...sentences.map((x, i) => el("span", { class: "sent", style: `animation-delay:${i * 220}ms` }, x + (i < sentences.length - 1 ? " " : "")))));
 
+  const outcomes = L === "is"
+    ? { clarify: "Þarf nánari skýringu", out_of_scope: "Utan gildissviðs", unavailable: "Gögn ekki tiltæk í skoðaðri töflu",
+        unverified: "Ekki tókst að staðfesta svar", error: "Tæknilegt vandamál" }
+    : { clarify: "Clarification needed", out_of_scope: "Outside supported scope", unavailable: "Unavailable in the checked table",
+        unverified: "Answer could not be verified", error: "Technical problem" };
+  if (outcomes[a.status]) card.prepend(el("p", { class: "note", role: "status" }, outcomes[a.status]));
+  if (a.issues?.length > 1) card.append(el("ul", { class: "note" }, a.issues.map(issue =>
+    el("li", {}, `${issue.sub_question}: ${issue.message}`))));
+
   if (a.status === "clarify" && a.clarification) {
     card.append(el("div", { class: "clarify" },     // the question itself is already the answer text above
       el("div", { class: "opts" }, a.clarification.options.map(o =>

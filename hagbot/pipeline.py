@@ -8,13 +8,15 @@ from collections.abc import Callable
 
 from .catalog import Catalog
 from .config import settings
-from .llm import LLM, LLMError, Timer
-from .schemas import (Answer, AnswerPart, AskRequest, Clarification, ClarifyOption, Step, TableRef)
+from .llm import LLM, Timer
+from .outcomes import AnswerFailure
+from .schemas import (Answer, AnswerIssue, AnswerPart, AskRequest, Clarification, ClarifyOption, Step, TableRef)
 from .sources import DataSource, make_source, table_url
 from .hierarchy import children
 from .steps.chart import choose_chart, comparison_chart
 from .steps.compose import compose
-from .steps.compute import compute
+from .steps.compute import compute, validate_rows
+from .steps.constraints import has_requested_period
 from .steps.followup import looks_like_followup, rewrite
 from .steps.plan import Plan, SubQuestion, plan
 from .steps.ratio import POPULATION_TABLE, detect_ratio, ratio_parts
@@ -100,7 +102,11 @@ class Pipeline:
                 forced = [req.table_id]
             elif ratio:  # "X per inhabitant": X from its own table, divided by the population in code
                 t = Timer()
-                num = (await plan(self.llm, ratio.numerator)).sub_questions[0]
+                numerator_plan = await plan(self.llm, ratio.numerator)
+                _check_plan(numerator_plan)
+                if len(numerator_plan.sub_questions) != 1:
+                    raise AnswerFailure("out_of_scope", "multiple_ratio_numerators")
+                num = numerator_plan.sub_questions[0]
                 pop = SubQuestion(question=ratio.population_question(lang), search_query="population 1 January")
                 p = Plan(sub_questions=[num, pop])
                 forced = [None, POPULATION_TABLE]
@@ -108,6 +114,7 @@ class Pipeline:
             else:
                 t = Timer()
                 p = await plan(self.llm, req.question)
+                _check_plan(p)
                 forced = [None] * len(p.sub_questions)
                 steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(s.question for s in p.sub_questions)))
 
@@ -117,32 +124,36 @@ class Pipeline:
                   for i, (sq, f) in enumerate(zip(p.sub_questions, forced))),
                 return_exceptions=True,
             )
-            clar = next((r for r in results if isinstance(r, NeedsClarification)), None)
-            if clar:
-                ans.status, ans.clarification, ans.text = "clarify", clar.clarification, clar.clarification.message
-                return ans
-            errors = [r for r in results if isinstance(r, Exception)]
-            parts = await self._merge_series([r for r in results if isinstance(r, AnswerPart)])
-            if ratio and len(parts) == 2 and (rp := ratio_parts(ratio, parts[0], parts[1], lang)):
+            if any(isinstance(r, asyncio.CancelledError) for r in results):
+                raise asyncio.CancelledError
+            errors = [(sq.question, r) for sq, r in zip(p.sub_questions, results) if isinstance(r, Exception)]
+            if errors:
+                for _, e in errors:
+                    steps.append(Step(name="stop", ms=0, detail=f"{type(e).__name__}: {e}"))
+                return _stop(ans, errors, len(p.sub_questions))
+            if len(results) != len(p.sub_questions) or not all(isinstance(r, AnswerPart) and r.facts for r in results):
+                raise AnswerFailure("unverified", "incomplete_answer")
+            # Complete the calculation before merging charts: raw operands are not an answer to a ratio question.
+            parts = results
+            if ratio:
+                rp = ratio_parts(ratio, parts[0], parts[1], lang) if len(parts) == 2 else None
+                if rp is None:
+                    raise AnswerFailure("unavailable", "incomplete_ratio")
                 parts = list(rp)
                 steps.append(Step(name="compute", ms=0, detail=rp[0].computation.expression))
-            for e in errors:
-                steps.append(Step(name="error", ms=0, detail=f"{type(e).__name__}: {e}"))
-            if not parts:
-                ans.text = _no_answer(lang, errors)
-                return ans
+            parts = await self._merge_series(parts)
 
             t = Timer()
             ans.text, ans.text_source = await compose(self.llm, req.question, parts, lang)
             steps.append(Step(name="compose", ms=t.ms(), detail=ans.text_source))
-            ans.parts, ans.status = parts, "answered"
-            ans.comparison = comparison_chart(parts, lang)
+            # Commit answer content only after all required work has succeeded.
+            comparison = comparison_chart(parts, lang)
+            ans.parts, ans.status, ans.comparison = parts, "answered", comparison
             ans.sources = list({p.table.id: p.table for p in parts}.values())
             return ans
         except Exception as e:  # the API always returns an Answer, never a stack trace
             steps.append(Step(name="error", ms=0, detail=f"{type(e).__name__}: {e}"))
-            ans.text = _no_answer(lang, [e])
-            return ans
+            return _stop(ans, [(req.question, e)])
         finally:
             ans.steps, ans.total_ms, ans.llm_calls = list(steps), total.ms(), self.llm.calls - calls_before
 
@@ -193,7 +204,8 @@ class Pipeline:
 
         t = Timer()
         meta = await self.source.meta(r.table.id)
-        res = await select(self.llm, meta, sq.question, original)
+        filter_question = f"{original} {sq.question}" if alone else sq.question
+        res = await select(self.llm, meta, sq.question, original, filter_question=filter_question)
         chosen = {meta.var(c).text: [meta.var(c).label_of(v) for v in vals] for c, vals in res.selections.items()}
         steps.append(Step(name="select", ms=t.ms(),
                           detail=f"{res.operation} {chosen}" + (f" notes: {res.notes}" if res.notes else "")))
@@ -205,7 +217,7 @@ class Pipeline:
         # ends). When the question named no period, the latest period with numbers is the answer.
         time_var = next((v for v in meta.variables if v.time), None)
         if (time_var and rows and all(r.value is None for r in rows) and res.selections.get(time_var.code) == [time_var.values[-1]]
-                and not re.search(r"\b(?:18|19|20)\d\d\b", f"{sq.question} {original}")):
+                and not has_requested_period(filter_question)):
             wide = await self.source.query(meta.id, {**res.selections, time_var.code: time_var.values})
             filled = [r.key[time_var.code] for r in wide if r.value is not None]
             if filled:
@@ -214,6 +226,7 @@ class Pipeline:
                 rows = [r for r in wide if r.key[time_var.code] == last]
                 detail += f"; {time_var.values[-1]} has no numbers yet, using {last}"
         if res.operation == "rank":   # categories with a number, largest first when only the top few were asked for
+            validate_rows(meta, rows, res.selections)
             rows = [r for r in rows if r.value is not None]
             if res.top:
                 rows = sorted(rows, key=lambda r: -abs(r.value))[:res.top]
@@ -229,6 +242,8 @@ class Pipeline:
                                  for v in meta.variables if not v.time):
             meta = meta.model_copy(update={"unit": "%"})
         computation, facts = compute(meta, rows, res, lang)
+        if not facts or (res.operation not in ("value", "series", "rank") and computation is None):
+            raise AnswerFailure("unavailable", "incomplete_calculation", res.operation)
         note = self._freshness_note(meta, res.selections, r.candidates, f"{sq.question} {original}", lang)
         if res.window_note:   # "the last 50 years" in a table that starts in 2003
             note = " ".join(x for x in (res.window_note[lang], note) if x)
@@ -240,7 +255,7 @@ class Pipeline:
             sub_question=sq.question,
             table=TableRef(id=meta.id, title=title, url=table_url(meta.path, meta.id),
                            updated=entry.last_period if entry else ""),
-            selection=chosen,
+            selection={meta.var(c).text: [meta.var(c).label_of(v) for v in vals] for c, vals in res.selections.items()},
             rows=rows,
             unit=meta.unit,
             computation=computation,
@@ -298,11 +313,33 @@ class Pipeline:
         return note
 
 
-def _no_answer(lang: str, errors: list[Exception]) -> str:
-    reason = str(errors[0]) if errors else ""
-    if errors and isinstance(errors[0], LLMError) and "did not answer" in reason:   # a busy machine, not a missing table
-        return ("Mállíkanið svaraði ekki í tæka tíð; tölvan er upptekin. Reyndu aftur eftir smá stund." if lang == "is" else
-                "The language model took too long to answer; the computer is busy. Please try again in a moment.")
-    if lang == "is":
-        return f"Ég fann ekki svar við þessu í töflum Hagstofunnar. {reason}".strip()
-    return f"I could not answer this from Statistics Iceland's tables. {reason}".strip()
+def _check_plan(p: Plan) -> None:
+    if p.outcome != "lookup":
+        raise AnswerFailure(p.outcome, "ambiguous_question" if p.outcome == "clarify" else "unsupported_request")
+
+
+def _stop(ans: Answer, errors: list[tuple[str, Exception]], expected_parts: int = 1) -> Answer:
+    """No success payload is published when any required part fails."""
+    issues = []
+    for question, e in errors:
+        if isinstance(e, NeedsClarification):
+            issues.append(AnswerIssue(status="clarify", code="ambiguous_table", message=e.clarification.message,
+                                      sub_question=question))
+        else:
+            failure = e if isinstance(e, AnswerFailure) else AnswerFailure("error", "technical_failure")
+            issues.append(AnswerIssue(status=failure.status, code=failure.code,
+                                      message=failure.message(ans.language), sub_question=question))
+    priority = {s: i for i, s in enumerate(("error", "out_of_scope", "unverified", "unavailable", "clarify"))}
+    first = min(issues, key=lambda i: priority[i.status])
+    ans.status, ans.issues, ans.text = first.status, issues, first.message
+    if expected_parts > 1:
+        prefix = ("Ég gat ekki svarað öllum hlutum spurningarinnar. " if ans.language == "is" else
+                  "I could not answer every required part of the question. ")
+        ans.text = prefix + ans.text
+    ans.parts, ans.sources, ans.comparison, ans.text_source = [], [], None, "none"
+    if ans.status == "clarify":
+        clar = next((e.clarification for _, e in errors if isinstance(e, NeedsClarification)), None)
+        ans.clarification = clar or Clarification(message=ans.text, options=[])
+    else:
+        ans.clarification = None
+    return ans

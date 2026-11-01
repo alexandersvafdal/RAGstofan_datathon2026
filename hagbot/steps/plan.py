@@ -1,6 +1,8 @@
 """Step 1: split the question into lookups that each need one table."""
 
-from pydantic import BaseModel, Field
+from typing import Literal
+
+from pydantic import BaseModel, Field, model_validator
 
 from ..llm import LLM
 
@@ -11,10 +13,26 @@ class SubQuestion(BaseModel):
 
 
 class Plan(BaseModel):
-    sub_questions: list[SubQuestion] = Field(min_length=1, max_length=3)
+    outcome: Literal["lookup", "clarify", "out_of_scope"] = "lookup"
+    sub_questions: list[SubQuestion] = Field(default_factory=list, max_length=3)
+
+    @model_validator(mode="after")
+    def valid_outcome(self):
+        if (self.outcome == "lookup") != bool(self.sub_questions):
+            raise ValueError("lookup requires sub-questions; clarify/out_of_scope require an empty list")
+        return self
 
 
 SYSTEM = """You plan lookups in Statistics Iceland's official statistics tables.
+First decide whether the WHOLE request is supported. Use outcome=lookup for statistical lookups, series,
+differences, percentage changes, shares, rankings and ratios to population using these tables.
+Use outcome=clarify if a measure or population has materially different interpretations (e.g. 'how rich are old
+people': income or net wealth, and which age group?). Return no sub_questions for clarify.
+Use outcome=out_of_scope for personal/private records, general non-statistical tasks, causal explanations or
+predictions that cannot be read from a published forecast. Return no sub_questions for out_of_scope.
+Unknown coverage or an unavailable requested period is NOT out_of_scope: use lookup and let metadata validation decide.
+Never drop a requested part to make a question answerable. If the request needs an unsupported operation or more
+than three distinct lookups, use out_of_scope for the whole request.
 Split the user's question into the smallest number of sub-questions (1 to 3) where each can be answered from ONE table.
 Most questions need exactly one. Only split when the question asks about clearly different topics
 (for example population AND unemployment).

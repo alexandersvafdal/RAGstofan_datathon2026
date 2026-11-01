@@ -8,7 +8,7 @@
      the searches times a recency factor; code-side rules (narrow) then drop variants nobody asked for.
   2. The model checks the hitlist from the top, 8 tables at a time: it picks one, or says none of them answers.
   3. If none fits: the model browses, first one of Statistics Iceland's subject areas, then a table inside it.
-  4. If every check said "none" (the model can be too strict), it must pick from the keyword hits.
+  4. If every check said "none", return an unverified outcome.
 
 Every tier shares the code-side rules the classic finder uses: ambiguous words ask the user, table variants nobody
 asked for are dropped (narrow), and the newest edition of a chosen table is used (freshest sibling).
@@ -24,9 +24,10 @@ from pydantic import BaseModel, Field
 from ..catalog import STOPWORDS, Catalog, CatalogEntry, recency_factor
 from ..config import ROOT
 from ..llm import LLM
+from ..outcomes import AnswerFailure
 from ..vote import vote_json, voting_on
 from ..text import normalize, tokens
-from .retrieve import AMBIGUOUS, Retrieved, SYSTEM as PICK_RULES, freshest_sibling, narrow, retrieve
+from .retrieve import AMBIGUOUS, Retrieved, SYSTEM as PICK_RULES, freshest_sibling, narrow
 
 KEYWORDS = ROOT / "data" / "keywords.json"
 BATCH = 8   # tables the model sees per check
@@ -144,7 +145,11 @@ async def _check(llm: LLM, entries: list[CatalogEntry], question: str, original:
         _last_votes[0] = agreement
     else:
         v = await llm.complete_json(CHECK, user, Verdict)
-    return by_id.get(v.table_id.strip())
+    if v.table_id.strip().lower() == "none":
+        return None
+    if v.table_id.strip() not in by_id:
+        raise AnswerFailure("unverified", "invalid_table_choice", v.table_id)
+    return by_id[v.table_id.strip()]
 
 
 _last_votes = [""]  # agreement of the most recent voted check, reported with the table
@@ -173,8 +178,10 @@ async def _browse(llm: LLM, catalog: Catalog, question: str, original: str) -> t
 
 async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_query: str,
                           k: int, forced_table: str | None = None, original: str = "") -> Retrieved:
-    if forced_table and (entry := catalog.get(forced_table)):
-        return Retrieved(table=entry, candidates=[entry.id])
+    if forced_table:
+        if entry := catalog.get(forced_table):
+            return Retrieved(table=entry, candidates=[entry.id])
+        raise AnswerFailure("unavailable", "unknown_table", forced_table)
     import re
     _last_votes[0] = ""
     q_user = normalize(original or question)
@@ -200,28 +207,27 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
     hitlist = [{"id": e.id, "title": e.title_en, "score": round(order[e.id][0], 4), "signals": order[e.id][1]}
                for e in shortlist[:BATCHES * BATCH]]
 
-    def done(table: CatalogEntry, pool: list[CatalogEntry], tier: str) -> Retrieved:
-        table = freshest_sibling(table, pool, f"{question} {original}")
+    async def done(table: CatalogEntry, pool: list[CatalogEntry], tier: str) -> Retrieved:
+        # Ranking rules may suggest a newer/headline table, but only a checked table can be returned.
+        replacement = freshest_sibling(headline(table, found, catalog, f"{question} {original}"),
+                                        pool, f"{question} {original}")
+        if replacement.id != table.id and await _check(llm, [replacement], question, original):
+            table = replacement
         return Retrieved(table=table, candidates=[e.id for e in pool], via=tier,
                          concepts=[c["concept"] for c in found], ranking=hitlist, votes=_last_votes[0] if voting_on() else "")
 
     # 2. the model checks the hitlist from the top
     for i in range(0, min(len(shortlist), BATCHES * BATCH), BATCH):
         if (hit := await _check(llm, shortlist[i:i + BATCH], question, original, start=i)):
-            hit = headline(hit, found, catalog, f"{question} {original}")
             signals = order.get(hit.id, (0, []))[1]
             tier = ("keywords" if any(x == "dictionary" for x in signals) else
                     "keyword search" if any(x.startswith("bm25") for x in signals) else "semantic search")
-            return done(hit, shortlist, tier)
+            return await done(hit, shortlist, tier)
 
     # 3. the model browses the subject areas
     hit, browsed = await _browse(llm, catalog, question, original)
     if hit:
         pool = [e for e in (catalog.get(i) for i in browsed) if e]
-        return done(hit, pool, "model browse")
+        return await done(hit, pool, "model browse")
 
-    # 4. safety net: every check said "none" (the model can be too strict), so it must pick from the keyword hits
-    if shortlist:
-        r = await retrieve(llm, catalog, question, search_query, k, original=original)
-        return done(r.table, shortlist, "best keyword hit")
-    raise LookupError(f"No table found for “{question}”")
+    raise AnswerFailure("unverified", "no_verified_table", question)

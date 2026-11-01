@@ -43,6 +43,10 @@ question
 
 Every LLM step has a Pydantic output schema (`hagbot/steps/*.py`). The model never does arithmetic and never chooses chart code.
 
+The answer contract also distinguishes clarification, out-of-scope requests, unavailable data, unverified answers
+and technical errors. Required parts must all succeed before an answer is published. See
+[answer outcomes and integrity checks](docs/answer-outcomes.md) for the rules and offline regression tests.
+
 | Path | What |
 |---|---|
 | `hagbot/schemas.py` | The answer contract the frontend renders from |

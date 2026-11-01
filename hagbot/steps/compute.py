@@ -2,13 +2,31 @@
 
 import re
 from collections import defaultdict
+from math import isfinite, prod
 
+from ..outcomes import AnswerFailure
 from ..schemas import Computation, Fact, Row
 from ..sources import TableMeta
 from ..text import fmt_number, fmt_value
 from .select import Resolved
 
 _TOTAL = re.compile(r"^(total|alls|samtals)$", re.I)
+
+
+def validate_rows(meta: TableMeta, rows: list[Row], selections: dict[str, list[str]]) -> None:
+    """A missing/suppressed operand cannot silently disappear from an answer or calculation."""
+    if not rows or any(r.value is None for r in rows):
+        raise AnswerFailure("unavailable", "missing_data", meta.id)
+    keys = set()
+    for row in rows:
+        if set(row.key) != set(selections) or any(v not in selections[c] for c, v in row.key.items()):
+            raise AnswerFailure("unverified", "unexpected_rows", meta.id)
+        key = tuple(sorted(row.key.items()))
+        if key in keys or not isfinite(row.value):
+            raise AnswerFailure("unverified", "invalid_rows", meta.id)
+        keys.add(key)
+    if len(keys) != prod(len(values) for values in selections.values()):
+        raise AnswerFailure("unavailable", "incomplete_data", meta.id)
 
 
 def row_label(meta: TableMeta, row: Row, keep: set[str] = frozenset()) -> str:
@@ -30,6 +48,7 @@ def _groups(rows: list[Row], dim: str) -> dict[tuple, dict[str, Row]]:
 
 
 def compute(meta: TableMeta, rows: list[Row], res: Resolved, lang: str) -> tuple[Computation | None, list[Fact]]:
+    validate_rows(meta, rows, res.selections)
     unit = meta.unit
     rows = [r for r in rows if r.value is not None]
     varying = {c for c, v in res.selections.items() if len(v) > 1}
@@ -69,6 +88,8 @@ def compute(meta: TableMeta, rows: list[Row], res: Resolved, lang: str) -> tuple
                 result, op_unit = a.value - b.value, unit
                 expr = f"{fmt_number(a.value, lang)} − {fmt_number(b.value, lang)}"
             else:
+                if b.value == 0:
+                    raise AnswerFailure("unavailable", "undefined_calculation", "percentage change from zero")
                 result, op_unit = (a.value - b.value) / b.value * 100, "%"
                 expr = f"({fmt_number(a.value, lang)} − {fmt_number(b.value, lang)}) ÷ {fmt_number(b.value, lang)}"
             la, lb = a.labels[meta.var(dim).text], b.labels[meta.var(dim).text]
@@ -79,7 +100,7 @@ def compute(meta: TableMeta, rows: list[Row], res: Resolved, lang: str) -> tuple
                 label = f"{'Mismunur' if lang == 'is' else 'Difference'}{pct}: {la} − {lb}"
         else:
             if res.part not in group or res.whole not in group or not group[res.whole].value:
-                continue
+                raise AnswerFailure("unavailable", "undefined_calculation", "missing or zero share denominator")
             p, w = group[res.part], group[res.whole]
             result, op_unit = p.value / w.value * 100, "%"
             expr = f"{fmt_number(p.value, lang)} ÷ {fmt_number(w.value, lang)}"

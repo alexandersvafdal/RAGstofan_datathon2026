@@ -7,12 +7,13 @@ from pydantic import BaseModel, Field
 
 from ..catalog import MIN_PREFIX, STOPWORDS, Catalog, CatalogEntry
 from ..llm import LLM
+from ..outcomes import AnswerFailure
 from ..hierarchy import code_of
 from ..text import asked_bases, base_year, normalize, tokens
 
 
 class Pick(BaseModel):
-    table_id: str = Field(description="ID of the best table, copied exactly from the list")
+    table_id: str = Field(description='ID of a table that answers the question, copied exactly, or "none"')
     confidence: Literal["high", "low"] = Field(
         description="low only if two or more tables fit equally well and the question does not say which"
     )
@@ -180,13 +181,16 @@ Rules:
 - A place or category the question names should be among the table's options ("Has options").
 - A question asking for subcategories, components, a breakdown or the main drivers needs a table that lists those
   categories (subindices, by category, effect or contribution of each), not one that only has the total.
-Copy the table ID exactly."""
+Copy the table ID exactly. If none supports the requested measure, place, population and period, return "none".
+Never choose a table just because it is the closest search hit."""
 
 
 async def retrieve(llm: LLM, catalog: Catalog, question: str, search_query: str, k: int,
                    forced_table: str | None = None, original: str = "") -> Retrieved:
-    if forced_table and (entry := catalog.get(forced_table)):
-        return Retrieved(table=entry, candidates=[entry.id])
+    if forced_table:
+        if entry := catalog.get(forced_table):
+            return Retrieved(table=entry, candidates=[entry.id])
+        raise AnswerFailure("unavailable", "unknown_table", forced_table)
     q = normalize(original or question)  # the user's own words: the planner may already have guessed ("passengers")
     for pattern, settled, tables in AMBIGUOUS:
         entries = [e for e in (catalog.get(t) for t in tables) if e]
@@ -195,18 +199,28 @@ async def retrieve(llm: LLM, catalog: Catalog, question: str, search_query: str,
     # the original wording matches Icelandic titles even when the planner mistranslates it
     hits = catalog.search(f"{search_query} {question} {original}", 2 * k)
     if not hits:
-        raise LookupError(f"No table matches “{question}”")
+        raise AnswerFailure("unverified", "no_candidates", question)
     entries = narrow([e for e, _ in hits], f"{question} {original}")[:k]
-    if len(entries) == 1:
-        return Retrieved(table=entries[0], candidates=[entries[0].id])
-
     cards = "\n".join(f"- {e.card(f'{question} {original}')}" for e in entries)
     asked = f"User asked: {original}\nThis part: {question}" if original and original != question else f"Question: {question}"
     pick = await llm.complete_json(SYSTEM, f"{asked}\n\nTables:\n{cards}", Pick)
     by_id = {e.id: e for e in entries}
-    table = by_id.get(pick.table_id.strip(), entries[0])  # an invented ID falls back to the top search hit
-    table = freshest_sibling(table, entries, f"{question} {original}")
+    if pick.table_id.strip().lower() == "none":
+        raise AnswerFailure("unverified", "no_verified_table", question)
+    table = by_id.get(pick.table_id.strip())
+    if table is None:
+        raise AnswerFailure("unverified", "invalid_table_choice", pick.table_id)
     alts = [by_id[a] for a in pick.alternatives if a in by_id and a != table.id]
+    if pick.confidence == "low" and not alts:
+        raise AnswerFailure("unverified", "uncertain_table", table.id)
+    if pick.confidence == "high":
+        replacement = freshest_sibling(table, entries, f"{question} {original}")
+        if replacement.id != table.id:
+            checked = await llm.complete_json(SYSTEM, f"{asked}\n\nTables:\n- {replacement.card(question)}", Pick)
+            if checked.table_id.strip() not in (replacement.id, "none"):
+                raise AnswerFailure("unverified", "invalid_table_choice", checked.table_id)
+            if checked.table_id.strip() == replacement.id and checked.confidence == "high":
+                table = replacement
     return Retrieved(
         table=table,
         alternatives=alts,

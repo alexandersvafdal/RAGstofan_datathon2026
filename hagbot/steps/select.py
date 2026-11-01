@@ -7,10 +7,12 @@ from pydantic import BaseModel, Field
 
 from ..catalog import SYNONYMS
 from ..llm import LLM
+from ..outcomes import AnswerFailure
 from ..vote import ask_all, majority, voting_on
 from ..sources import TableMeta, Variable
 from ..hierarchy import children, coded, named
 from ..text import asked_bases, base_year, normalize, tokens
+from .constraints import RequestedFilter, has_requested_period, period_requirements, validate_filters
 
 Op = Literal["value", "series", "difference", "pct_change", "share", "max", "min"]
 
@@ -25,6 +27,9 @@ class Selection(BaseModel):
     compare_dimension: str | None = Field(default=None, description="dimension code the operation runs along")
     part: str | None = Field(default=None, description="value code of the part, for share")
     whole: str | None = Field(default=None, description="value code of the whole (usually the total), for share")
+    requested_filters: list[RequestedFilter] = Field(description=(
+        "Every explicit filter required by THIS part of the question, including unsupported filters. "
+        "Quote the user's wording; do not record defaults as requested filters."))
 
 
 class Resolved(BaseModel):
@@ -56,6 +61,9 @@ def _mention_order(var: Variable, codes: list[str], question: str) -> list[str] 
 
 SYSTEM = """You fill in a query against one Statistics Iceland table.
 For every dimension choose the value codes the question needs, copied exactly from the options.
+Record EVERY explicit filter in requested_filters, quoting the question. Include an unavailable filter with
+values=[] (and dimension=null if the dimension is absent). Never replace it by a total, a nearby period or another
+category, or omit it because the table cannot answer it. For multiple parts, record only this part's requirements.
 - If the question does not mention a dimension, choose its total (e.g. "Total", "Alls") or, for time, the latest period.
 - For "how much did X grow from A to B" select both periods and use difference or pct_change along the time dimension.
 - For "what share of ... is X" select X and the total, and use share with part=X and whole=total.
@@ -119,9 +127,6 @@ def _options_for_prompt(var: Variable, question: str) -> list[tuple[str, str]]:
     return out[:_MAX_OPTIONS]
 
 
-_IS_UNIT = {"year": "árin", "month": "mánuðina", "quarter": "ársfjórðungana"}
-
-
 def _window(q: str) -> tuple[int, str] | None:
     """(n, "year" | "month" | "quarter") for "the last n years" and the like, in a normalized question."""
     if _DECADE.search(q):
@@ -134,25 +139,15 @@ def _window(q: str) -> tuple[int, str] | None:
         "quarter" if unit.startswith(("quarter", "arsfjord")) else "year"
 
 
-def _same_year_edge(var: Variable, v: str) -> str | None:
-    """The table's first or last period, when v is a period of the same kind and year just beyond it."""
-    first, last = var.values[0], var.values[-1]
-    if len(v) != len(first) or v[:4].isdigit() is False or v[4:5] != first[4:5]:
-        return None
-    if v < first and v[:4] == first[:4]:
-        return first
-    if v > last and v[:4] == last[:4]:
-        return last
-    return None
-
-
 def _default(var: Variable) -> list[str]:
     if var.time:
         return [var.values[-1]]
     for code, label in zip(var.values, var.value_texts):
         if _TOTAL.search(label):
             return [code]
-    return [var.values[0]]
+    if len(var.values) == 1:
+        return [var.values[0]]
+    raise AnswerFailure("clarify", "missing_filter", var.text)
 
 
 def _resolve_value(var: Variable, v: str) -> str | None:
@@ -171,21 +166,25 @@ def guess_op(question: str) -> str | None:
     return next((op for op, rx in _INTENT if rx.search(q)), None)
 
 
-def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | None = None) -> Resolved:
-    """Map whatever the model returned onto valid codes; fill gaps with defaults."""
+def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | None = None,
+            filter_question: str | None = None) -> Resolved:
+    """Map equivalent labels to codes; never repair an unavailable requested value into a default."""
     notes, out = [], {}
+    own_question = filter_question or part or question
+    known_keys = {normalize(v.code) for v in meta.variables} | {normalize(v.text) for v in meta.variables}
+    if unknown := [k for k in sel.selections if normalize(k) not in known_keys]:
+        raise AnswerFailure("unverified", "invalid_dimension", str(unknown))
     by_key = {normalize(k): k for k in sel.selections}
     for var in meta.variables:
-        raw = sel.selections.get(var.code) or sel.selections.get(by_key.get(normalize(var.text), ""), [])
+        if not var.values:
+            raise AnswerFailure("unavailable", "empty_dimension", var.text)
+        if var.time:
+            period_requirements(meta, var, own_question)
+        raw = (sel.selections.get(var.code) or sel.selections.get(by_key.get(normalize(var.code), ""), [])
+               or sel.selections.get(by_key.get(normalize(var.text), ""), []))
         codes = [c for c in (_resolve_value(var, v) for v in raw) if c]
-        if var.time:   # "2000M01" in a table that starts at 2000M03: the nearest period in the same year
-            for v in raw:
-                if not _resolve_value(var, v) and (near := _same_year_edge(var, v)):
-                    codes.append(near)
-                    notes.append(f"{var.text}: {v} is outside the table, using {near}")
-            raw = [v for v in raw if _resolve_value(var, v) or not _same_year_edge(var, v)]
         if len(codes) < len(raw):
-            notes.append(f"{var.text}: dropped unknown values {[v for v in raw if not _resolve_value(var, v)]}")
+            raise AnswerFailure("unverified", "invalid_selection", f"{var.text}: {raw}")
         if not codes:
             codes = _default(var)
             notes.append(f"{var.text}: defaulted to {[var.label_of(c) for c in codes]}")
@@ -204,6 +203,9 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     # An index base the question does not name: the current (newest) one, whatever the model or the default chose.
     # "Base 1983" stays when the question asks for it ("grunnur 1983", "1983=100").
     asked = asked_bases(question)
+    offered_bases = {y for v in meta.variables if not v.time for label in v.value_texts if (y := base_year(label))}
+    if asked and not asked <= offered_bases | ({base_year(meta.title)} - {None}):
+        raise AnswerFailure("unavailable", "requested_base_unavailable", str(sorted(asked)))
     for var in meta.variables:
         bases = {c: y for c in var.values if (y := base_year(var.label_of(c)))}
         if var.time or len(bases) < 2:
@@ -231,7 +233,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             re.search(_CHANGE_OPTION, normalize(var.label_of(c))) for var in meta.variables if not var.time
             for c in out[var.code]):
         for var in meta.variables:
-            if var.time and len(out[var.code]) > 1:
+            if var.time and len(out[var.code]) > 1 and not has_requested_period(own_question):
                 out[var.code] = out[var.code][-1:]
         notes.append(f"operation {op} -> value (the table already gives the change)")
         op = "value"
@@ -247,6 +249,8 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             step = "M" if "M" in var.values[-1] else "Q" if "Q" in var.values[-1] else ""
             start = next((i for i, c in enumerate(var.values) if years and c.startswith(min(years))), None)
             if start is None:
+                if years:
+                    raise AnswerFailure("unavailable", "requested_period_unavailable", min(years))
                 start = max(0, len(var.values) - _TREND_DEFAULT[step])
             out[var.code] = var.values[start:]
             notes.append(f"{var.text}: a trend, {var.values[start]} to {var.values[-1]}")
@@ -254,8 +258,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             notes.append(f"operation {op} -> series (trend wording)")
         op = "series"
 
-    # "The last 15 years": from that calendar year to the latest period. A window reaching back before the table
-    # starts gets every period there is, and the answer says where the table begins.
+    # "The last 15 years": from that calendar year to the latest period. Reject incomplete coverage.
     # ("in the last 12 months" with inflation or wages is the published annual change, handled above)
     # Read from this part alone: "the past 5 years compared to 2000 to 2005" is planned as two parts, and the second
     # must keep its own years. A part that names a year has no window.
@@ -279,11 +282,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             out[var.code] = var.values[start:]
             notes.append(f"{var.text}: the last {n} {unit}s, {var.values[start]} to {var.values[-1]}")
             if short:
-                first = var.values[0]
-                window_note = {"en": f"The table only goes back to {first}, so this covers {first} to {var.values[-1]}, "
-                                     f"not the full {n} {unit}s asked for.",
-                               "is": f"Taflan nær aðeins aftur til {first}, svo þetta nær yfir {first} til {var.values[-1]}, "
-                                     f"ekki öll {n} {_IS_UNIT[unit]} sem spurt var um."}
+                raise AnswerFailure("unavailable", "requested_window_unavailable", f"{n} {unit}s; starts {var.values[0]}")
         if op == "value":
             op = "series"
 
@@ -319,11 +318,10 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             sel = sel.model_copy(update={"compare_dimension": compare})
             notes.append(f"operation {op} along {meta.var(compare).text}")
         else:
-            notes.append(f"{op} needs several values to search; reporting values instead")
-            op = "value"
+            raise AnswerFailure("unverified", "incomplete_calculation", op)
 
     # No year or period in the question: the latest period, whatever the model chose
-    if not re.search(r"\b(?:18|19|20)\d\d\b", question) and op in ("value", "share") and not window:
+    if not has_requested_period(own_question) and op in ("value", "share") and not window:
         for var in meta.variables:
             if var.time and out.get(var.code) != [var.values[-1]]:
                 notes.append(f"{var.text}: no period asked, using latest {var.values[-1]}")
@@ -340,12 +338,11 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     if op in ("difference", "pct_change", "share") and not compare:
         compare = next((c for c, v in out.items() if len(v) > 1), None)
     if op in ("difference", "pct_change") and (not compare or len(out[compare]) < 2):
-        notes.append(f"{op} needs two values to compare; reporting values instead")
-        op = "value"
+        raise AnswerFailure("unverified", "incomplete_calculation", op)
     order = None
     if op in ("difference", "pct_change") and compare and not meta.var(compare).time and len(out[compare]) == 2:
         # comparing categories, not periods: the latest period unless one is named, and the question's own order
-        if not re.search(r"\b(?:18|19|20)\d\d\b", question):
+        if not has_requested_period(own_question):
             for var in meta.variables:
                 if var.time and out.get(var.code) != [var.values[-1]]:
                     notes.append(f"{var.text}: no period asked, using latest {var.values[-1]}")
@@ -358,6 +355,8 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
         var = meta.var(compare) if compare else None
         part = _resolve_value(var, sel.part or "") if var else None
         whole = _resolve_value(var, sel.whole or "") if var else None
+        if (sel.part and not part) or (sel.whole and not whole):
+            raise AnswerFailure("unverified", "invalid_share", f"{sel.part} / {sel.whole}")
         if not (part and whole and var):
             # the model picked only the part ("Reykjavík"): the whole is that dimension's total
             for v in meta.variables:
@@ -369,8 +368,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                     notes.append(f"share: part {v.label_of(part)!r}, whole {v.label_of(total)!r}")
                     break
         if not (part and whole and part in out[compare] and whole in out[compare]):
-            notes.append("share needs a part and a whole; reporting values instead")
-            op, part, whole = "value", None, None
+            raise AnswerFailure("unverified", "incomplete_calculation", "share")
     # "Hverjir eru undirflokkar neysluvísitölunnar", "main drivers of …", "biggest industries": the categories of the
     # table's coded dimension (COICOP, NACE … read from the labels), at one period. A category the question names is
     # opened one level down; "largest/main" keeps the biggest few. Works for any table whose categories carry codes.
@@ -400,11 +398,13 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             op = "rank"
             notes.append(f"{var.text}: {'the largest ' + str(top) + ' of ' if top else ''}{len(kids)} categories"
                          + (f" under {var.label_of(named(var, question))!r}" if named(var, question) else ""))
+    validate_filters(meta, out, sel.requested_filters, own_question, quoted_question=question)
     return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes,
                     window_note=window_note, breakdown=breakdown, top=top)
 
 
-async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None) -> Resolved:
+async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None,
+                 *, filter_question: str | None = None) -> Resolved:
     lines = []
     for var in meta.variables:
         opts = "; ".join(f"{c}={t}" for c, t in _options_for_prompt(var, f"{original or ''} {question}"))
@@ -414,9 +414,9 @@ async def select(llm: LLM, meta: TableMeta, question: str, original: str | None 
     user = f"{asked}\n\nTable {meta.id}: {meta.title}\nDimensions:\n" + "\n".join(lines)
     if not voting_on():
         sel = await llm.complete_json(SYSTEM, user, Selection)
-        return resolve(meta, sel, f"{original or ''} {question}", part=question)
+        return resolve(meta, sel, f"{original or ''} {question}", part=question, filter_question=filter_question)
     sel, agreement = vote_selection(await ask_all(llm, SYSTEM, user, Selection))
-    res = resolve(meta, sel, f"{original or ''} {question}", part=question)
+    res = resolve(meta, sel, f"{original or ''} {question}", part=question, filter_question=filter_question)
     res.notes.insert(0, "votes: " + ", ".join(f"{(meta.var(k).text if k in {v.code for v in meta.variables} else k)} {a}"
                                               for k, a in agreement.items()))
     return res
@@ -434,4 +434,7 @@ def vote_selection(samples: list[Selection]) -> tuple[Selection, dict[str, str]]
         agreement[dim] = f"{c}/{n}"
     op, c = majority([(s.operation, s.compare_dimension, s.part, s.whole) for s in samples])
     agreement["operation"] = f"{c}/{n}"
-    return Selection(selections=chosen, operation=op[0], compare_dimension=op[1], part=op[2], whole=op[3]), agreement
+    # Keep every grounded requirement reported by the voters; disagreement must not erase a requested filter.
+    requirements = {r.model_dump_json(): r for sample in samples for r in sample.requested_filters}
+    return Selection(selections=chosen, operation=op[0], compare_dimension=op[1], part=op[2], whole=op[3],
+                     requested_filters=list(requirements.values())), agreement

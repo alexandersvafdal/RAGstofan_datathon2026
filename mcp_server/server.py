@@ -48,6 +48,8 @@ def _answer(a: dict) -> dict:
     """The answer as a model reads it best: the sentence, the figures behind it, and where each came from."""
     out: dict = {"status": a["status"], "answer": a["text"], "language": a["language"],
                  "sources": [{"table_id": s["id"], "title": s["title"], "url": s["url"]} for s in a.get("sources", [])]}
+    if a.get("issues"):
+        out["issues"] = a["issues"]
     if a["status"] == "clarify" and a.get("clarification"):
         c = a["clarification"]
         out["clarification"] = {"message": c.get("message", ""),
