@@ -6,6 +6,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from ..catalog import SYNONYMS, _same_word
+from ..config import settings
 from ..llm import LLM
 from ..vote import ask_all, majority, voting_on
 from ..sources import TableMeta, Variable
@@ -25,6 +26,9 @@ class Selection(BaseModel):
     compare_dimension: str | None = Field(default=None, description="dimension code the operation runs along")
     part: str | None = Field(default=None, description="value code of the part, for share")
     whole: str | None = Field(default=None, description="value code of the whole (usually the total), for share")
+    apart: list[str] = Field(default_factory=list, description=(
+        "dimension codes whose categories the question wants side by side although it names none of them: "
+        "\"the gender pay gap\" (sex), \"urban against rural\", \"young and old\" (age); empty otherwise"))
 
 
 class Resolved(BaseModel):
@@ -69,6 +73,8 @@ For every dimension choose the value codes the question needs, copied exactly fr
 - For "how much did X grow from A to B" select both periods and use difference or pct_change along the time dimension.
 - For "what share of ... is X" select X and the total, and use share with part=X and whole=total.
 - For trends ("how has ... changed", "over the years") select a range of periods and use series.
+- When the question compares the categories of a dimension without naming them ("the gender pay gap", "urban vs
+  rural", "young and old"), select those categories (not the total) and list the dimension in apart.
 - For "when was X highest / lowest" select the periods (or categories) to search and use max or min.
 - Inflation means the annual % change of the consumer price index. If the table has an option that already is the
   change asked for ("Annual change, %", "volume change on previous year"), select it with operation value.
@@ -322,6 +328,10 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     the question (places, period, breakdown; hagbot/steps/plan.py), checked against the text; without it (a table
     the user clicked, a published rate) the same facts are read from the text by the patterns below."""
     notes, out, beyond, alternatives, aggregate_over, missing_period, partial = [], {}, None, {}, [], "", ""
+    # TRUST_SELECTION=1 (the default): the model's categories and operation stand. The rules marked `second_guess`
+    # below overrule them from the question's wording; they run only with TRUST_SELECTION=0. The rest always run:
+    # they make the query valid, or fill in periods the model could not see (it is shown at most _MAX_OPTIONS).
+    second_guess = not settings.trust_selection
     from .retrieve import _DIMENSION_IS, breakdown_words, named_places
     if facts is not None:   # the planner's places as normalized words, as the patterns would give them
         places_part = [t for pl in facts.places for t in tokens(pl) if len(t) >= 4]
@@ -364,7 +374,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                 notes.append(f"{var.text}: {y} is not in the table ({var.value_texts[0]}–{var.value_texts[-1]})")
         # no total and none named, or every option chosen while no breakdown was asked (the model listing all 13 age
         # groups for "female students"): the whole is their sum, one figure, not one per option
-        every = bool(codes) and set(codes) == set(var.values) and not _asks_breakdown(question)
+        every = second_guess and bool(codes) and set(codes) == set(var.values) and not _asks_breakdown(question)
         if (not codes or every) and _partition(var) and var.code != sel.compare_dimension:
             codes = list(var.values)
             aggregate_over.append(var.code)
@@ -379,6 +389,9 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
         out[var.code] = sorted(set(codes), key=var.values.index)
 
     q = normalize(question)
+    # dimensions the model says the question compares without naming a category ("gender gap": sex), by code or name;
+    # their categories are kept apart, not folded into the total
+    apart = {v.code for v in meta.variables for a in sel.apart if not v.time and normalize(a) in (normalize(v.code), normalize(v.text))}
     # the question's words through the search synonyms, so "men"/"karlar" name Males and "verðbólga" the CPI
     qwords = [w for t in tokens(question) for w in SYNONYMS.get(t, t).split() if len(w) >= 4]
     def mentioned(label: str, siblings: list[str] = ()) -> bool:
@@ -405,12 +418,15 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
         if var.time:
             continue
         chosen = out[var.code]
-        if not re.search(r"unknown|othekkt|not stated|otilgreint|ospecified", q):
+        if var.code in apart and (total := _total_of(var)) is not None and chosen == [total]:
+            out[var.code] = chosen = [c for c in var.values if c != total]   # "gender gap": men and women, not the total
+            notes.append(f"{var.text}: {[var.label_of(c) for c in chosen]} apart (the question compares them)")
+        if second_guess and not re.search(r"unknown|othekkt|not stated|otilgreint|ospecified", q):
             kept = [c for c in chosen if not re.search(r"unknown|óþekkt|not stated|ótilgreint|unspecified", var.label_of(c), re.I)]
             if len(kept) < len(chosen):
                 notes.append(f"{var.text}: dropped {[var.label_of(c) for c in chosen if c not in kept]} (not asked for)")
                 out[var.code] = chosen = kept or _default(var)
-        if sel.operation in ("value", "series") and len(chosen) >= 2 and not coded(var):
+        if second_guess and sel.operation in ("value", "series") and len(chosen) >= 2 and not coded(var):
             labels = [var.label_of(c) for c in chosen]
             in_question = [c for c in chosen if mentioned(var.label_of(c), labels)]
             if in_question and len(in_question) < len(chosen):
@@ -427,11 +443,11 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             # read from the user's own words: the planner's English part may say "value" where the user said "how much"
             asked = normalize(question[:-len(part)]) if part and question.endswith(part) and question[:-len(part)].strip() else q
             wanted = "value" if _MONEY.search(asked) else "quantity" if _HOW_MUCH.search(asked) else ""
-            if wanted and kind(chosen[0]) not in ("", wanted) and (fit := [c for c in var.values if kind(c) == wanted]):
+            if second_guess and wanted and kind(chosen[0]) not in ("", wanted) and (fit := [c for c in var.values if kind(c) == wanted]):
                 notes.append(f"{var.text}: {var.label_of(fit[0])!r} for the {wanted} asked, not {var.label_of(chosen[0])!r}")
                 out[var.code] = chosen = fit[:1]
             alternatives[var.code] = [c for c in var.values if c != chosen[0]]
-        if (len(chosen) == 1 and _partition(var) and var.code != sel.compare_dimension and var.code not in aggregate_over
+        if (second_guess and len(chosen) == 1 and _partition(var) and var.code != sel.compare_dimension and var.code not in aggregate_over
                 and not mentioned(var.label_of(chosen[0]), var.value_texts)):
             notes.append(f"{var.text}: {var.label_of(chosen[0])!r} is not named in the question and the table has no total; "
                          f"summed over all {len(var.values)} options")
@@ -440,9 +456,9 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
         # "the housing price index from 2010": one line, the whole country, not every region and house type the model
         # could chart. Several categories stay when the question names one of them, asks for a breakdown ("by region",
         # "eftir landshlutum", "all regions"), or compares along this dimension.
-        if (sel.operation in ("value", "series") and len(chosen) >= 2 and not coded(var) and var.code != sel.compare_dimension
-                and not any(mentioned(var.label_of(c), [var.label_of(x) for x in chosen]) for c in chosen) and not breakdown
-                and (total := _total_of(var)) is not None):
+        if (second_guess and sel.operation in ("value", "series") and len(chosen) >= 2 and not coded(var)
+                and var.code != sel.compare_dimension and not any(mentioned(var.label_of(c), [var.label_of(x) for x in chosen]) for c in chosen) and not breakdown
+                and var.code not in apart and (total := _total_of(var)) is not None):
             notes.append(f"{var.text}: none of {[var.label_of(c) for c in chosen]} named in the question; using {[var.label_of(total)]}")
             out[var.code] = [total]
             alternatives[var.code] = [c for c in chosen if c != total]
@@ -466,7 +482,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     # Kópavogur for Reykjavík): in a place dimension, only options the question names, or the total, may stay; with
     # none of them chosen, the named ones answer, or the total under the note. A breakdown ("by municipality") or a
     # ranking along the dimension keeps every category.
-    if places and sel.operation != "rank" and not breakdown:
+    if second_guess and places and sel.operation != "rank" and not breakdown:
         for var in meta.variables:
             if var.time:
                 continue
@@ -493,7 +509,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
 
     # "Iceland" in a question means the whole country, not Icelandic citizens or people born in Iceland
     # ...unless the question compares groups ("Icelanders and foreigners") or the model chose several of them
-    if not re.search(r"citizen|rikisborg|born|birth|faedd|faeding|origin|uppruna|icelander|foreign|islending|utlending|erlend", q):
+    if second_guess and not re.search(r"citizen|rikisborg|born|birth|faedd|faeding|origin|uppruna|icelander|foreign|islending|utlending|erlend", q):
         for var in meta.variables:
             if re.search(r"citizen|birth|origin|country|rikisfang|faedingarland|uppruni", normalize(var.text)) and \
                     len(out[var.code]) == 1 and any(normalize(var.label_of(c)) in ("iceland", "island") for c in out[var.code]):
@@ -505,7 +521,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     asked = asked_bases(question)
     for var in meta.variables:
         bases = {c: y for c in var.values if (y := base_year(var.label_of(c)))}
-        if var.time or len(bases) < 2:
+        if var.time or len(bases) < 2 or not second_guess:
             continue
         wanted = [c for c, y in bases.items() if y in asked]
         pick = wanted or [max(bases, key=bases.get)]
@@ -516,7 +532,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     # Inflation, wage rise "in 12 months", GDP growth: the table publishes the change itself; use it rather than
     # computing one between two periods the model picked (it picked 11 months apart, or 2014 to 2025)
     op = sel.operation
-    if re.search(_ANNUAL_ASK, q):
+    if second_guess and re.search(_ANNUAL_ASK, q):
         for var in meta.variables:
             changes = [c for c in var.values if re.search(_CHANGE_OPTION, normalize(var.label_of(c)))]
             chosen = out[var.code]
@@ -539,6 +555,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     # A trend question: every period from the year asked (or a default span) to the latest, as a series
     # "how much has it grown since 2020" asks for one number, not a trend
     trend = bool(re.search(_TREND, q)) and op != "share" and not re.search(r"how much|how many|by how|hve mik|um hve|hve marg", q)
+    trend = trend and (second_guess or op == "series")   # trusted: only the periods of a series the model chose
     if trend:
         for var in meta.variables:
             if not var.time:
@@ -603,7 +620,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                 op = "series"
 
     # "When was it highest": the extreme along the dimension that varies, time by default
-    extreme = next((o for o, rx in _EXTREME if rx.search(q)), None) if op in ("value", "series") else None
+    extreme = next((o for o, rx in _EXTREME if rx.search(q)), None) if op in ("value", "series") and second_guess else None
     if op in ("max", "min") or extreme:
         op = op if op in ("max", "min") else extreme
         multi = [c for c, v in out.items() if len(v) > 1 and c not in aggregate_over]   # a summed list is one value
@@ -623,7 +640,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             op = "value"
 
     # No year or period in the question: the latest period, whatever the model chose
-    if not re.search(r"\b(?:18|19|20)\d\d\b", question) and op in ("value", "share") and not window:
+    if second_guess and not re.search(r"\b(?:18|19|20)\d\d\b", question) and op in ("value", "share") and not window:
         for var in meta.variables:
             if var.time and out.get(var.code) != [var.values[-1]]:
                 notes.append(f"{var.text}: no period asked, using latest {var.values[-1]}")
@@ -633,7 +650,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     if compare in aggregate_over:   # the dimension an operation runs along is never summed away
         aggregate_over.remove(compare)
         notes.append(f"{meta.var(compare).text}: compared, not summed")
-    hint = guess_op(question)
+    hint = guess_op(question) if second_guess else None
     gives_change = any(re.search(_CHANGE_OPTION, normalize(var.label_of(c))) for var in meta.variables if not var.time
                        for c in out[var.code])
     if (op in ("value", "series") and not trend and hint in ("difference", "pct_change") and not gives_change
@@ -643,13 +660,13 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     if op == "value" and hint == "share":
         notes.append("operation value -> share (question wording)")
         op = "share"
-    if op == "pct_change" and re.search(r"\bstig\b|\bstigum\b|\bpoints?\b", q):   # "um hve mörg stig": index points, not %
+    if second_guess and op == "pct_change" and re.search(r"\bstig\b|\bstigum\b|\bpoints?\b", q):   # "um hve mörg stig": index points, not %
         notes.append("operation pct_change -> difference (points asked)")
         op = "difference"
     if op == "pct_change" and hint == "difference" and not re.search(r"percent|%|prosent|hlutfall|per cent|hundradshlut", q):
         notes.append("operation pct_change -> difference (a change asked, no percent word)")   # "how much did Reykjavík grow"
         op = "difference"
-    if op == "difference" and re.search(r"\bstig\b|\bstigum\b|\bpoints?\b", q):
+    if second_guess and op == "difference" and re.search(r"\bstig\b|\bstigum\b|\bpoints?\b", q):
         # points are a difference of the index itself: a dimension chosen as "Annual change, %" goes back to the level
         for var in meta.variables:
             chosen = out.get(var.code) or []
@@ -672,7 +689,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     order = None
     if op in ("difference", "pct_change") and compare and not meta.var(compare).time and len(out[compare]) == 2:
         # comparing categories, not periods: the latest period unless one is named, and the question's own order
-        if not re.search(r"\b(?:18|19|20)\d\d\b", question):
+        if second_guess and not re.search(r"\b(?:18|19|20)\d\d\b", question):
             for var in meta.variables:
                 if var.time and out.get(var.code) != [var.values[-1]]:
                     notes.append(f"{var.text}: no period asked, using latest {var.values[-1]}")
@@ -796,4 +813,6 @@ def vote_selection(samples: list[Selection]) -> tuple[Selection, dict[str, str]]
         agreement[dim] = f"{c}/{n}"
     op, c = majority([(s.operation, s.compare_dimension, s.part, s.whole) for s in samples])
     agreement["operation"] = f"{c}/{n}"
-    return Selection(selections=chosen, operation=op[0], compare_dimension=op[1], part=op[2], whole=op[3]), agreement
+    apart = [d for d in dict.fromkeys(d for s in samples for d in s.apart) if sum(d in s.apart for s in samples) * 2 > n]
+    return Selection(selections=chosen, operation=op[0], compare_dimension=op[1], part=op[2], whole=op[3],
+                     apart=apart), agreement

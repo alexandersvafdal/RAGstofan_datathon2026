@@ -210,7 +210,8 @@ Everything is set in `.env` (see `.env.example`): the model endpoint and default
 `LLM_MODEL`), the models offered in the picker (`MODELS`), the data source (`DATA_SOURCE`), e5 search (`USE_E5`),
 the context the server gives each request (`LLM_CONTEXT`; otherwise `data/models.json`, refreshed with
 `python -m hagbot.models`), whether the answer writer may do a final calculation on the figures
-(`LLM_CALC`, on by default), and majority voting on the model's choices (`VOTES`, `VOTE_MODELS`).
+(`LLM_CALC`, on by default), whether the model's choice of categories and operation
+stands or code may overrule it from the question's wording (`TRUST_SELECTION`, on by default), and majority voting on the model's choices (`VOTES`, `VOTE_MODELS`).
 
 ## Limits and next steps
 
