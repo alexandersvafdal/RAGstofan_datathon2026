@@ -18,8 +18,7 @@ from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import ToolAnnotations
 
 API = os.getenv("RAGSTOFAN_URL", "http://ragstofan-spark.tail4f2a97.ts.net:8000").rstrip("/")
-ASK_TIMEOUT = float(os.getenv("RAGSTOFAN_TIMEOUT", "300"))   # a long question takes one to two minutes
-MAX_ROWS = 60   # data rows passed back per table; the model cites these, the full table is a link away
+ASK_TIMEOUT = float(os.getenv("RAGSTOFAN_TIMEOUT", "300"))   # transport limit; the backend enforces its request budget
 
 server = MCPServer(
     name="RAGstofan",
@@ -44,41 +43,10 @@ async def _get(path: str, **params) -> dict:
         return r.json()
 
 
-def _answer(a: dict) -> dict:
-    """The answer as a model reads it best: the sentence, the figures behind it, and where each came from."""
-    out: dict = {"status": a["status"], "answer": a["text"], "language": a["language"],
-                 "sources": [{"table_id": s["id"], "title": s["title"], "url": s["url"]} for s in a.get("sources", [])]}
-    if a.get("issues"):
-        out["issues"] = a["issues"]
-    if a["status"] == "clarify" and a.get("clarification"):
-        c = a["clarification"]
-        out["clarification"] = {"message": c.get("message", ""),
-                                "options": [{"label": o["label"], "table_id": o["table_id"]} for o in c.get("options", [])],
-                                "how_to_continue": "Ask again with the table_id of the option that fits."}
-    parts = []
-    for p in a.get("parts", []):
-        dims = list((p["rows"][0]["labels"] if p["rows"] else {}).keys())
-        part = {"sub_question": p["sub_question"], "table_id": p["table"]["id"], "unit": p["unit"],
-                "selection": p["selection"],
-                "figures": [{"label": f["label"], "value": f["value"], "formatted": f["formatted"], "unit": f["unit"]}
-                            for f in p["facts"]],
-                "rows": [{**{d: r["labels"].get(d) for d in dims}, "value": r["value"]} for r in p["rows"][:MAX_ROWS]]}
-        if len(p["rows"]) > MAX_ROWS:
-            part["rows_omitted"] = len(p["rows"]) - MAX_ROWS
-        if p.get("computation"):
-            part["computation"] = p["computation"]
-        if p.get("note"):
-            part["note"] = p["note"]
-        if p.get("verifications"):
-            part["verifications"] = p["verifications"]
-        if p.get("attempts"):
-            part["attempts"] = p["attempts"]
-        parts.append(part)
-    if parts:
-        out["parts"] = parts
-    out["numbers_checked"] = a.get("text_source") == "model"   # every number in the sentence matched the table
-    out["seconds"] = round(a.get("total_ms", 0) / 1000, 1)
-    return out
+try:
+    from .adapter import _answer
+except ImportError:  # python mcp_server/server.py
+    from adapter import _answer
 
 
 @server.tool(annotations=READ_ONLY)
@@ -87,7 +55,7 @@ async def ask_icelandic_statistics(question: str, table_id: str | None = None, f
 
     Finds the right table, reads the figures, does any arithmetic (differences, shares, growth) and checks every
     number in the answer against the table. Several questions in one are split and answered together.
-    Takes 20–120 seconds.
+    The backend returns an explicit timeout outcome when its request budget is exhausted.
 
     Args:
         question: The question, e.g. "How many people live in Reykjavík?" or "Hver var verðbólgan í september?"

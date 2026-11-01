@@ -36,6 +36,9 @@ class TableRef(BaseModel):
     title: str
     url: str  # human-readable page on px.hagstofa.is
     updated: str = ""  # the latest period the table has, e.g. "2026M10": how fresh the source is
+    source_kind: str = "unknown"
+    retrieved_at: str = ""
+    snapshot_at: str = ""
 
 
 class Row(BaseModel):
@@ -58,6 +61,9 @@ class Fact(BaseModel):
     value: float
     unit: str
     formatted: str  # value formatted for the answer language
+    basis_indices: list[int] = Field(default_factory=list)
+    source_ids: list[str] = Field(default_factory=list)
+    periods: list[str] = Field(default_factory=list)
 
 
 class ChartPoint(BaseModel):
@@ -81,9 +87,24 @@ class TableAttempt(BaseModel):
     table_id: str
     status: Literal["verified", "rejected", "error"]
     code: str = ""
+    detail: str = ""
     metadata_sha256: str = ""
     question_sha256: str = ""
     via: str = ""
+
+
+class StatisticalContext(BaseModel):
+    """Executed definitions used to decide whether arithmetic across tables is meaningful."""
+
+    measure: str
+    definitions: dict[str, list[str]] = Field(default_factory=dict)
+    geography: list[str] = Field(default_factory=list)
+    population: dict[str, list[str]] = Field(default_factory=dict)
+    periods: list[str] = Field(default_factory=list)
+    reference: str = "unknown"
+    unit: str = ""
+    scale: int = 1
+    explicit: list[str] = Field(default_factory=list)
 
 
 class AnswerPart(BaseModel):
@@ -97,6 +118,7 @@ class AnswerPart(BaseModel):
     computation: Computation | None = None
     facts: list[Fact]
     verifications: list[TableVerification] = Field(default_factory=list)
+    context: StatisticalContext | None = None
     attempts: list[TableAttempt] = Field(default_factory=list)
     chart: ChartSpec | None = None
     note: str = ""  # e.g. why the latest figure is from an earlier year, and where newer figures are
@@ -131,6 +153,19 @@ class AnswerIssue(BaseModel):
     attempts: list[TableAttempt] = Field(default_factory=list)
 
 
+class AnswerClaim(BaseModel):
+    id: str
+    part: int
+    fact_indices: list[int]
+    kind: Literal["value", "calculation", "series"]
+    labels: list[str]
+    values: list[float]
+    units: list[str]
+    periods: list[str] = Field(default_factory=list)
+    source_ids: list[str]
+    text: str
+
+
 class Answer(BaseModel):
     question: str
     language: Language
@@ -140,9 +175,10 @@ class Answer(BaseModel):
     comparison: ChartSpec | None = None  # series from different tables on one chart, each set to 100 at the start
     clarification: Clarification | None = None
     sources: list[TableRef] = Field(default_factory=list)
+    claims: list[AnswerClaim] = Field(default_factory=list)
     issues: list[AnswerIssue] = Field(default_factory=list)
     steps: list[Step] = Field(default_factory=list)
-    # "model": the model's sentence passed the number check; "template": it failed or errored, facts restated
+    # New answers use template: text rendered from bound claims. model is retained for legacy clients.
     text_source: Literal["model", "template", "none"] = "none"
     llm_calls: int = 0
     total_ms: int = 0

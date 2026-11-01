@@ -66,6 +66,7 @@ class CatalogEntry(BaseModel):
     about_is: str = ""
     keywords_en: list[str] = []
     keywords_is: list[str] = []
+    source_summary: str = ""  # source profile hint for discovery; selection still checks current source metadata
 
     def card(self, question: str = "") -> str:
         """The short description the reranker reads, with the options that match words in the question."""
@@ -75,7 +76,8 @@ class CatalogEntry(BaseModel):
         is_title = f" ({self.title_is})" if self.title_is and self.title_is != self.title_en else ""
         card = f"{self.id}: {self.title_en}{is_title}{period}. Dimensions: {', '.join(self.dimensions)}"
         hits = self.matching_values(question)
-        return card + (f". Has options: {', '.join(hits)}" if hits else "")
+        return card + (f". Has options: {', '.join(hits)}" if hits else "") + \
+            (f". Source definitions: {self.source_summary[:360]}" if self.source_summary else "")
 
     def matching_values(self, question: str, limit: int = 4) -> list[str]:
         words = [w for w in tokens(question) if len(w) >= MIN_PREFIX and w not in STOPWORDS and w not in SYNONYMS]
@@ -136,7 +138,7 @@ class _Field:
 
 
 class Catalog:
-    def __init__(self, entries: list[CatalogEntry], dense: list | None = None):
+    def __init__(self, entries: list[CatalogEntry], dense: list | None = None, profiles: dict | None = None):
         """dense: vector searches, each with .name and .search(query, k) -> [(table_id, score)]."""
         self.entries = entries
         self.dense = dense or []
@@ -146,7 +148,13 @@ class Catalog:
         self._values = _Field([tokens(" ".join(e.values)) for e in entries], presence_only=True)
         self._about = _Field([tokens(" ".join([e.about_en, e.about_is, *e.keywords_en, *e.keywords_is])) for e in entries],
                              presence_only=True)
-        self._vocab = set(self._main.idf) | set(self._values.idf) | set(self._about.idf)
+        from .profiles import discovery_text
+        texts = {e.id: discovery_text(profiles[e.id]) for e in entries if profiles and e.id in profiles
+                 and profiles[e.id].id == e.id and profiles[e.id].path == e.path}
+        self._source = _Field([tokens(texts.get(e.id, "")) for e in entries], presence_only=True)
+        for e in entries:
+            e.source_summary = texts.get(e.id, "")
+        self._vocab = set(self._main.idf) | set(self._values.idf) | set(self._about.idf) | set(self._source.idf)
         self._recency = [recency_factor(e.last_period, e.title_en) for e in entries]
 
     @classmethod
@@ -166,7 +174,8 @@ class Catalog:
                     dense.append(ExampleSearch(e5.model, files, set(settings.example_langs.split(",")), settings.cache_dir))
             except ImportError as err:
                 log.warning("e5 search off: %s. Install requirements-e5.txt or set USE_E5=0", err)
-        return cls(entries, dense)
+        from .profiles import load_profiles
+        return cls(entries, dense, load_profiles(settings.profiles_path))
 
     def get(self, table_id: str) -> CatalogEntry | None:
         return self._by_id.get(table_id)
@@ -209,9 +218,10 @@ class Catalog:
         for i, entry in enumerate(self.entries):
             main, vals = self._main.scores(i, expansions), self._values.scores(i, expansions)
             about = self._about.scores(i, expansions)
-            s = sum(main) + VALUES_WEIGHT * sum(vals) + ABOUT_WEIGHT * sum(about)
+            source = self._source.scores(i, expansions)
+            s = sum(main) + VALUES_WEIGHT * sum(vals) + ABOUT_WEIGHT * sum(about) + 0.6 * sum(source)
             if s > 0:
                 # tables matching every query word (in any field) beat tables matching one word strongly
-                coverage = sum(1 for m, v, a in zip(main, vals, about) if m or v or a) / len(expansions)
+                coverage = sum(1 for m, v, a, p in zip(main, vals, about, source) if m or v or a or p) / len(expansions)
                 scored.append((entry, s * coverage ** 2 * self._recency[i]))
         return sorted(scored, key=lambda x: -x[1])[:k]

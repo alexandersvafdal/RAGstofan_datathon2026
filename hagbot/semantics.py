@@ -39,8 +39,10 @@ def profile(meta: TableMeta) -> TableProfile:
         fields["unit"] = meta.unit
     for var in meta.variables:
         fields[f"dimension:{var.code}"] = var.text
+        fields.update({f"note-dimension:{var.code}:{i}": note for i, note in enumerate(var.notes)})
         for code, label in zip(var.values, var.value_texts):
             fields[f"value:{var.code}:{code}"] = label
+            fields.update({f"note-value:{var.code}:{code}:{i}": note for i, note in enumerate(var.value_notes.get(code, []))})
         if var.time:
             kinds = {"monthly" if re.fullmatch(r"\d{4}M\d{2}", c) else
                      "quarterly" if re.fullmatch(r"\d{4}Q[1-4]", c) else
@@ -80,8 +82,8 @@ _AXES = {
         "income": r"\bincome\b|\btekj\w*",
         "wages": r"\bwages?\b|\bearnings\b|\blaun\w*",
         "population": r"\bpopulation\b|\bmannfjold\w*",
-        "unemployment": r"\bunemployment\b|\batvinnuleys\w*",
-        "employment": r"(?<!un)\bemployment\b|\bstarfandi\b",
+        "unemployment": r"\bunemployment\b|\bunemployed\b|\batvinnuleys\w*",
+        "employment": r"(?<!un)\bemployment\b|\bemployed\b|\bstarfandi\b",
         "consumer price index": r"\bconsumer price index\b|\bcpi\b|\bvisital\w* neysluverd\w*",
         "inflation": r"\binflation\b|\bverdbolg\w*",
     },
@@ -156,12 +158,14 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
                            proof: Compatibility) -> TableVerification:
     p = profile(meta)
     # Citation of an available but unselected category would prove a different query.
-    allowed = {name: value for name, value in p.fields.items() if not name.startswith("value:")}
+    allowed = {name: value for name, value in p.fields.items() if not name.startswith(("value:", "note-value:"))}
     selected_labels = []
     for var in meta.variables:
         for code in selections[var.code]:
             key = f"value:{var.code}:{code}"
             allowed[key] = p.fields[key]
+            for i, note in enumerate(var.value_notes.get(code, [])):
+                allowed[f"note-value:{var.code}:{code}:{i}"] = note
             if not var.time:
                 selected_labels.append(p.fields[key])
     indices = [check.requirement for check in proof.checks]
@@ -180,7 +184,7 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
                 # Rebind only a unique, exact label in the selected metadata;
                 # never rescue an unselected option or invent missing text.
                 matches = [field for field, text in allowed.items() if quote and " ".join(tokens(text)) == quote]
-                unselected = ref.field.startswith("value:") and ref.field in p.fields and ref.field not in allowed
+                unselected = ref.field.startswith(("value:", "note-value:")) and ref.field in p.fields and ref.field not in allowed
                 if unselected or len(matches) != 1:
                     raise AnswerFailure("unverified", "invalid_metadata_evidence", ref.field)
                 amendments.append(f"metadata citation {ref.field} -> {matches[0]} (unique exact source label)")
@@ -203,6 +207,11 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
             actual.add("inflation")
         if wanted and actual and wanted.isdisjoint(actual):
             raise AnswerFailure("unavailable", "incompatible_definition", f"{req.facet}: {req.value} vs {sorted(actual)}")
+        if req.facet == "measure" and wanted & {"employment", "unemployment"} and re.search(r"\brate\b", normalize(req.value)):
+            measures = [var.label_of(code) for var in meta.variables if re.search(r"unit|measure|contents|eining", normalize(var.text))
+                        for code in selections[var.code]]
+            if measures and not all(re.search(r"\brate\b|\bpercent\w*|%|hlutfall", normalize(label)) for label in measures):
+                raise AnswerFailure("unavailable", "incompatible_definition", "a count cannot answer a requested rate")
         extra = actual - desired.get(req.facet, set())
         if req.facet == "measure" and "inflation" in desired["measure"]:
             extra.discard("consumer price index")  # inflation is a particular transformation of the CPI

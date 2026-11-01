@@ -42,8 +42,10 @@ First decide whether the WHOLE request is supported. Use outcome=lookup for stat
 differences, percentage changes, sums of named categories, shares, rankings and ratios to population using these tables.
 Use outcome=clarify if a measure or population has materially different interpretations (e.g. 'how rich are old
 people': income or net wealth, and which age group?). Return no sub_questions for clarify.
-Use outcome=out_of_scope for personal/private records, general non-statistical tasks, causal explanations or
-predictions that cannot be read from a published forecast. Return no sub_questions for out_of_scope.
+Use outcome=out_of_scope for personal/private records, general non-statistical tasks and causal explanations.
+Return no sub_questions for out_of_scope. Future statistical figures use lookup: only a published forecast may
+answer them, never invent or extrapolate one. Do not reject a statistical lookup solely because its year is old
+or in the future; whether published coverage exists is decided by retrieval and source metadata.
 Unknown coverage or an unavailable requested period is NOT out_of_scope: use lookup and let metadata validation decide.
 Never drop a requested part to make a question answerable. If the request needs an unsupported operation or more
 than three distinct lookups, use out_of_scope for the whole request.

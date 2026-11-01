@@ -608,7 +608,7 @@ function renderAnswer(card, a) {
 
   // One quiet line under the answer: whether the numbers were checked and how long it took, then listen and copy
   const info = el("div", { class: "meta-info" });
-  if (a.text_source === "model") info.append(el("span", { class: "ok", title: t("checked", L) }, t("checkedShort", L)));
+  if (a.claims?.length || a.text_source === "model") info.append(el("span", { class: "ok", title: t("checked", L) }, t("checkedShort", L)));
   if (a.total_ms) info.append(el("span", { class: "secs" }, `${(a.total_ms / 1000).toFixed(1)} ${t("seconds", L)}`));
   const actions = el("div", { class: "meta-actions" });
   if (voiceList && a.status !== "error") {

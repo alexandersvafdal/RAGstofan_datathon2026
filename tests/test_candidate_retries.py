@@ -90,7 +90,7 @@ class CandidateRetryTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(source.meta_calls, ["TABLE1", "TABLE2"])
                 self.assertEqual([table_id for table_id, _ in source.queries], ["TABLE2"])
                 self.assertEqual(len(cards.queries), 1)  # no duplicate BM25 or vector/embedding search
-                self.assertEqual(llm.calls, 6)
+                self.assertEqual(llm.calls, 5)  # composition no longer calls the model
                 self.assertNotIn("TABLE1:", llm.prompts[3][1])
                 self.assertIn(specification().model_dump_json(), llm.prompts[2][1])
                 self.assertIn(specification().model_dump_json(), llm.prompts[4][1])
@@ -127,7 +127,7 @@ class CandidateRetryTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([table_id for table_id, _ in source.queries], ["TABLE2"])
         self.assertEqual(answer.parts[0].selection["Year"], ["2025M09"])
         self.assertEqual(answer.parts[0].attempts[0].code, "requested_period_unavailable")
-        self.assertEqual(llm.calls, 5)
+        self.assertEqual(llm.calls, 4)
 
     async def test_candidate_limit_is_an_abstention_not_a_best_effort_answer(self):
         for mode in ("tiered",):

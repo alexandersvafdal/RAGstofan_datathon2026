@@ -1,5 +1,12 @@
 # Question sets
 
+The correctness runner, `python -m eval.integrity_eval --questions <dev.jsonl> --endpoint <server> --repeat 3
+--output <results.json>`, measures precision, coverage, false refusals, retries, calls and p50/p95 latency separately.
+It supports `expected_status`, `expected_facts` (value/unit/period/label), `expected_operation` and `expected_result`
+alongside table/value labels. Table-only questions are not counted as fully graded answers. Frozen/holdout paths
+require `--measurement`. `--summarize <results.json>` reports saved results without requests. Provision source
+profiles and choose the freshness policy before evaluation; see [implementation notes](../docs/correctness-implementation.md).
+
 | File | Questions | Made by | Role |
 |---|---|---|---|
 | `dev_core.jsonl` | 10 (6 EN, 4 IS) | us, 28 Oct | Development. The first set, written with the prototype. Fixed against; catches regressions. |

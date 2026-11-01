@@ -16,6 +16,7 @@ Every tier shares the code-side rules in retrieve.py: ambiguous words ask the us
 are dropped (narrow), and the newest edition of a chosen table is used (freshest sibling). This is the only finder.
 """
 
+import asyncio
 import json
 import re
 from collections.abc import Collection
@@ -228,7 +229,8 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
     preferred = [e for c in with_tables for t in [t for t in c["tables"] if t not in excluded][:per_concept]
                  if (e := catalog.get(t))]
     query = " ".join([text, *(c["search"] for c in found)])
-    rankings = cache.rankings(catalog, query, 4 * k) if cache is not None else catalog.rankings(query, 4 * k)
+    rankings = await asyncio.to_thread(cache.rankings, catalog, query, 4 * k) if cache is not None else \
+        await asyncio.to_thread(catalog.rankings, query, 4 * k)
     searches = {name: [e for e in (catalog.get(i) for i in ids if i not in excluded) if e] for name, ids in rankings.items()}
     ranked = rank(preferred, searches)
     shortlist = narrow([e for e, _, _ in ranked], f"{question} {original}")

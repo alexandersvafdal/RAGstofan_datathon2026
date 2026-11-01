@@ -8,6 +8,8 @@ from collections.abc import Callable, Collection
 
 from .catalog import Catalog
 from .config import settings
+from .contexts import context_for, validate_combination, validate_population_ratio
+from .claims import build_claims
 from .llm import LLM, Timer
 from .outcomes import AnswerFailure, RETRYABLE_TABLE_FAILURES
 from .schemas import (Answer, AnswerIssue, AnswerPart, AskRequest, Clarification, ClarifyOption, Step, TableAttempt, TableRef)
@@ -36,6 +38,13 @@ _PERCENT = re.compile(r"(?<![\d.])%|\bpercent|prosent|hlutfall|volume change|cha
                       r"arleg fjolgun|atvinnuleysi")
 _RELATIVE = r"\blast (year|month|quarter)\b|\bprevious year\b|\bsidasta (ar|manud|arsfjord)|\bi fyrra\b|\bfyrra ar"
 
+
+def _result_unit(meta: TableMeta, selections: dict[str, list[str]]) -> str:
+    if any(selections.get(v.code) and all(_PERCENT.search(normalize(v.label_of(c))) for c in selections[v.code])
+           for v in meta.variables if not v.time):
+        return "%"
+    return meta.unit if meta.unit_source == "source" else ""
+
 CLARIFY = {
     "en": "Several tables could answer this. Which one do you mean?",
     "is": "Fleiri en ein tafla gæti svarað þessu. Hverja áttu við?",
@@ -61,6 +70,11 @@ class StepLog(list):
             self.on_step(step)
 
 
+def _language(req: AskRequest) -> str:
+    detected = detect_language(req.question)
+    return "is" if detected == "is" else req.language or detected
+
+
 class Pipeline:
     def __init__(self, llm: LLM | None = None, catalog: Catalog | None = None, source: DataSource | None = None):
         self.llm = llm or LLM()
@@ -71,11 +85,25 @@ class Pipeline:
         """Answer with the model asked for, or the default. Another model runs on a copy of this pipeline, so
         concurrent questions on different models do not disturb each other."""
         model, reasoning = (settings.fast_model, "none") if req.fast else (req.model, req.reasoning)
-        if model or reasoning or req.temperature is not None:
+        worker = self
+        if hasattr(self.llm, "with_options"):
             other = copy.copy(self)
             other.llm = self.llm.with_options(model, req.temperature, reasoning)
-            return await other._answer(req, on_step)
-        return await self._answer(req, on_step)
+            worker = other
+        elapsed, steps, before = Timer(), [], worker.llm.calls
+        def record(step):
+            steps.append(step)
+            if on_step:
+                on_step(step)
+        try:
+            return await asyncio.wait_for(worker._answer(req, record), timeout=float(settings.answer_timeout_s))
+        except TimeoutError:
+            failure = AnswerFailure("error", "answer_timeout")
+            record(Step(name="error", ms=0, detail="AnswerFailure: answer_timeout"))
+            return Answer(question=req.question, language=_language(req), status="error",
+                          text=failure.message(_language(req)),
+                          issues=[AnswerIssue(status="error", code=failure.code, message=failure.message(_language(req)))],
+                          steps=steps, total_ms=elapsed.ms(), llm_calls=worker.llm.calls - before, model=worker.llm.model)
 
     async def suggest(self, ans: Answer) -> list[str]:
         """Follow-up questions for an answer already shown: asked for afterwards, so they never delay it."""
@@ -86,11 +114,7 @@ class Pipeline:
         return await suggest(self.llm, ans.question, ans.text, [p for p, _ in pairs], [m for _, m in pairs], ans.language)
 
     async def _answer(self, req: AskRequest, on_step: Callable[[Step], None] | None = None) -> Answer:
-        lang = req.language or detect_language(req.question)
-        if lang == "en" and detect_language(req.question) == "is":
-            # unmistakably Icelandic (ð, þ, æ … or Icelandic question words) under an English setting: the question's
-            # own language wins, so a spoken Icelandic question is not answered, and read aloud, in English
-            lang = "is"
+        lang = _language(req)
         total, steps = Timer(), StepLog(on_step)
         calls_before = self.llm.calls
         ans = Answer(question=req.question, language=lang, status="error", text="", model=self.llm.model)
@@ -104,7 +128,7 @@ class Pipeline:
                 req = req.model_copy(update={"question": full})
             ratio = None if req.table_id else detect_ratio(req.question)
             # "GDP per capita": many tables publish the rate itself, so read it rather than divide
-            stored = stored_rate(self.catalog, ratio, req.question) if ratio else None
+            stored = await asyncio.to_thread(stored_rate, self.catalog, ratio, req.question) if ratio else None
             forced: list[str | None]
             target = req.table_id or (stored.id if stored else None)
             if target:
@@ -123,6 +147,8 @@ class Pipeline:
                     ratio = None  # read the published rate, after the same specification/evidence checks
                 steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(s.question for s in p.sub_questions)))
             elif ratio:  # "X per inhabitant": X from its own table, divided by the population in code
+                if len(ratio.places) > 1 or ratio.qualified_population:
+                    raise AnswerFailure("clarify", "ambiguous_denominator_population")
                 t = Timer()
                 numerator_plan = await plan(self.llm, ratio.numerator)
                 _check_plan(numerator_plan, ratio.numerator)
@@ -170,6 +196,7 @@ class Pipeline:
                 rp = ratio_parts(ratio, parts[0], parts[1], lang) if len(parts) == 2 else None
                 if rp is None:
                     raise AnswerFailure("unavailable", "incomplete_ratio")
+                validate_population_ratio(parts[0], parts[1], ratio.year, dated=ratio.dated)
                 parts = list(rp)
                 steps.append(Step(name="compute", ms=0, detail=rp[0].computation.expression))
             elif len(parts) == 2:
@@ -177,6 +204,7 @@ class Pipeline:
                 if p.combination:
                     combo = p.combination
                     first, second = parts[combo.first], parts[combo.second]
+                    validate_combination(first, second, combo.operation)
                     combined = (share_parts(first, second, lang, ordered=True) if combo.operation == "share" else
                                 difference_parts(first, second, lang, operation=combo.operation, ordered=True))
                     if combined is None:
@@ -188,7 +216,8 @@ class Pipeline:
             parts = await self._merge_series(parts)
 
             t = Timer()
-            ans.text, ans.text_source = await compose(self.llm, req.question, parts, lang)
+            ans.claims = build_claims(parts, lang)
+            ans.text, ans.text_source = await compose(self.llm, req.question, parts, lang, claims=ans.claims)
             steps.append(Step(name="compose", ms=t.ms(), detail=ans.text_source))
             # Commit answer content only after all required work has succeeded.
             comparison = comparison_chart(parts, lang)
@@ -218,12 +247,22 @@ class Pipeline:
             rows = list({tuple(sorted(r.key.items())): r for p in group for r in p.rows}.values())
             selections = {v.code: [c for c in v.values if any(r.key.get(v.code) == c for r in rows)] for v in meta.variables}
             first = group[0]
+            context = first.context.model_copy(deep=True) if first.context else None
+            if context:
+                if any(p.context is None or p.context.definitions != context.definitions for p in group):
+                    context = None
+                else:
+                    context.periods = sorted({period for p in group for period in p.context.periods})
+                    context.geography = sorted({place for p in group for place in p.context.geography})
+                    context.population = {axis: sorted({value for p in group for value in p.context.population.get(axis, ["total"])})
+                                          for axis in {axis for p in group for axis in p.context.population}}
             out.append(first.model_copy(update={
                 "sub_question": " | ".join(p.sub_question for p in group),
                 "rows": rows,
                 "facts": [f for p in group for f in p.facts],
                 "verifications": [v for p in group for v in p.verifications],
                 "attempts": [a for p in group for a in p.attempts],
+                "context": context,
                 "selection": {k: list(dict.fromkeys(v for p in group for v in p.selection.get(k, []))) for k in first.selection},
                 "chart": (c := choose_chart(meta, rows, selections, None)) and c.model_copy(update={"title": first.table.title}),
             }))
@@ -267,11 +306,13 @@ class Pipeline:
                 filter_question = f"{original} {sq.question}" if alone else sq.question
                 res = await select(self.llm, meta, sq.question, original, filter_question=filter_question,
                                    specification=sq.specification)
+                if not _result_unit(meta, res.selections):
+                    raise AnswerFailure("unverified", "unknown_unit", meta.id)
                 if res.verification is None:
                     raise AnswerFailure("unverified", "missing_compatibility")
             except AnswerFailure as failure:
                 attempts.append(TableAttempt(table_id=r.table.id, status="rejected", code=failure.code,
-                                             metadata_sha256=metadata_sha, question_sha256=question_sha, via=r.via))
+                                             detail=failure.detail[:512], metadata_sha256=metadata_sha, question_sha256=question_sha, via=r.via))
                 failure.attempts = list(attempts)
                 if forced_table or failure.code not in RETRYABLE_TABLE_FAILURES or failure.status not in ("unavailable", "unverified"):
                     raise
@@ -299,14 +340,18 @@ class Pipeline:
         r, meta, res, attempts = await self._verified_query(sq, original, lang, forced_table, steps, alone)
         t = Timer()
         filter_question = f"{original} {sq.question}" if alone else sq.question
-        rows = await self.source.query(meta.id, res.selections)
+        async def fetch(selections):
+            if hasattr(self.source, "query_checked"):
+                return await self.source.query_checked(meta, selections)
+            return await self.source.query(meta.id, selections)
+        rows = await fetch(res.selections)
         detail = f"{len(rows)} rows"
         # A table's time dimension often lists a period before its numbers exist ("2026" with ".." until the year
         # ends). When the question named no period, the latest period with numbers is the answer.
         time_var = next((v for v in meta.variables if v.time), None)
         if (time_var and rows and all(r.value is None for r in rows) and res.selections.get(time_var.code) == [time_var.values[-1]]
                 and not has_requested_period(filter_question)):
-            wide = await self.source.query(meta.id, {**res.selections, time_var.code: time_var.values})
+            wide = await fetch({**res.selections, time_var.code: time_var.values})
             filled = [r.key[time_var.code] for r in wide if r.value is not None]
             if filled:
                 last = max(filled, key=time_var.values.index)
@@ -325,10 +370,7 @@ class Pipeline:
         # Tables like THJ01000 mix indices, counts and yearly changes and give no unit; a chosen "volume change on
         # previous year" or "annual growth" is a percentage, so say so
         # (one dimension whose every chosen value is a percentage is enough: "Sex: Total, Unit: Unemployment rate")
-        if meta.unit != "%" and any(res.selections.get(v.code) and
-                                 all(_PERCENT.search(normalize(v.label_of(c))) for c in res.selections[v.code])
-                                 for v in meta.variables if not v.time):
-            meta = meta.model_copy(update={"unit": "%"})
+        meta = meta.model_copy(update={"unit": _result_unit(meta, res.selections), "unit_source": "source"})
         computation, facts = compute(meta, rows, res, lang)
         if not facts or (res.operation not in ("value", "series", "rank") and computation is None):
             raise AnswerFailure("unavailable", "incomplete_calculation", res.operation)
@@ -348,13 +390,15 @@ class Pipeline:
         return AnswerPart(
             sub_question=sq.question,
             table=TableRef(id=meta.id, title=title, url=table_url(meta.path, meta.id),
-                           updated=entry.last_period if entry else ""),
+                           updated=next((v.values[-1] for v in meta.variables if v.time and v.values), ""),
+                           source_kind=meta.source_kind, retrieved_at=meta.retrieved_at, snapshot_at=meta.snapshot_at),
             selection={meta.var(c).text: [meta.var(c).label_of(v) for v in vals] for c, vals in res.selections.items()},
             rows=rows,
             unit=meta.unit,
             computation=computation,
             facts=facts,
             verifications=[verification],
+            context=context_for(meta, res.selections, sq.specification),
             attempts=attempts,
             chart=chart.model_copy(update={"title": title}) if chart else None,
             note=note,
@@ -459,7 +503,7 @@ def _stop(ans: Answer, errors: list[tuple[str, Exception]], expected_parts: int 
         prefix = ("Ég gat ekki svarað öllum hlutum spurningarinnar. " if ans.language == "is" else
                   "I could not answer every required part of the question. ")
         ans.text = prefix + ans.text
-    ans.parts, ans.sources, ans.comparison, ans.text_source = [], [], None, "none"
+    ans.parts, ans.sources, ans.claims, ans.comparison, ans.text_source = [], [], [], None, "none"
     if ans.status == "clarify":
         clar = next((e.clarification for _, e in errors if isinstance(e, NeedsClarification)), None)
         ans.clarification = clar or Clarification(message=ans.text, options=[])

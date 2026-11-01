@@ -18,6 +18,7 @@ from collections import OrderedDict
 from math import prod
 from pathlib import Path
 from typing import Literal, Protocol
+from datetime import datetime, timezone
 
 import httpx
 from pydantic import BaseModel
@@ -25,6 +26,7 @@ from pydantic import BaseModel
 from .catalog import Catalog
 from .config import settings
 from .schemas import Row
+from .outcomes import AnswerFailure
 
 
 class Variable(BaseModel):
@@ -34,6 +36,8 @@ class Variable(BaseModel):
     value_texts: list[str]
     time: bool = False
     elimination: bool = False
+    notes: list[str] = []
+    value_notes: dict[str, list[str]] = {}
 
     def label_of(self, code: str) -> str:
         return self.value_texts[self.values.index(code)]
@@ -50,6 +54,10 @@ class TableMeta(BaseModel):
     source: str = ""
     notes: list[str] = []
     updated: str = ""
+    source_kind: Literal["unknown", "fixture", "snapshot", "live"] = "unknown"
+    retrieved_at: str = ""
+    snapshot_at: str = ""
+    revision: str = ""
     variables: list[Variable]
 
     def var(self, code: str) -> Variable:
@@ -58,6 +66,16 @@ class TableMeta(BaseModel):
 
 class SourceError(RuntimeError):
     pass
+
+
+def _check_metadata(expected: TableMeta, current: TableMeta) -> None:
+    if expected.model_dump(exclude={"retrieved_at"}) != current.model_dump(exclude={"retrieved_at"}):
+        raise AnswerFailure("unverified", "source_metadata_changed", expected.id)
+
+
+def _check_size(meta: TableMeta, selection: dict[str, list[str]]) -> None:
+    if prod(len(selection.get(v.code, v.values)) for v in meta.variables) > settings.query_cell_limit:
+        raise AnswerFailure("clarify", "query_too_large", str(settings.query_cell_limit))
 
 
 class DataSource(Protocol):
@@ -93,16 +111,21 @@ class FixtureSource:
 
     async def meta(self, table_id: str) -> TableMeta:
         t = self._get(table_id)
-        return TableMeta(**{**t["meta"], "unit": t.get("unit", ""), "unit_source": "source"})
+        return TableMeta(**{**t["meta"], "unit": t.get("unit", ""), "unit_source": "source", "source_kind": "fixture"})
 
     async def query(self, table_id: str, selection: dict[str, list[str]]) -> list[Row]:
         meta = await self.meta(table_id)
+        _check_size(meta, selection)
         cells = [
             (r["key"], r["value"])
             for r in self._get(table_id)["rows"]
             if all(r["key"].get(code) in vals for code, vals in selection.items())
         ]
         return _rows_from_cells(meta, cells)
+
+    async def query_checked(self, meta: TableMeta, selection: dict[str, list[str]]) -> list[Row]:
+        _check_metadata(meta, await self.meta(meta.id))
+        return await self.query(meta.id, selection)
 
 
 class PxApiSource:
@@ -123,8 +146,12 @@ class PxApiSource:
     async def _request(self, method: str, url: str, body: dict | None = None) -> dict:
         key = hashlib.sha1(f"{method} {url} {json.dumps(body, sort_keys=True)}".encode()).hexdigest()
         cached = settings.cache_dir / f"{key}.json"
-        if cached.exists():
-            return json.loads(cached.read_text())
+        ttl = settings.metadata_ttl_s if method == "GET" else settings.data_ttl_s
+        if cached.exists() and 0 <= time.time() - cached.stat().st_mtime < ttl:
+            try:
+                return json.loads(cached.read_text())
+            except (ValueError, OSError):
+                pass
         for attempt in range(4):
             async with self._lock:  # one request at a time, spaced out
                 wait = settings.px_min_interval_s - (time.monotonic() - self._last)
@@ -138,21 +165,77 @@ class PxApiSource:
             if r.status_code >= 400:
                 raise SourceError(f"PX-API {r.status_code}: {r.text[:200]}")
             data = r.json()
-            cached.write_text(json.dumps(data, ensure_ascii=False))
+            temporary = cached.with_suffix(f".{id(asyncio.current_task())}.tmp")
+            temporary.write_text(json.dumps(data, ensure_ascii=False))
+            temporary.replace(cached)
             return data
         raise SourceError("PX-API kept answering 429 (rate limited). Try again later or use DATA_SOURCE=fixtures.")
 
     async def meta(self, table_id: str) -> TableMeta:
         d = await self._request("GET", self._api_url(table_id))
-        return _meta_from_api(table_id, d, self.catalog)
+        meta = _meta_from_api(table_id, d, self.catalog)
+        meta.source_kind = "live"
+        key = hashlib.sha1(f"GET {self._api_url(table_id)} null".encode()).hexdigest()
+        cached = settings.cache_dir / f"{key}.json"
+        meta.retrieved_at = datetime.fromtimestamp(cached.stat().st_mtime, timezone.utc).isoformat() if cached.exists() else ""
+        from .profiles import enrich_live_metadata
+        return enrich_live_metadata(meta, settings.profiles_path, self.lang, settings.metadata_ttl_s)
+
+    async def warm_definitions(self, table_id: str) -> TableMeta:
+        """Offline provisioning: a one-cell PX export exposes source definitions.
+
+        The cell is discarded. This is deliberately outside the question path;
+        rejected answer candidates never trigger a numeric query for enrichment.
+        """
+        meta = _meta_from_api(table_id, await self._request("GET", self._api_url(table_id)), self.catalog)
+        if any(not v.values for v in meta.variables):
+            raise SourceError(f"{table_id}: empty dimension")
+        body = {"query": [{"code": v.code, "selection": {"filter": "item", "values": [v.values[-1] if v.time else v.values[0]]}}
+                          for v in meta.variables], "response": {"format": "px"}}
+        for attempt in range(4):
+            async with self._lock:
+                delay = settings.px_min_interval_s - (time.monotonic() - self._last)
+                if delay > 0:
+                    await asyncio.sleep(delay)
+                response = await self.client.post(self._api_url(table_id), json=body)
+                self._last = time.monotonic()
+            if response.status_code == 429:
+                await asyncio.sleep(float(response.headers.get("Retry-After", 10)) * (attempt + 1))
+                continue
+            if response.status_code >= 400:
+                raise SourceError(f"PX definitions {response.status_code}: {response.text[:200]}")
+            marker = re.search(rb"(?m)^DATA\s*=", response.content)
+            if marker is None:
+                raise SourceError(f"{table_id}: PX export has no DATA marker")
+            _apply_definitions(meta, _px_definitions(response.content[:marker.start()], self.lang, meta))
+            meta.source_kind, meta.retrieved_at = "live", datetime.now(timezone.utc).isoformat()
+            return meta
+        raise SourceError("PX definitions rate limited")
 
     async def query(self, table_id: str, selection: dict[str, list[str]]) -> list[Row]:
+        return await self.query_checked(await self.meta(table_id), selection)
+
+    async def query_checked(self, meta: TableMeta, selection: dict[str, list[str]]) -> list[Row]:
+        _check_metadata(meta, await self.meta(meta.id))
+        _check_size(meta, selection)
         body = {
             "query": [{"code": c, "selection": {"filter": "item", "values": v}} for c, v in selection.items()],
             "response": {"format": "json-stat2"},
         }
-        d = await self._request("POST", self._api_url(table_id), body)
-        meta = await self.meta(table_id)
+        d = await self._request("POST", self._api_url(meta.id), body)
+        for code in d.get("id", []):
+            if code not in {v.code for v in meta.variables}:
+                raise AnswerFailure("unverified", "source_metadata_changed", meta.id)
+            var = meta.var(code)
+            labels = d.get("dimension", {}).get(code, {}).get("category", {}).get("label", {})
+            if isinstance(labels, dict) and any(c not in var.values or " ".join(str(label).split()) != " ".join(var.label_of(c).split())
+                                                for c, label in labels.items()):
+                raise AnswerFailure("unverified", "source_metadata_changed", f"{meta.id}: {code}")
+        if meta.updated and isinstance(d.get("updated"), str):
+            stamps = [re.sub(r"\D", "", s) for s in (meta.updated, d["updated"])]
+            length = min(14, *(len(s) for s in stamps))
+            if length >= 8 and stamps[0][:length] != stamps[1][:length]:
+                raise AnswerFailure("unverified", "source_revision_changed", meta.id)
         return _rows_from_cells(meta, parse_jsonstat2(d))
 
 
@@ -164,12 +247,14 @@ def _meta_from_api(table_id: str, d: dict, catalog: Catalog) -> TableMeta:
     looks_like_time = lambda vals: bool(vals) and all(re.fullmatch(r"(?:18|19|20)\d\d(?:[MQ]\d{1,2})?", x) for x in vals)
     variables = [
         Variable(code=v["code"], text=v["text"], values=v["values"], value_texts=v["valueTexts"],
-                 time=v.get("time", False) or looks_like_time(v["values"]), elimination=v.get("elimination", False))
+                 time=v.get("time", False) or looks_like_time(v["values"]), elimination=v.get("elimination", False),
+                 notes=_notes(v.get("notes", v.get("note", []))),
+                 value_notes={c: _notes(n) for c, n in v.get("valueNotes", {}).items() if c in v["values"]}
+                 if isinstance(v.get("valueNotes"), dict) else {})
         for v in d["variables"]
     ]
     unit = d.get("unit") if isinstance(d.get("unit"), str) else ""
-    notes = d.get("notes", d.get("note", []))
-    notes = [notes] if isinstance(notes, str) else [n for n in notes if isinstance(n, str)] if isinstance(notes, list) else []
+    notes = _notes(d.get("notes", d.get("note", [])))
     return TableMeta(id=table_id, title=d.get("title") or (entry.title_en if entry else table_id),
                      title_source="source" if d.get("title") else "catalog" if entry else "unknown",
                      path=entry.path if entry else "", unit=unit or (entry.unit if entry else ""),
@@ -178,6 +263,10 @@ def _meta_from_api(table_id: str, d: dict, catalog: Catalog) -> TableMeta:
                      source=d.get("source") if isinstance(d.get("source"), str) else "",
                      notes=notes, updated=d.get("updated") if isinstance(d.get("updated"), str) else "",
                      variables=variables)
+
+
+def _notes(value) -> list[str]:
+    return [value] if isinstance(value, str) else [n for n in value if isinstance(n, str)] if isinstance(value, list) else []
 
 
 _STATEMENT = re.compile(r'([A-Z][A-Z0-9-]*)((?:\[[a-z]{2}\])?(?:\((?:"[^"]*"|[^)"])*\))?)\s*=')
@@ -213,7 +302,7 @@ def _px_statements(head: bytes) -> dict[str, str]:
     return statements
 
 
-def _px_metadata(path: Path, lang: str) -> dict[str, str]:
+def _px_metadata(path: Path, lang: str, meta: TableMeta | None = None) -> dict:
     """Read source definitions without loading the (potentially huge) numeric DATA section."""
     chunks = bytearray()
     with path.open("rb") as stream:
@@ -223,13 +312,74 @@ def _px_metadata(path: Path, lang: str) -> dict[str, str]:
             if marker := re.search(rb"(?m)^DATA\s*=", chunks[max(0, previous - 16):]):
                 del chunks[max(0, previous - 16) + marker.start():]
                 break
-    statements = _px_statements(bytes(chunks))
+    return _px_definitions(bytes(chunks), lang, meta)
+
+
+def _px_definitions(header: bytes, lang: str, meta: TableMeta | None = None) -> dict:
+    statements = _px_statements(header)
     def text(key):
         # English snapshots also contain Icelandic: use an explicit translation
         # before the default language, never join definitions across languages.
         raw = statements.get(f"{key}[{lang}]", statements.get(key, ""))
         return " ".join(_px_items(raw))
-    return {"unit": text("UNITS"), "source": text("SOURCE"), "description": text("CONTENTS"), "note": text("NOTE")}
+    result = {"unit": text("UNITS"), "source": text("SOURCE"), "description": text("CONTENTS"), "note": text("NOTE")}
+    if updated := text("LASTUPDATED"):
+        result["updated"] = updated
+    if meta is None:
+        return result
+    names = {}
+    for var in meta.variables:
+        names[var.code] = names[var.text] = var
+    for key, raw in statements.items():
+        if key.startswith("VARIABLECODE("):
+            args, codes = _px_items(key[key.index("(") + 1:-1]), _px_items(raw)
+            if args and codes and codes[0] in names:
+                names[args[0]] = names[codes[0]]
+    scoped = {}
+    for key, raw in statements.items():
+        match = re.fullmatch(r'(NOTE|VALUENOTE)(?:\[([a-z]{2})\])?\((.*)\)', key)
+        if not match or match[2] not in (None, lang):
+            continue
+        args = _px_items(match[3])
+        if not args or args[0] not in names:
+            continue
+        var = names[args[0]]
+        value = None
+        if match[1] == "VALUENOTE":
+            if len(args) != 2:
+                continue
+            labels = _px_items(statements.get(f'VALUES[{lang}]("{args[0]}")',
+                                             statements.get(f'VALUES("{args[0]}")', "")))
+            codes = _px_items(statements.get(f'CODES("{args[0]}")', ""))
+            candidates = {c for c, label in zip(var.values, var.value_texts) if args[1] in (c, label)}
+            candidates |= {c for c, label in zip(codes, labels) if args[1] == label and c in var.values}
+            if len(candidates) != 1:
+                continue
+            value = candidates.pop()
+        identity = (var.code, value)
+        if identity not in scoped or match[2] == lang:
+            scoped[identity] = _px_items(raw)
+    result["variable_notes"] = {code: notes for (code, value), notes in scoped.items() if value is None}
+    result["value_notes"] = {}
+    for (code, value), notes in scoped.items():
+        if value is not None:
+            result["value_notes"].setdefault(code, {})[value] = notes
+    return result
+
+
+def _apply_definitions(meta: TableMeta, extra: dict) -> TableMeta:
+    if extra.get("unit"):
+        meta.unit, meta.unit_source = extra["unit"], "source"
+    meta.source = meta.source or extra.get("source", "")
+    meta.description = meta.description or extra.get("description", "")
+    meta.updated = meta.updated or extra.get("updated", "")
+    if extra.get("note") and extra["note"] not in meta.notes:
+        meta.notes.append(extra["note"])
+    for var in meta.variables:
+        var.notes = list(dict.fromkeys([*var.notes, *extra.get("variable_notes", {}).get(var.code, [])]))
+        for code, notes in extra.get("value_notes", {}).get(var.code, {}).items():
+            var.value_notes[code] = list(dict.fromkeys([*var.value_notes.get(code, []), *notes]))
+    return meta
 
 
 class PxTable:
@@ -285,8 +435,10 @@ class PxTable:
 class LocalPxSource:
     """The snapshot on disk, with the live API behind it for anything the snapshot lacks."""
 
-    def __init__(self, catalog: Catalog, root: Path | None = None, lang: str = "en", keep: int = 16):
+    def __init__(self, catalog: Catalog, root: Path | None = None, lang: str = "en", keep: int = 16,
+                 freshness_policy: str | None = None):
         self.catalog, self.root, self.lang = catalog, root or settings.local_data_dir, lang
+        self.policy = freshness_policy or settings.freshness_policy
         self.live = PxApiSource(catalog, lang)
         self._folders: dict[str, Path] = {}  # "<API path>/<table id>" -> folder holding metadata.json and data.px
         with (self.root / "catalogue.csv").open(encoding="utf-8-sig") as f:
@@ -297,26 +449,31 @@ class LocalPxSource:
         self._tables: OrderedDict[str, PxTable] = OrderedDict()  # the last few tables read, newest last
         self.keep = keep
         self._metadata: dict[str, TableMeta] = {}
+        self._metadata_stamps: dict[str, str] = {}
 
     def _folder(self, table_id: str) -> Path | None:
         entry = self.catalog.get(table_id)
         return self._folders.get(f"{entry.path}/{table_id}") if entry else None
 
     async def meta(self, table_id: str) -> TableMeta:
+        if getattr(self, "policy", settings.freshness_policy) == "live":
+            return await self.live.meta(table_id)
         folder = self._folder(table_id)
         if not folder:
             return await self.live.meta(table_id)
-        if table_id not in self._metadata:
+        stamp = ":".join(f"{p.stat().st_mtime_ns}:{p.stat().st_size}" for p in (folder / "metadata.json", folder / "data.px"))
+        if table_id not in self._metadata or getattr(self, "_metadata_stamps", {}).get(table_id) != stamp:
             meta = _meta_from_api(table_id, json.loads((folder / "metadata.json").read_text(encoding="utf-8-sig")),
                                   self.catalog)
-            extra = await asyncio.to_thread(_px_metadata, folder / "data.px", self.lang)
-            if extra["unit"]:
-                meta.unit, meta.unit_source = extra["unit"], "source"
-            meta.source = meta.source or extra["source"]
-            meta.description = meta.description or extra["description"]
-            if extra["note"] and extra["note"] not in meta.notes:
-                meta.notes.append(extra["note"])
+            extra = await asyncio.to_thread(_px_metadata, folder / "data.px", self.lang, meta)
+            _apply_definitions(meta, extra)
+            meta.source_kind, meta.snapshot_at = "snapshot", settings.snapshot_at
+            meta.revision = stamp
             self._metadata[table_id] = meta
+            if not hasattr(self, "_metadata_stamps"):
+                self._metadata_stamps = {}
+            self._metadata_stamps[table_id] = stamp
+            getattr(self, "_tables", {}).pop(table_id, None)
         return self._metadata[table_id].model_copy(deep=True)
 
     def _table(self, table_id: str, meta: TableMeta) -> PxTable:
@@ -329,16 +486,27 @@ class LocalPxSource:
         return self._tables[table_id]
 
     async def query(self, table_id: str, selection: dict[str, list[str]]) -> list[Row]:
+        if getattr(self, "policy", settings.freshness_policy) == "live":
+            return await self.live.query(table_id, selection)
         if not self._folder(table_id):
             return await self.live.query(table_id, selection)
         meta = await self.meta(table_id)
+        _check_size(meta, selection)
         if any(c not in meta.var(code).values for code, vals in selection.items() for c in vals):
             return await self.live.query(table_id, selection)  # e.g. a month published after the snapshot
         table = await asyncio.to_thread(self._table, table_id, meta)
         codes = [v.code for v in meta.variables]
-        sel = [selection.get(c) or meta.var(c).values for c in codes]
+        sel = [selection.get(c, meta.var(c).values) for c in codes]
         cells = [(dict(zip(codes, combo)), table.value(dict(zip(codes, combo)))) for combo in itertools.product(*sel)]
         return _rows_from_cells(meta, cells)
+
+    async def query_checked(self, meta: TableMeta, selection: dict[str, list[str]]) -> list[Row]:
+        if getattr(self, "policy", settings.freshness_policy) == "live" or not self._folder(meta.id):
+            return await self.live.query_checked(meta, selection)
+        _check_metadata(meta, await self.meta(meta.id))
+        rows = await self.query(meta.id, selection)
+        _check_metadata(meta, await self.meta(meta.id))
+        return rows
 
 
 def parse_jsonstat2(d: dict) -> list[tuple[dict[str, str], float | None]]:

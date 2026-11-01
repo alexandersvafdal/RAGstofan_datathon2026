@@ -27,27 +27,26 @@ Post-integration verification: 112 offline regression tests, the teammate's 16 r
 catalog, JavaScript syntax and conflict/whitespace checks. Integration tests cover dictionary routing without
 bypassing validation, published rates, named-month recovery, sums/category chips and ordered cross-table arithmetic.
 
-## Remaining progression
+## Current implementation checkpoint
 
-1. Continue development-set calibration of coverage and false refusals. The retry harness is published and the
-   Spark preview is running. The user authorized committing, pushing and deployment on 1 November. Spark main
-   has newer team changes and untracked artifacts, so the feature branch uses a separate Git worktree on port
-   8002; the existing main app on port 8000 is preserved.
-2. Assess added model calls and compare latency before/after on the same serving setup. Do not claim a speed
-   improvement or a sub-30-second result from offline tests.
-3. Extend the source definitions now read from local PX headers to live metadata and discovery profiles.
-4. Strengthen cross-table population, geography, period, denominator and unit compatibility and source freshness.
-5. Validate final prose against structured claims as well as numeric values.
-6. Calibrate correctness, coverage, false refusals, clarification and latency with development questions; frozen
-   and holdout sets remain measurement-only.
+The remaining engineering milestones are implemented: scoped PX definitions/notes, source profiles in discovery,
+cache expiry and source revision checks, snapshot/live provenance, cross-table statistical contracts, final bound
+claims, an overall request deadline and a repeated evaluation runner. See [implementation details](correctness-implementation.md).
+The dictionary harness and shared tiered finder remain intact. Final rendering removes the writer-model call.
 
-Edit code only on this computer. Spark testing must use code pulled from GitHub after it has been published;
-do not copy unpublished local changes onto the Spark. Preview URL: `http://10.10.40.10:8002/`. Runtime smoke tests
-and observed latency must be reported separately from the offline regression results.
+Code changes are local and will reach only the feature preview through GitHub. The user explicitly authorized
+Spark regression tests on their feature branch; the main checkout and app remain outside this work.
+Local verification: 163 offline regression tests, JavaScript syntax and whitespace checks pass. Spark regression
+verification and profile provisioning follow publication; they do not constitute live-model evaluation.
 
-## False-refusal calibration and live preview verification
+Remaining progression is evaluation: provision profiles for the chosen source policy, run the repeated development
+set, inspect accuracy/coverage/false refusals and latency separately, calibrate on development evidence, then run a
+separate frozen/holdout measurement. No live evaluation of this implementation has been performed yet. These
+milestones do not claim universal semantic correctness or measured sub-30-second success.
 
-Published runtime code through `acefe83` fixes observed false rejections without adding model calls:
+## Historical false-refusal calibration and live preview verification
+
+Before the implementation checkpoint above, runtime code through `acefe83` fixed observed false rejections without adding model calls:
 
 - Misreported implicit defaults no longer reject a query when the executed codes match the resolver's policy.
   Explicit dates, places, categories, missing cells and incomplete operations remain protected.

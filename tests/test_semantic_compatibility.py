@@ -272,6 +272,15 @@ class CompatibilityTests(FailureAssertions, unittest.TestCase):
                                          proof([("title", "Consumer price index"), ("value:Measure:median", "Annual change, %")]))
         self.assertEqual(checked.table_id, "TEST001")
 
+    def test_unemployment_count_cannot_answer_a_rate_even_with_a_percent_unit_hint(self):
+        m = TableMeta(id="LAB", title="Unemployment", path="People/labour", unit="Number/percent", unit_source="source", variables=[
+            Variable(code="Unit", text="Unit", values=["count", "rate"], value_texts=["Unemployed", "Unemployment rate"])])
+        wanted = spec(requirement("measure", "unemployment rate"))
+        self.assert_failure("incompatible_definition", validate_compatibility, m, {"Unit": ["count"]}, wanted,
+                            proof([("title", "Unemployment")]), status="unavailable")
+        self.assertEqual(validate_compatibility(m, {"Unit": ["rate"]}, wanted,
+                                               proof([("value:Unit:rate", "Unemployment rate")])).table_id, "LAB")
+
     def test_votes_cannot_construct_a_query_nobody_verified(self):
         samples = [selection(selections=picks, operation="value") for picks in (
             {"A": ["1"], "B": ["1"], "C": ["2"]}, {"A": ["1"], "B": ["2"], "C": ["1"]},

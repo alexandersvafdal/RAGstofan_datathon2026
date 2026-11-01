@@ -14,7 +14,7 @@ from hagbot.catalog import CatalogEntry
 from hagbot.outcomes import AnswerFailure
 from hagbot.pipeline import NeedsClarification, Pipeline
 from hagbot.semantics import fingerprint
-from hagbot.schemas import Answer, AnswerPart, AskRequest, Clarification, Fact, Row, TableRef
+from hagbot.schemas import Answer, AnswerPart, AskRequest, Clarification, Fact, Row, TableRef, StatisticalContext
 from hagbot.sources import TableMeta, Variable
 from hagbot.specification import Compatibility, Evidence, QuestionSpec, Requirement, RequirementCheck
 from hagbot.steps.compose import Written
@@ -57,7 +57,7 @@ def meta(periods=None, categories=True):
                      value_texts=["Total", "Reykjavík", "Akureyri"]),
             Variable(code="Sex", text="Sex", values=["0", "1", "2"], value_texts=["Total", "Males", "Females"]),
         ]
-    return TableMeta(id="TEST001", title="Population", path="People/population", unit="persons", variables=variables)
+    return TableMeta(id="TEST001", title="Population", path="People/population", unit="persons", unit_source="source", variables=variables)
 
 
 class ScriptedLLM:
@@ -114,8 +114,10 @@ class SourceStub:
 
 
 def part(question="Population", value=30):
-    return AnswerPart(sub_question=question, table=TableRef(id="TEST001", title="Population", url="https://example.org"),
+    return AnswerPart(sub_question=question, table=TableRef(id="TEST001", title="Population", url="https://example.org", source_kind="fixture"),
                       selection={"Year": ["2025"]}, rows=[], unit="persons",
+                      context=StatisticalContext(measure="population", definitions={"statistic": ["total"]},
+                                                 geography=["iceland"], periods=["2025"], reference="january_1", unit="persons"),
                       facts=[Fact(label="Population 2025", value=value, unit="persons", formatted=str(value))])
 
 
@@ -496,7 +498,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
             answer = await pipeline.answer(AskRequest(question="Hver var mannfjöldinn árið 2026?", language="en"))
         self.assertEqual(answer.status, "answered")
         self.assertEqual(answer.parts[0].facts[0].value, 394324)
-        self.assertEqual(llm.calls, 3)
+        self.assertEqual(llm.calls, 2)  # final claims are rendered without a writer-model call
 
     async def test_ratio_cannot_return_only_its_operands(self):
         planned = Plan(sub_questions=[SubQuestion(question="Births in 2025?", search_query="births")])

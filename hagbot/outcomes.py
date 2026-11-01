@@ -7,7 +7,7 @@ from .schemas import FailureStatus, TableAttempt
 RETRYABLE_TABLE_FAILURES = frozenset({
     "incompatible_table", "incompatible_definition", "incompatible_unit", "incompatible_frequency",
     "requested_filter_unavailable", "requested_period_unavailable", "requested_base_unavailable",
-    "requested_window_unavailable", "empty_dimension", "unknown_compatibility", "insufficient_metadata_evidence",
+    "requested_window_unavailable", "empty_dimension", "unknown_compatibility", "insufficient_metadata_evidence", "unknown_unit",
 })
 
 
@@ -47,6 +47,15 @@ class AnswerFailure(Exception):
         super().__init__(f"{code}: {detail}" if detail else code)
 
     def message(self, lang: str) -> str:
+        if self.code == "query_too_large":
+            return ("Veldu færri flokka eða styttra tímabil svo hægt sé að ljúka fyrirspurninni." if lang == "is" else
+                    "Please select fewer categories or a shorter time period so the query can be completed.")
+        if self.code == "ambiguous_denominator_population":
+            return ("Vinsamlegast afmarkaðu stað og íbúahóp sem nota á í nefnaranum." if lang == "is" else
+                    "Please specify the place and population group to use as the denominator.")
+        if self.code == "answer_timeout":
+            return ("Ekki tókst að ljúka staðfestu svari innan tímamarkanna. Reyndu afmarkaðri spurningu." if lang == "is" else
+                    "I could not complete a verified answer within the time limit. Please try a narrower question.")
         if self.code == "missing_filter":
             return (f"Hvaða gildi á að nota fyrir „{self.detail}“?" if lang == "is" else
                     f"Which value should I use for “{self.detail}”?")

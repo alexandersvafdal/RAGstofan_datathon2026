@@ -28,11 +28,18 @@ class Settings:
     data_source: str = os.getenv("DATA_SOURCE", "fixtures")
     px_base_url: str = os.getenv("PX_BASE_URL", "https://px.hagstofa.is")
     px_min_interval_s: float = float(os.getenv("PX_MIN_INTERVAL_S", "1.0"))
+    metadata_ttl_s: float = float(os.getenv("METADATA_TTL_S", "3600"))
+    data_ttl_s: float = float(os.getenv("DATA_TTL_S", "300"))
+    freshness_policy: str = os.getenv("FRESHNESS_POLICY", "snapshot")
+    snapshot_at: str = os.getenv("SNAPSHOT_AT", "2026-10-18")
+    answer_timeout_s: float = float(os.getenv("ANSWER_TIMEOUT_S", "30"))
+    query_cell_limit: int = int(os.getenv("QUERY_CELL_LIMIT", "100000"))
 
     catalog_path: Path = _path("CATALOG_PATH", "data/catalog.json")
     fixtures_dir: Path = _path("FIXTURES_DIR", "data/fixtures")
     local_data_dir: Path = _path("LOCAL_DATA_DIR", "data/release/data")  # the organizers' snapshot, for DATA_SOURCE=local
     cache_dir: Path = _path("CACHE_DIR", ".cache")
+    profiles_path: Path = _path("PROFILES_PATH", ".cache/source-profiles.json")
 
     retrieve_top_k: int = int(os.getenv("RETRIEVE_TOP_K", "15"))
     retrieve_max_attempts: int = int(os.getenv("RETRIEVE_MAX_ATTEMPTS", "3"))
@@ -64,6 +71,12 @@ class Settings:
     def __post_init__(self):
         if not 1 <= self.retrieve_max_attempts <= 5:
             raise ValueError("RETRIEVE_MAX_ATTEMPTS must be between 1 and 5")
+        if self.freshness_policy not in {"snapshot", "live"}:
+            raise ValueError("FRESHNESS_POLICY must be snapshot or live")
+        if min(self.metadata_ttl_s, self.data_ttl_s) < 0 or self.answer_timeout_s <= 0:
+            raise ValueError("cache TTLs must be nonnegative and ANSWER_TIMEOUT_S must be positive")
+        if self.query_cell_limit < 1:
+            raise ValueError("QUERY_CELL_LIMIT must be positive")
 
 
 settings = Settings()

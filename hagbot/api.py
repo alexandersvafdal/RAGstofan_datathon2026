@@ -49,6 +49,12 @@ async def health():
         "llm_base_url": settings.llm_base_url,
         "data_source": settings.data_source,
         "tables_in_catalog": len(pipeline.catalog.entries),
+        "freshness_policy": settings.freshness_policy,
+        "snapshot_at": settings.snapshot_at if settings.data_source == "local" and settings.freshness_policy == "snapshot" else "",
+        "answer_timeout_s": settings.answer_timeout_s,
+        "metadata_ttl_s": settings.metadata_ttl_s,
+        "data_ttl_s": settings.data_ttl_s,
+        "source_profiles": sum(bool(e.source_summary) for e in pipeline.catalog.entries),
     }
 
 

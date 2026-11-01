@@ -11,6 +11,7 @@ year asked, of the place asked about (Iceland unless a place is named). The divi
 """
 
 import re
+from math import isfinite
 
 from ..catalog import STOPWORDS, Catalog, CatalogEntry
 from ..schemas import AnswerPart, Computation, Fact
@@ -63,6 +64,8 @@ class RatioAsk:
         self.numerator, self.scale, self.year, self.clause = numerator, scale, year, clause
         self.dated = dated  # the question names the population date, so the division must be done here
         self.place = place  # the population is this place's, not Iceland's
+        self.places = [place] if place else []
+        self.qualified_population = False
 
     def population_question(self, lang: str) -> str:
         year = self.year or "the latest year"
@@ -82,8 +85,12 @@ def detect_ratio(question: str) -> RatioAsk | None:
     if not numerator.endswith("?"):
         numerator = numerator.rstrip(".") + "?"
     places = _places(numerator)
-    return RatioAsk(numerator, _scale(m), years[-1] if years else None, m.group(0).strip(),
-                    dated=bool(m.group("date")), place=places[0] if places else None)
+    result = RatioAsk(numerator, _scale(m), years[-1] if years else None, m.group(0).strip(),
+                      dated=bool(m.group("date")), place=places[0] if places else None)
+    result.places = places
+    result.qualified_population = bool(re.match(r"\s+(?:aged|under|over|older|younger|with|who|sem|eldri|yngri|med|a aldrinum)\b",
+                                                normalize(question[m.end():])))
+    return result
 
 
 def rate_scales(entry: CatalogEntry) -> set[int]:
@@ -105,7 +112,7 @@ def stored_rate(catalog: Catalog, ask: RatioAsk, question: str, k: int = 10) -> 
     year and place asked, and is about the numerator's subject (shares a word with it). The table covering most of the
     subject's words wins; on a tie, one whose title says both ("GDP per capita", "Landsframleiðslan á mann").
     None if the question names the population date: then the division is what is asked."""
-    if ask.dated:
+    if ask.dated or ask.qualified_population:
         return None
     from .retrieve import narrow  # retrieve imports nothing from here; a late import keeps the steps independent
 
@@ -133,27 +140,43 @@ def stored_rate(catalog: Catalog, ask: RatioAsk, question: str, k: int = 10) -> 
 def ratio_parts(ask: RatioAsk, num: AnswerPart, den: AnswerPart, lang: str) -> tuple[AnswerPart, AnswerPart] | None:
     """The numerator part with the ratio as its computation and headline, and the population part with a readable
     label. None if either side is not one number."""
-    if len(num.facts) != 1 or len(den.facts) != 1 or not den.facts[0].value:
+    if len(num.facts) != 1 or len(den.facts) != 1 or den.facts[0].value <= 0:
         return None
     a = num.facts[0]
     year = re.search(r"\b(?:18|19|20)\d\d\b", den.facts[0].label)
     where = f" of {ask.place}" if ask.place and lang == "en" else f" í {ask.place}" if ask.place else ""
     b = den.facts[0].model_copy(update={"label": (f"Population{where}, 1 January {year.group(0)}" if lang == "en" else
                                                    f"Mannfjöldi{where} 1. janúar {year.group(0)}") if year else den.facts[0].label})
-    result = a.value / b.value * ask.scale
+    numerator_scale = num.context.scale if num.context else 1
+    denominator_scale = den.context.scale if den.context else 1
+    result = a.value * numerator_scale / (b.value * denominator_scale) * ask.scale
+    if not isfinite(result):
+        return None
     per = (f"per {fmt_number(ask.scale, lang)} inhabitants" if ask.scale > 1 else "per inhabitant") if lang == "en" else \
           (f"á hverja {fmt_number(ask.scale, lang)} íbúa" if ask.scale > 1 else "á hvern íbúa")
     times = f" × {fmt_number(ask.scale, lang)}" if ask.scale > 1 else ""
     formatted = fmt_number(result, lang, 1 if result < 1000 else 0)
-    fact = Fact(label=f"{a.label}, {per}", value=result, unit="", formatted=formatted)
+    unit = num.context.unit.removeprefix("count:") if num.context else a.unit
+    fact = Fact(label=f"{a.label}, {per}", value=result, unit=unit, formatted=formatted, basis_indices=[0, 1],
+                source_ids=list(dict.fromkeys([*(a.source_ids or [num.table.id]), *(b.source_ids or [den.table.id])])),
+                periods=list(dict.fromkeys([*a.periods, *b.periods])))
+    scale_a = f" × {fmt_number(numerator_scale, lang)}" if numerator_scale != 1 else ""
+    scale_b = f" × {fmt_number(denominator_scale, lang)}" if denominator_scale != 1 else ""
     return num.model_copy(update={
-        "computation": Computation(op="ratio", expression=f"{a.formatted} / {b.formatted}{times}", result=result, unit=""),
+        "computation": Computation(op="ratio", expression=f"({a.formatted}{scale_a}) / ({b.formatted}{scale_b}){times}", result=result, unit=unit),
         "facts": [a, b, fact],
         "chart": None,
     }), den.model_copy(update={"facts": [b]})
 
 
 def _compatible_units(first: AnswerPart, second: AnswerPart) -> bool:
+    if first.context and second.context and first.context.unit and second.context.unit:
+        from ..semantics import _unit
+        for part in (first, second):
+            observed = _unit(part.facts[0].unit or part.unit)
+            if observed and observed != (part.context.unit, part.context.scale):
+                return False
+        return (first.context.unit, first.context.scale) == (second.context.unit, second.context.scale)
     units = [normalize(p.facts[0].unit or p.unit) for p in (first, second)]
     units = ["persons" if unit in ("people", "person", "persons", "inhabitants") else unit for unit in units]
     return bool(units[0]) and units[0] == units[1]
@@ -177,7 +200,9 @@ def share_parts(first: AnswerPart, second: AnswerPart, lang: str, *, ordered: bo
         first, second, a, b = second, first, b, a
     result = round(a.value / b.value * 100, 4)
     label = f"{'Hlutfall' if lang == 'is' else 'Share'}: {a.label} / {b.label}"
-    fact = Fact(label=label, value=result, unit="%", formatted=fmt_value(result, "%", lang))
+    fact = Fact(label=label, value=result, unit="%", formatted=fmt_value(result, "%", lang), basis_indices=[0, 1],
+                source_ids=list(dict.fromkeys([*(a.source_ids or [first.table.id]), *(b.source_ids or [second.table.id])])),
+                periods=list(dict.fromkeys([*a.periods, *b.periods])))
     return first.model_copy(update={
         "computation": Computation(op="share", expression=f"{a.formatted} ÷ {b.formatted}", result=result, unit="%"),
         "facts": [a, b, fact],
@@ -207,7 +232,9 @@ def difference_parts(first: AnswerPart, second: AnswerPart, lang: str, *, operat
     unit = "%" if operation == "pct_change" else b.unit
     sign = "+" if result > 0 else ""
     label = f"{'Breyting' if lang == 'is' else 'Change'} {a.label} → {b.label}"
-    fact = Fact(label=label, value=result, unit=unit, formatted=sign + fmt_value(result, unit, lang))
+    fact = Fact(label=label, value=result, unit=unit, formatted=sign + fmt_value(result, unit, lang), basis_indices=[0, 1],
+                source_ids=list(dict.fromkeys([*(a.source_ids or [first.table.id]), *(b.source_ids or [second.table.id])])),
+                periods=list(dict.fromkeys([*a.periods, *b.periods])))
     return second.model_copy(update={
         "computation": Computation(op=operation, expression=(f"({b.formatted} − {a.formatted}) ÷ {a.formatted} × 100"
                                       if operation == "pct_change" else f"{b.formatted} − {a.formatted}"), result=result, unit=unit),

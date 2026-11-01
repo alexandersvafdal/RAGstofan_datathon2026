@@ -52,8 +52,14 @@ def compute(meta: TableMeta, rows: list[Row], res: Resolved, lang: str) -> tuple
     unit = meta.unit
     rows = [r for r in rows if r.value is not None]
     varying = {c for c, v in res.selections.items() if len(v) > 1}
-    facts = [Fact(label=row_label(meta, r, varying), value=r.value, unit=unit, formatted=fmt_value(r.value, unit, lang))
+    facts = [Fact(label=row_label(meta, r, varying), value=r.value, unit=unit, formatted=fmt_value(r.value, unit, lang),
+                  source_ids=[meta.id], periods=[r.key[v.code] for v in meta.variables if v.time])
              for r in rows]
+    indices = {id(row): i for i, row in enumerate(rows)}
+    def calculated(label, value, unit, formatted, operands):
+        return Fact(label=label, value=value, unit=unit, formatted=formatted,
+                    basis_indices=[indices[id(row)] for row in operands], source_ids=[meta.id],
+                    periods=sorted({row.key[v.code] for row in operands for v in meta.variables if v.time}))
     if res.operation in ("value", "series", "rank") or not rows:   # rank: the rows arrive ranked and trimmed
         return None, facts
 
@@ -67,8 +73,8 @@ def compute(meta: TableMeta, rows: list[Row], res: Resolved, lang: str) -> tuple
             present = sorted(group, key=order.index)
             best = (max if res.operation == "max" else min)((group[c] for c in present), key=lambda r: r.value)
             first, last = (group[present[i]].labels[meta.var(dim).text] for i in (0, -1))
-            facts.append(Fact(label=f"{word[res.operation, lang]}: {row_label(meta, best, {dim})}", value=best.value,
-                              unit=unit, formatted=fmt_value(best.value, unit, lang)))
+            facts.append(calculated(f"{word[res.operation, lang]}: {row_label(meta, best, {dim})}", best.value,
+                                    unit, fmt_value(best.value, unit, lang), list(group.values())))
             if comp is None:
                 expr = (f"{'hæsta' if res.operation == 'max' else 'lægsta'} af {len(present)} gildum, {first}–{last}"
                         if lang == "is" else f"{'highest' if res.operation == 'max' else 'lowest'} of {len(present)} values, {first}–{last}")
@@ -83,8 +89,8 @@ def compute(meta: TableMeta, rows: list[Row], res: Resolved, lang: str) -> tuple
                 continue
             total = sum(group[c].value for c in present)
             names = " + ".join(group[c].labels[meta.var(dim).text] for c in present)
-            facts.append(Fact(label=f"{'Samtals' if lang == 'is' else 'Total'}: {names}", value=total, unit=unit,
-                              formatted=fmt_value(total, unit, lang)))
+            facts.append(calculated(f"{'Samtals' if lang == 'is' else 'Total'}: {names}", total, unit,
+                                    fmt_value(total, unit, lang), [group[c] for c in present]))
             if comp is None:
                 comp = Computation(op="sum", expression=" + ".join(fmt_number(group[c].value, lang) for c in present),
                                    result=total, unit=unit)
@@ -121,8 +127,8 @@ def compute(meta: TableMeta, rows: list[Row], res: Resolved, lang: str) -> tuple
             expr = f"{fmt_number(p.value, lang)} ÷ {fmt_number(w.value, lang)}"
             label = f"Share: {row_label(meta, p, {dim})} of {w.labels[meta.var(dim).text]}"
         sign = "+" if res.operation != "share" and result > 0 else ""
-        facts.append(Fact(label=label, value=round(result, 4), unit=op_unit,
-                          formatted=sign + fmt_value(result, op_unit, lang)))
+        operands = [p, w] if res.operation == "share" else [a, b]
+        facts.append(calculated(label, round(result, 4), op_unit, sign + fmt_value(result, op_unit, lang), operands))
         if comp is None:
             comp = Computation(op=res.operation, expression=expr, result=round(result, 4), unit=op_unit)
     return comp, facts

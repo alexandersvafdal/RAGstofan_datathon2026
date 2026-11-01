@@ -50,13 +50,17 @@ The message says a multi-part question could not be completed and issues identif
 Ratio operands cannot be returned as an answer when the ratio could not be computed, and additional numerator
 lookups cannot be silently discarded.
 
+Answers now also carry `claims`, bound to fact indices, labels, values, units, periods and sources. Final prose is
+rendered from those records. Cross-table calculations require compatible executed statistical contexts. Expired
+live caches must refresh; observed source changes stop the answer. A whole-request deadline produces
+`error/answer_timeout` without partial facts or claims. See [implementation details](correctness-implementation.md).
+
 These are control-flow and data-integrity safeguards. They do not prove the model correctly interpreted every
 phrase or selected the right statistical definition, nor detect every omitted sub-question. Scope classification
 and extraction of requirements beyond the deterministic checks still depend on the model. This intentionally
 increases abstentions; measure coverage and correctness with the actual serving model before deployment.
-Cache freshness, broader metadata extraction, profile-based discovery and live model
-calibration remain separate work. The first compatibility gate checks evidence and common statistical distinctions;
-it cannot establish the correctness of every semantic interpretation.
+Source freshness, profile-based discovery and scoped metadata are implemented. Live-model calibration remains the
+next phase. The compatibility gate cannot establish the correctness of every semantic interpretation.
 
 Run offline regression tests, without model, vector or PX-API calls:
 

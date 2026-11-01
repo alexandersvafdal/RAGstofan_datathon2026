@@ -171,7 +171,7 @@ class PipelineIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(answer.status, "answered")
         self.assertEqual(len(answer.parts), 1)
         self.assertTrue(answer.parts[0].verifications)
-        self.assertEqual(llm.calls, 3)
+        self.assertEqual(llm.calls, 2)
         divide.assert_not_called()
 
 

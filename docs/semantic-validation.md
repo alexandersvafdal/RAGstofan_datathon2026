@@ -99,10 +99,13 @@ statistical distinction can escape the common-rule checks.
 
 ## Remaining work in this milestone
 
-- Expand source metadata extraction, including PX definitions/footnotes not exposed in the current metadata view.
-- Use profiles to improve candidate discovery beyond the existing catalog/dictionary rankings.
-- Calibrate acceptance and abstention with the serving model, measuring coverage and answer correctness separately.
-- Evaluate multi-table definition compatibility and source freshness before claiming deployment readiness.
+The engineering milestones now include scoped PX notes, source profiles in discovery, expiring live caches,
+source revision checks, cross-table definition contracts and bound final claims. See
+[implementation details](correctness-implementation.md). Live definitions are provisioned before serving with
+`scripts.build_source_profiles` and are accepted only while fresh and matching the API schema.
+
+The remaining phase is serving-model evaluation and calibration. Unknown statistical definitions and unproven
+cross-table containment remain `unverified`; implementing the checks does not establish their empirical coverage.
 
 No serving-model or Spark accuracy is established by the offline regression tests. Frozen and holdout question
 sets remain measurement-only.
