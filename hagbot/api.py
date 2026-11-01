@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import re
 import time
 from contextlib import asynccontextmanager
 
@@ -64,9 +65,10 @@ async def models():
             _models = (time.monotonic(), await pipeline.llm.models())
         except Exception:   # the endpoint cannot list models: offer only the default
             _models = (time.monotonic(), [])
-    names = _models[1]
-    return {"default": settings.llm_model, "models": [settings.llm_model, *(m for m in names if m != settings.llm_model)],
-            "fast": settings.fast_model}
+    # The default first, then the rest from the largest down: the parameter count is read from the tag ("27b", "0.8b")
+    size = lambda m: (-float(x.group(1)) if (x := re.search(r"(\d+(?:\.\d+)?)b\b", m)) else 0.0, m)
+    names = sorted((m for m in _models[1] if m != settings.llm_model), key=size)
+    return {"default": settings.llm_model, "models": [settings.llm_model, *names], "fast": settings.fast_model}
 
 
 @app.get("/api/indicators", response_model=Indicators)
