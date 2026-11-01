@@ -27,16 +27,15 @@ flowchart TD
 
     subgraph find["2 · Find the table (each part in parallel)"]
         A{"Word with no single table?<br/>tourists · ferðamenn"}:::code
-        MODE{"RETRIEVAL setting"}:::code
         DICT["Keyword dictionary<br/>data/keywords.json: verðbólga → consumer price index → VIS01000<br/>adds the official term to the search"]:::code
         subgraph search["Search 1,857 tables, in parallel · English wording + the original"]
             S1["BM25 keywords · top 120<br/>titles EN + IS, dimension names, option labels,<br/>prefix match, synonyms, all words must match"]:::code
             S2["e5 vectors · top 120<br/>meaning of each table's description:<br/>titles, dimensions IS + EN, period, options"]:::code
         end
-        FS["Fuse by rank · top 30<br/>1 / (60 + rank) from each search, × recency"]:::code
-        RK["Rank: dictionary tables first,<br/>then fused searches × recency"]:::code
+        RK["Rank: dictionary tables first, then the searches<br/>fused by rank, 1 / (60 + rank) from each, × recency"]:::code
         N["Narrow by rule<br/>drop trend / seasonal / forecast / census unless asked,<br/>keep tables with the place, month or year asked for"]:::code
-        T[["LLM ③ Pick one table from the 15<br/>or say two fit equally"]]:::llm
+        DD{"One subject, its headline table on top,<br/>nothing asked beyond it?"}:::code
+        T[["LLM ③ Must pick one table<br/>from the hitlist"]]:::llm
         CK[["LLM ③ Check the hitlist, 8 tables at a time, ≤ 2 rounds<br/>pick one, or say none fits · votes"]]:::llm
         BR[["LLM ③ Browse: choose ≤ 2 subject areas"]]:::llm
         CK2[["LLM ③ Check tables in those areas,<br/>8 at a time, ≤ 4 rounds · votes"]]:::llm
@@ -75,19 +74,13 @@ flowchart TD
     R -- no --> P
     P --> A
     A -- yes --> ASK
-    A -- no --> MODE
-    MODE -- "classic (default)" --> search
-    MODE -- tiered --> DICT --> search
-    search -- classic --> FS --> N
-    search -- tiered --> RK --> N
-    N -- "classic: top 15" --> T
-    N -- "tiered: top 16" --> CK
-    T -- two fit equally --> ASK
-    T -- one --> F
-    CK -- a table --> F
+    A -- no --> DICT --> search --> RK --> N --> DD
+    DD -- "yes: the dictionary decides" --> F
+    DD -- "no: top 16" --> CK
+    CK -- "a table, snapped to the subject's headline<br/>table unless a breakdown was asked" --> F
     CK -- none fits --> BR --> CK2
     CK2 -- a table --> F
-    CK2 -- "none fits: must pick" --> T
+    CK2 -- "none fits" --> T --> F
     F --> C --> V --> D --> E --> K --> NT --> M --> RD --> G --> W --> X
     X -- yes --> OUT
     X -- no --> TPL --> OUT
@@ -99,8 +92,8 @@ flowchart TD
 
 <sub>Gold, double-edged boxes are LLM calls (qwen2.5:14b through Ollama, or any OpenAI-compatible server); the circled
 number is the call's kind, counted in the table below. Blue is plain code. "votes": with `VOTES` > 1 or `VOTE_MODELS`
-set, that call is asked several times in parallel and the majority wins (off by default). The tiered finder is used
-with `RETRIEVAL=tiered`; the classic finder is the default. Each step is streamed to the browser the moment it finishes.</sub>
+set, that call is asked several times in parallel and the majority wins (off by default). Each step is streamed to the
+browser the moment it finishes.</sub>
 
 ### LLM calls per question
 
@@ -108,12 +101,11 @@ with `RETRIEVAL=tiered`; the classic finder is the default. Each step is streame
 |---|---|---|---|
 | ① | Rewrite a follow-up | the wording leans on the previous turn | 0–1 |
 | ② | Plan | always, unless the user clicked a table or a published per-inhabitant rate answers it | 0–1 |
-| ③ | Pick the table, classic | per part; skipped when one table is left, or when the table is fixed (clicked, or population for a ratio) | 0–1 per part |
-| ③ | Find the table, tiered | per part: check 1–2 rounds; if none fits, browse 1 + check 1–4 rounds; if still none, the classic pick 1 | 1–8 per part |
+| ③ | Find the table | per part: none when the table is fixed (clicked, or population for a ratio) or the dictionary decides alone; otherwise check 1–2 rounds; if none fits, browse 1 + check 1–4 rounds; if still none, a forced pick 1 | 0–8 per part |
 | ④ | Choose categories | per part | 1 per part |
 | ⑤ | Write the answer | when at least one part has numbers | 0–1 |
 
-A one-part question with the classic finder makes 4 calls (plan, pick, categories, write). Voting multiplies the
+A one-part question makes 3–4 calls (plan, find 0–1, categories, write). Voting multiplies the
 calls marked "votes" by the number of votes; they run in parallel, so it costs compute more than time.
 
 ## Why Icelandic questions are reworded in English
@@ -143,8 +135,8 @@ languages. It would make sense with a model that is strong in Icelandic.
 | Ratio to population | `hagbot/steps/ratio.py` | no |
 | Follow-up rewrite | `hagbot/steps/followup.py` | rewrite only |
 | Search | `hagbot/catalog.py` (BM25 over three fields) and `hagbot/e5.py` (e5 vectors, on by default; optional bge-m3 in `hagbot/vectors.py`), run in parallel and fused by rank | no |
-| Narrow, ambiguity, pick table | `hagbot/steps/retrieve.py` | pick only |
-| Tiered finder (`RETRIEVAL=tiered`) | `hagbot/steps/tiered.py`, keyword dictionary `data/keywords.json` | check and browse |
+| Narrow, ambiguity, forced pick | `hagbot/steps/retrieve.py` | pick only |
+| Tiered finder | `hagbot/steps/tiered.py`, keyword dictionary `data/keywords.json` | check and browse |
 | Majority voting (`VOTES`, `VOTE_MODELS`) | `hagbot/vote.py` | repeats a call |
 | Choose and validate categories | `hagbot/steps/select.py` | choose only |
 | Data | `hagbot/sources.py` (local snapshot, live PX-API, fixtures) | no |

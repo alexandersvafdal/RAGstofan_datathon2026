@@ -35,9 +35,6 @@ class Settings:
     cache_dir: Path = _path("CACHE_DIR", ".cache")
 
     retrieve_top_k: int = int(os.getenv("RETRIEVE_TOP_K", "15"))
-    # How a table is found: "classic" (keyword search, the model picks from 15) or "tiered" (keyword dictionary ->
-    # model check -> semantic search -> model browse; hagbot/steps/tiered.py)
-    retrieval: str = os.getenv("RETRIEVAL", "classic")
     # Majority voting on the model's choices (table pick, categories). VOTES=1 is off. With VOTE_MODELS set
     # ("qwen3.8:27b,gpt-oss:20b,..."), each model votes once; otherwise the main model votes VOTES times, the first
     # at temperature 0 and the rest at VOTE_TEMPERATURE so they can differ.

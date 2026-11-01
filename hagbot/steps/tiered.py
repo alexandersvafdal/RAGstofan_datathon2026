@@ -6,13 +6,14 @@
      and whichever vector searches are switched on (e5 from hagbot/e5.py, bge-m3 from hagbot/vectors.py), all run on
      the question plus the official term. Dictionary tables lead; the rest are ordered by reciprocal-rank fusion of
      the searches times a recency factor; code-side rules (narrow) then drop variants nobody asked for.
-  2. The model checks the hitlist from the top, 8 tables at a time: it picks one, or says none of them answers.
+     When the question has one subject, its headline table is on top and nothing beyond the subject is asked,
+     the dictionary decides and no model is called.
+  2. Otherwise the model checks the hitlist from the top, 8 tables at a time: it picks one, or says none answers.
   3. If none fits: the model browses, first one of Statistics Iceland's subject areas, then a table inside it.
-  4. If every check said "none" (the model can be too strict), it must pick from the keyword hits.
+  4. If every check said "none" (the model can be too strict), it must pick from the hitlist (retrieve.retrieve).
 
-Every tier shares the code-side rules the classic finder uses: ambiguous words ask the user, table variants nobody
-asked for are dropped (narrow), and the newest edition of a chosen table is used (freshest sibling).
-Set RETRIEVAL=tiered to use it; the classic finder stays the default until this one is measured.
+Every tier shares the code-side rules in retrieve.py: ambiguous words ask the user, table variants nobody asked for
+are dropped (narrow), and the newest edition of a chosen table is used (freshest sibling). This is the only finder.
 """
 
 import json

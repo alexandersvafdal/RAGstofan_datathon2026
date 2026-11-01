@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from ..catalog import SYNONYMS
+from ..catalog import SYNONYMS, _same_word
 from ..llm import LLM
 from ..vote import ask_all, majority, voting_on
 from ..sources import TableMeta, Variable
@@ -39,6 +39,7 @@ class Resolved(BaseModel):
     breakdown: str | None = None  # rank: the coded dimension listed, so its categories can be opened further
     top: int | None = None        # rank: keep the n largest (by size, either sign); None lists them all
     beyond: str | None = None     # a period asked for that lies after this table's last one ("2026M09" in a table to 2026M08)
+    place_note: dict[str, str] | None = None  # en/is, when a place the question names is not among the table's options
 
 
 def _mention_order(var: Variable, codes: list[str], question: str) -> list[str] | None:
@@ -160,12 +161,43 @@ def _same_year_edge(var: Variable, v: str) -> str | None:
     return None
 
 
+_MONTH_NUM = {m: i for i, m in enumerate(("january february march april may june july august september october november "
+                                              "december").split(), 1)}
+_MONTH_NUM |= {m: i for i, m in enumerate("januar februar mars april mai juni juli agust september oktober november desember".split(), 1)}
+_QUARTER_NUM = {"first": 1, "1st": 1, "fyrsta": 1, "fyrsti": 1, "second": 2, "2nd": 2, "odrum": 2, "annar": 2, "annan": 2,
+                "third": 3, "3rd": 3, "thridja": 3, "thridji": 3, "fourth": 4, "4th": 4, "fjorda": 4, "fjordi": 4}
+
+
+def _period_from_question(var: Variable, text: str) -> str | None:
+    """The period a question names, as this table codes it: "August 2026" -> 2026M08, "second quarter of 2026" ->
+    2026Q2, "in 2025" -> 2025. Only when the question names one year, so a range is left to the model."""
+    q = normalize(text)
+    years = re.findall(r"\b(?:18|19|20)\d\d\b", q)
+    if len(set(years)) != 1:
+        return None
+    y = years[0]
+    m = re.search(r"\b(" + "|".join(_MONTH_NUM) + r")\b\s+" + y, q)
+    if m and f"{y}M{_MONTH_NUM[m.group(1)]:02d}" in var.values:
+        return f"{y}M{_MONTH_NUM[m.group(1)]:02d}"
+    qm = re.search(r"\b(" + "|".join(_QUARTER_NUM) + r")\s+(?:quarter|arsfjordung\w*)\s+(?:of\s+)?" + y, q) or \
+         re.search(r"\bq([1-4])\s*" + y, q)
+    if qm:
+        n = _QUARTER_NUM.get(qm.group(1), qm.group(1))
+        if f"{y}Q{n}" in var.values:
+            return f"{y}Q{n}"
+    return y if y in var.values else None
+
+
 def _default(var: Variable) -> list[str]:
+    """The latest period; for other dimensions the total, a whole-country option, or a "…, total" option, in that order."""
     if var.time:
         return [var.values[-1]]
-    for code, label in zip(var.values, var.value_texts):
-        if _TOTAL.search(label):
-            return [code]
+    pairs = list(zip(var.values, var.value_texts))
+    for pattern in (re.compile(r"^(total|alls|samtals|all)$"), re.compile(r"whole country|landid allt|all of iceland|^iceland$|^island$"),
+                    re.compile(r"\b(total|alls|samtals|allir|allar|oll)\b")):
+        for code, label in pairs:
+            if pattern.search(normalize(label)):
+                return [code]
     return [var.values[0]]
 
 
@@ -202,13 +234,47 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             raw = [v for v in raw if _resolve_value(var, v) or not _same_year_edge(var, v)]
         if len(codes) < len(raw):
             notes.append(f"{var.text}: dropped unknown values {[v for v in raw if not _resolve_value(var, v)]}")
+        if not codes and var.time and (asked := _period_from_question(var, part or question)):
+            codes = [asked]   # the model left the period out: the one the question names, not the latest
+            notes.append(f"{var.text}: {asked} from the question")
         if not codes:
             codes = _default(var)
             notes.append(f"{var.text}: defaulted to {[var.label_of(c) for c in codes]}")
         out[var.code] = sorted(set(codes), key=var.values.index)
 
-    # "Iceland" in a question means the whole country, not Icelandic citizens or people born in Iceland
     q = normalize(question)
+    qwords = [w for w in tokens(question) if len(w) >= 4]
+    def mentioned(label: str) -> bool:
+        return any(_same_word(t, w) for t in tokens(label) if len(t) >= 4 for w in qwords)
+    # "Unknown domicile", "Not stated": never the answer unless asked for; a place the model made up (Garðabær for
+    # Egilsstaðir, which the table lacks) goes too when the others chosen are the ones the question names
+    for var in meta.variables:
+        if var.time:
+            continue
+        chosen = out[var.code]
+        if not re.search(r"unknown|othekkt|not stated|otilgreint|ospecified", q):
+            kept = [c for c in chosen if not re.search(r"unknown|óþekkt|not stated|ótilgreint|unspecified", var.label_of(c), re.I)]
+            if len(kept) < len(chosen):
+                notes.append(f"{var.text}: dropped {[var.label_of(c) for c in chosen if c not in kept]} (not asked for)")
+                out[var.code] = chosen = kept or _default(var)
+        if sel.operation == "value" and len(chosen) >= 2 and not coded(var):
+            in_question = [c for c in chosen if mentioned(var.label_of(c))]
+            if in_question and len(in_question) < len(chosen):
+                notes.append(f"{var.text}: dropped {[var.label_of(c) for c in chosen if c not in in_question]} (not named in the question)")
+                out[var.code] = in_question
+    # a place the question names that no option and no title of this table carries: say so, rather than answer as if
+    place_note = None
+    from .retrieve import named_places
+    texts = [t for v in meta.variables if not v.time for t in v.value_texts] + [meta.title]
+    for place in named_places(part or question):
+        if not any(_same_word(t, place) for label in texts for t in tokens(label)):
+            shown = next((w for w in re.findall(r"[A-ZÁÐÉÍÓÚÝÞÆÖ][\wáðéíóúýþæö]+", part or question) if normalize(w).startswith(place[:5])), place)
+            place_note = {"en": f"{shown} is not among this table's options; the figures are for the options selected.",
+                          "is": f"{shown} er ekki meðal valkosta í þessari töflu; tölurnar eru fyrir það sem valið var."}
+            notes.append(f"{shown}: not in the table's options")
+            break
+
+    # "Iceland" in a question means the whole country, not Icelandic citizens or people born in Iceland
     # ...unless the question compares groups ("Icelanders and foreigners") or the model chose several of them
     if not re.search(r"citizen|rikisborg|born|birth|faedd|faeding|origin|uppruna|icelander|foreign|islending|utlending|erlend", q):
         for var in meta.variables:
@@ -348,7 +414,10 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
 
     compare = sel.compare_dimension if sel.compare_dimension in out else None
     hint = guess_op(question)
-    if op in ("value", "series") and not trend and hint in ("difference", "pct_change") and any(len(v) == 2 for v in out.values()):
+    gives_change = any(re.search(_CHANGE_OPTION, normalize(var.label_of(c))) for var in meta.variables if not var.time
+                       for c in out[var.code])
+    if (op in ("value", "series") and not trend and hint in ("difference", "pct_change") and not gives_change
+            and any(len(v) == 2 for v in out.values())):
         notes.append(f"operation {op} -> {hint} (question wording)")
         op = hint
     if op == "value" and hint == "share":
@@ -356,6 +425,9 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
         op = "share"
     if op == "pct_change" and re.search(r"\bstig\b|\bstigum\b|\bpoints?\b", q):   # "um hve mörg stig": index points, not %
         notes.append("operation pct_change -> difference (points asked)")
+        op = "difference"
+    if op == "pct_change" and hint == "difference" and not re.search(r"percent|%|prosent|hlutfall|per cent|hundradshlut", q):
+        notes.append("operation pct_change -> difference (a change asked, no percent word)")   # "how much did Reykjavík grow"
         op = "difference"
     if op == "difference" and re.search(r"\bstig\b|\bstigum\b|\bpoints?\b", q):
         # points are a difference of the index itself: a dimension chosen as "Annual change, %" goes back to the level
@@ -440,7 +512,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             notes.append(f"{var.text}: {'the largest ' + str(top) + ' of ' if top else ''}{len(kids)} categories"
                          + (f" under {var.label_of(named(var, question))!r}" if named(var, question) else ""))
     return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes,
-                    window_note=window_note, breakdown=breakdown, top=top, beyond=beyond)
+                    window_note=window_note, breakdown=breakdown, top=top, beyond=beyond, place_note=place_note)
 
 
 async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None) -> Resolved:

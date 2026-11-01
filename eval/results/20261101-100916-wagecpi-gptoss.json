@@ -1,0 +1,101 @@
+{
+ "label": "wagecpi-gptoss",
+ "results": [
+  {
+   "id": "wage-vs-cpi-is",
+   "level": "hard",
+   "language": "is",
+   "question": "hver er launavísitala borin saman við vísitölu neysluverðs",
+   "expected_tables": [
+    "LAU04000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [],
+   "table_ok": false,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 25.23,
+   "llm_calls": 11,
+   "tables": [
+    "LAU04800"
+   ],
+   "text": "Launavísitöldin fyrir 2026M08 er 169,7 samkvæmt töflunni LAU04800 frá Hagstofa Íslands.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1416,
+     "detail": "What is the wage index compared to the consumer price index?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 21442,
+     "detail": "LAU04800 from [VIS01000, LAU04000, VIN02001, LAU04201, LAU04101, LAU04001, LAU04103, LAU04800, LAU04203, LAU04003, VIS02508, LAU04107, LAU04105, VIS02201, VIS02202, LAU04205, LAU04207, LAU04200, LAU04007, VIS02506, LAU04005, LAU04109, LAU04209, VIS02502, VIS01303, VIS02500, LAU04802, VIS02200, VIS02002, VIS01104, VIS01103, VIS02001, LAU09917, VIS08000b, LAU09927, LAU09923, VIS08010b, LAU09925, VIS01503, VIS02400, LAU09901, VIS02301, LAU09903, VIS01301, LAU09915, VIS02000, LAU09902, VIN02092, VIS01101, VIS01304, VIS01102, VIN02091, VIS01004, VIS01305, VIS01106, VIN02100, VIS06140, VIS08003b, SKU01008, VIN02202, VIS02300, VIN02200, VIN02012, VIN02205, VIN02500, VIN02203, VIS08011] via best keyword hit · concepts: consumer price index, wage index, wages, comparison"
+    },
+    {
+     "name": "select",
+     "ms": 1316,
+     "detail": "value {'Month': ['2026M08']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 8,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1041,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wage-vs-cpi-en",
+   "level": "hard",
+   "language": "en",
+   "question": "how does the wage index compare with the consumer price index",
+   "expected_tables": [
+    "LAU04000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [],
+   "table_ok": false,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 25.35,
+   "llm_calls": 11,
+   "tables": [
+    "LAU04800"
+   ],
+   "text": "I cannot compare the wage index with the consumer price index because the CPI data is not provided in the facts.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1427,
+     "detail": "What is the trend of the wage index compared to the consumer price index in Iceland over the last years?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 16460,
+     "detail": "LAU04800 from [VIS01000, LAU04000, VIS02201, VIS02508, VIS02506, VIS02202, LAU04800, LAU04201, VIS02500, LAU04207, LAU04203, LAU04205, VIS02000, LAU04200, VIS02200, LAU04209, VIS01303, VIS08000b, VIN02092, VIS02400, VIS02001, LAU04101, VIS08003b, VIS01104, LAU09917, LAU09927, VIS01503, LAU09925, VIS01004, VIS01304, THJ05813, VIS02300, VIS02301, LAU04109, LAU04107, LAU09915, LAU09901, UMH31118, IDN02303, LAU04001, VIS01305, VIS01301, LAU04103, LAU04105, VIS02502, SJA06100b, VIS02002, UMH34095, FYR01202, VIN02100, THJ01000, LAU04007, VIS06140, LAU04003, SJA01106, VIS01300, VIS08010b, THJ02105, THJ03201, FYR05103, VIS01101, VIS01102, UTA06108, UTA06202, VIN02091, FYR01204, FYR05201a, LAU09923, VIS06126, VIN02204, LAU09902, LAU09903, VIN02202, VIS08011, VIS06128, VIN02203, VIN02200, VIN02500, VIN02201] via best keyword hit · concepts: consumer price index, wage index, comparison, trend"
+    },
+    {
+     "name": "select",
+     "ms": 6231,
+     "detail": "series {'Month': ['2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08']} notes: ['Month: a trend, 2021M09 to 2026M08']"
+    },
+    {
+     "name": "fetch",
+     "ms": 3,
+     "detail": "60 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1227,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}

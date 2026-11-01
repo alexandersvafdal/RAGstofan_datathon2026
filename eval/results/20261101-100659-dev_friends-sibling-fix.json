@@ -1,0 +1,485 @@
+{
+ "label": "dev_friends-sibling-fix",
+ "results": [
+  {
+   "id": "friends-unemp-max-15y",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver er hæsta atvinnuleysistíðnin á síðustu 15 árum, hvað var hún há og hvaða ár?",
+   "expected_tables": [
+    "VIN00001|VIN00921|VIN00911|VIN01002|VIN00910"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; max over a span, needs year and value",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 68.52,
+   "llm_calls": 4,
+   "tables": [
+    "VIN00001"
+   ],
+   "text": "Hæsta atvinnuleysistíðin á tímabilinu 2003–2026 var 12,4% í maí 2011, samkvæmt Hagstofu Íslands (tafla VIN00001).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2520,
+     "detail": "What was the highest unemployment rate in the last 15 years, and in which year did it occur?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 6117,
+     "detail": "VIN00001 from [VIN00001, VIN00920, VIN00911, VIN00921, VIN01002, VIN00951, VIN00910, VIN00931, VIN01004, VIN01401, FYR01202, VIN01404, VIN01402, HEI03111, FYR09004, VIN01003, FYR04112, VIN00971, FYR04111, VIN01105, VIN01206, LAU04103, VIN01110, VIN01006, MAN05210, VIN01106, FYR04102, LAU04207, FYR04101, VIN00961, LAU04107, VIN01104, LAU04203, LAU09917, VIN01005, VIN01111, SKU01007, LAU04201, FYR09002, VIN10040, VIN02005, SKU01008, FYR09005, UMH53120, LIF01131, TEK02011, JVS00001, SKO03108, VIN02100, FYR01204, THJ11002, VIN01701, VIN02004, SKU01010, VIN02001, THJ11011, SKU01002, TEK01007, VIN02010, LAU04205, VIN00932, LAU04200, LAU04101, MAN05202, LAU04105, THJ09007, VIN01203, LIF01151, SKU01009, LIF01120, HEI09106, LIF06103, PEN01101, SKU01005, MEN06108, SKU01003, VIN01403, CEN09002, SKU01004, SKU01006, MAN06203, FYR09006, PEN02102, CEN03441, MAN06104, FYR04200, CEN07010, CEN07020, CEN03020, CEN03070, CEN07030, CEN07040, CEN07050] via keyword search · concepts: unemployment, annual"
+    },
+    {
+     "name": "select",
+     "ms": 52225,
+     "detail": "max {'Month': ['2011M01', '2011M02', '2011M03', '2011M04', '2011M05', '2011M06', '2011M07', '2011M08', '2011M09', '2011M10', '2011M11', '2011M12', '2012M01', '2012M02', '2012M03', '2012M04', '2012M05', '2012M06', '2012M07', '2012M08', '2012M09', '2012M10', '2012M11', '2012M12', '2013M01', '2013M02', '2013M03', '2013M04', '2013M05', '2013M06', '2013M07', '2013M08', '2013M09', '2013M10', '2013M11', '2013M12', '2014M01', '2014M02', '2014M03', '2014M04', '2014M05', '2014M06', '2014M07', '2014M08', '2014M09', '2014M10', '2014M11', '2014M12', '2015M01', '2015M02', '2015M03', '2015M04', '2015M05', '2015M06', '2015M07', '2015M08', '2015M09', '2015M10', '2015M11', '2015M12', '2016M01', '2016M02', '2016M03', '2016M04', '2016M05', '2016M06', '2016M07', '2016M08', '2016M09', '2016M10', '2016M11', '2016M12', '2017M01', '2017M02', '2017M03', '2017M04', '2017M05', '2017M06', '2017M07', '2017M08', '2017M09', '2017M10', '2017M11', '2017M12', '2018M01', '2018M02', '2018M03', '2018M04', '2018M05', '2018M06', '2018M07', '2018M08', '2018M09', '2018M10', '2018M11', '2018M12', '2019M01', '2019M02', '2019M03', '2019M04', '2019M05', '2019M06', '2019M07', '2019M08', '2019M09', '2019M10', '2019M11', '2019M12', '2020M01', '2020M02', '2020M03', '2020M04', '2020M05', '2020M06', '2020M07', '2020M08', '2020M09', '2020M10', '2020M11', '2020M12', '2021M01', '2021M02', '2021M03', '2021M04', '2021M05', '2021M06', '2021M07', '2021M08', '2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08'], 'Sex/age': ['Total'], 'Unit': ['Unemployment rate']} notes: ['Month: the last 15 years, 2011M01 to 2026M08', 'operation max along Month']"
+    },
+    {
+     "name": "fetch",
+     "ms": 12,
+     "detail": "188 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 7634,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-pop-1984",
+   "level": "easy",
+   "language": "is",
+   "question": "Hvað bjuggu margir á Íslandi árið 1984?",
+   "expected_tables": [
+    "MAN00000|MAN00101|MAN00110"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; an old year",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 10.83,
+   "llm_calls": 4,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (tafla MAN00101) var mannfjöldi á Íslandi 238.416 árið 1984.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2659,
+     "detail": "What was the total population of Iceland in 1984?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2431,
+     "detail": "MAN00101 from [MAN00101, MAN00110, SJA07001, MAN00000, MAN05311, MAN06100, MAN06201, SAM02002, MAN00102, MAN08000, SAM04101, THJ05111, THJ05211, MAN02120] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 2760,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['1984']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2968,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-cpi-now-12m",
+   "level": "medium",
+   "language": "is",
+   "question": "Gefðu mér neysluverðsvísitöluna eins og hún er í dag og sýndu mér líka hvernig hún hefur þróast síðustu 12 mánuði",
+   "expected_tables": [
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; latest value plus a 12-month series",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 18.17,
+   "llm_calls": 4,
+   "tables": [
+    "VIS01000"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (tafla VIS01000) var árleg breyting á neysluverðs vísitölu 5,9% í september 2026. Yfir síðustu 12 mánuði, frá október 2025 til september 2026, hreyfðist vísitalan á bilinu 3,7% til 5,9%.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2591,
+     "detail": "What is the current consumer price index and its development over the last 12 months?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3343,
+     "detail": "VIS01000 from [VIS01000, VIS01301, VIS02202, VIS02000, VIS02500, VIS01104, VIS02002, VIS02502, VIS01304, VIS01300, VIS01102, VIS02506, VIS01101, VIS01103, VIS01004, LAU04800, VIS01106, VIS01305, VIS13302, VIS13303, VIS13000, VIS13301, VIS03302, VIS03303, VIS01306, SAM08048, SJA06100, VIS08003, LAU04000, VIS08000, LAU04001, LAU04003, LAU04005, LAU04007, VIS01308, VIS03301, THJ05813, UTA07001] via keywords · concepts: consumer price index, trend, latest, monthly"
+    },
+    {
+     "name": "select",
+     "ms": 4776,
+     "detail": "series {'Month': ['2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08', '2026M09'], 'Index': ['Consumer price index'], 'Item': ['Annual change, %']} notes: ['Month: 2026M10 is outside the table, using 2026M09', \"Item: the question asks for the annual change; using 'Annual change, %'\", 'Month: a trend, 2021M10 to 2026M09']"
+    },
+    {
+     "name": "fetch",
+     "ms": 7,
+     "detail": "60 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 7454,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-building-now-12m",
+   "level": "medium",
+   "language": "is",
+   "question": "Gefðu mér byggingarvísitöluna eins og hún er í dag og sýndu mér líka hvernig hún hefur þróast síðustu 12 mánuði",
+   "expected_tables": [
+    "VIS13001|VIS13305|VIS13301"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; building cost index",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 23.71,
+   "llm_calls": 4,
+   "tables": [
+    "VIS13001"
+   ],
+   "text": "Byggingarvísitalan var 129,6 í september 2026, miðað við grunn 2021. Yfir síðustu 12 mánuði hækkaði talan úr 125,8 í september 2025 í 129,6 í september 2026, samkvæmt Hagstofu Íslands (tafla VIS13001).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2517,
+     "detail": "What is the current value of the construction index and how has it developed over the last 12 months?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2876,
+     "detail": "VIS13001 from [VIS13000, VIS13001, VIS13301, VIS13302, VIS13303, VIS03301, VIS03302, VIS03303, VIS03001, VIS03304, VIS01000, VIS02202, VIS01106, UMH31109, LAU04007, VIS01301, VIS01103, VIS01304, VIS01306, UTA06102, LAU04800, VIS01300, UTA06107, UTA06201, VIS01104, THJ05636B, VIS01305, LAU04000, VIS02000, LAU04001, SAM08048, VIS01004, LAU04003, LAU04005, VIS08000, VIN02091, LAU04109, UTA07001] via keywords · concepts: building cost index, trend, latest"
+    },
+    {
+     "name": "select",
+     "ms": 6032,
+     "detail": "series {'Month': ['2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08', '2026M09'], 'Base': ['Base 2021']} notes: ['Month: 2026M10 is outside the table, using 2026M09', 'Month: a trend, 2021M10 to 2026M09']"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "60 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 12274,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-wage-now-12m",
+   "level": "medium",
+   "language": "is",
+   "question": "Gefðu mér launavísitöluna eins og hún er í dag og sýndu mér líka hvernig hún hefur þróast síðustu 12 mánuði",
+   "expected_tables": [
+    "LAU04000"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; wage index",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 30.65,
+   "llm_calls": 4,
+   "tables": [
+    "LAU04000"
+   ],
+   "text": "Launavísitalan sýnir árlegan vöxt um 5,7% í ágúst 2026, en hún var 7,7% í september 2021. Yfir síðustu 12 mánuði hefur vöxturinn lækkað stöðugt frá 7,5% í nóvember 2025 niður í 5,7% í ágúst 2026. Göggin eru tekin úr töflu LAU04000 hjá Hagstofu Íslands.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 4945,
+     "detail": "What is the current wage index and its development over the last 12 months?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4752,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04800, LAU04003, LAU04007, LAU04005, LAU04802, VIS01301, VIS02202, VIS01300, VIS01004, VIS13302, TEK02001, TEK02003, TEK02004, SAM08048, VIS02500, VIS02000, VIS01306, VIS01103, VIS13000, TEK02011, TEK02014, TEK02013, TEK02012, VIS01000, VIS01305, VIS01304, VIS13303, VIS13301, VIS01104, VIS01102, LAU04101, LAU04103, LAU04107, LAU04105, LAU04109, VIN02091] via keywords · concepts: wage index, wages, trend, latest, monthly"
+    },
+    {
+     "name": "select",
+     "ms": 9099,
+     "detail": "series {'Month': ['2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08'], 'Unit': ['Annual change, %']} notes: [\"Unit: the question asks for the annual change; using 'Annual change, %'\", 'Month: a trend, 2021M09 to 2026M08']"
+    },
+    {
+     "name": "fetch",
+     "ms": 9,
+     "detail": "60 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 11840,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-cpi-drivers-12m",
+   "level": "hard",
+   "language": "is",
+   "question": "Gefðu mér top 3 áhrifavalda í breytingu vísitölu neysluverðs og hversu mikil áhrif hver hefur haft síðustu 12 mánuði",
+   "expected_tables": [
+    "VIS01300|VIS01301|VIS01304"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; contributions of CPI subindices",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 32.52,
+   "llm_calls": 4,
+   "tables": [
+    "VIS01301"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (tafla VIS01301) voru helstu áhrifaþættir á vísitölu neysluverðs í desember 2025 ferðalög (0,5%), húsnæði, vatn, rafmagn, gas og aðrar eldsneyti (0,3%) og fatnaður og skó (0,1%).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 13404,
+     "detail": "What are the top 3 factors contributing to the change in the consumer price index over the last 12 months and what is the magnitude of their impact?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4417,
+     "detail": "VIS01301 from [VIS01301, VIS01300, VIS02202, VIS01304, VIS01104, VIS01103, VIS01305, VIS02506, VIS01306, UTA06107, UTA06201, VIS08003, UTA16107, UTA16201, VIS01000, VIS02000, VIS02500, VIS01101, VIS01102, VIS02002, VIS02502, VIS13000, VIS08000, VIS01004, VIS13302, VIS13303, VIS13301, LAU04001, VIS01106, VIS03301, LAU04003, VIS03302, VIS03303, LAU04005, LAU04007, THJ05813, UTA07001] via keyword search · concepts: consumer price index, change"
+    },
+    {
+     "name": "select",
+     "ms": 8724,
+     "detail": "rank {'Month': ['2025M12'], 'Item': ['Effect on the CPI, %'], 'Subindex': ['01 Food and non-alcoholic beverages', '02 Alcoholic beverages and tobacco', '03 Clothing and footwear', '04 Housing, water, electricity, gas and other fuels', '05 Furnishing, household equipment etc.', '06 Health', '07 Transport', '08 Communications', '09 Recreation and culture', '10 Educational services', '11 Hotels, cafés and restaurants', '12 Miscellaneous goods and services']} notes: ['Subindex: the largest 3 of 12 categories']"
+    },
+    {
+     "name": "fetch",
+     "ms": 10,
+     "detail": "12 rows; the largest 3"
+    },
+    {
+     "name": "compose",
+     "ms": 5957,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-cpi-drivers-monthly",
+   "level": "hard",
+   "language": "is",
+   "question": "Sýndu mér mánuð fyrir mánuð síðasta árið hvaða þrír undirflokkar höfðu mest áhrif á breytingu vísitölu neysluverðs, upp eða niður",
+   "expected_tables": [
+    "VIS01300|VIS01301|VIS01304"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; top 3 per month",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 30.56,
+   "llm_calls": 4,
+   "tables": [
+    "VIS01301"
+   ],
+   "text": "Fyrir desember 2025 voru þrír stærstu áhrifaþættirnir á vísitölu neysluverðs samkvæmt Hagstofu Íslands (tafla VIS01301) ferðalög (0,5%), húsnæði, vatn, rafmagn, gas og aðrar eldsneyti (0,3%) og fatnaður og skó (0,1%).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3344,
+     "detail": "What were the three sub-categories with the largest impact (positive or negative) on the monthly change of the consumer price index for each month of the last year?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3730,
+     "detail": "VIS01301 from [VIS01300, VIS01301, VIS02202, VIS02506, VIS01304, VIS01305, VIS01103, VIS01104, VIS01306, VIS08003, SJA06100, VIS01308, THJ95200, VIS01000, VIS02500, VIS02502, VIS02000, VIS01101, VIS01102, VIS02002, VIS08000, LAU04003, VIS13303, LAU04001, VIS03303, LAU04007, LAU04005, VIS01004, VIS13302, VIS01106, VIS08010, VIS03302, VIS13000, VIS03301, VIS13301, LAU04000, VIS13501, FYR01201, FYR01203, SAM08051, VIS03001, LAU09923, LAU09927, LAU09925, LAU04103, UTA07001] via keyword search · concepts: consumer price index, change, monthly"
+    },
+    {
+     "name": "select",
+     "ms": 17333,
+     "detail": "rank {'Month': ['2025M12'], 'Item': ['Effect on the CPI, %'], 'Subindex': ['01 Food and non-alcoholic beverages', '02 Alcoholic beverages and tobacco', '03 Clothing and footwear', '04 Housing, water, electricity, gas and other fuels', '05 Furnishing, household equipment etc.', '06 Health', '07 Transport', '08 Communications', '09 Recreation and culture', '10 Educational services', '11 Hotels, cafés and restaurants', '12 Miscellaneous goods and services']} notes: ['Subindex: the largest 6 of 12 categories']"
+    },
+    {
+     "name": "fetch",
+     "ms": 7,
+     "detail": "12 rows; the largest 6"
+    },
+    {
+     "name": "compose",
+     "ms": 6140,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-labour-cost-compare",
+   "level": "hard",
+   "language": "is",
+   "question": "Gefðu mér samanburð í línuriti á launakostnaði í byggingariðnaði, fiskveiðum og fjármálaþjónustu síðustu 5 árin",
+   "expected_tables": [
+    "VIN02092|VIN02091|LAU04107|LAU04109|LAU04209"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; several activities over several years",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 27.97,
+   "llm_calls": 4,
+   "tables": [
+    "VIN02091"
+   ],
+   "text": "Gögnin úr töflu VIN02091 hjá Hagstofu Íslands sýna vístala launakostnaðar í byggingariðnaði (F) og fjármála- og tryggingastarfsemi (K) frá 2021Q1 til 2026Q2, en gögn fyrir fiskveiðir eru ekki til staðar í upplýsingunum. Í byggingariðnaði hækkaði vístalan úr 96,3 í 168,1 og í fjármála- og tryggingastarfsemi úr 95,2 í 156,4 yfir sama tímabil.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2821,
+     "detail": "What was the wage cost in the construction industry, fishing, and financial services sectors for the last 5 years?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 6169,
+     "detail": "VIN02091 from [VIN02001, LAU04000, SJA01101, IDN03001, LAU04207, VIN02092, LAU04107, VIN02091, LAU04209, VIN02100, UMH31118, THJ08421, THJ03204, LAU04109, LAU09917, LAU04205, VIN02003, LAU04203, VIN02101, UMH31110, LAU09927, TEK02004, THJ03105, SAM08011, VIS13302, FYR08001, LAU04007, LAU04200, UMH31119, UMH31109, FYR08000, VIS03401, LAU04201, SJA01106, FYR08010, THJ06021, UMH31108, FYR04111, LAU04103, FYR04101, UMH51001, LAU04105, IDN02303, THJ08420, THJ01103, FYR08011, TEK02001, SKO03206c, VIS13303, FYR09002, TEK02003, UMH40100, VIS13301, THJ08401, VIS13001, SAM08001, VIS03302, VIN02002, FYR01202, LAU09915, UMH51102, THJ05121, THJ05123, THJ06020, THJ05221, THJ05223, UMH31107, THJ05321, THJ06019, THJ05323, THJ05421, VIN02005, LIF03324, LAU04800, LAU09901, VIN02500, THJ11002, THJ10001, LAU04101, SJA08104, THJ09001, LAU09925, LIF03322, UMH31230, SJA08107, IDN03002, VIN08601, VIS03201, LIF03314, VIN02013, SKU01005, SKU01010, SKU01004, SKU01009, THJ03101, THJ03103, SAM06110, VIN02203, VIN08602, THJ95144, FYR04200] via keyword search · concepts: wage index, wages, construction, fish catch, manufacturing, comparison"
+    },
+    {
+     "name": "select",
+     "ms": 10125,
+     "detail": "series {'Quarter': ['2021Q1', '2021Q2', '2021Q3', '2021Q4', '2022Q1', '2022Q2', '2022Q3', '2022Q4', '2023Q1', '2023Q2', '2023Q3', '2023Q4', '2024Q1', '2024Q2', '2024Q3', '2024Q4', '2025Q1', '2025Q2', '2025Q3', '2025Q4', '2026Q1', '2026Q2'], 'Economic activity': ['Construction (F)', 'Financial and insurance activities (K)'], 'Labour cost': ['Labour cost, total'], 'Unit': ['Value of index']} notes: ['Quarter: the last 5 years, 2021Q1 to 2026Q2']"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "44 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 8851,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-labour-cost-compare-en",
+   "level": "hard",
+   "language": "en",
+   "question": "Compare labour costs in construction, fishing and financial services over the last 5 years in a line chart",
+   "expected_tables": [
+    "VIN02092|VIN02091|LAU04107|LAU04109|LAU04209"
+   ],
+   "expected_values": [],
+   "note": "English twin of friends-labour-cost-compare",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 47.64,
+   "llm_calls": 10,
+   "tables": [
+    "LAU04007"
+   ],
+   "text": "The provided facts from Statistics Iceland (Hagstofa Íslands), table LAU04007, cover wage indices for Construction (F) and Financial and insurance activities (K) from January 2021 to June 2026, but do not include data for the fishing sector. Over this period, the wage index for Construction (F) increased from 112.8 in January 2021 to 166.5 in June 2026, while the index for Financial and insurance activities (K) rose from 111.1 in January 2021 to 155.4 in June 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2535,
+     "detail": "What were the labour costs in the construction, fishing, and financial services sectors over the last 5 years?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 28951,
+     "detail": "LAU04007 from [THJ11011, THJ11001, THJ11002, TEK02001, TEK02003, TEK02004, VIN02001, VIN02002, VIN02003, VIN02004, VIN02005, VIN02010, VIN02011, VIN02012, VIN02013, VIN02014, VIN02015, VIN02016, VIN02017, VIN02019, VIN02200, VIN02201, VIN02202, VIN02203, VIN02204, VIN02205, LAU04000, LAU04001, LAU04003, LAU04005, LAU04007, LAU04101] via model browse · concepts: construction, fish catch, comparison"
+    },
+    {
+     "name": "select",
+     "ms": 7064,
+     "detail": "series {'Month': ['2021M01', '2021M02', '2021M03', '2021M04', '2021M05', '2021M06', '2021M07', '2021M08', '2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06'], 'Index': ['Wage index'], 'Economic activity': ['Construction (F)', 'Financial and insurance activities (K)'], 'Unit': ['Value of index']} notes: ['Month: the last 5 years, 2021M01 to 2026M06']"
+    },
+    {
+     "name": "fetch",
+     "ms": 9,
+     "detail": "132 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 9075,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-unemp-max-15y-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What was the highest unemployment rate in the last 15 years, how high was it and in which year?",
+   "expected_tables": [
+    "VIN00001|VIN00921|VIN00911|VIN01002|VIN00910"
+   ],
+   "expected_values": [],
+   "note": "English twin of friends-unemp-max-15y",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 64.21,
+   "llm_calls": 4,
+   "tables": [
+    "VIN00001"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands), table VIN00001, the highest unemployment rate recorded in the last 15 years was 12.4% in May 2011.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2756,
+     "detail": "What was the highest unemployment rate in Iceland in the last 15 years, and in which year did it occur?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3349,
+     "detail": "VIN00001 from [VIN00001, VIN00920, VIN01002, VIN00911, VIN00921, FYR01202, FYR04102, FYR09004, VIN00951, FYR01201, FYR01204, VIN01401, FYR09006, FYR04112, HEI03111, UMH31118, VIS02201, VIN10012, FYR03010, FYR09002, FYR09005, VIN00931, VIN01105, VIS02202, VIN01106, VIN01703, LAU04201, HEI12001, SAM08010, VIS02200, VIN00910, FYR04111, VIN01006, FYR05201a, MAN05210, VIN01111, FYR04101, FYR09001, SAM08001, VIN01110, VIN10032, THJ11002, VIN01104, FYR05103, MEN06108, FYR01203, LAU04103, SAM08050, UMH11120, VIN00961, VIN00971, CEN03441, VIN10052, UMH31108, SKO03206c, LAU04203, SKU01008, LIF01131, TEK02011, VIN10001, UMH53120, SKO03108, UMH34065, VIN08602, VIN01402, VIN01404, CEN07010, FYR09003, VIN01203, CEN07020, CEN03020, SKU01007, CEN03070, LAU09917, CEN07030, HEI02501, CEN07040, CEN07050, LIF01120, PEN01101, MEN08103, FYR03001, VIN01003, SKU01010, HEI09106, CEN09002, CEN03102, CEN03103, VIS02400, MAN06203, MAN06104] via keyword search · concepts: unemployment, annual"
+    },
+    {
+     "name": "select",
+     "ms": 51628,
+     "detail": "max {'Month': ['2011M01', '2011M02', '2011M03', '2011M04', '2011M05', '2011M06', '2011M07', '2011M08', '2011M09', '2011M10', '2011M11', '2011M12', '2012M01', '2012M02', '2012M03', '2012M04', '2012M05', '2012M06', '2012M07', '2012M08', '2012M09', '2012M10', '2012M11', '2012M12', '2013M01', '2013M02', '2013M03', '2013M04', '2013M05', '2013M06', '2013M07', '2013M08', '2013M09', '2013M10', '2013M11', '2013M12', '2014M01', '2014M02', '2014M03', '2014M04', '2014M05', '2014M06', '2014M07', '2014M08', '2014M09', '2014M10', '2014M11', '2014M12', '2015M01', '2015M02', '2015M03', '2015M04', '2015M05', '2015M06', '2015M07', '2015M08', '2015M09', '2015M10', '2015M11', '2015M12', '2016M01', '2016M02', '2016M03', '2016M04', '2016M05', '2016M06', '2016M07', '2016M08', '2016M09', '2016M10', '2016M11', '2016M12', '2017M01', '2017M02', '2017M03', '2017M04', '2017M05', '2017M06', '2017M07', '2017M08', '2017M09', '2017M10', '2017M11', '2017M12', '2018M01', '2018M02', '2018M03', '2018M04', '2018M05', '2018M06', '2018M07', '2018M08', '2018M09', '2018M10', '2018M11', '2018M12', '2019M01', '2019M02', '2019M03', '2019M04', '2019M05', '2019M06', '2019M07', '2019M08', '2019M09', '2019M10', '2019M11', '2019M12', '2020M01', '2020M02', '2020M03', '2020M04', '2020M05', '2020M06', '2020M07', '2020M08', '2020M09', '2020M10', '2020M11', '2020M12', '2021M01', '2021M02', '2021M03', '2021M04', '2021M05', '2021M06', '2021M07', '2021M08', '2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08'], 'Sex/age': ['Total'], 'Unit': ['Unemployment rate']} notes: ['Month: the last 15 years, 2011M01 to 2026M08', 'operation max along Month']"
+    },
+    {
+     "name": "fetch",
+     "ms": 7,
+     "detail": "188 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 6459,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}

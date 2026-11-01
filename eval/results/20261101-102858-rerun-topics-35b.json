@@ -1,0 +1,112 @@
+{
+ "label": "rerun-topics-35b",
+ "results": [
+  {
+   "id": "wage-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How much did wages rise in the 12 months to September 2026?",
+   "expected_tables": [
+    "LAU04001"
+   ],
+   "expected_values": [
+    5.6
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": false,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 16.88,
+   "llm_calls": 5,
+   "tables": [
+    "LAU04000"
+   ],
+   "text": "2025M09, Annual change, %: 7.8%; 2026M08, Annual change, %: 5.7%; Change (%) 2025M09 → 2026M08: -26.9%. Source: Statistics Iceland, LAU04000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1371,
+     "detail": "What is the wage index for September 2026 and what was it in September 2025, or what is the annual percentage change in wages for the period ending September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 10279,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04005, LAU04007, LAU04003, VIS02500, VIS02000, LAU04800, VIS13000, VIS01301, LAU04802, VIS01300, VIS02202, VIS13302, VIS01000, VIS02002, VIS01306, VIS01102, SAM08049, VIS08000, TEK02001, TEK02003, VIS02502, TEK02004, LAU04101, VIS02504, LAU04107, LAU04105, LAU04103, LAU04109, UTA05002, VIN02091, JVS00001] via keywords · concepts: wage index, wages, change, share, annual"
+    },
+    {
+     "name": "select",
+     "ms": 3009,
+     "detail": "pct_change {'Month': ['2025M09', '2026M08'], 'Unit': ['Annual change, %']} notes: ['Month: 2026M09 is outside the table, using 2026M08', 'operation value -> pct_change (question wording)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2211,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "cpi-wage-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What were annual inflation and annual wage growth in September 2026?",
+   "expected_tables": [
+    "VIS01000",
+    "LAU04001"
+   ],
+   "expected_values": [
+    5.9,
+    5.6
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": false,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 18.66,
+   "llm_calls": 4,
+   "tables": [
+    "LAU04000"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table LAU04000, the annual wage growth in August 2026 was 5.7%. The provided facts do not contain data for annual inflation or wage growth specifically for September 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3068,
+     "detail": "What was the annual inflation rate (percentage change of consumer price index) in September 2026? | What was the annual wage growth (wage index) in September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 78,
+     "detail": "LAU04000 from [LAU04000, LAU04005, LAU04007, LAU04001, LAU04003, LAU04800, LAU04802, VIS13000, VIS13302, VIN00004, VIN10032, VIN10022, VIS02500, VIS01000, VIS13303, VIN10052, VIN10001, SAM08049, VIS01004, LAU04107, LAU04105, LAU04101, LAU04109, LAU04103, VIS02504, VIN02091, JVS00001, SJA01101, SJA01102, THJ05813, THJ01601, THJ03111, UTA05002] via dictionary · concepts: wage index, change, annual"
+    },
+    {
+     "name": "select",
+     "ms": 13445,
+     "detail": "value {'Month': ['2026M08'], 'Unit': ['Annual change, %']} notes: ['Month: 2026M09 is outside the table, using 2026M08']"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: HTTPStatusError Server error '500 Internal Server Error' for url 'http://localhost:11435/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500"
+    },
+    {
+     "name": "compose",
+     "ms": 1805,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}

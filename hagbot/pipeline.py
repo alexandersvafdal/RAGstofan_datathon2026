@@ -18,7 +18,7 @@ from .steps.compute import compute
 from .steps.followup import looks_like_followup, rewrite
 from .steps.plan import Plan, SubQuestion, merge_period_parts, plan
 from .steps.ratio import POPULATION_TABLE, detect_ratio, difference_parts, ratio_parts, share_parts, stored_rate
-from .steps.retrieve import _INDEXATION_TABLE, period_end, retrieve
+from .steps.retrieve import _INDEXATION_TABLE, period_end
 from .steps.tiered import retrieve_tiered
 from .steps.select import guess_op, select
 from .steps.suggest import suggest
@@ -195,12 +195,8 @@ class Pipeline:
                            alone: bool = True) -> AnswerPart:
         t = Timer()
         # a multi-part question's full wording would pull every part toward the same tables
-        if settings.retrieval == "tiered":
-            r = await retrieve_tiered(self.llm, self.catalog, sq.question, sq.search_query,
-                                      settings.retrieve_top_k, forced_table, original if alone else "")
-        else:
-            r = await retrieve(self.llm, self.catalog, sq.question, sq.search_query, settings.retrieve_top_k, forced_table,
-                               original if alone else "")
+        r = await retrieve_tiered(self.llm, self.catalog, sq.question, sq.search_query,
+                                  settings.retrieve_top_k, forced_table, original if alone else "")
         steps.append(Step(name="retrieve", ms=t.ms(),
                           detail=f"{r.table.id} from [{', '.join(r.candidates)}]" + (" (ambiguous)" if r.ambiguous else "")
                                  + (f" via {r.via}" if r.via else "") + (f" · votes {r.votes}" if r.votes else "")
@@ -258,6 +254,8 @@ class Pipeline:
         note = self._freshness_note(meta, res.selections, r.candidates, f"{sq.question} {original}", lang)
         if res.window_note:   # "the last 50 years" in a table that starts in 2003
             note = " ".join(x for x in (res.window_note[lang], note) if x)
+        if res.place_note:    # "Egilsstaðir" in a table of the 2008 municipalities
+            note = " ".join(x for x in (res.place_note[lang], note) if x)
         # the table named in the answer's language: chart titles, legends and the source card read it
         entry = self.catalog.get(meta.id)
         title = entry.title_is if lang == "is" and entry and entry.title_is else meta.title

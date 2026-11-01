@@ -1,0 +1,57 @@
+{
+ "label": "final-wagecpi-35b",
+ "results": [
+  {
+   "id": "wage-vs-cpi-is",
+   "level": "hard",
+   "language": "is",
+   "question": "hver er launavísitala borin saman við vísitölu neysluverðs",
+   "expected_tables": [
+    "LAU04000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [],
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ConnectError All connection attempts failed",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ConnectError All connection attempts failed"
+    }
+   ]
+  },
+  {
+   "id": "wage-vs-cpi-en",
+   "level": "hard",
+   "language": "en",
+   "question": "how does the wage index compare with the consumer price index",
+   "expected_tables": [
+    "LAU04000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [],
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.0,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ConnectError All connection attempts failed",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ConnectError All connection attempts failed"
+    }
+   ]
+  }
+ ]
+}

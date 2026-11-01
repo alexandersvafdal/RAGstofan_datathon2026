@@ -1,0 +1,558 @@
+{
+ "label": "dev_friends-35b-final",
+ "results": [
+  {
+   "id": "friends-unemp-max-15y",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver er hæsta atvinnuleysistíðnin á síðustu 15 árum, hvað var hún há og hvaða ár?",
+   "expected_tables": [
+    "VIN00001|VIN00921|VIN00911|VIN01002|VIN00910"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; max over a span, needs year and value",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 24.02,
+   "llm_calls": 5,
+   "tables": [
+    "VIN00001"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu VIN00001 var hæsta atvinnuleysistíðnin á tímabilinu 2011-2026 12,4% í maí 2011.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1316,
+     "detail": "What was the highest unemployment rate in Iceland over the last 15 years, and in which year did it occur?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2740,
+     "detail": "VIN00001 from [VIN00001, VIN00920, VIN00911, VIN00921, VIN01002, VIN00951, VIN00910, FYR01202, VIN00931, VIN01701, VIN10040, FYR01204, FYR04112, FYR04111, VIN01105, LAU04201, UMH31118, VIN01006, VIN01401, VIS02201, VIN00971, THJ01000, VIN01106, VIN01110, VIN10012, HEI03111, LAU04200, VIN01111, LAU04103, VIN01206, LIF03340, LAU04203, LIF03307, VIN00961, VIS02200, LIF03304, VIN01004, LFI03305, LFI03306, THJ11002, MEN06108, LAU04207, MAN05210, UMH53120, FYR04102, SKU01008, VIN01404, VIS02202, CEN09002, LIF03343, JVS00001, VIN01003, LAU09917, FYR04101, VIN01402, TEK01007, FYR09004, HEI12001, LAU04107, SAM08010, LIF03310, THJ06019, SKU01007, VIN01203, CEN05000, THJ11011, VIN01703, MAN01002, SAM08008, VIN01104, VIN02100, FYR09006, VIN02010, FYR04200, MAN06203, HEI09106, FYR09002, FYR09005, CEN03441, SKO03226, SKU01010, LIF03320, LIF03330, LIF03341, LIF03342, SKU01009, MAN06104, HEI02501, SKU01006, CEN07020, CEN03020, CEN03070, SAM06110] via keyword search · concepts: unemployment, annual"
+    },
+    {
+     "name": "select",
+     "ms": 17459,
+     "detail": "max {'Month': ['2011M01', '2011M02', '2011M03', '2011M04', '2011M05', '2011M06', '2011M07', '2011M08', '2011M09', '2011M10', '2011M11', '2011M12', '2012M01', '2012M02', '2012M03', '2012M04', '2012M05', '2012M06', '2012M07', '2012M08', '2012M09', '2012M10', '2012M11', '2012M12', '2013M01', '2013M02', '2013M03', '2013M04', '2013M05', '2013M06', '2013M07', '2013M08', '2013M09', '2013M10', '2013M11', '2013M12', '2014M01', '2014M02', '2014M03', '2014M04', '2014M05', '2014M06', '2014M07', '2014M08', '2014M09', '2014M10', '2014M11', '2014M12', '2015M01', '2015M02', '2015M03', '2015M04', '2015M05', '2015M06', '2015M07', '2015M08', '2015M09', '2015M10', '2015M11', '2015M12', '2016M01', '2016M02', '2016M03', '2016M04', '2016M05', '2016M06', '2016M07', '2016M08', '2016M09', '2016M10', '2016M11', '2016M12', '2017M01', '2017M02', '2017M03', '2017M04', '2017M05', '2017M06', '2017M07', '2017M08', '2017M09', '2017M10', '2017M11', '2017M12', '2018M01', '2018M02', '2018M03', '2018M04', '2018M05', '2018M06', '2018M07', '2018M08', '2018M09', '2018M10', '2018M11', '2018M12', '2019M01', '2019M02', '2019M03', '2019M04', '2019M05', '2019M06', '2019M07', '2019M08', '2019M09', '2019M10', '2019M11', '2019M12', '2020M01', '2020M02', '2020M03', '2020M04', '2020M05', '2020M06', '2020M07', '2020M08', '2020M09', '2020M10', '2020M11', '2020M12', '2021M01', '2021M02', '2021M03', '2021M04', '2021M05', '2021M06', '2021M07', '2021M08', '2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08'], 'Sex/age': ['Total'], 'Unit': ['Unemployment rate']} notes: ['Month: the last 15 years, 2011M01 to 2026M08', 'operation max along Month']"
+    },
+    {
+     "name": "fetch",
+     "ms": 11,
+     "detail": "188 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2493,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-pop-1984",
+   "level": "easy",
+   "language": "is",
+   "question": "Hvað bjuggu margir á Íslandi árið 1984?",
+   "expected_tables": [
+    "MAN00000|MAN00101|MAN00110"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; an old year",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 3.43,
+   "llm_calls": 3,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "Árið 1984 bjuggu 238.416 manns á Íslandi samkvæmt töflu MAN00101 (Mannfjöldi eftir kyni og aldri 1841-2026) frá Hagstofu Íslands.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 968,
+     "detail": "What was the population of Iceland in 1984?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 135,
+     "detail": "MAN00101 from [MAN00101, MAN00110, SJA07001, MAN00000, MAN05311, MAN06100, MAN06201, SAM02002, MAN00102, MAN08000, SAM04101, THJ05111, THJ05211, MAN02120] via dictionary · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 1244,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['1984']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 7,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1073,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-cpi-now-12m",
+   "level": "medium",
+   "language": "is",
+   "question": "Gefðu mér neysluverðsvísitöluna eins og hún er í dag og sýndu mér líka hvernig hún hefur þróast síðustu 12 mánuði",
+   "expected_tables": [
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; latest value plus a 12-month series",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 8.06,
+   "llm_calls": 4,
+   "tables": [
+    "VIS01000"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (tafla VIS01000) var neysluverðsvísitalan 697,3 í september 2026. Á síðustu 12 mánuðum, frá október 2025 til september 2026, hækkaði vísitalan úr 661,4 í 697,3.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1539,
+     "detail": "What is the current value of the consumer price index (CPI) in Iceland? | What has been the development of the consumer price index in Iceland over the last 12 months?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 133,
+     "detail": "VIS01000 from [VIS01000, VIS02201, VIS01104, VIS02202, VIS02508, VIS01301, VIS02500, VIS01304, VIS02506, VIS01300, VIS02000, VIS01101, VIS01102, VIS01103, VIS01305, VIS02002, SJA01106, VIS02502, THJ02105, THJ05813, VIS02200, VIS01303, VIS08000b, LAU04800, THJ03204, VIS06140, VIS08003b, VIS02001, SJA06100b, VIS08010b, VIS02400, VIS01503, VIS02301, VIS01004, VIS02300, THJ02101, VIS08011, THJ01104, UMH34095, IDN02303, THJ03105, THJ03106, UMH31118, VIS06123, FYR05103, VIS01306, VIS01106, VIS02504, LAU04201, THJ08421, LAU04200, UTA07001, LAN1105, VIS13302, LAU04000, LAU04001, VIN02091, FYR08000, LAU04003, VIN02092, SAM08001, LAU04109, VIS13000, LAU04005, VIS06125, LAN1107, VIS06128, FYR08010, VIS06126, FYR05201a, THJ03101, THJ03103, THJ03102, VIS08002, THJ03104] via dictionary · concepts: consumer price index, latest"
+    },
+    {
+     "name": "retrieve",
+     "ms": 90,
+     "detail": "VIS01000 from [VIS01000, VIS02202, VIS01301, VIS02500, VIS02000, VIS02506, VIS02502, VIS02002, VIS01104, VIS01300, VIS02201, VIS02508, VIS01004, VIS02200, VIS01303, VIS08003b, VIS08000b, VIS01102, SJA06100b, VIS01101, VIS01304, VIS01106, LAU04800, SJA01106, VIS02001, VIS13302, VIS13000, LAU04001, VIS08010b, VIS13301, VIS02400, VIS01503, VIS02300, VIS02301, LAU09927, VIS01103, VIS01306, IDN02303, SAM08048, SJA06100, VIS08003, LAU04000, VIS02504, VIS13303, VIS01305, LAU04003, SAM08001, THJ03204, THJ03105, LAU04005, LAU04007, SAM08011, VIS01308, SJA04907, THJ02105, SAM01103, VIS13001, LAU04801, SJA04906, THJ08421, THJ05813, VIS13501, THJ06019, SAM01601, VIS03302, VIS03303, VIS03301, VIS06123, LAU09923, SJA06102, LAU09925, SJA07102, SJA06101, VIS03010, SJA07101, VIS08011] via dictionary · concepts: consumer price index, monthly"
+    },
+    {
+     "name": "select",
+     "ms": 2158,
+     "detail": "series {'Month': ['2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08', '2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\", 'Month: a trend, 2021M10 to 2026M09']"
+    },
+    {
+     "name": "fetch",
+     "ms": 8,
+     "detail": "60 rows"
+    },
+    {
+     "name": "select",
+     "ms": 3976,
+     "detail": "series {'Month': ['2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08', '2026M09'], 'Index': ['Consumer price index'], 'Item': ['Annual change, %']} notes: [\"Item: defaulted to ['Index']\", \"Item: the question asks for the annual change; using 'Annual change, %'\", 'Month: a trend, 2021M10 to 2026M09']"
+    },
+    {
+     "name": "fetch",
+     "ms": 3,
+     "detail": "60 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2304,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-building-now-12m",
+   "level": "medium",
+   "language": "is",
+   "question": "Gefðu mér byggingarvísitöluna eins og hún er í dag og sýndu mér líka hvernig hún hefur þróast síðustu 12 mánuði",
+   "expected_tables": [
+    "VIS13001|VIS13305|VIS13301"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; building cost index",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 12.96,
+   "llm_calls": 8,
+   "tables": [
+    "VIS13001"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands), töflu VIS13001, var byggingarvísitalan 129,6 í september 2026. Síðustu 12 mánuðirnar, frá október 2025 til september 2026, hækkaði vísitalan úr 125,9 í 129,6.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1611,
+     "detail": "What is the current value of the construction price index (byggingarvísitala)? | What has been the development of the construction price index over the last 12 months?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4809,
+     "detail": "VIS13001 from [VIS13000, VIS13001, VIS13301, VIS13302, VIS13303, VIS03301, VIS03401, VIS03302, VIS03303, VIS03001, VIS01000, VIS13501, VIN02092, VIN02091, VIS03304, VIS01106, THJ02105, SJA01106, VIS01004, VIS08003b, VIS03201, VIS03010, SJA06100b, THJ03204, THJ03105, VIS02508, VIN02500, THJ08421, VIS01104, THJ03106, VIS08000b, VIS01103, VIS08010b, LAU04800, LAU04200, LIF03322, IDN03002, VIS02201, LAU04201, VIS08000, FYR08000, VIS06140, IDN03001, LAU04109, VIS01304, LAU04007, LAN1103, THJ01104, THJ11011, THJ01601, VIS01303, THJ01501, THJ03111, LAN1107, THJ11002, VIS02202, VIS02506, THJ05813, THJ08420, VIS06141, VIS01306, LAU04101, VIS06123, VIS06125, LFI03306, THJ03101, VIS08002, UTA07001, THJ03103, FYR08010, LIF03323, THJ03102, LIF03324, THJ03104, VIS02200, VIS08011, THJ03106b, LIF03314, THJ03105b, IDN03003, CEN04530, VIS06126, VIS06128, THJ02101, VIS01503] via keywords · concepts: building cost index, latest"
+    },
+    {
+     "name": "retrieve",
+     "ms": 5747,
+     "detail": "VIS13001 from [VIS13000, VIS13001, VIS13302, VIS13301, VIS13303, VIS03301, VIS03302, VIS03303, VIS01301, VIS03001, VIS13501, VIS03401, VIS01106, VIS03304, VIS02500, VIS02000, VIS01000, VIS01300, VIS08000b, VIS08003b, SJA06100b, VIS01104, SJA01106, VIS01004, LAU04800, VIS08010b, VIS02002, VIS01101, VIS03201, VIS01303, VIS03010, VIS02200, VIS02001, LAU09927, VIS01103, VIS02202, VIS01503, THJ03204, THJ03105, THJ08421, VIS02300, VIS01306, VIS01102, VIN00004, VIS01304, VIS02502, LAU04007, LAU04001, UTA06107, UTA06201, LIF03322, VIS02504, SAM08048, VIS01305, LAU04801, VIS02506, SJA06100, VIS08003, THJ02105, LAU04200, VIS02508, VIN02092, IDN02303, FYR01201, FYR01203, IDN03002, LIF03324, VIS08011, CEN04530, THJ95144, SJA06102, UTA16107, UTA16201] via keywords · concepts: building cost index, trend, monthly"
+    },
+    {
+     "name": "select",
+     "ms": 2321,
+     "detail": "series {'Month': ['2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08', '2026M09'], 'Base': ['Base 2021']} notes: ['Month: a trend, 2021M10 to 2026M09', 'operation value -> series (trend wording)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 9,
+     "detail": "60 rows"
+    },
+    {
+     "name": "select",
+     "ms": 3084,
+     "detail": "series {'Month': ['2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08', '2026M09'], 'Base': ['Base 2021']} notes: [\"Base: defaulted to ['Base 2021']\", 'Month: a trend, 2021M10 to 2026M09']"
+    },
+    {
+     "name": "fetch",
+     "ms": 3,
+     "detail": "60 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2366,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-wage-now-12m",
+   "level": "medium",
+   "language": "is",
+   "question": "Gefðu mér launavísitöluna eins og hún er í dag og sýndu mér líka hvernig hún hefur þróast síðustu 12 mánuði",
+   "expected_tables": [
+    "LAU04000"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; wage index",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 10.65,
+   "llm_calls": 6,
+   "tables": [
+    "LAU04000"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (tafla LAU04000) var launavísitalan 1.149,3 í ágúst 2026 og hefur hún þróast frá 799,5 í september 2021.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1527,
+     "detail": "What is the current wage index (launavísitala)? | What has been the development of the wage index over the last 12 months?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 85,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04003, LAU04800, LAU04007, VIS01301, LAU04802, LAU04005, VIS02500, VIS02000, VIS01300, LAU09927, LAU09925, LAU09923, VIS13000, VIS13302, VIS08000b, VIS01004, VIS01104, VIS08003b, SJA06100b, SJA01106, VIS01106, LAU04801, VIS08010b, LAU04101, LAU04201, SAM08048, VIS02001, LAU04200, VIS02300, VIS01103, VIS02202, VIS01306, VIS01000, LAU04203, LAU04103, VIS13303, VIS13301, LAU04107, VIS01305, VIS01102, VIS01304, LAU04109, LAU04207, LAU04209, TEK02001, SAM01103, VIS13001, TEK02003, VIS01303, TEK02004, VIS02502, FYR01202, SAM01601, VIS03302, VIS02002, LAU04105, VIS03303, VIS03301, LAU04205, VIS02200, SAM01603, LAU09917, VIN10032, SAM01102, SAM01501, FYR01201, SJA06100, VIS08000, SAM01502, VIS08003, VIN10001, VIS01101, VIS03001, UTA05000, VIN02010, LAU09915, VIS03304, VIN01401, SAM01400, LAU09901, VIS03010, PEN02102, LAU09902, LAU09903, VIS01503, SJA06102] via dictionary · concepts: wage index, monthly"
+    },
+    {
+     "name": "select",
+     "ms": 2181,
+     "detail": "series {'Month': ['2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08'], 'Unit': ['Annual change, %']} notes: ['Month: 2026M09 is outside the table, using 2026M08', \"Unit: the question asks for the annual change; using 'Annual change, %'\", 'Month: a trend, 2021M09 to 2026M08']"
+    },
+    {
+     "name": "fetch",
+     "ms": 7,
+     "detail": "60 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4706,
+     "detail": "LAU04000 from [LAU04000, VIN02001, VIN02002, LAU04201, LAU04101, LAU04001, LAU04200, LAU04103, LAU04003, LAU04800, LAU04203, LAU04107, LAU04109, LAU04802, LAU04207, LAU04007, LAU04005, LAU04105, LAU04205, VIN02092, VIN02091, LAU04209, VIN02003, VIN02004, VIN02005, LAU09917, LAU09923, LAU09927, LAU09925, LAU09901, VIN02010, LAU09903, LAU09902, LAU09915, VIN02500, VIN02013, VIN02016, VIN02012, VIN02011, VIN02017, VIN02100, VIN02015, VIN02019, THJ06021, VIN02014, VIN02202, TEK02001, TEK02003, THJ06029, TEK02004, VIS01103, VIS02508, FYR01202, VIS01104, FYR08000, FYR08001, VIS01306, THJ06024e, VIS01000, SJA01106, VIS08010b, THJ06023e, FYR01204, VIS01303, VIN02205, VIN02200, VIN02204] via keywords · concepts: wage index, wages, latest"
+    },
+    {
+     "name": "select",
+     "ms": 2457,
+     "detail": "series {'Month': ['2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08'], 'Unit': ['Value of index']} notes: ['Month: a trend, 2021M09 to 2026M08']"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "60 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1943,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-cpi-drivers-12m",
+   "level": "hard",
+   "language": "is",
+   "question": "Gefðu mér top 3 áhrifavalda í breytingu vísitölu neysluverðs og hversu mikil áhrif hver hefur haft síðustu 12 mánuði",
+   "expected_tables": [
+    "VIS01300|VIS01301|VIS01304"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; contributions of CPI subindices",
+   "table_ok": false,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 6.58,
+   "llm_calls": 4,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. cannot access local variable 'named' where it is not associated with a value",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1344,
+     "detail": "What are the top 3 contributing factors to the change in the consumer price index (CPI) over the last 12 months and their respective impacts?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3131,
+     "detail": "VIS01300 from [VIS01301, VIS01300, VIS01304, VIS02202, VIS01104, VIS01103, VIS01305, VIS01306, VIS02506, VIS08003, VIS01000, VIS02000, VIS02500, VIS01101, VIS01102, VIS02002, VIS02502, VIS08000, VIS13000, VIS13303, VIS13302, VIS01004, VIS01106, VIS13301, VIS03301, LAU04001, LAU04003, VIS03302, VIS08010, VIS03303, LAU04005, LAU04007, THJ05813, UTA07001] via keyword search · concepts: consumer price index, change"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "UnboundLocalError: cannot access local variable 'named' where it is not associated with a value"
+    }
+   ]
+  },
+  {
+   "id": "friends-cpi-drivers-monthly",
+   "level": "hard",
+   "language": "is",
+   "question": "Sýndu mér mánuð fyrir mánuð síðasta árið hvaða þrír undirflokkar höfðu mest áhrif á breytingu vísitölu neysluverðs, upp eða niður",
+   "expected_tables": [
+    "VIS01300|VIS01301|VIS01304"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; top 3 per month",
+   "table_ok": false,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 21.49,
+   "llm_calls": 4,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. cannot access local variable 'named' where it is not associated with a value",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1246,
+     "detail": "What were the three sub-categories with the largest contribution to the change in the consumer price index for each month of the previous year?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 5108,
+     "detail": "VIS01301 from [VIS01300, VIS01301, VIS02506, VIS02202, VIS08003b, SJA06100b, VIS01304, VIS08003, VIS02200, VIS01303, VIS02508, VIS01305, VIS01104, SJA06100, VIS01103, VIS01503, VIS01306, VIS03010, VIS02504, VIS02201, VIS01308, VIS05304, THJ95200, VIS01000, VIS02500, VIS02000, VIS01102, VIS01101, VIS02502, VIS02002, VIS08000b, VIS08010b, VIS13303, VIS08000, LAU04003, VIS02001, VIS03303, LAU04001, SJA01106, LAU04007, VIS02400, VIS13302, VIS02300, VIS02301, LAU09923, VIS08010, LAU09927, VIS01004, FYR01201, FYR01203, LAU04005, LAU04103, VIS03302, VIS03301, LAU04203, VIS13000, VIS13301, LAU04000, VIS06141, VIS13501, SAM08051, VIS01106, THJ05813, UTA07001, LAU09925, VIS08011, LAU09917, SJA07102, SJA07101, LAU09902, VIS06126, MEN09111, VIN07212, VIS08002] via keyword search · concepts: consumer price index, change, monthly"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "UnboundLocalError: cannot access local variable 'named' where it is not associated with a value"
+    }
+   ]
+  },
+  {
+   "id": "friends-labour-cost-compare",
+   "level": "hard",
+   "language": "is",
+   "question": "Gefðu mér samanburð í línuriti á launakostnaði í byggingariðnaði, fiskveiðum og fjármálaþjónustu síðustu 5 árin",
+   "expected_tables": [
+    "VIN02092|VIN02091|LAU04107|LAU04109|LAU04209"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; several activities over several years",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 74.22,
+   "llm_calls": 11,
+   "tables": [
+    "SJA08101",
+    "VIN02091"
+   ],
+   "text": "Launakostnaður í fiskveiðum (tafla SJA08101) jókst úr 8.270,2 árið 2019 í 11.938,7 árið 2024. Vísitala launakostnaðar í fjármálaþjónustu (tafla VIN02091) var 95,2 fyrsta kvartal 2021 og 156,4 annað kvartal 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 4982,
+     "detail": "What was the wage cost in the construction industry for each of the last 5 years? | What was the wage cost in the fishing industry for each of the last 5 years? | What was the wage cost in financial services for each of the last 5 years?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 42672,
+     "detail": "VIN02091 from [LAU04000, LAU04207, VIN02092, LAU04007, LAU04107, VIN02100, LAU04209, LAU04205, VIN02091, LAU04109, LAU04201, THJ06021, LAU04203, LAU09917, LAU04005, LAU04105, LAU09927, THJ05421, THJ02105, LAU09925, LAU09901, LAU09923, LAU09915, LAU09902, LAU04101, VIN02101, VIN02500, LAU09903, LAU04001, LAU04003, LAU04200, LAU04103, VIS01104, FYR08001, VIN02005, THJ10001, VIS02508, UTA04006, THJ09004, VIN02003, THJ05221, VIN02002, FYR08000, THJ05223, THJ09006, THJ05321, THJ05323, THJ10002, VIN02010, THJ05121, THJ05123, THJ01104, SAM08011, VIS02200, THJ09002, THJ09003, VIS02201, VIS13301, VIS02000, LAU04800, THJ06029, FYR08010, VIS01004, FYR08011, VIS01301, VIN02001, LAN1105, VIS01305, VIS01304, TEK01006, THJ08421, THJ09005, TEK01008, UMH53011, FEL04011, UMH53031, VIS03401, VIS03301, FYR09002, SJA08110, THJ06010, UMH53120, THJ06023e, VIS03010, THJ09004ens, THJ06028e, VIN02013, HEI01002, HEI01006, HEI01004, SAM06110, UTA04002] via keyword search · concepts: wage index, trend"
+    },
+    {
+     "name": "retrieve",
+     "ms": 46324,
+     "detail": "SJA08101 from [SJA01101, LAU04000, VIN02092, SJA08101, SJA09041, SJA09042, SJA02202, LAU04201, SJA09003, SJA09033, SJA08110, SJA09040, SJA04001, SJA02204, SJA08109, LAU09917, SJA09020, LAU04203, VIN02101, VIN02091, SJA09004, SJA08103, LAU09901, LAU09927, VIS08003b, SJA08104, LAU09925, VIS02508, LAU09915, UMH51102, LAU04207, FYR08001, VIN02500, SJA01106, VIN02100, LAU04200, TEK02004, LAU04101, LAU04205, LAU04107, LAN1105, UMH34055, VIN08601, VIS08000b, VIN02002, FYR08000, LAU04007, SJA09112, LAU04209, SJA02201, UMH31108, VIS08010b, SJA08107, SJA07101, VIS01306, FYR08011, TEK02001, LAU04001, LAU09923, SJA02203, SJA01102, FYR04111, FYR04101, FYR08010, SJA09005, SJA09035, LAU04105, LAU04103, VIS02201, VIS02506, VIS13301, THJ01103, SJA09001, SJA03005, VIS01305, SJA06100b, SJA09123, THJ06010, SJA04003, SJA06101, SJA07102, LAU09902, LAU09903, VIS03010, SJA06102, FYR01001, VIN08602, THJ03105b] via keyword search · concepts: wage index, fish catch, trend"
+    },
+    {
+     "name": "select",
+     "ms": 17609,
+     "detail": "series {'Quarter': ['2021Q1', '2021Q2', '2021Q3', '2021Q4', '2022Q1', '2022Q2', '2022Q3', '2022Q4', '2023Q1', '2023Q2', '2023Q3', '2023Q4', '2024Q1', '2024Q2', '2024Q3', '2024Q4', '2025Q1', '2025Q2', '2025Q3', '2025Q4', '2026Q1', '2026Q2'], 'Economic activity': ['Financial and insurance activities (K)'], 'Labour cost': ['Labour cost, total'], 'Unit': ['Value of index']} notes: [\"Unit: defaulted to ['Value of index']\", 'Quarter: the last 5 years, 2021Q1 to 2026Q2']"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "22 rows"
+    },
+    {
+     "name": "select",
+     "ms": 18047,
+     "detail": "series {'Year': ['2019', '2020', '2021', '2022', '2023', '2024'], 'Categories': ['2.3 Labour related costs'], 'Type of ships': ['Total']} notes: ['Year: the last 5 years, 2019 to 2024']"
+    },
+    {
+     "name": "fetch",
+     "ms": 4,
+     "detail": "6 rows"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: Model did not return valid Verdict: 1 validation error for Verdict\ntable_id\n  Field required [type=missing, input_value={'properties': {'table_id...bour cost structure).\"}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/missing"
+    },
+    {
+     "name": "compose",
+     "ms": 4689,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-labour-cost-compare-en",
+   "level": "hard",
+   "language": "en",
+   "question": "Compare labour costs in construction, fishing and financial services over the last 5 years in a line chart",
+   "expected_tables": [
+    "VIN02092|VIN02091|LAU04107|LAU04109|LAU04209"
+   ],
+   "expected_values": [],
+   "note": "English twin of friends-labour-cost-compare",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 53.0,
+   "llm_calls": 11,
+   "tables": [
+    "VIN02091",
+    "SJA08101"
+   ],
+   "text": "Statistics Iceland (Hagstofa Íslands) data from table VIN02091 shows the labour cost index for Construction rose from 96.3 in 2021Q1 to 168.1 in 2026Q2, while Financial and insurance activities increased from 95.2 in 2021Q1 to 156.4 in 2026Q2. For the fishing sector, table SJA08101 reports labour related costs rising from 8,270.2 in 2019 to 11,938.7 in 2024.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 4265,
+     "detail": "What are the labour costs in the construction industry for the last 5 years? | What are the labour costs in the fishing industry for the last 5 years? | What are the labour costs in financial services for the last 5 years?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 15878,
+     "detail": "VIN02091 from [IDN03001, VIN02100, VIN02092, VIN02101, VIN02091, VIS13302, THJ03105, VIS13301, VIS13303, THJ03204, VIN02500, VIS03303, IDN03002, THJ11011, FYR08010, LAU04109, VIS03010, VIS03401, THJ02105, VIN00001, LAU04209, VIN02003, LAU04207, LIF03323, THJ08421, LAU04107, VIS13001, UMH31108, LAU09917, VIS01304, LIF03214, VIS01300, LIF03343, LAU04205, LIF03324, FYR04111, LAU04007, FYR08011, LIF03304, FYR04101, FYR05109, THJ01103, VIN01205, THJ03111, FYR08001, VIN01104, IDN03003, VIS03201, VIS13000, UMH31119, VIN01403, UMH40500, LIF03334, LIF03314, LIF03322, VIS01305, LAU09915, UMH31109, VIS01301, VIS06140, CEN04530, VIS01303, VIS06141, SAM08001, LIF03307, VIN02005, VIS03301, VIN01402, VIS03302, UMH51001, THJ06010, IDN02303, CEN04540, LIF03313, CEN04410, LAU09901, LIF03321, VIN08601, THJ95144, LIF03320, VIN02012, IDN03004, VIN08602, THJ03101, THJ03103, THJ03104, THJ03102] via keyword search · concepts: construction, trend"
+    },
+    {
+     "name": "retrieve",
+     "ms": 19558,
+     "detail": "VIN02091 from [VIN02100, VIN02092, VIN02091, VIN02101, THJ06021, THJ11011, VIN01401, VIN02500, VIN00001, VIN02005, LAU04205, FYR08010, UTA04006, THJ10002, FYR08011, THJ05421, LAU04207, THJ09004, VIN02003, VIN02002, SAM08011, LAU04107, LAU04105, VIN01104, THJ09003, THJ05123, VIN02010, THJ10001, VIN01205, VIN02001, THJ05121, FYR08001, LAU04007, LAU09917, THJ05751, LAU04209, VIN01403, THJ01202, LAN1105, VIN02004, LAU04201, THJ09006, UMH53011, THJ05223, UMH53031, THJ05323, FYR09002, THJ05221, THJ08421, UMH53120, UMH34050, VIN01002, LAU04203, UTA04005, LAN05008, LAN05001, THJ03204, LAN05003, THJ03111, LAN05005, STI03267, LAN05007, LAU09915, LAN05002, THJ06028e, LAN05004, SAM06110, LAN05006, LAU09901, THJ05265, THJ05261, LAU04109, THJ05263, SJA08112, THJ05242, THJ03201, SJA08110, THJ05267, SJA08101, THJ05251, THJ05351, LAU04101, SAM30111, THJ05161, THJ06020, THJ05342, THJ05442, FYR08000, THJ06010, THJ05271, THJ06029, THJ05151, VIS01104, THJ05142, LIF03324, VIN02013, LAU09927, UTA04002, LAU09925, THJ09004ens, VIS03010, THJ95144, THJ09003ens, LIF03314, THJ06022e, VIN08602, THJ05712, LAU09902] via keyword search · concepts: trend"
+    },
+    {
+     "name": "retrieve",
+     "ms": 22615,
+     "detail": "SJA08101 from [SJA01101, SJA08101, SJA02202, SJA09041, VIN02100, SJA04001, SJA08110, SJA09042, SJA09003, SJA09033, VIN02092, SJA09040, UMH34055, SJA08109, SJA02204, SJA08103, SJA08112, VIN02101, SJA02203, SJA09112, SJA09020, SJA04003, SJA09004, SJA09035, SJA08104, SJA09005, UMH51102, VIN08601, FYR08011, FYR02103, FYR08010, VIN00001, FYR08001, VIN02091, LAN1105, SJA02201, SJA01106, VIS01306, UMH31108, SJA08107, VIN01205, SJA01102, FYR04111, THJ11011, FYR05109, FYR04101, SAM08011, VIN01104, THJ01103, VIS02508, VIN01403, THJ08421, TEK02001, SJA09001, FYR01001, THJ03204, VIN02500, UMH31119, SJA03005, UMH34095, LAU04207, FYR09002, SJA09123, UTA06106, SKO03206c, LAU09917, SJA04907, SJA09124, UMH31230, SJA09111, SJA09110, FYR08000, FYR09005, FYR01003, THJ03105b, LAU09915, SJA07101, THJ06010, VIN08602, FYR04200, FYR04202, SJA07102, THJ95144, VIS03010, CEN03103, VIN02015] via keyword search · concepts: fish catch, trend"
+    },
+    {
+     "name": "select",
+     "ms": 15728,
+     "detail": "series {'Quarter': ['2021Q1', '2021Q2', '2021Q3', '2021Q4', '2022Q1', '2022Q2', '2022Q3', '2022Q4', '2023Q1', '2023Q2', '2023Q3', '2023Q4', '2024Q1', '2024Q2', '2024Q3', '2024Q4', '2025Q1', '2025Q2', '2025Q3', '2025Q4', '2026Q1', '2026Q2'], 'Economic activity': ['Construction (F)'], 'Labour cost': ['Labour cost, total'], 'Unit': ['Value of index']} notes: ['Quarter: the last 5 years, 2021Q1 to 2026Q2']"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "22 rows"
+    },
+    {
+     "name": "select",
+     "ms": 20240,
+     "detail": "series {'Quarter': ['2021Q1', '2021Q2', '2021Q3', '2021Q4', '2022Q1', '2022Q2', '2022Q3', '2022Q4', '2023Q1', '2023Q2', '2023Q3', '2023Q4', '2024Q1', '2024Q2', '2024Q3', '2024Q4', '2025Q1', '2025Q2', '2025Q3', '2025Q4', '2026Q1', '2026Q2'], 'Economic activity': ['Financial and insurance activities (K)'], 'Labour cost': ['Labour cost, total'], 'Unit': ['Value of index']} notes: ['Quarter: the last 5 years, 2021Q1 to 2026Q2']"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "22 rows"
+    },
+    {
+     "name": "select",
+     "ms": 20719,
+     "detail": "series {'Year': ['2019', '2020', '2021', '2022', '2023', '2024'], 'Categories': ['2.3 Labour related costs'], 'Type of ships': ['Total']} notes: [\"Type of ships: defaulted to ['Total']\", 'Year: the last 5 years, 2019 to 2024']"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "6 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 5222,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-unemp-max-15y-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What was the highest unemployment rate in the last 15 years, how high was it and in which year?",
+   "expected_tables": [
+    "VIN00001|VIN00921|VIN00911|VIN01002|VIN00910"
+   ],
+   "expected_values": [],
+   "note": "English twin of friends-unemp-max-15y",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 18.24,
+   "llm_calls": 5,
+   "tables": [
+    "VIN00921"
+   ],
+   "text": "Males and females, 16-74, Unemployment rate, % (Ratio of labour force): 8.0% in 2009, 3.4% in 2023; highest 8.3% in 2010. Highest: 2010, Males and females, 16-74, Unemployment rate, % (Ratio of labour force): 8.3%. Source: Statistics Iceland, VIN00921.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2642,
+     "detail": "What was the annual unemployment rate in Iceland for each year from 2009 to 2023?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 6438,
+     "detail": "VIN00921 from [VIN00001, VIN00920, VIN01002, VIN00911, FYR01202, VIN00921, FYR04112, VIN00931, VIN00951, FYR04102, VIN00971, FYR01204, FYR03010, SKO03206c, SAM08010, LAU04200, FYR09004, UMH11120, FYR01201, UMH31118, SAM08001, VIN00961, VIS02201, MAN05401, SAM08002, UMH53120, VIN01105, FYR09002, UMH31108, LIF01131, FYR01205, FYR09005, VIN01106, SKO02110, SAM08011, VIN10040, VIN10012, VIN01111, UMH31230, SAM08004, LIF06103, FYR08000, FYR03002, VIN00910, UMH34065, SAM08008, MAN11351, VIN01006, VIN02010, LAU04800, LIF01130, VIN01703, VIN01401, SAM08000, VIN02100, LAU04209, SKO03226, LIF01151, VIN01110, VIN01203, FYR04111, THJ11002, MAN05210, MEN08103, FYR09001, VIN01201, LIF01132, LIF01134, THJ11011, IDN02303, SJA03001, MAN05311, FYR09006, THJ05751, HEI03111, FYR05103, CEN03441, MAN03260, VIN01404, SKO04302, SJA09005, SKU01008, LIF06102, SKO01322, CEN07010, FYR03001, CEN07020, CEN03020, CEN03070, SKU01007, FYR09003, VIS02200, CEN07030, CEN07040, THJ09007ens, CEN07050, MAN06203, MAN06104, VIN01003] via keyword search · concepts: unemployment, annual"
+    },
+    {
+     "name": "select",
+     "ms": 6599,
+     "detail": "max {'Year': ['2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'], 'Region': ['Total'], 'Sex': ['Males and females'], 'Age': ['16-74'], 'Unit': ['Unemployment rate, % (Ratio of labour force)']} notes: ['operation max along Year']"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "15 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2554,
+     "detail": "template"
+    }
+   ]
+  }
+ ]
+}

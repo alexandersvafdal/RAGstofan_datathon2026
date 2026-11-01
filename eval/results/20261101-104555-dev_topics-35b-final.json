@@ -1,0 +1,1029 @@
+{
+ "label": "dev_topics-35b-final",
+ "results": [
+  {
+   "id": "cpi-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was the annual inflation rate in September 2026?",
+   "expected_tables": [
+    "VIS01000"
+   ],
+   "expected_values": [
+    5.9
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 12.48,
+   "llm_calls": 5,
+   "tables": [
+    "VIS01000"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table VIS01000, the annual inflation rate in September 2026 was 5.9%.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2813,
+     "detail": "What was the annual inflation rate (percentage change of consumer price index) for Iceland in September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 5014,
+     "detail": "VIS01000 from [VIS01000, VIS02500, VIS13000, VIS02502, VIS01300, VIS02506, VIS13302, VIS08000, VIS01004, VIS13301, VIS13303, VIS01101, VIS01106, VIS01103, SJA06100, VIS08003, LAU04000, LAU04001, LAU04003, LAU04800, LAU04005, LAU04007, SAM08049, UMH31109, THJ05813, VIS02504, SJA01101, SJA01102] via keywords · concepts: consumer price index, change, share, monthly, annual"
+    },
+    {
+     "name": "select",
+     "ms": 2162,
+     "detail": "value {'Month': ['2026M09'], 'Index': ['Consumer price index'], 'Item': ['Annual change, %']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 7,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2482,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "cpi-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hver var verðbólgan í ágúst 2026?",
+   "expected_tables": [
+    "VIS01000"
+   ],
+   "expected_values": [
+    5.6
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.08,
+   "llm_calls": 3,
+   "tables": [
+    "VIS01000"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu VIS01000 var verðbólgan í ágúst 2026 5,6%.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2767,
+     "detail": "What was the annual inflation rate in Iceland in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 147,
+     "detail": "VIS01000 from [VIS01000, VIS02502, VIS02506, VIS02500, VIS01004, VIS01300, VIS13000, VIS01101, LAU04800, VIS01106, LAU04001, VIS01103, VIS13302, UMH31109, SJA06100, VIS08003, VIS13301, LAU04000, LAU04003, LAU04005, LAU04007, VIN00004, LAU04801, UTA06001, UTA06005, SAM08049, VIS13303, VIS08000, VIN00001, THJ05813] via dictionary · concepts: consumer price index, monthly, annual"
+    },
+    {
+     "name": "select",
+     "ms": 1249,
+     "detail": "value {'Month': ['2026M08'], 'Index': ['Consumer price index'], 'Item': ['Annual change, %']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 909,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wage-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How much did wages rise in the 12 months to September 2026?",
+   "expected_tables": [
+    "LAU04001"
+   ],
+   "expected_values": [
+    5.6
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": false,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 6.54,
+   "llm_calls": 5,
+   "tables": [
+    "LAU04000"
+   ],
+   "text": "2025M09, Annual change, %: 7.8%; 2026M08, Annual change, %: 5.7%; Change (%) 2025M09 → 2026M08: -26.9%. Source: Statistics Iceland, LAU04000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1401,
+     "detail": "What is the wage index for September 2026 and what was it in September 2025, or what is the annual percentage change in wages for the period ending September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2615,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04005, LAU04007, LAU04003, VIS02500, VIS02000, LAU04800, VIS13000, VIS01301, LAU04802, VIS01300, VIS02202, VIS13302, VIS01000, VIS02002, VIS01306, VIS01102, SAM08049, VIS08000, TEK02001, TEK02003, VIS02502, TEK02004, LAU04101, VIS02504, LAU04107, LAU04105, LAU04103, LAU04109, UTA05002, VIN02091, JVS00001] via keywords · concepts: wage index, wages, change, share, annual"
+    },
+    {
+     "name": "select",
+     "ms": 1445,
+     "detail": "pct_change {'Month': ['2025M09', '2026M08'], 'Unit': ['Annual change, %']} notes: ['Month: 2026M09 is outside the table, using 2026M08', 'operation value -> pct_change (question wording)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1069,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "exports-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was the value of goods exports in September 2026?",
+   "expected_tables": [
+    "UTA06001"
+   ],
+   "expected_values": [
+    87478.1
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 3.19,
+   "llm_calls": 3,
+   "tables": [
+    "UTA06001"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table UTA06001, the value of goods exports in September 2026 was 87,478.1.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1024,
+     "detail": "What was the value of goods exports in Iceland in September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 151,
+     "detail": "UTA06001 from [UTA06001, UTA06101, UTA06102, UTA06002, UTA06005, UTA06107, UMH31109, UTA06003, UTA02801, UTA04008, UTA02802, UTA05000, UTA06203, UTA06201, UTA05003, UTA05002, VIS02504, UTA04005, THJ01601, THJ06012, SJA01101, SJA01102, THJ03111, THJ03112, THJ01602, UTA04009, THJ05812] via dictionary · concepts: exports"
+    },
+    {
+     "name": "select",
+     "ms": 1105,
+     "detail": "value {'Product': ['Exports fob, total'], 'Month': ['2026M09']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 9,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 900,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "marine-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hvert var verðmæti útfluttra sjávarafurða í ágúst 2026?",
+   "expected_tables": [
+    "UTA06001"
+   ],
+   "expected_values": [
+    24607.5
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 6.39,
+   "llm_calls": 5,
+   "tables": [
+    "UTA06001"
+   ],
+   "text": "Hagstofa Íslands (Hagstofa Íslands) gefur upp að verðmæti útfluttra sjávarafurða hafi verið 32.568,5 í september 2026 (tafla UTA06001). Gögnin ná yfir tímabilið 2011-2026 en upplýsingar um ágúst 2026 eru ekki til staðar.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1009,
+     "detail": "What was the value of exported marine products in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2453,
+     "detail": "UTA06001 from [VIS01000, UTA06001, SJA06100, UTA06101, VIS08003, UTA06102, UTA06003, UTA06107, UTA06005, UTA06002, UTA02801, UTA02802, UTA06203, UMH31109, UTA04008, VIS08000, UTA03801, UTA03803, UTA05003, THJ01601, THJ01602, THJ05813] via keyword search · concepts: prices, marine exports"
+    },
+    {
+     "name": "select",
+     "ms": 1406,
+     "detail": "value {'Product': ['  Exported marine products'], 'Month': ['2026M09']} notes: [\"Month: defaulted to ['2026M09']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1519,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "hotels-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many overnight stays were there in hotels and guesthouses in August 2026?",
+   "expected_tables": [
+    "SAM01201"
+   ],
+   "expected_values": [
+    845186
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.79,
+   "llm_calls": 5,
+   "tables": [
+    "SAM01201"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table SAM01201, there were 845,186 overnight stays in hotels and guesthouses in August 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1269,
+     "detail": "What was the number of overnight stays in hotels and guesthouses in Iceland in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2099,
+     "detail": "SAM01201 from [SAM01201, SAM01202, UMH31109, VIN10012, SAM02001, SAM08049, UTA06002, UTA06003, THJ01601, THJ01602, THJ05811, THJ03111, THJ06012] via keywords · concepts: overnight stays, hotels"
+    },
+    {
+     "name": "select",
+     "ms": 1602,
+     "detail": "value {'Months': ['2026M08'], 'Region': ['Total'], 'Citizenship': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 9,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 812,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "hotels-foreign-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hversu margar gistinætur útlendinga voru á hótelum og gistiheimilum í júlí 2026?",
+   "expected_tables": [
+    "SAM01201"
+   ],
+   "expected_values": [
+    789664
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.06,
+   "llm_calls": 5,
+   "tables": [
+    "SAM01201"
+   ],
+   "text": "Í júlí 2026 voru 789.664 gistinætur útlendinga á hótelum og gistiheimilum, samkvæmt Hagstofu Íslands (Hagstofa Íslands), töflu SAM01201.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1145,
+     "detail": "What was the number of overnight stays by foreigners in hotels and guesthouses in July 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2443,
+     "detail": "SAM01201 from [SAM01201, SAM02001, UTA04008, VIN10012, SAM01202, VIN10052, MAN10001, MAN10003, MAN10002, THJ06012, UTA04005, UTA04009, UTA05003] via keywords · concepts: overnight stays, households, hotels, foreign citizens"
+    },
+    {
+     "name": "select",
+     "ms": 1404,
+     "detail": "value {'Months': ['2026M07'], 'Region': ['Total'], 'Citizenship': ['Foreigners']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1068,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "kef-foreign-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many foreign passengers went through Keflavík airport in August 2026?",
+   "expected_tables": [
+    "SAM02001"
+   ],
+   "expected_values": [
+    314180
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 4.84,
+   "llm_calls": 4,
+   "tables": [
+    "SAM02001"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table SAM02001, 314,180 foreign passengers went through Keflavík airport in August 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1206,
+     "detail": "What was the number of foreign passengers at Keflavík airport in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1634,
+     "detail": "SAM02001 from [SAM02001] via keywords · concepts: passengers"
+    },
+    {
+     "name": "select",
+     "ms": 1114,
+     "detail": "value {'Nationality': ['Foreigners'], 'Month': ['2026M08']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 872,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "kef-us-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How many American passengers passed through Keflavík airport in July 2026?",
+   "expected_tables": [
+    "SAM02001"
+   ],
+   "expected_values": [
+    100928
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.65,
+   "llm_calls": 6,
+   "tables": [
+    "SAM02001"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table SAM02001, 100,928 American passengers passed through Keflavík airport in July 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1105,
+     "detail": "How many American passengers passed through Keflavík airport in July 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4474,
+     "detail": "SAM02001 from [SAM02001] via model browse · concepts: passengers"
+    },
+    {
+     "name": "select",
+     "ms": 1135,
+     "detail": "value {'Nationality': ['U.S.A.'], 'Month': ['2026M07']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 927,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "house-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By how many percent did residential property prices in Iceland change from September 2025 to September 2026?",
+   "expected_tables": [
+    "VIS01106"
+   ],
+   "expected_values": [
+    2.1
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "tolerance": 0.03,
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 5.83,
+   "llm_calls": 5,
+   "tables": [
+    "VIS01106"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table VIS01106, residential property prices outside the capital area increased by 4.3% from September 2025 to September 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1170,
+     "detail": "What was the percentage change in residential property prices in Iceland between September 2025 and September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2543,
+     "detail": "VIS01106 from [VIS01106, VIS02500, VIS02000, VIS02202, VIS01300, VIS13000, VIS01301, VIS13302, VIS01000, VIS02002, VIS13301, VIS13303, VIS01102, VIS02502, VIS03302, VIS01104, VIS02506, VIS02504, THJ05813, THJ01601, THJ03111, THJ03112, UTA07001] via keywords · concepts: house prices, change, share"
+    },
+    {
+     "name": "select",
+     "ms": 1225,
+     "detail": "pct_change {'Month': ['2025M09', '2026M09'], 'Index': ['Outside capital area, total']} notes: [\"Index: defaulted to ['Outside capital area, total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 880,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "births-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many children were born in Iceland in 2025?",
+   "expected_tables": [
+    "MAN05100"
+   ],
+   "expected_values": [
+    4387
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": false,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 3.42,
+   "llm_calls": 3,
+   "tables": [
+    "MAN05101"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN05101, there were 4,387 live births in Iceland in 2025.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1021,
+     "detail": "How many children were born in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 153,
+     "detail": "MAN05101 from [MAN05101, MAN05100, MAN05102, MAN05204, MAN43002, MAN04120, MAN05104, MAN08000, SKO04201a, MAN43000, MAN05111, MAN12103, SKO00012, MAN43004, VIN00901, MAN05321, MAN030106, MAN05201, MAN05110, MAN05401, MAN05103, MAN05202, MAN04119, MAN00110, VIN00931, THJ05242, THJ05342, MAN01401, THJ05142, MAN05303, MAN030104, SJA07001, MAN08213, THJ05465, THJ05265, THJ05442, SKO02108b, THJ05261, THJ05263, THJ05165, THJ05267, THJ05368, THJ05251, MAN04208, THJ05351, THJ05369, TEK02011, THJ05161, VIN00911] via dictionary · concepts: live births, children"
+    },
+    {
+     "name": "select",
+     "ms": 1445,
+     "detail": "value {'Unit': ['All children'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 3,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 790,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "births-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hver var breytingin á fjölda lifandi fæddra barna frá 2024 til 2025?",
+   "expected_tables": [
+    "MAN05100"
+   ],
+   "expected_values": [
+    76
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": false,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 6.68,
+   "llm_calls": 5,
+   "tables": [
+    "MAN05101"
+   ],
+   "text": "Samkvæmt töflu MAN05101 frá Hagstofu Íslands fjölgaði lifandi fæddum börnum úr 4.311 árið 2024 í 4.387 árið 2025, sem er aukning upp á 1,8%.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1388,
+     "detail": "What was the number of live births in Iceland from 2024 to 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2361,
+     "detail": "MAN05101 from [MAN05101, MAN05100, MAN00101, MAN02005, MAN10001, MAN05204, MAN05102, MAN05110, MAN05111, MAN05104, MAN05203, MAN05401, MAN04120, MAN43002, SKO01000, MAN08000, MAN12103, VIN00901, SKO01001, MAN07109, MAN05302, SKO00002, MAN05201, MAN00110, MAN05202, VIN00931, MAN05103, VIN01002, MAN05303, MAN05321, KOS03217a, SKO01201, HEI09301, TEK01006, SKO01101, SKO01104, VIN10040, MAN08801, SKO01102, SKO01109, MAN030106, SKO03203, SKO01105, SKO03207, MAN030104, MAN11101, SKO04201a, SKO04201, SKO03202, SAM09121, MAN08213, VIN07210, THJ05242, MAN04119, THJ05342, MAN05301, VIN00941, THJ05142, VIN01201, SKO03208a, SKO04205b, KOS03216, KOS03200a, THJ09001, SKO01322, LIF03410, THJ09000, KOS01892, SAM09122, SKO01108, KOS01890, MAN06220, CEN01260, CEN05100, CEN07030] via keywords · concepts: population, live births, children, change, annual"
+    },
+    {
+     "name": "select",
+     "ms": 1688,
+     "detail": "pct_change {'Unit': ['All children'], 'Age': ['Total'], 'Year': ['2024', '2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1240,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "gdp-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was GDP volume growth in Iceland in 2025?",
+   "expected_tables": [
+    "THJ01000|THJ01103|THJ01104"
+   ],
+   "expected_values": [
+    1.1
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.33,
+   "llm_calls": 5,
+   "tables": [
+    "THJ01000"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table THJ01000, the GDP volume growth in Iceland for 2025 was 1.1%.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1025,
+     "detail": "What was the GDP volume growth (economic growth) in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2325,
+     "detail": "THJ01000 from [THJ01000, THJ01104, THJ01102, THJ01103, SAM08004, THJ05111, THJ01601, THJ05211, THJ08401, THJ05311, SAM08011, THJ03105, UMH34055, THJ08422, THJ05152, THJ10001, THJ06020, THJ05132, THJ02105, VIS02201, UMH31118, UMH34095, VIS02202, VIS06142, UMH34065, THJ05631, SAM08001, SAM08008, THJ06021, THJ03204, UMH31110, THJ03111, THJ03106, THJ05521, SAM08002, THJ05331, THJ05531, THJ05511, VIS02000, THJ05532, THJ05611, THJ11011, THJ05616, SAM08000, THJ05614, THJ05615, THJ05343, THJ05242, SJA07001, THJ05633, THJ05342, THJ06012, THJ05142, UTA05002, UMH34050, VIS02504, THJ05223, THJ05323, THJ05442, UMH31119, THJ05232, THJ05381, LAN1105, THJ05481, THJ05911, STI03266, THJ05243, THJ05143, FYR04102, THJ05181, THJ05281] via keywords · concepts: economic growth, change"
+    },
+    {
+     "name": "select",
+     "ms": 1224,
+     "detail": "value {'Year': ['2025'], 'Category': ['Gross domestic product, volume change on previous year']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 3,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 748,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "gdp-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hver var hagvöxtur á Íslandi árið 2024?",
+   "expected_tables": [
+    "THJ01000|THJ01103|THJ01104"
+   ],
+   "expected_values": [
+    -0.9
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.05,
+   "llm_calls": 4,
+   "tables": [
+    "THJ01000"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu THJ01000 var hagvöxtur á Íslandi árið 2024 -0,9%.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1008,
+     "detail": "What was the economic growth (GDP volume change) in Iceland in 2024?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1850,
+     "detail": "THJ01000 from [THJ01000, VIS06125, THJ01104, VIS06124, THJ01102, UMH31108, THJ01103, SAM08004, UMH34055, UMH31107, UMH31101, UMH40500, LAN1107, THJ05152, UMH40100, THJ01601, VIS06142, UMH34065, THJ01401, FYR05103, UMH40210, SAM08011, UMH34095, THJ03111, UMH31118, VIS06123, THJ08401, VIS02201, THJ05631, UMH31230, THJ05111, THJ05211, THJ05311, SAM08008, VIS06140, VIS06141, UMH40220, THJ06012, FYR08010, THJ06021, THJ03204, THJ03112, THJ08422, FYR08000, VIS08000, SJA08109, SJA08103, FYR08001, THJ03105, VIN02010, SJA08107, UMH31220, FYR08011, SJA09113, THJ10001, SAM08001, SJA09005, THJ05813, MID00101, SJA01110, SJA09041, LAN05007, SJA08112, SJA08110, UMH40200, SJA08101] via keywords · concepts: economic growth, change"
+    },
+    {
+     "name": "select",
+     "ms": 1228,
+     "detail": "value {'Year': ['2024'], 'Category': ['Gross domestic product, volume change on previous year']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 965,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "netmig-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What was net migration to Iceland in the second quarter of 2026?",
+   "expected_tables": [
+    "MAN10003|MAN10002"
+   ],
+   "expected_values": [
+    940
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.49,
+   "llm_calls": 5,
+   "tables": [
+    "MAN10002"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN10002, net migration to Iceland in the second quarter of 2026 was 940.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1039,
+     "detail": "What was the net migration to Iceland in the second quarter of 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2640,
+     "detail": "MAN10002 from [MAN10002, MAN10003, MAN10001, MAN00101, MAN02005, MAN43000, MAN43002, THJ06012, VIN10012, THJ05812, THJ05811, MAN00110, VIN10001, VIN00900, MAN43004, MAN00000, MAN43005, MAN43007, VIN00930, VIN00910, VIN01502, THJ01601, THJ03111, VIN10052, THJ01602, VIN00920, JVS00001, SAM02001, VIN10032, MAN43006, VIN01206, UTA04005, THJ05813, THJ03112, VIN10022, MAN12104, UTA05003, VIN01001, VIN01005, UTA05002, MAN04203, UTA04009, MAN030101, MAN04001, VIN01004, MAN00102, MAN04208, VIN00004, THJ11001, MAN03200, MAN04103, VIN01501, MAN00115, MAN030103, MAN030102] via keywords · concepts: population, migration"
+    },
+    {
+     "name": "select",
+     "ms": 1992,
+     "detail": "value {'Quarter': ['2026Q2'], 'Event': ['Net migration'], 'NUTS3 region': ['Total'], 'Sex and citizenship': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 808,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "immig-foreign-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How many foreign citizens moved to Iceland in the first quarter of 2026?",
+   "expected_tables": [
+    "MAN10003|MAN10002"
+   ],
+   "expected_values": [
+    2980
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.59,
+   "llm_calls": 5,
+   "tables": [
+    "MAN10002"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN10002, 2,980 foreign citizens moved to Iceland in the first quarter of 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1050,
+     "detail": "How many foreign citizens immigrated to Iceland in the first quarter of 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2851,
+     "detail": "MAN10002 from [MAN10002, MAN10003, MAN43000, MAN43002, MAN04001, VIN10012, MAN43004, VIN10001, SAM02001, MAN04103, MAN43007, MAN43005, MAN10001, VIN10052, MAN04208, VIN10032, VIN10022, MAN43006, MAN04203, THJ06012, SAM01102, UTA05003, SAM01201, JVS00001, THJ05811] via keywords · concepts: migration, immigrants, foreign citizens"
+    },
+    {
+     "name": "select",
+     "ms": 1854,
+     "detail": "value {'Quarter': ['2026Q1'], 'Event': ['Immigration'], 'NUTS3 region': ['Total'], 'Sex and citizenship': ['Foreign citizens']} notes: [\"NUTS3 region: defaulted to ['Total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 828,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "meanage-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hver er meðalaldur landsmanna árið 2026?",
+   "expected_tables": [
+    "MAN00102"
+   ],
+   "expected_values": [
+    39.2
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.35,
+   "llm_calls": 5,
+   "tables": [
+    "MAN00102"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu MAN00102 var meðalaldur landsmanna árið 2026 39,2.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 988,
+     "detail": "What is the average age of the population in Iceland in 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2209,
+     "detail": "MAN00102 from [MAN00102, MAN02005, MAN00101, MAN10001, MAN43000, MAN04103, MAN030102, MAN43002, MAN07209, MAN03280, MAN03200, MAN030101, MAN04208, MAN12103, MAN03250, MAN03270, MAN10003, MAN00110, VIN01001, VIN00900, VIN10012, MAN04001, MAN00115, VIN00001, VIN00930, VIN00910, MAN07109, MAN00000, MAN030103, MAN04203, MAN43004, MAN43006, MAN07108, MAN12104] via keywords · concepts: population, age, mean age, average"
+    },
+    {
+     "name": "select",
+     "ms": 1271,
+     "detail": "value {'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 875,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "mothers-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What was the mean age of first-time mothers in 2025?",
+   "expected_tables": [
+    "MAN05103"
+   ],
+   "expected_values": [
+    29.2
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 12.78,
+   "llm_calls": 5,
+   "tables": [
+    "MAN05103"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN05103, the mean age of first-time mothers in 2025 was 29.2.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1067,
+     "detail": "What was the mean age of first-time mothers in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 5088,
+     "detail": "MAN05103 from [MAN05101, MAN00102, MAN05100, MAN05103, MAN05204, MAN05102, MAN05201, MAN05303, MAN05104, MAN05110, MAN04120, MAN05203, MAN08000, MAN43002, MAN12103, VIN00941, MAN030104, MAN030106, MAN08213, TEK01001, VIN00901, VIN00931, MAN04119, MAN05202, VIN00911, MAN05221, MAN43000, THJ05211, THJ05311, THJ05111, TEK01006, MAN01102, MAN05401, MAN00110, MAN01401, MAN05405, VIN00900, MAN01002, VIN02001, VIN00932, SKO04205b, VIN02004, TEK02011, VIN02005, SKO04108, MEN01206, THJ01000, TEK01007, MAN05321, TEK01008, SKO00012, SKO00005a, VIN02002, VIN02003, THJ05465, SKO04106, VIN00001] via keyword search · concepts: live births, age, mean age, average"
+    },
+    {
+     "name": "select",
+     "ms": 1637,
+     "detail": "value {'Year': ['2025'], 'Age of parents': ['Age of mother'], 'Type of births': ['Births of first childs'], 'Unit': ['Mean age']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 4,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4981,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "cars-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hversu margir fólksbílar voru skráðir á Íslandi árið 2025?",
+   "expected_tables": [
+    "SAM03105"
+   ],
+   "expected_values": [
+    254362
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 12.41,
+   "llm_calls": 5,
+   "tables": [
+    "SAM03105"
+   ],
+   "text": "Árið 2025 voru 254.362 fólksbílar skráðir á Íslandi, samkvæmt töflu SAM03105 frá Hagstofu Íslands.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2268,
+     "detail": "What was the number of passenger cars registered in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 5754,
+     "detail": "SAM03105 from [SAM03105, SAM02001, SAM08006, VIS02201, VIS02202, SAM30120, SAM08011, SAM08000, SAM08001, SAM08004, VIS01104, VIS01301, SAM08049, SAM08003, VIS01308, SAM08007, SAM31002, UMH31119, SAM08002, UTA04006, FYR06103, SAM08010, SAM08008, UTA06001, UTA06005, UTA06203, UMH31118, SAM08050, VIS06140, VIS06141, MAN04119, MAN04001, VIN00931, SAM01603, SKO03206c, VIN01105, UTA03802, SKO03208a, VIN01107, VIN01110, THJ09000] via keywords · concepts: passengers, cars"
+    },
+    {
+     "name": "select",
+     "ms": 2122,
+     "detail": "value {'Year': ['2025'], 'Vehicles': ['Passenger cars, 1-8 passengers (M1)']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2259,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "cpi-wage-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What were annual inflation and annual wage growth in September 2026?",
+   "expected_tables": [
+    "VIS01000",
+    "LAU04001"
+   ],
+   "expected_values": [
+    5.9,
+    5.6
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": false,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 12.07,
+   "llm_calls": 6,
+   "tables": [
+    "VIS01000",
+    "LAU04000"
+   ],
+   "text": "In September 2026, the annual inflation rate was 5.9% according to Statistics Iceland (Hagstofa Íslands) table VIS01000. The annual wage growth for August 2026 was 5.7% as reported in table LAU04000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2598,
+     "detail": "What was the annual inflation rate (percentage change of consumer price index) in September 2026? | What was the annual wage growth (wage index) in September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 67,
+     "detail": "LAU04000 from [LAU04000, LAU04005, LAU04007, LAU04001, LAU04003, LAU04800, LAU04802, VIS13000, VIS13302, VIN00004, VIN10032, VIN10022, VIS02500, VIS01000, VIS13303, VIN10052, VIN10001, SAM08049, VIS01004, LAU04107, LAU04105, LAU04101, LAU04109, LAU04103, VIS02504, VIN02091, JVS00001, SJA01101, SJA01102, THJ05813, THJ01601, THJ03111, UTA05002] via dictionary · concepts: wage index, change, annual"
+    },
+    {
+     "name": "select",
+     "ms": 4362,
+     "detail": "value {'Month': ['2026M08'], 'Unit': ['Annual change, %']} notes: ['Month: 2026M09 is outside the table, using 2026M08']"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 6991,
+     "detail": "VIS01000 from [VIS01000, VIS02500, VIS13000, VIS01300, VIS02502, VIS02506, VIS08000, VIS13302, VIS01103, VIS13303, VIS01101, VIS01004, SJA06100, VIS08003, VIS13301, UTA05000, VIS01106, LAU04000, LAU04001, LAU04800, LAU04003, LAU04005, LAU04007, THJ05813, VIS02504, UTA05002, LAU04101, LAU04103, VIN02091, LAU04109, LAU04105, LAU04107] via keywords · concepts: consumer price index, change, share, annual"
+    },
+    {
+     "name": "select",
+     "ms": 1436,
+     "detail": "value {'Month': ['2026M09'], 'Index': ['Consumer price index'], 'Item': ['Annual change, %']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compute",
+     "ms": 0,
+     "detail": "5.9% − 5.7%"
+    },
+    {
+     "name": "compose",
+     "ms": 1045,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}

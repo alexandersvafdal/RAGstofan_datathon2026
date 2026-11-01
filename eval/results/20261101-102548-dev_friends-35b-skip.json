@@ -1,0 +1,275 @@
+{
+ "label": "dev_friends-35b-skip",
+ "results": [
+  {
+   "id": "friends-unemp-max-15y",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver er hæsta atvinnuleysistíðnin á síðustu 15 árum, hvað var hún há og hvaða ár?",
+   "expected_tables": [
+    "VIN00001|VIN00921|VIN00911|VIN01002|VIN00910"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; max over a span, needs year and value",
+   "table_ok": false,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 20.22,
+   "llm_calls": 4,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: RemoteProtocolError Server disconnected without sending a response.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1250,
+     "detail": "What was the highest unemployment rate in Iceland over the last 15 years, and in which year did it occur?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 6213,
+     "detail": "VIN00001 from [VIN00001, VIN00920, VIN00911, VIN00921, VIN01002, VIN00951, VIN00910, FYR01202, VIN00931, VIN01701, VIN10040, FYR01204, FYR04112, FYR04111, VIN01105, LAU04201, UMH31118, VIN01006, VIN01401, VIS02201, VIN00971, THJ01000, VIN01106, VIN01110, VIN10012, HEI03111, LAU04200, VIN01111, LAU04103, VIN01206, LIF03340, LAU04203, LIF03307, VIN00961, VIS02200, LIF03304, VIN01004, LFI03305, LFI03306, THJ11002, MEN06108, LAU04207, MAN05210, UMH53120, FYR04102, SKU01008, VIN01404, VIS02202, CEN09002, LIF03343, JVS00001, VIN01003, LAU09917, FYR04101, VIN01402, TEK01007, FYR09004, HEI12001, LAU04107, SAM08010, LIF03310, THJ06019, SKU01007, VIN01203, CEN05000, THJ11011, VIN01703, MAN01002, SAM08008, VIN01104, VIN02100, FYR09006, VIN02010, FYR04200, MAN06203, HEI09106, FYR09002, FYR09005, CEN03441, SKO03226, SKU01010, LIF03320, LIF03330, LIF03341, LIF03342, SKU01009, MAN06104, HEI02501, SKU01006, CEN07020, CEN03020, CEN03070, SAM06110] via keyword search · concepts: unemployment, annual"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: RemoteProtocolError Server disconnected without sending a response."
+    }
+   ]
+  },
+  {
+   "id": "friends-pop-1984",
+   "level": "easy",
+   "language": "is",
+   "question": "Hvað bjuggu margir á Íslandi árið 1984?",
+   "expected_tables": [
+    "MAN00000|MAN00101|MAN00110"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; an old year",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.02,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "friends-cpi-now-12m",
+   "level": "medium",
+   "language": "is",
+   "question": "Gefðu mér neysluverðsvísitöluna eins og hún er í dag og sýndu mér líka hvernig hún hefur þróast síðustu 12 mánuði",
+   "expected_tables": [
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; latest value plus a 12-month series",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.11,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "friends-building-now-12m",
+   "level": "medium",
+   "language": "is",
+   "question": "Gefðu mér byggingarvísitöluna eins og hún er í dag og sýndu mér líka hvernig hún hefur þróast síðustu 12 mánuði",
+   "expected_tables": [
+    "VIS13001|VIS13305|VIS13301"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; building cost index",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "friends-wage-now-12m",
+   "level": "medium",
+   "language": "is",
+   "question": "Gefðu mér launavísitöluna eins og hún er í dag og sýndu mér líka hvernig hún hefur þróast síðustu 12 mánuði",
+   "expected_tables": [
+    "LAU04000"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; wage index",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "friends-cpi-drivers-12m",
+   "level": "hard",
+   "language": "is",
+   "question": "Gefðu mér top 3 áhrifavalda í breytingu vísitölu neysluverðs og hversu mikil áhrif hver hefur haft síðustu 12 mánuði",
+   "expected_tables": [
+    "VIS01300|VIS01301|VIS01304"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; contributions of CPI subindices",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "friends-cpi-drivers-monthly",
+   "level": "hard",
+   "language": "is",
+   "question": "Sýndu mér mánuð fyrir mánuð síðasta árið hvaða þrír undirflokkar höfðu mest áhrif á breytingu vísitölu neysluverðs, upp eða niður",
+   "expected_tables": [
+    "VIS01300|VIS01301|VIS01304"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; top 3 per month",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "friends-labour-cost-compare",
+   "level": "hard",
+   "language": "is",
+   "question": "Gefðu mér samanburð í línuriti á launakostnaði í byggingariðnaði, fiskveiðum og fjármálaþjónustu síðustu 5 árin",
+   "expected_tables": [
+    "VIN02092|VIN02091|LAU04107|LAU04109|LAU04209"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; several activities over several years",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "friends-labour-cost-compare-en",
+   "level": "hard",
+   "language": "en",
+   "question": "Compare labour costs in construction, fishing and financial services over the last 5 years in a line chart",
+   "expected_tables": [
+    "VIN02092|VIN02091|LAU04107|LAU04109|LAU04209"
+   ],
+   "expected_values": [],
+   "note": "English twin of friends-labour-cost-compare",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "friends-unemp-max-15y-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What was the highest unemployment rate in the last 15 years, how high was it and in which year?",
+   "expected_tables": [
+    "VIN00001|VIN00921|VIN00911|VIN01002|VIN00910"
+   ],
+   "expected_values": [],
+   "note": "English twin of friends-unemp-max-15y",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,3564 @@
+{
+ "label": "all60-35b-skip",
+ "results": [
+  {
+   "id": "population-iceland-2026-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many people lived in Iceland on 1 January 2026?",
+   "expected_tables": [
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    394324.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.93,
+   "llm_calls": 5,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "2026: 394,324. Source: Statistics Iceland, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1204,
+     "detail": "What was the population of Iceland on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2392,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN12104, MAN04203, MAN12103, MAN04208, MAN030101, MAN04103, MAN03250, MAN43000, MAN03280, MAN43007, MAN00102, MAN03270, MAN43005, MAN43002, MAN03200, SJA01101, MAN00000, MAN04001, MAN43004, MAN00110, VIN10012, UTA02801, UTA03801, MAN00115, UTA06102, MAN030103, MAN43006, VIN00001, UTA06107, UTA06201, VIN00900, SJA02201, SJA01102, SJA02202, UTA03803, MAN07108, VIN00930] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 1375,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2026']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 921,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "population-iceland-2026-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve margir bjuggu á Íslandi 1. janúar 2026?",
+   "expected_tables": [
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    394324.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 4.73,
+   "llm_calls": 5,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "2026: 394.324. Heimild: Hagstofa Íslands, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1047,
+     "detail": "What was the population of Iceland on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1256,
+     "detail": "MAN00101 from [MAN02005, MAN10001, MAN00101, MAN04103, MAN04203, MAN030101, MAN03280, MAN030102, MAN12103, MAN12104, MAN04208, MAN03250, MAN43007, MAN43005, MAN03270, MAN43000, MAN43002, MAN00102, MAN03200, MAN43006, MAN04001, MAN00000, VIN10012, MAN43004, SJA01101, SJA02201, SJA01102, MAN00110, SJA02202, MAN00115, MAN030103, VIN00001, SAM01601] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 1365,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2026']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1062,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "population-reykjavik-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many people lived in Reykjavík on 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    139804.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 4.9,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN02005, the population of Reykjavík on 1 January 2026 was 139,804.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1035,
+     "detail": "What was the population of Reykjavík on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1232,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN12104, MAN04208, MAN04203, MAN43005, MAN43007, MAN03270, MAN030101, MAN030102, MAN07108, MAN03200, MAN43006, MAN07109, VIN10012, SJA01101] via keywords · concepts: population, smoking, region"
+    },
+    {
+     "name": "select",
+     "ms": 1691,
+     "detail": "value {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 15,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 920,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "population-reykjavik-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve margir bjuggu í Reykjavík 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    139804.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.11,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu MAN02005 bjuggu 139.804 manns í Reykjavíkurborg 1. janúar 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1045,
+     "detail": "What was the population of Reykjavík on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1242,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN04203, MAN12104, MAN04208, MAN03270, MAN43005, MAN43007, MAN03200, MAN030101, MAN43006, MAN07108, MAN030102, VIN10012, SJA01101, MAN07109, TEK02003, TEK02004, TEK02014] via keywords · concepts: population, smoking"
+    },
+    {
+     "name": "select",
+     "ms": 1712,
+     "detail": "value {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1106,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "births-2024-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many children were born in Iceland in 2024?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321"
+   ],
+   "expected_values": [
+    4311.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 3.48,
+   "llm_calls": 3,
+   "tables": [
+    "MAN05101"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN05101, there were 4,311 live births in Iceland in 2024.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 989,
+     "detail": "How many children were born in Iceland in 2024?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 115,
+     "detail": "MAN05101 from [MAN05101, MAN05100, MAN43002, MAN05102, SKO01000, SKO01109, MAN43000, MAN12103, SKO01106, SKO01001, SKO00012, MAN05204, SKO01305, MAN43004, MAN07109, SKO01103, SKO01108, SKO01201, MAN04120, KOS06001, MAN05110, SKO01101, SKO01104, SKO01102, MAN05401, MAN08000, SKO01105, KOS02101c, MAN05201, MAN00110, KOS01892, VIN10040, SKO04201a, VIN00931, KOS02108, MAN05103, UMH31108, MAN05104, UMH31230, MAN04208, SAM09121, VIN01207, MAN05321, MAN03200, MAN05111, MAN12104, SJA09005, MAN08801, KOS02051, SKO01304, UMH31220, KOS02054, SKO01322, KOS02053, KOS01890, UMH31101] via dictionary · concepts: live births, children"
+    },
+    {
+     "name": "select",
+     "ms": 1459,
+     "detail": "value {'Unit': ['All children'], 'Age': ['Total'], 'Year': ['2024']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 917,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "births-2024-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve mörg börn fæddust á Íslandi árið 2024?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321"
+   ],
+   "expected_values": [
+    4311.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 3.77,
+   "llm_calls": 3,
+   "tables": [
+    "MAN05101"
+   ],
+   "text": "Árið 2024 fæddust 4.311 börn á Íslandi. Tölurnar eru úr töflu MAN05101 hjá Hagstofu Íslands (Statistics Iceland).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1048,
+     "detail": "How many children were born in Iceland in 2024?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 199,
+     "detail": "MAN05101 from [MAN05101, MAN05100, MAN43002, MAN05102, MAN05204, SKO01000, SKO01106, SKO01109, SKO01001, MAN43004, SKO01108, MAN12103, SKO01103, SKO01105, SKO01104, SKO01305, MAN07109, SKO01201, MAN05111, SKO01304, MAN05110, MAN04120, KOS01890, SKO01101, MAN05201, SKO01102, MAN05401, MAN05321, VIN10040, MAN08801, MAN00110, MAN43000, KOS01892, SAM09121, UMH31230, SKO00012, SKO01322, SKO04201a, VIN00931, UMH31108, MAN05103, MAN08000, MAN05104, VIN01207, SAM09122, KOS02101c, SJA09005, MAN05301, KOS02051, UMH31220, KOS02054, UMH31101, KOS02053, VIN01201] via dictionary · concepts: live births, children"
+    },
+    {
+     "name": "select",
+     "ms": 1460,
+     "detail": "value {'Unit': ['All children'], 'Age': ['Total'], 'Year': ['2024']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1060,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "cpi-2026-09-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was the consumer price index in September 2026?",
+   "expected_tables": [
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    697.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 3.88,
+   "llm_calls": 3,
+   "tables": [
+    "VIS01000"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table VIS01000, the consumer price index in September 2026 was 697.3.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1040,
+     "detail": "What was the consumer price index (vísitala neysluverðs) in September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 917,
+     "detail": "VIS01000 from [VIS01000, VIS02502, VIS02500, VIS02506, VIS01101, VIS01106, VIS01103, VIS01004, LAU04800, VIS01300, VIS08000, VIS08003, VIS13302, LAU04001, VIS13000, VIS13303, VIS13301, UTA06005, UTA06001, LAU04003, LAU04005, VIS02504, THJ05813, THJ01602, SJA01101, SJA01102, LAU04109, THJ01601, THJ03111, THJ03112] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "select",
+     "ms": 1094,
+     "detail": "value {'Month': ['2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 3,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 821,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "cpi-2026-09-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hver var vísitala neysluverðs í september 2026?",
+   "expected_tables": [
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    697.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 3.37,
+   "llm_calls": 3,
+   "tables": [
+    "VIS01000"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu VIS01000 var vísitala neysluverðs í september 2026 697,3.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1029,
+     "detail": "What was the consumer price index (vísitala neysluverðs) in September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 381,
+     "detail": "VIS01000 from [VIS01000, VIS02502, VIS02500, VIS01101, VIS02506, VIS01106, VIS01103, VIS01004, LAU04800, VIS01300, VIS08000, VIS13302, VIS08003, LAU04001, VIS13303, VIS13000, VIS13301, UTA06005, UTA06001, VIS02504, THJ05813, SJA01101, SJA01102, THJ01602, LAU04109, THJ01601, THJ03111, THJ03112] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "select",
+     "ms": 976,
+     "detail": "value {'Month': ['2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 972,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wage-index-2026-08-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was the wage index in August 2026?",
+   "expected_tables": [
+    "LAU04000"
+   ],
+   "expected_values": [
+    1149.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 3.17,
+   "llm_calls": 3,
+   "tables": [
+    "LAU04000"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table LAU04000, the wage index in August 2026 was 1,149.3.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1047,
+     "detail": "What was the wage index in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 148,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04005, LAU04007, LAU04800, LAU04003, LAU04802, VIS01004, TEK02001, VIS13302, VIS02500, VIN00004, VIN10032, UMH31109, VIN10022, VIS02506, VIS13303, VIN10052, LAU04801, VIN10001, VIS13301, TEK02003, TEK02004, VIS01000, VIS01103, VIS13000, LAU04107, LAU04105, LAU04109, LAU04101, LAU04103, VIN02091, THJ05813, JVS00001, UTA05002] via dictionary · concepts: wage index"
+    },
+    {
+     "name": "select",
+     "ms": 1109,
+     "detail": "value {'Month': ['2026M08'], 'Unit': ['Value of index']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 3,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 859,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wage-index-2026-08-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hver var launavísitalan í ágúst 2026?",
+   "expected_tables": [
+    "LAU04000"
+   ],
+   "expected_values": [
+    1149.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.09,
+   "llm_calls": 5,
+   "tables": [
+    "LAU04000"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu LAU04000 var launavísitalan í ágúst 2026 1.149,3.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1111,
+     "detail": "What was the wage index (launavísitala) in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1852,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04003, LAU04800, LAU04802, LAU04007, LAU04005, VIS01103, VIS13302, VIS01004, VIS02506, VIS02500, TEK02001, TEK02003, TEK02004, VIS01106, VIS02502, LAU04101, LAU04103, LAU04107, LAU04105, LAU04109, VIN02091, JVS00001, THJ05813] via keywords · concepts: wage index, wages"
+    },
+    {
+     "name": "select",
+     "ms": 1079,
+     "detail": "value {'Month': ['2026M08'], 'Unit': ['Value of index']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1044,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "unemployment-2026q2-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was the unemployment rate in Iceland in the second quarter of 2026?",
+   "expected_tables": [
+    "VIN00920|VIN00910"
+   ],
+   "expected_values": [
+    6.5
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.45,
+   "llm_calls": 5,
+   "tables": [
+    "VIN00920"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table VIN00920, the unemployment rate in Iceland for the second quarter of 2026 was 6.5%.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1070,
+     "detail": "What was the unemployment rate in Iceland in the second quarter of 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1638,
+     "detail": "VIN00920 from [VIN00920, VIN00001, VIN00910, JVS00001, VIN01206, VIN01004, VIN00930, THJ05811, THJ05812, THJ11001, THJ06012, VIN01005, UTA04005, VIN10012, UTA05002, VIN01502, THJ01601, THJ03111, THJ01602, VIN00900, THJ05813, MAN10001, THJ03112, UTA05003, VIS02508, MAN10003, VIN01001, UTA04009, VIS02504, MAN10002, VIN01501, SAM08050, VIN10032, VIN01503, VIN01504, VIN10052, VIN01505, MAN43000, FYR04102, VIN00004, LAU04107, VIN10022] via keywords · concepts: unemployment"
+    },
+    {
+     "name": "select",
+     "ms": 1845,
+     "detail": "value {'Quarter': ['2026Q2'], 'Region': ['Total'], 'Sex': ['Males and females'], 'Age': ['16-74'], 'Unit': ['Unemployment rate, % (of labour force)']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 896,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "unemployment-2026q2-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hvert var atvinnuleysi á Íslandi á öðrum ársfjórðungi 2026?",
+   "expected_tables": [
+    "VIN00920|VIN00910"
+   ],
+   "expected_values": [
+    6.5
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.33,
+   "llm_calls": 5,
+   "tables": [
+    "VIN00920"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu VIN00920 var atvinnuleysið á Íslandi 6,5% á öðrum ársfjórðungi 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1020,
+     "detail": "What was the unemployment rate in Iceland in the second quarter of 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1293,
+     "detail": "VIN00920 from [VIN00920, VIN00001, VIN00910, VIN01004, THJ05811, VIN01206, JVS00001, THJ05812, VIN00930, VIN01005, UTA04005, THJ11001, THJ05813, THJ01601, UTA04009, THJ06012, VIN01001, LAU04107, LAU04109, VIN02091, THJ03111, THJ03112, VIN10012, THJ01602, UTA05002, VIN01502, VIS02504, VIS02508, VIN00900, MAN10001, UTA05003, MAN10003, VIN10052, MAN10002, VIN10001, VIN01501, VIN01503, VIN01504, VIN01505, VIN10032, LAU04101, LAU04103, VIN10022, LAU04105, SAM08050] via keywords · concepts: unemployment, quarterly"
+    },
+    {
+     "name": "select",
+     "ms": 1914,
+     "detail": "value {'Quarter': ['2026Q2'], 'Region': ['Total'], 'Sex': ['Males and females'], 'Age': ['16-74'], 'Unit': ['Unemployment rate, % (of labour force)']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1103,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "gdp-2025-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was Iceland's gross domestic product in 2025?",
+   "expected_tables": [
+    "THJ01102|THJ05111|THJ05211|THJ05311|THJ05531|THJ05631"
+   ],
+   "expected_values": [
+    4941210.91673494
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 4.53,
+   "llm_calls": 5,
+   "tables": [
+    "THJ01102"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table THJ01102, Iceland's gross domestic product in 2025 was 4,941,210.9.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1070,
+     "detail": "What was Iceland's gross domestic product (GDP) at current prices in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1390,
+     "detail": "THJ01102 from [THJ01102, THJ01000, THJ01601, VIS01000, THJ01103, VIS02201, THJ01104, VIS02202, THJ05111, THJ05211, THJ05311, THJ03105, SAM08004, SAM08011, VIS06140, THJ05331, THJ02105, THJ08421, THJ03204, THJ08401, UMH31118, THJ05631, UMH34095, SAM08001, UMH34065, THJ05242, VIS02000, VIS02500, THJ05142, THJ05521, VIS02508, THJ05531, THJ05511, THJ06029, THJ05532, THJ05611, THJ05616, THJ06020, THJ05614, VIS02002, THJ05615, THJ05343, UMH51102, THJ05633, THJ05342, VIS01301, SAM08000, VIS06141, VIS01102, LAN1101, THJ06012, UTA05002, SAM08003, THJ05132, THJ06019, SAM08008, THJ08422, VIS01104, VIS01304, VIS02504, LAN1105, THJ05143, UMH31110, THJ02103, VIS01101] via keywords · concepts: gross domestic product, prices, latest"
+    },
+    {
+     "name": "select",
+     "ms": 1158,
+     "detail": "value {'Category': ['8. Gross Domestic Product'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 905,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "gdp-2025-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hver var verg landsframleiðsla á Íslandi árið 2025?",
+   "expected_tables": [
+    "THJ01102|THJ05111|THJ05211|THJ05311|THJ05531|THJ05631"
+   ],
+   "expected_values": [
+    4941210.91673494
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 4.77,
+   "llm_calls": 5,
+   "tables": [
+    "THJ01102"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu THJ01102 var verg landsframleiðsla á Íslandi árið 2025 4.941.210,9.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1074,
+     "detail": "What was the gross domestic product (GDP) at current prices in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1343,
+     "detail": "THJ01102 from [THJ01102, THJ01000, THJ01601, VIS01000, THJ01103, THJ01104, VIS02201, VIS06140, VIS02202, SAM08004, THJ05111, THJ05211, THJ05311, THJ03105, VIS06141, THJ08421, THJ02105, SAM08011, LAN1101, THJ05331, THJ08401, THJ03204, UMH31118, THJ05631, UMH34095, UMH34065, THJ05242, SAM08001, THJ05142, THJ05521, THJ05531, THJ05511, UMH31110, THJ05532, THJ05611, THJ05616, THJ05614, THJ05615, THJ05343, THJ05633, THJ05342, VIS01301, VIS01102, VIS02508, VIS02504, SAM08003, UMH51102, UMH31119, THJ11011, SAM08008, VIS02002, THJ05132, THJ08422, VIS01104, VIS01304, LAN1105] via keywords · concepts: gross domestic product, prices, latest"
+    },
+    {
+     "name": "select",
+     "ms": 1271,
+     "detail": "value {'Category': ['8. Gross Domestic Product'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1084,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "overnight-stays-2025-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many overnight stays were there in registered accommodation in Iceland in 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    9850428.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 3.93,
+   "llm_calls": 3,
+   "tables": [
+    "SAM01601"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table SAM01601, there were 9,850,428 overnight stays in registered accommodation in Iceland in 2025.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1061,
+     "detail": "What was the number of overnight stays in registered accommodation in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 135,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM01502, SAM08007, SAM01501, SAM01102, SAM01103, SAM08000, SAM01602, SAM03105, VIS02202, SAM08001, VIS02201, SAM08004, FYR06103, UMH31118, VIN01105, MAN43007, VIN01107, VIN01110, VIN01113, VIN01112, VIN10012, VIN10032, FYR06101, FYR06102, SAM08006, VIN10022, THJ11011, THJ02103, THJ03204, STI03267, SAM08050, VIS01104, THJ08401, THJ03105, VIS02504, STI03266, THJ08420, STI03265, THJ02105, VIN00932, STI03264, SAM08002, SAM01202, SAM08003, SAM08011, VIS01301, SAM08008, THJ08421] via dictionary · concepts: overnight stays"
+    },
+    {
+     "name": "select",
+     "ms": 1812,
+     "detail": "value {'Citizenship': ['Total'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 10,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 911,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "overnight-stays-2025-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve margar gistinætur voru á skráðum gististöðum á Íslandi árið 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    9850428.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.48,
+   "llm_calls": 5,
+   "tables": [
+    "SAM01601"
+   ],
+   "text": "Árið 2025 voru 9.850.428 gistinætur á skráðum gististöðum á Íslandi samkvæmt töflu SAM01601 frá Hagstofu Íslands.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1179,
+     "detail": "What was the number of overnight stays at registered tourist accommodations in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1179,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM01502, SAM01501, SAM01103, SAM01102, SAM08000, SAM08007, SAM01602, SAM03105, UMH31118, STI03267, VIN01105, VIN01107, VIN01110, SAM08001, VIN01113, SAM08006, VIN01112, SAM08008, VIN10032, SAM08010, VIN10022, SAM08011, FYR06103, THJ03204, THJ08401, THJ03105, THJ08420, THJ08421, SAM01202, THJ11002, SAM08004, VIN01106, SAM08002, VIN01108, VIN01111, SAM01104, SKO03208b, MAN43007, SAM08003, VIN10012, FYR06101, FYR06102, UMH31119, THJ11011, THJ02103, VIS01104] via keywords · concepts: overnight stays"
+    },
+    {
+     "name": "select",
+     "ms": 2001,
+     "detail": "value {'Citizenship': ['Total'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1119,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "immigrants-2026-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many immigrants lived in Iceland on 1 January 2026?",
+   "expected_tables": [
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    77226.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 4.98,
+   "llm_calls": 5,
+   "tables": [
+    "MAN43000"
+   ],
+   "text": "2026, Immigrant: 77,226. Source: Statistics Iceland, MAN43000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1132,
+     "detail": "What was the number of immigrants (by origin) living in Iceland on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1194,
+     "detail": "MAN43000 from [MAN43000, MAN43002, VIN10012, VIN10001, VIN10052, VIN10032, VIN10022] via keywords · concepts: immigrant population, immigrants"
+    },
+    {
+     "name": "select",
+     "ms": 1739,
+     "detail": "value {'Year': ['2026'], 'Age': ['Total'], 'Origin': ['Immigrant'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 906,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "immigrants-2026-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve margir innflytjendur bjuggu á Íslandi 1. janúar 2026?",
+   "expected_tables": [
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    77226.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.98,
+   "llm_calls": 5,
+   "tables": [
+    "MAN43000"
+   ],
+   "text": "2026, Immigrant: 77.226. Heimild: Hagstofa Íslands, MAN43000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1178,
+     "detail": "What is the number of immigrants (by origin) living in Iceland on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1921,
+     "detail": "MAN43000 from [MAN43000, MAN43002, VIN10012, VIN10001, VIN10052, VIN10032, VIN10022] via keywords · concepts: immigrant population, immigrants"
+    },
+    {
+     "name": "select",
+     "ms": 1747,
+     "detail": "value {'Year': ['2026'], 'Age': ['Total'], 'Origin': ['Immigrant'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1136,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "vigdis-1980-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many valid votes did Vigdís Finnbogadóttir get in Reykjavík in the 1980 presidential election?",
+   "expected_tables": [
+    "KOS07112"
+   ],
+   "expected_values": [
+    15594.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.16,
+   "llm_calls": 5,
+   "tables": [
+    "KOS07112"
+   ],
+   "text": "In the 1980 presidential election, Vigdís Finnbogadóttir received 15,594 valid votes in Reykjavík. This data is from Statistics Iceland (Hagstofa Íslands), table KOS07112.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1225,
+     "detail": "How many valid votes did Vigdís Finnbogadóttir receive in Reykjavík during the 1980 Icelandic presidential election?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1307,
+     "detail": "KOS07112 from [KOS03107, KOS07112, KOS02006, KOS07104, KOS03103, UMH13120, KOS02124] via keyword search · concepts: smoking, presidential elections, region"
+    },
+    {
+     "name": "select",
+     "ms": 1582,
+     "detail": "value {'Candidate and year of election': ['Vigdís Finnbogadóttir 1980'], 'Unit': ['Number valid votes'], 'Constituency': ['Reykjavík']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 4,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1038,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "vigdis-1980-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve mörg gild atkvæði fékk Vigdís Finnbogadóttir í Reykjavík í forsetakjörinu 1980?",
+   "expected_tables": [
+    "KOS07112"
+   ],
+   "expected_values": [
+    15594.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.35,
+   "llm_calls": 5,
+   "tables": [
+    "KOS07112"
+   ],
+   "text": "Samkvæmt töflu KOS07112 frá Hagstofu Íslands fékk Vigdís Finnbogadóttir 15.594 gild atkvæði í Reykjavík í forsetakjörinu 1980.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1269,
+     "detail": "How many valid votes did Vigdís Finnbogadóttir receive in Reykjavík in the 1980 presidential election?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1408,
+     "detail": "KOS07112 from [KOS03107, KOS07112, KOS02006, KOS07104, KOS03103, KOS02124] via keyword search · concepts: smoking, presidential elections, region"
+    },
+    {
+     "name": "select",
+     "ms": 1513,
+     "detail": "value {'Candidate and year of election': ['Vigdís Finnbogadóttir 1980'], 'Unit': ['Number valid votes'], 'Constituency': ['Reykjavík']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1161,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-growth-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By how many people did the population of Reykjavík grow from 1 January 2025 to 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    1032.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 8.96,
+   "llm_calls": 8,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN02005, the population of Reykjavík grew by 1,032 people from 1 January 2025 to 1 January 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1558,
+     "detail": "What was the population of Reykjavík on 1 January 2025? | What was the population of Reykjavík on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2099,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN03270, MAN04208, MAN12104, MAN04203, MAN43005, MAN43007, MAN05221, MAN030102, MAN030101, MAN03200, MAN05110, TEK01002, MAN030106, MAN030104, MAN43006, SKO04201, SKO03202, SAM01603, MEN01208] via keywords · concepts: population, smoking"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2426,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN03270, MAN04203, MAN04208, MAN12104, MAN43005, MAN43007, MAN030102, MAN03200, MAN030101, MAN43006, MAN07109, MAN07108, VIN10012, SJA01101] via keywords · concepts: population, smoking"
+    },
+    {
+     "name": "select",
+     "ms": 2370,
+     "detail": "difference {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "select",
+     "ms": 3667,
+     "detail": "difference {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1140,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-growth-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve marga fjölgaði íbúum Reykjavíkur frá 1. janúar 2025 til 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    1032.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 9.27,
+   "llm_calls": 8,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Íbúafjöldi Reykjavíkur fjölgaði um 1.032 frá 1. janúar 2025 til 1. janúar 2026, samkvæmt Hagstofu Íslands (Hagstofa Íslands), töflu MAN02005.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1568,
+     "detail": "What was the population of Reykjavík on January 1, 2025? | What was the population of Reykjavík on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2217,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN03270, MAN04208, MAN04203, MAN12104, MAN43007, MAN43005, MAN05221, MAN030102, MAN03200, MAN030101, MAN05110, TEK01002, MAN030106, MAN030104, MAN43006, SKO04201, SKO03202, MAN07109, MAN01201, SAM01603, MEN01208] via keywords · concepts: population, smoking"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2550,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN03270, MAN04203, MAN04208, MAN12104, MAN43007, MAN43005, MAN030101, MAN030102, MAN03200, MAN43006, MAN07109, MAN07108, VIN10012, SJA01101] via keywords · concepts: population, smoking"
+    },
+    {
+     "name": "select",
+     "ms": 2341,
+     "detail": "difference {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "select",
+     "ms": 3615,
+     "detail": "difference {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1394,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-share-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What percentage of Iceland's population lived in Reykjavík on 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN00000|MAN00101|MAN00110|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    35.454093588
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 9.14,
+   "llm_calls": 8,
+   "tables": [
+    "MAN00101",
+    "MAN02005"
+   ],
+   "text": "On 1 January 2026, 35.5% of Iceland's population lived in Reykjavík, according to Statistics Iceland (Hagstofa Íslands) table MAN02005. The total population was 394,324 as recorded in tables MAN00101 and MAN02005.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1573,
+     "detail": "What was the total population of Iceland on 1 January 2026? | What was the population of Reykjavík municipality on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2775,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN04203, MAN04208, MAN12104, MAN04103, MAN030101, MAN03280, MAN12103, MAN00000, MAN43000, MAN03250, MAN00102, MAN43007, MAN43005, MAN03270, MAN43002, MAN03200, MAN00110, MAN43004, SJA01101, MAN04001, MAN00115, MAN030103, MAN43006, VIN00001, VIN10012, VIN00900, SJA02201, SJA01102, SJA02202, UTA03803, MAN07108, VIN00930, UTA02801, UTA03801, MAN07209, VIN00910, MAN07109, UTA06002, UTA06003] via keywords · concepts: population"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2568,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN12104, MAN04208, MAN04203, MAN43005, MAN03270, MAN43007, MAN030101, MAN030102, MAN03200, MAN07108, MAN07109, VIN10012, MAN43006, SJA01101] via keywords · concepts: population, smoking, region"
+    },
+    {
+     "name": "select",
+     "ms": 1712,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2026']} notes: ['operation value -> share (question wording)', 'share needs a part and a whole; reporting values instead']"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "select",
+     "ms": 3052,
+     "detail": "share {'Municipality': ['Total', 'Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1270,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-share-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve stórt hlutfall landsmanna bjó í Reykjavík 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN00000|MAN00101|MAN00110|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    35.454093588
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.54,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Samkvæmt töflu MAN02005 frá Hagstofu Íslands bjó 35,5% landsmanna í Reykjavíkurborg 1. janúar 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1169,
+     "detail": "What was the population of Iceland and Reykjavík on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1227,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN04203, MAN12104, MAN04208, MAN43005, MAN43007, MAN03270, MAN030101, MAN030102, MAN07108, MAN07109, MAN43006, MAN03200, VIN10012, SJA01101, TEK02003, TEK02004, TEK02014] via keywords · concepts: population, smoking, region, share"
+    },
+    {
+     "name": "select",
+     "ms": 2097,
+     "detail": "share {'Municipality': ['Total', 'Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1048,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-kopavogur-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How many people lived in Reykjavík and Kópavogur together on 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN04203|MAN04208|MAN12104"
+   ],
+   "expected_values": [
+    180090.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 9.1,
+   "llm_calls": 8,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "On 1 January 2026, the combined population of Reykjavík and Kópavogur was 180,090 people. This figure is from Statistics Iceland (Hagstofa Íslands), table MAN02005.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1572,
+     "detail": "What was the population of Reykjavík on 1 January 2026? | What was the population of Kópavogur on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2098,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN04208, MAN12104, MAN04203, MAN43005, MAN03270, MAN43007, MAN030101, MAN030102, MAN07108, MAN03200, MAN07109, MAN43006, VIN10012, SJA01101] via keywords · concepts: population, smoking, region"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2485,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN04208, MAN12104, MAN04203, MAN43005, MAN43007, MAN030101, MAN07108, MAN07109, MAN03200, SJA01101] via keywords · concepts: population, region"
+    },
+    {
+     "name": "select",
+     "ms": 2353,
+     "detail": "sum {'Municipality': ['Reykjavikurborg', 'Kopavogsbaer'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']} notes: ['operation value -> sum over Municipality (question wording)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "select",
+     "ms": 3671,
+     "detail": "sum {'Municipality': ['Reykjavikurborg', 'Kopavogsbaer'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']} notes: ['operation value -> sum over Municipality (question wording)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1231,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-kopavogur-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve margir bjuggu samtals í Reykjavík og Kópavogi 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN04203|MAN04208|MAN12104"
+   ],
+   "expected_values": [
+    180090.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.58,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Samtals bjuggu 180.090 manns í Reykjavík og Kópavogi 1. janúar 2026 (Hagstofa Íslands, töflunúmer MAN02005).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1087,
+     "detail": "What was the total population in Reykjavík and Kópavogur on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1363,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN04203, MAN12104, MAN04208, MAN43005, MAN43007, MAN03200, MAN07108, MAN07109, MAN030101, SJA01101, VIN10012, TEK02003, TEK02004] via keywords · concepts: population, smoking, region"
+    },
+    {
+     "name": "select",
+     "ms": 1950,
+     "detail": "sum {'Municipality': ['Reykjavikurborg', 'Kopavogsbaer'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']} notes: ['operation value -> sum over Municipality (question wording)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1182,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "men-minus-women-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How many more men than women lived in Iceland on 1 January 2026?",
+   "expected_tables": [
+    "MAN00101|MAN02005|MAN02007|MAN030101|MAN030102|MAN03200|MAN03250|MAN04103|MAN04203|MAN04208|MAN12103|MAN12104|MAN43000",
+    "MAN00101|MAN02005|MAN02007|MAN030101|MAN030102|MAN03200|MAN03250|MAN04103|MAN04203|MAN04208|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    10254.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.37,
+   "llm_calls": 8,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "Males, 2026: 202,181; Females, 2026: 191,927; Difference: Males − Females: +10,254. Source: Statistics Iceland, MAN00101. Males, 2026: 202,181; Females, 2026: 191,927; Difference: Males − Females: +10,254. Source: Statistics Iceland, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1458,
+     "detail": "What was the population of men in Iceland on 1 January 2026? | What was the population of women in Iceland on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2085,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN04203, MAN030102, MAN03250, MAN12103, MAN030101, MAN12104, MAN04103, MAN04208, MAN03280, MAN43000, MAN03270, MAN03200, MAN00102, MAN43005, MAN07209, MAN43002, MAN43004, MAN43007, VIN00001, MAN43006, MAN00000, VIN00900, MAN030103, VIN00930, VIN00910, MAN10003, MAN00110, MAN10002, VIN00004, VIN01502] via keywords · concepts: population, male"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2482,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN04203, MAN12104, MAN12103, MAN43005, MAN04103, MAN04208, MAN03250, MAN030101, MAN03280, MAN43000, MAN00102, MAN03270, MAN43002, MAN03200, MAN43004, MAN43007, MAN07209, VIN00001, MAN43006, MAN00000, VIN00900, MAN030103, VIN00930, VIN10012, VIN00910, MAN10003, MAN00110, MAN10002, VIN00004, VIN01502] via keywords · concepts: population, female"
+    },
+    {
+     "name": "select",
+     "ms": 1875,
+     "detail": "difference {'Sex': ['Males', 'Females'], 'Age': ['Total'], 'Year': ['2026']} notes: ['difference: Males minus Females, as asked']"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "select",
+     "ms": 2386,
+     "detail": "difference {'Sex': ['Males', 'Females'], 'Age': ['Total'], 'Year': ['2026']} notes: ['difference: Males minus Females, as asked']"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 922,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "men-minus-women-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve mörgum fleiri karlar en konur bjuggu á Íslandi 1. janúar 2026?",
+   "expected_tables": [
+    "MAN00101|MAN02005|MAN02007|MAN030101|MAN030102|MAN03200|MAN03250|MAN04103|MAN04203|MAN04208|MAN12103|MAN12104|MAN43000",
+    "MAN00101|MAN02005|MAN02007|MAN030101|MAN030102|MAN03200|MAN03250|MAN04103|MAN04203|MAN04208|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    10254.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 8.74,
+   "llm_calls": 8,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "Males, 2026: 202.181; Females, 2026: 191.927; Mismunur: Males − Females: +10.254. Heimild: Hagstofa Íslands, MAN00101. Males, 2026: 202.181; Females, 2026: 191.927; Mismunur: Males − Females: +10.254. Heimild: Hagstofa Íslands, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1540,
+     "detail": "What was the population of males in Iceland on January 1, 2026? | What was the population of females in Iceland on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3246,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN04203, MAN03250, MAN030101, MAN12103, MAN12104, MAN04208, MAN04103, MAN03280, MAN43000, MAN03270, MAN03200, MAN00102, MAN43005, MAN43002, MAN07209, MAN43004, VIN00900, MAN43007, VIN00001, MAN43006, MAN00000, MAN030103, VIN00930, VIN00910, MAN10003, MAN00110, MAN10002, VIN00004, VIN01502, VIN10012] via keywords · concepts: population, male"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3589,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN04203, MAN03250, MAN12104, MAN04103, MAN04208, MAN00102, MAN030101, MAN43005, MAN12103, MAN03280, MAN43000, MAN03270, MAN43002, MAN43004, MAN03200, MAN43007, MAN07209, MAN10002, VIN00001, MAN43006, MAN00000, VIN00900, MAN030103, VIN00930, VIN00910, MAN10003, MAN00110, VIN10012, VIN00004, VIN01502, MAN04001] via keywords · concepts: population, female"
+    },
+    {
+     "name": "select",
+     "ms": 1829,
+     "detail": "difference {'Sex': ['Males', 'Females'], 'Age': ['Total'], 'Year': ['2026']} notes: ['difference: Males minus Females, as asked']"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "select",
+     "ms": 2324,
+     "detail": "difference {'Sex': ['Males', 'Females'], 'Age': ['Total'], 'Year': ['2026']} notes: ['difference: Males minus Females, as asked']"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1123,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "cpi-points-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By how many points did the consumer price index rise from September 2025 to September 2026?",
+   "expected_tables": [
+    "VIS01000|VIS01002",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    39.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 4.72,
+   "llm_calls": 4,
+   "tables": [
+    "VIS01000"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table VIS01000, the consumer price index rose by 39 points from September 2025 to September 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1379,
+     "detail": "What was the value of the consumer price index in September 2025? | What was the value of the consumer price index in September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 119,
+     "detail": "VIS01000 from [VIS01000, VIS02202, VIS01301, VIS02000, VIS02500, VIS02002, VIS01104, VIS01102, VIS01304, VIS02506, VIS01106, VIS01101, VIS02502, LAU04800, VIS01300, VIS01306, VIS01004, VIS01103, VIS13302, VIS13303, LAU04000, VIS02504, THJ05813, UTA05002] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "retrieve",
+     "ms": 61,
+     "detail": "VIS01000 from [VIS01000, VIS02506, VIS02500, VIS01106, VIS02502, VIS01004, UTA06001, VIS01101, LAU04800, UMH31109, VIS01300, VIS01103, VIS13302, VIS13000, VIS13303, VIS13301, LAU04000, THJ05813, VIS02504, THJ01602, THJ01601, THJ03111, THJ03112, SJA01101, SJA01102, UTA05002] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "select",
+     "ms": 1263,
+     "detail": "difference {'Month': ['2025M09', '2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "select",
+     "ms": 2154,
+     "detail": "difference {'Month': ['2025M09', '2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1000,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "cpi-points-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve mörg stig hækkaði vísitala neysluverðs frá september 2025 til september 2026?",
+   "expected_tables": [
+    "VIS01000|VIS01002",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    39.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 5.15,
+   "llm_calls": 4,
+   "tables": [
+    "VIS01000"
+   ],
+   "text": "2025M09, Consumer price index, Index: 658,3; 2026M09, Consumer price index, Index: 697,3; Breyting (%) 2025M09 → 2026M09: +5,9%. Heimild: Hagstofa Íslands, VIS01000. 2026M09, Consumer price index, Annual change, %: 5,9%. Heimild: Hagstofa Íslands, VIS01000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1533,
+     "detail": "What was the consumer price index (vísitala neysluverðs) in September 2025? | What was the consumer price index (vísitala neysluverðs) in September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 113,
+     "detail": "VIS01000 from [VIS01000, VIS02002, VIS02202, VIS02000, VIS01102, VIS01301, VIS01104, VIS02500, VIS02502, VIS01304, VIS01101, VIS02506, VIS01103, VIS01106, VIS01004, VIS01306, VIS08003, VIS01300, LAU04001, VIS13302, LAU04800, VIS02504, THJ05813, LAU04109, LAU04101] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "retrieve",
+     "ms": 85,
+     "detail": "VIS01000 from [VIS01000, VIS02502, VIS02500, VIS02506, VIS01101, VIS01106, VIS01103, VIS01004, LAU04800, VIS01300, VIS08000, VIS13302, VIS08003, VIS13000, LAU04001, VIS13303, VIS13301, UTA06005, UTA06001, UMH31109, VIS02504, THJ05813, THJ01602, SJA01101, SJA01102, LAU04109, THJ01601, THJ03111, THJ03112] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "select",
+     "ms": 1185,
+     "detail": "pct_change {'Month': ['2025M09', '2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "select",
+     "ms": 2250,
+     "detail": "value {'Month': ['2026M09'], 'Index': ['Consumer price index'], 'Item': ['Annual change, %']} notes: ['operation pct_change -> value (the table already gives the change)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1161,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "overnight-stays-change-2025-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By what percentage did the number of overnight stays in registered accommodation in Iceland increase from 2024 to 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    5.774727016
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.53,
+   "llm_calls": 4,
+   "tables": [
+    "SAM01601"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table SAM01601, the number of overnight stays in registered accommodation increased by 5.8% from 2024 to 2025.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1425,
+     "detail": "What was the number of overnight stays in registered accommodation in Iceland in 2024? | What was the number of overnight stays in registered accommodation in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 365,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM01502, SAM91201, SAM01501, SAM01453, SAM01102, SAM08005, SAM01103, FYR08000, FYR08010, VIN10040, FYR05103, FYR08011, FYR08001, SAM01602, SAM08007, SAM03105, VIN10012, MAN43007, UMH31118, VIN10032, VIN10022, SAM08000, MEN10201, SJA09112, UMH31230, UMH40500, FYR06103, SJA05003, VIS02202, UMH40100, SJA08101, SAM09121, UMH40210, SAM09122, VIN01105, UMH40220, VIN01107, SAM08050, VIN01110, UMH40110, VIN01112, SAM30111, VIN01113, VIS02201, UMH51001, UMH31108, UMH01111, SAM08006] via dictionary · concepts: overnight stays"
+    },
+    {
+     "name": "retrieve",
+     "ms": 60,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM01502, SAM08007, SAM01501, SAM01102, SAM01103, SAM01602, SAM08000, SAM03105, VIS02202, VIS02201, SAM08001, SAM08011, FYR06103, UMH31118, VIN01105, MAN43007, VIN01107, VIN10012, VIN01110, VIN01113, VIN01112, VIN10032, SAM08006, FYR06101, FYR06102, VIN10022, THJ11011, THJ02103, THJ03204, STI03267, VIS01104, THJ08401, THJ03105, VIS02504, STI03266, THJ11002, THJ08420, SAM08008, STI03265, THJ02105, STI03264, SAM08050, SAM08002, SAM08003, SAM08004, VIS01301, THJ08421] via dictionary · concepts: overnight stays"
+    },
+    {
+     "name": "select",
+     "ms": 1931,
+     "detail": "pct_change {'Citizenship': ['Total'], 'Year': ['2024', '2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "select",
+     "ms": 3621,
+     "detail": "pct_change {'Citizenship': ['Total'], 'Year': ['2024', '2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1053,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "overnight-stays-change-2025-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve mörg prósent fjölgaði gistinóttum á skráðum gististöðum á Íslandi frá 2024 til 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    5.774727016
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.33,
+   "llm_calls": 5,
+   "tables": [
+    "SAM01601"
+   ],
+   "text": "Samkvæmt töflu SAM01601 frá Hagstofu Íslands fjölgaði gistinóttum á skráðum gististöðum um 5,8 prósent frá 2024 til 2025.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1221,
+     "detail": "What was the percentage change in overnight stays at registered accommodation establishments in Iceland from 2024 to 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1214,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM08007, SAM01502, SAM91201, SAM01501, SAM01451, SAM01453, STI03261, SAM01103, SAM08005, SAM03105, SAM01400, SAM01102, SAM01602, SAM08000, SJA08105, VIN00931, FYR06103, FYR08000, THJ08401, SAM01442, SAM01401, VIS01301, SAM01411, SJA08106, SKO03200, VIS02504, SAM01441, VIN01105, SAM01431, VIN01107, VIN01110, VIN01113, VIN01112, UMH01111, THJ05232, SAM01104, THJ05132, KOS02004, KOS02001, LIF03343, VIS02201, SAM09122, VIS02202, SAM09121, LFI03305, SAM08006, LIF03215, MAN00110, THJ01000, LIF03217, VIN02005, SAM08008, FYR06101, FYR06102, UMH31108, THJ02103, FYR08010, FYR01202, LIF03307, MAN04001, SAM08011, LIF01142, THJ05551, LIF03214, UMH40500, LIF01134, UMH40100, KOS03200a, SAM09106, MAN030103, KOS03216, FYR08001, SKO02120, FYR05103, LFI03306, LIF03342, VIN01207, SKO03226, SKO02210, MEN06112, KOS03103, HEI09301, VIN07210, KOS02101c, SAM04101, SKO04145] via keywords · concepts: overnight stays, change, share"
+    },
+    {
+     "name": "select",
+     "ms": 1812,
+     "detail": "pct_change {'Citizenship': ['Total'], 'Year': ['2024', '2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1079,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "women-share-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What percentage of Iceland's population on 1 January 2026 were women?",
+   "expected_tables": [
+    "MAN00101|MAN02005|MAN02007|MAN030101|MAN030102|MAN03200|MAN03250|MAN04103|MAN04203|MAN04208|MAN12103|MAN12104|MAN43000",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    48.672411519
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 4.87,
+   "llm_calls": 5,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "Total, 2026: 394,324; Females, 2026: 191,927; Share: Females, 2026 of Total: 48.7%. Source: Statistics Iceland, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1084,
+     "detail": "What is the total population and the female population of Iceland on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1244,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN04203, MAN03280, MAN12104, MAN43005, MAN03250, MAN12103, MAN04208, MAN030101, MAN00102, MAN43000, MAN04103, MAN03270, MAN43002, MAN03200, MAN43004, MAN07209, MAN43006, MAN43007, MAN030103, VIN00001, MAN00000, VIN00900, VIN00930, VIN00910, MAN10003, MAN00110, VIN10012, MAN10002, VIN00004, VIN01502] via keywords · concepts: population, female, share"
+    },
+    {
+     "name": "select",
+     "ms": 1586,
+     "detail": "share {'Sex': ['Total', 'Females'], 'Age': ['Total'], 'Year': ['2026']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 951,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "women-share-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve stórt hlutfall landsmanna 1. janúar 2026 voru konur?",
+   "expected_tables": [
+    "MAN00101|MAN02005|MAN02007|MAN030101|MAN030102|MAN03200|MAN03250|MAN04103|MAN04203|MAN04208|MAN12103|MAN12104|MAN43000",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    48.672411519
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.0,
+   "llm_calls": 5,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu MAN00101 voru 48,7% landsmanna konur árið 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1162,
+     "detail": "What was the share of women in the total population of Iceland on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1218,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN03250, MAN030102, MAN030101, MAN04103, MAN03280, MAN04208, MAN43000, MAN12103, MAN43002, MAN43005, MAN04203, MAN12104, MAN07209, MAN03270, MAN00102, MAN03200, MAN10003, MAN00110, MAN43007, VIN00930, VIN00910, VIN00001, MAN00000, VIN00900, VIN00920, TEK02011, MAN43004, VIN10012, MAN43006] via keywords · concepts: population, female, age, share"
+    },
+    {
+     "name": "select",
+     "ms": 1570,
+     "detail": "share {'Sex': ['Total', 'Females'], 'Age': ['Total'], 'Year': ['2026']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1046,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wage-index-points-2026-08-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By how many points did the wage index rise from August 2025 to August 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "LAU04000"
+   ],
+   "expected_values": [
+    61.6
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.03,
+   "llm_calls": 4,
+   "tables": [
+    "LAU04000"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table LAU04000, the wage index rose by 61.6 points from August 2025 to August 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1425,
+     "detail": "What was the value of the wage index in August 2025? | What was the value of the wage index in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 103,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04007, LAU04003, LAU04005, LAU04800, VIS02202, LAU04802, VIS02000, VIS02500, VIS02002, VIS01306, VIS01301, VIS01304, VIS01104, VIS13302, VIS01102, VIS01103, LAU04101, LAU04109, LAU04107, LAU04105, LAU04103, VIN02091] via dictionary · concepts: wage index"
+    },
+    {
+     "name": "retrieve",
+     "ms": 65,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04005, LAU04007, LAU04003, LAU04800, LAU04802, UMH31109, VIS13302, VIS02500, VIN00004, UTA06001, VIS01103, VIN10032, VIS01004, VIS13303, UTA06101, VIS08010, UTA06102, VIN10022, LAU04801, VIS13301, VIS02506, LAU04109, LAU04107, LAU04105, VIN02091, LAU04101, LAU04103, JVS00001, THJ05813, THJ01601, THJ03111, THJ03112, UTA05002, THJ06012] via dictionary · concepts: wage index"
+    },
+    {
+     "name": "select",
+     "ms": 1122,
+     "detail": "difference {'Month': ['2025M08', '2026M08'], 'Unit': ['Value of index']} notes: [\"Unit: defaulted to ['Value of index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "select",
+     "ms": 2073,
+     "detail": "difference {'Month': ['2025M08', '2026M08'], 'Unit': ['Value of index']} notes: [\"Unit: defaulted to ['Value of index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1351,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wage-index-points-2026-08-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve mörg stig hækkaði launavísitalan frá ágúst 2025 til ágúst 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "LAU04000"
+   ],
+   "expected_values": [
+    61.6
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.63,
+   "llm_calls": 8,
+   "tables": [
+    "LAU04000"
+   ],
+   "text": "Samkvæmt töflu LAU04000 frá Hagstofu Íslands hækkaði launavísitalan um 61,6 stig frá ágúst 2025 til ágúst 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1668,
+     "detail": "What was the wage index (launavísitala) in August 2025? | What was the wage index (launavísitala) in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2115,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04003, LAU04007, LAU04005, LAU04800, LAU04802, VIS02202, TEK02001, VIS01103, VIS02000, VIS02002, VIS01306, TEK02003, TEK02004, VIS01104, VIS01304, VIS13302, VIS01301, LAU04101, LAU04103, LAU04107, LAU04105, LAU04109, VIN02091, JVS00001] via keywords · concepts: wage index, wages"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2516,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04003, LAU04800, LAU04007, LAU04802, LAU04005, TEK02001, TEK02003, TEK02004, VIS01103, VIS13302, VIS01004, VIS02506, VIS02500, VIN10032, LAU04101, LAU04103, LAU04107, LAU04105, LAU04109, VIN02091, JVS00001, THJ05813, THJ06012] via keywords · concepts: wage index, wages"
+    },
+    {
+     "name": "select",
+     "ms": 1681,
+     "detail": "difference {'Month': ['2025M08', '2026M08'], 'Unit': ['Value of index']} notes: [\"Unit: defaulted to ['Value of index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "select",
+     "ms": 2091,
+     "detail": "pct_change {'Month': ['2025M08', '2026M08'], 'Unit': ['Value of index']} notes: [\"Unit: defaulted to ['Value of index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1210,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "immigrants-growth-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By how many people did the number of immigrants living in Iceland grow from 1 January 2025 to 1 January 2026?",
+   "expected_tables": [
+    "MAN43000|MAN43002|MAN43004|MAN43007",
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    3430.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 7.47,
+   "llm_calls": 7,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. Model did not return valid Verdict: 1 validation error for Verdict\ntable_id\n  Field required [type=missing, input_value={'properties': {'table_id': 'none'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/missing",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2752,
+     "detail": "What was the population of immigrants (by immigrant background) living in Iceland on 1 January 2025? | What was the population of immigrants (by immigrant background) living in Iceland on 1 January 2026?"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: Model did not return valid Verdict: 1 validation error for Verdict\ntable_id\n  Field required [type=missing, input_value={'properties': {'table_id': 'none'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/missing"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: Model did not return valid Verdict: 1 validation error for Verdict\ntable_id\n  Field required [type=missing, input_value={'properties': {'table_id': 'none'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/missing"
+    }
+   ]
+  },
+  {
+   "id": "immigrants-growth-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve marga fjölgaði innflytjendum á Íslandi frá 1. janúar 2025 til 1. janúar 2026?",
+   "expected_tables": [
+    "MAN43000|MAN43002|MAN43004|MAN43007",
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    3430.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 9.44,
+   "llm_calls": 7,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. Model did not return valid Verdict: 1 validation error for Verdict\ntable_id\n  Field required [type=missing, input_value={'properties': {'table_id': 'none'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/missing",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 4191,
+     "detail": "What was the number of immigrants (by immigrant background) in Iceland on January 1, 2025? | What was the number of immigrants (by immigrant background) in Iceland on January 1, 2026?"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: Model did not return valid Verdict: 1 validation error for Verdict\ntable_id\n  Field required [type=missing, input_value={'properties': {'table_id': 'none'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/missing"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: Model did not return valid Verdict: 1 validation error for Verdict\ntable_id\n  Field required [type=missing, input_value={'properties': {'table_id': 'none'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/missing"
+    }
+   ]
+  },
+  {
+   "id": "foreign-stays-share-2025-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What percentage of the overnight stays in registered accommodation in Iceland in 2025 were by foreigners?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    86.83462282
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 30.08,
+   "llm_calls": 6,
+   "tables": [
+    "SAM01601"
+   ],
+   "text": "In 2025, 86.8% of overnight stays in registered accommodation in Iceland were by foreigners, according to Statistics Iceland (Hagstofa Íslands) table SAM01601.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3582,
+     "detail": "What was the total number of overnight stays in registered accommodation in Iceland in 2025? | What was the number of overnight stays by foreigners in registered accommodation in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 134,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM01502, SAM08007, SAM01501, SAM01102, SAM01103, SAM01602, SAM08000, SAM03105, VIS02202, VIS02201, SAM08001, FYR06103, UMH31118, VIN01105, VIN01107, MAN43007, VIN01110, VIN10012, VIN01113, VIN01112, SAM08006, VIN10032, FYR06101, FYR06102, VIN10022, THJ11011, THJ02103, THJ03204, SAM08008, STI03267, VIS01104, THJ08401, THJ03105, SAM08050, VIS02504, THJ11002, STI03266, THJ08420, STI03265, THJ02105, STI03264, SAM08002, SAM01202, SAM08003, SAM08011, SAM08004, VIS01301, THJ08421] via dictionary · concepts: overnight stays"
+    },
+    {
+     "name": "select",
+     "ms": 4107,
+     "detail": "share {'Citizenship': ['Total', 'Foreigners'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: Model did not return valid Verdict: 1 validation error for Verdict\ntable_id\n  Field required [type=missing, input_value={'properties': {'table_id': 'none'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/missing"
+    },
+    {
+     "name": "compose",
+     "ms": 879,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "foreign-stays-share-2025-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve stórt hlutfall gistinátta á skráðum gististöðum á Íslandi árið 2025 voru gistinætur útlendinga?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    86.83462282
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 10.71,
+   "llm_calls": 11,
+   "tables": [
+    "SAM01601",
+    "SAM01201"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu SAM01601 voru gistinætur útlendinga á skráðum gististöðum á Íslandi árið 2025 86,8% af heildarfjölda gistinátta.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1574,
+     "detail": "What was the total number of overnight stays at registered accommodation establishments in Iceland in 2025? | What was the number of overnight stays by foreigners at registered accommodation establishments in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1908,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM08007, SAM01502, SAM01501, SAM01102, SAM01103, SAM08000, VIS02202, VIS02201, SAM01602, SAM03105, SAM08001, SAM08011, SAM08002, FYR06103, UMH31118, VIN01105, MAN43007, VIN01107, SAM08006, VIN01110, VIN01113, SAM08008, VIN01112, THJ05232, VIN10012, THJ05132, VIN10032, FYR06101, SAM08050, FYR06102, THJ11002, VIN10022, SAM08004, VIS01308, THJ11011, THJ02103, THJ03204, STI03267, VIS01104, SAM01202, THJ08401, SAM08010, THJ03105, VIN00932, VIS02504, STI03266, THJ08420, STI03265, THJ02105, STI03264, SAM08003] via keywords · concepts: overnight stays"
+    },
+    {
+     "name": "select",
+     "ms": 2287,
+     "detail": "share {'Citizenship': ['Total', 'Foreigners'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 6353,
+     "detail": "SAM01201 from [SAM02001, SAM08048, SAM08049, SAM08050, SAM01102, SAM01103, SAM01104, SAM01201, SAM01202, SAM01501, SAM01502, SAM01601, SAM01602, SAM01603, THJ02103, THJ02105, SAM08000, SAM08001, SAM08002, SAM08003, SAM08004, SAM08006, SAM08007, SAM08008, SAM08010, SAM08011, THJ10001, THJ10002, THJ03201, THJ03204, THJ03105, THJ03106] via model browse · concepts: overnight stays, foreign citizens"
+    },
+    {
+     "name": "select",
+     "ms": 1465,
+     "detail": "share {'Months': ['2026M08'], 'Region': ['Total'], 'Citizenship': ['Total', 'Foreigners']} notes: [\"Months: defaulted to ['2026M08']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1190,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "population-and-cpi-2026-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many people lived in Iceland on 1 January 2026, and what was the consumer price index in September 2026?",
+   "expected_tables": [
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    394324.0,
+    697.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.96,
+   "llm_calls": 6,
+   "tables": [
+    "MAN00101",
+    "VIS01000"
+   ],
+   "text": "2026: 394,324. Source: Statistics Iceland, MAN00101. 2026M09, Consumer price index, Index: 697.3. Source: Statistics Iceland, VIS01000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1395,
+     "detail": "What was the population of Iceland on 1 January 2026? | What was the consumer price index in Iceland in September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 68,
+     "detail": "VIS01000 from [VIS01000, VIS02506, VIS02500, VIS02502, VIS01004, VIS01106, LAU04800, VIS01101, VIS01300, VIS13302, VIS01103, VIS13000, UTA06005, UTA06001, VIS13301, VIS13303, UMH31109, THJ05813, VIS02504, SJA01101, SJA01102, THJ01602, THJ01601, THJ03111, THJ03112] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "select",
+     "ms": 1612,
+     "detail": "value {'Month': ['2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2135,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN04103, MAN12104, MAN04203, MAN12103, MAN030101, MAN04208, MAN00000, MAN03280, MAN43000, MAN03250, MAN00102, MAN43007, MAN43005, MAN03270, MAN43002, MAN00110, MAN03200, MAN43004, SJA01101, MAN04001, MAN00115, MAN030103, MAN43006, VIN00001, VIN10012, VIN00900, SJA02201, SJA01102, SJA02202, UTA03803, MAN07108, VIN00930, UTA02801, UTA03801, MAN07209, VIN00910, MAN07109, UTA06002, UTA06003] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 1287,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2026']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1137,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "population-and-cpi-2026-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve margir bjuggu á Íslandi 1. janúar 2026 og hver var vísitala neysluverðs í september 2026?",
+   "expected_tables": [
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    394324.0,
+    697.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.3,
+   "llm_calls": 6,
+   "tables": [
+    "MAN00101",
+    "VIS01000"
+   ],
+   "text": "2026: 394.324. Heimild: Hagstofa Íslands, MAN00101. 2026M09, Consumer price index, Index: 697,3. Heimild: Hagstofa Íslands, VIS01000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1382,
+     "detail": "What was the population of Iceland on January 1, 2026? | What was the consumer price index in Iceland in September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 65,
+     "detail": "VIS01000 from [VIS01000, VIS02506, VIS02500, VIS02502, VIS01004, VIS01106, LAU04800, VIS01101, VIS01300, VIS13302, VIS01103, VIS13000, UTA06005, UTA06001, VIS13301, VIS13303, UMH31109, THJ05813, VIS02504, SJA01101, SJA01102, THJ01602, THJ01601, THJ03111, THJ03112] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "select",
+     "ms": 1858,
+     "detail": "value {'Month': ['2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2399,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN00000, MAN04103, MAN12104, MAN12103, MAN04203, MAN04208, MAN00102, MAN43000, MAN030101, MAN03280, MAN03250, MAN43007, MAN03270, MAN43005, MAN43002, MAN03200, MAN00110, MAN43004, SJA01101, MAN04001, MAN00115, MAN030103, MAN43006, VIN00001, VIN10012, VIN00900, SJA02201, SJA01102, SJA02202, UTA03803, MAN07108, VIN00930, UTA02801, UTA03801, MAN07209, VIN00910, MAN07109, UTA06002, UTA06003, VIS02504] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 1244,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2026']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1269,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "wages-and-prices-2026-08-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What were the wage index and the consumer price index in August 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    1149.3,
+    694.6
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.08,
+   "llm_calls": 6,
+   "tables": [
+    "LAU04000",
+    "VIS01000"
+   ],
+   "text": "In August 2026, the wage index was 1,149.3 and the consumer price index was 694.6, according to Statistics Iceland (Hagstofa Íslands) tables LAU04000 and VIS01000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1680,
+     "detail": "What was the wage index (launavísitala) in August 2026? | What was the consumer price index (vísitala neysluverðs) in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 65,
+     "detail": "VIS01000 from [VIS01000, VIS02502, VIS02500, VIS01101, VIS02506, VIS01106, VIS01103, VIS01004, VIS01300, LAU04800, LAU04001, VIS08003, VIS13302, LAU04801, VIS08000, UTA06005, UTA06001, LAU04003, VIS13000, LAU04007, THJ05813, THJ01602, LAU04109, LAU04101, LAU04107, THJ01601, THJ03111, THJ03112] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "select",
+     "ms": 1898,
+     "detail": "value {'Month': ['2026M08'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2420,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04003, LAU04800, LAU04007, LAU04802, LAU04005, TEK02001, TEK02003, TEK02004, VIS01103, VIS13302, VIS01004, VIS02506, VIS02500, VIN10032, LAU04101, LAU04103, LAU04107, LAU04105, LAU04109, VIN02091, JVS00001, THJ05813, THJ06012] via keywords · concepts: wage index, wages"
+    },
+    {
+     "name": "select",
+     "ms": 1059,
+     "detail": "value {'Month': ['2026M08'], 'Unit': ['Value of index']} notes: [\"Unit: defaulted to ['Value of index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 920,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wages-and-prices-2026-08-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver var launavísitalan og hver var vísitala neysluverðs í ágúst 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    1149.3,
+    694.6
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.45,
+   "llm_calls": 6,
+   "tables": [
+    "LAU04000",
+    "VIS01000"
+   ],
+   "text": "Í ágúst 2026 var launavísitalan 1.149,3 og vísitala neysluverðsins 694,6 samkvæmt Hagstofu Íslands (Hagstofa Íslands), töflurnar LAU04000 og VIS01000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1649,
+     "detail": "What was the wage index (launavísitala) in August 2026? | What was the consumer price index (vísitala neysluverðs) in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 68,
+     "detail": "VIS01000 from [VIS01000, VIS02502, VIS02500, VIS01101, VIS02506, VIS01106, VIS01103, VIS01004, VIS01300, LAU04800, LAU04001, VIS08003, VIS13302, LAU04801, VIS08000, UTA06005, UTA06001, LAU04003, VIS13000, LAU04007, THJ05813, THJ01602, LAU04109, LAU04101, LAU04107, THJ01601, THJ03111, THJ03112] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "select",
+     "ms": 1627,
+     "detail": "value {'Month': ['2026M08'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2175,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04003, LAU04800, LAU04007, LAU04802, LAU04005, TEK02001, TEK02003, TEK02004, VIS01103, VIS13302, VIS01004, VIS02506, VIS02500, VIN10032, LAU04101, LAU04103, LAU04107, LAU04105, LAU04109, VIN02091, JVS00001, THJ05813, THJ06012] via keywords · concepts: wage index, wages"
+    },
+    {
+     "name": "select",
+     "ms": 1334,
+     "detail": "value {'Month': ['2026M08'], 'Unit': ['Value of index']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 50,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1241,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "stays-and-population-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many overnight stays were there in registered accommodation in Iceland in 2025, and how many people lived in Iceland on 1 January 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    9850428.0,
+    389444.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.5,
+   "llm_calls": 6,
+   "tables": [
+    "SAM01601",
+    "MAN00101"
+   ],
+   "text": "2025, Overnight stays: 9,850,428. Source: Statistics Iceland, SAM01601. 2025: 389,444. Source: Statistics Iceland, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1481,
+     "detail": "What was the number of overnight stays in registered accommodation in Iceland in 2025? | What was the population of Iceland on 1 January 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 662,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM01502, SAM08007, SAM01501, SAM01102, SAM01103, SAM01602, SAM08000, SAM03105, VIS02202, VIS02201, SAM08001, SAM08011, FYR06103, UMH31118, VIN01105, MAN43007, VIN01107, VIN10012, VIN01110, VIN01113, VIN01112, VIN10032, SAM08006, FYR06101, FYR06102, VIN10022, THJ11011, THJ02103, THJ03204, STI03267, VIS01104, THJ08401, THJ03105, VIS02504, STI03266, THJ11002, THJ08420, SAM08008, STI03265, THJ02105, STI03264, SAM08050, SAM08002, SAM08003, SAM08004, VIS01301, THJ08421] via dictionary · concepts: overnight stays"
+    },
+    {
+     "name": "select",
+     "ms": 2418,
+     "detail": "value {'Citizenship': ['Total'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']} notes: [\"Month: defaulted to ['Total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2766,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN08000, MAN04203, VIN00901, MAN12104, MAN04208, VIN00931, MAN04103, MAN12103, MAN030106, MAN05401, MAN00000, MAN03250, MAN030101, MAN03280, MAN43000, MAN03270, VIS02201, MAN05202, MAN04120, TEK01002, VIS01102, MAN00110, MAN05110, THJ01000, MAN00102, MAN030104, VIS01301, UMH31118, MAN08213, MAN04119, SJA02204, SJA02203, THJ06029, MAN04001, THJ05611, VIN00921, THJ05616, THJ05614, THJ05615, THJ05211, THJ05311, THJ05111, THJ05633, SKO00012, THJ05631, SJA07001, SKO03200, VIS02202, MAN43005, TEK01006, THJ05521, MAN05201, THJ05331, MAN43007, THJ05511, THJ05532, SKO03203, SKO03207, VIN00971] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 1353,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1227,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "stays-and-population-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve margar gistinætur voru á skráðum gististöðum á Íslandi árið 2025 og hve margir bjuggu á Íslandi 1. janúar 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    9850428.0,
+    389444.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 8.42,
+   "llm_calls": 8,
+   "tables": [
+    "SAM01601",
+    "MAN00101"
+   ],
+   "text": "2025, Overnight stays: 9.850.428. Heimild: Hagstofa Íslands, SAM01601. 2025: 389.444. Heimild: Hagstofa Íslands, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1570,
+     "detail": "What was the number of overnight stays at registered guesthouses in Iceland in 2025? | What was the population of Iceland on January 1, 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1878,
+     "detail": "SAM01601 from [SAM01201, SAM01601, SAM01102, SAM01603, SAM01103, SAM01502, SAM01501, SAM01602, SAM08000, VIS02202, VIS02201, SAM01202, SAM08007, UMH31118, SAM03105, SKO03208b, SKO03208a, SAM08001, SKO04205b, MAN43007, THJ02103, VIS01104, FYR06101, THJ02105, FYR06102, VIN10012, FYR06103, VIS01301, VIN02001, SAM08011, SAM08006, SKO03106, SAM08008, SKO04105, SAM08004, TEK01001, SAM31002, UMH31109, TEK01008, MAN01002, MAN04119, THJ05551, MAN04120, SAM08002, THJ11002, SAM08050, SAM01104] via keywords · concepts: overnight stays, hotels"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2163,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN08000, MAN12104, VIN00901, MAN04203, MAN04208, MAN04103, MAN030106, VIN00931, MAN12103, THJ05211, MAN05401, THJ05111, MAN00000, MAN03250, MAN030101, MAN03280, MAN03270, MAN43000, VIS02201, MAN05202, MAN04120, TEK01002, VIS01102, MAN00110, THJ06029, THJ01000, MAN00102, UMH31118, MAN030104, MAN05110, VIS01301, MAN08213, MAN04119, SJA02204, SJA02203, MAN04001, VIN00921, SJA07001, SKO00012, THJ05611, THJ05616, THJ05614, THJ05615, STI03267, THJ05311, THJ05633, MAN05201, THJ05631, VIS02202, SAM08004, SKO03200, MAN43005, TEK01006, MAN05303, THJ05521, THJ05331, MAN43007, THJ05511, THJ05532, SKO03203, SKO03207, MAN01401, VIN00971] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 2315,
+     "detail": "value {'Citizenship': ['Total'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "select",
+     "ms": 3153,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1414,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "gdp-and-births-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What was Iceland's gross domestic product in 2025, and how many children were born in Iceland in 2025?",
+   "expected_tables": [
+    "THJ01102|THJ05111|THJ05211|THJ05311|THJ05531|THJ05631",
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321"
+   ],
+   "expected_values": [
+    4941210.91673494,
+    4387.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.52,
+   "llm_calls": 6,
+   "tables": [
+    "THJ01102",
+    "MAN05101"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands), Iceland's gross domestic product was 4,941,210.9 in 2025 (Table THJ01102). In the same year, there were 4,387 live births (Table MAN05101).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1537,
+     "detail": "What was Iceland's gross domestic product (GDP) at current prices in 2025? | How many children were born in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 63,
+     "detail": "MAN05101 from [MAN05101, MAN05100, MAN05102, MAN05204, MAN43002, MAN04120, MAN05104, MAN05111, MAN08000, SKO04201a, MAN43000, MAN43004, MAN05401, MAN12103, MAN05321, SKO00012, MAN030106, MAN05201, MAN05110, MAN05103, MAN05202, VIN00901, MAN00110, VIN00931, THJ05242, THJ05342, THJ05142, MAN04119, MAN030104, MAN030102, SJA07001, MAN08213, MAN01401, MAN05303, THJ05465, THJ05265, THJ05442, MAN07109, THJ05261, THJ05263, SKO02108b, THJ05165, THJ05267, THJ05368, THJ05251, TEK02011, THJ05351, SKO02108, THJ05369, THJ05161, VIN00911] via dictionary · concepts: live births, children"
+    },
+    {
+     "name": "select",
+     "ms": 2096,
+     "detail": "value {'Unit': ['All children'], 'Age': ['Total'], 'Year': ['2025']} notes: [\"Age: defaulted to ['Total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2646,
+     "detail": "THJ01102 from [THJ01102, THJ01000, THJ01601, VIS01000, THJ01103, VIS02201, THJ01104, THJ05111, THJ05211, VIS02202, THJ05311, THJ03105, SAM08004, THJ05331, SAM08011, VIS06140, THJ02105, THJ03204, THJ08401, THJ05343, UMH31118, THJ05631, UMH34095, THJ08421, VIS02500, SAM08001, THJ05242, VIS02000, UMH34065, THJ05142, THJ06029, THJ05521, THJ05531, THJ05511, THJ05532, THJ06020, THJ05611, UMH51102, THJ05616, VIS02508, THJ05614, THJ05615, THJ05633, THJ05342, THJ05132, VIS01301, VIS06141, VIS01102, THJ06012, LAN1101, VIS02002, THJ06019, UMH31119, SAM08003, THJ05143, SAM08008, VIS01104, VIS01304, THJ06021, LAN1105, UTA05002, THJ02103, VIS02504, VIS01101] via keywords · concepts: gross domestic product, prices, latest"
+    },
+    {
+     "name": "select",
+     "ms": 1283,
+     "detail": "value {'Category': ['8. Gross Domestic Product'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1056,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "gdp-and-births-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver var verg landsframleiðsla á Íslandi árið 2025 og hve mörg börn fæddust á Íslandi árið 2025?",
+   "expected_tables": [
+    "THJ01102|THJ05111|THJ05211|THJ05311|THJ05531|THJ05631",
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321"
+   ],
+   "expected_values": [
+    4941210.91673494,
+    4387.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.55,
+   "llm_calls": 6,
+   "tables": [
+    "THJ01102",
+    "MAN05101"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) var verg landsframleiðsla á Íslandi árið 2025 4.941.210,9 samkvæmt töflu THJ01102. Á sama ári fæddust 4.387 börn á Íslandi samkvæmt töflu MAN05101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1490,
+     "detail": "What was the gross domestic product (GDP) at current prices in Iceland in 2025? | How many children were born in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 61,
+     "detail": "MAN05101 from [MAN05101, MAN05100, MAN05102, MAN05204, MAN43002, MAN04120, MAN05104, MAN08000, MAN05111, MAN43004, MAN12103, SKO04201a, MAN43000, SKO00012, MAN05321, VIN00901, MAN05103, MAN030106, MAN05201, MAN05110, MAN05401, MAN05202, MAN04119, MAN00110, MAN05303, VIN00931, THJ05242, THJ05342, THJ05142, MAN030104, MAN030102, MAN08213, THJ05465, THJ05265, MAN01401, THJ05442, THJ05261, SJA07001, THJ05263, SKO02108, THJ05165, THJ05267, THJ05368, THJ05251, THJ05351, THJ05369, THJ05161, VIN00911, THJ09001] via dictionary · concepts: live births, children"
+    },
+    {
+     "name": "select",
+     "ms": 2012,
+     "detail": "value {'Unit': ['All children'], 'Age': ['Total'], 'Year': ['2025']} notes: [\"Age: defaulted to ['Total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2580,
+     "detail": "THJ01102 from [THJ01102, THJ01000, THJ01601, VIS01000, THJ01103, VIS02201, THJ05111, THJ01104, THJ05211, VIS02202, THJ05311, THJ03105, SAM08004, VIS06140, THJ05331, SAM08011, THJ02105, THJ03204, THJ08401, THJ05343, UMH31118, THJ05631, UMH34095, VIS02500, THJ08421, VIS02000, SAM08001, THJ05242, UMH34065, THJ05142, THJ05521, THJ05531, THJ05511, VIS02508, THJ05532, THJ05611, THJ06020, THJ05616, THJ06029, THJ05614, VIS02002, THJ05615, THJ05633, THJ05342, VIS01301, VIS06141, UMH51102, VIS01102, THJ05132, LAN1101, SAM08003, VIS02504, SAM08008, THJ05143, THJ06019, VIS01104, VIS01304, LAN1105, UTA05002, THJ06012, THJ02103, UMH31119, VIS01101] via keywords · concepts: gross domestic product, prices, latest"
+    },
+    {
+     "name": "select",
+     "ms": 1103,
+     "detail": "value {'Category': ['8. Gross Domestic Product'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1373,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "stays-per-inhabitant-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many overnight stays in registered accommodation were there in Iceland in 2025 per inhabitant on 1 January 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    25.293567239
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.02,
+   "llm_calls": 4,
+   "tables": [
+    "SAM01601",
+    "MAN00101"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table SAM01601, there were 25.3 overnight stays per inhabitant in registered accommodation in Iceland in 2025.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1045,
+     "detail": "What was the number of overnight stays in registered accommodation in Iceland in 2025? | How many people lived in Iceland on 1 January 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 116,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM01502, SAM08007, SAM01501, SAM01102, SAM01103, SAM08000, SAM01602, SAM03105, VIS02202, VIS02201, SAM08001, FYR06103, UMH31118, VIN01105, MAN43007, VIN01107, VIN10012, VIN01110, VIN01113, VIN01112, VIN10032, FYR06101, SAM08006, FYR06102, VIN10022, SAM08050, THJ11011, THJ02103, THJ03204, STI03267, VIS01104, THJ08401, THJ03105, VIS02504, STI03266, THJ08420, STI03265, THJ02105, STI03264, SAM08002, SAM08003, VIN00932, SAM08011, SAM01202, SAM08004, VIS01301, THJ08421] via dictionary · concepts: overnight stays"
+    },
+    {
+     "name": "retrieve",
+     "ms": 0,
+     "detail": "MAN00101 from [MAN00101]"
+    },
+    {
+     "name": "select",
+     "ms": 1809,
+     "detail": "value {'Citizenship': ['Total'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "select",
+     "ms": 3028,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compute",
+     "ms": 0,
+     "detail": "9,850,428 / 389,444"
+    },
+    {
+     "name": "compose",
+     "ms": 821,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "stays-per-inhabitant-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve margar gistinætur á skráðum gististöðum voru á Íslandi árið 2025 á hvern íbúa 1. janúar 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    25.293567239
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.35,
+   "llm_calls": 6,
+   "tables": [
+    "SAM01601",
+    "MAN00101"
+   ],
+   "text": "Árið 2025 voru 25,3 gistinætur á skráðum gististöðum á hvern íbúa 1. janúar 2025 (Hagstofa Íslands, töfluauðkenni SAM01601).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1059,
+     "detail": "What was the number of overnight stays at registered tourist accommodations in Iceland in 2025? | How many people lived in Iceland on 1 January 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 0,
+     "detail": "MAN00101 from [MAN00101]"
+    },
+    {
+     "name": "select",
+     "ms": 2073,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3359,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM01502, SAM01501, SAM01103, SAM01102, SAM08000, SAM08007, SAM01602, SAM03105, STI03267, VIN01105, VIN01107, VIN01110, SAM08001, VIN01113, SAM08008, VIN01112, SAM08006, VIN10032, SAM08010, VIN10022, SAM08011, FYR06103, THJ03204, THJ08401, THJ03105, THJ08420, THJ08421, SAM01202, THJ11002, SAM08004, VIN01106, SAM08002, VIN01108, VIN01111, SAM01104, SKO03208b, SAM08003, MAN43007, FYR06101, FYR06102, VIN10012, UMH31119, UMH31118, THJ11011, THJ02103, VIS01104] via keywords · concepts: overnight stays"
+    },
+    {
+     "name": "select",
+     "ms": 1819,
+     "detail": "value {'Citizenship': ['Total'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compute",
+     "ms": 0,
+     "detail": "9.850.428 / 389.444"
+    },
+    {
+     "name": "compose",
+     "ms": 1105,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "births-per-1000-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many children were born in Iceland in 2025 per 1,000 inhabitants on 1 January 2025?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    11.264777478
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.11,
+   "llm_calls": 4,
+   "tables": [
+    "MAN05101",
+    "MAN00101"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN05101, there were 11.3 live births per 1,000 inhabitants in 2025. The population on 1 January 2025 was 389,444 as recorded in tables MAN05101 and MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 953,
+     "detail": "How many children were born in Iceland in 2025? | How many people lived in Iceland on 1 January 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 125,
+     "detail": "MAN05101 from [MAN05101, MAN05100, MAN05102, MAN05204, MAN43002, MAN04120, MAN05104, MAN08000, SKO04201a, MAN43000, MAN05111, MAN12103, SKO00012, MAN43004, VIN00901, MAN05321, MAN030106, MAN05201, MAN05110, MAN05401, MAN05103, MAN05202, MAN04119, MAN00110, VIN00931, THJ05242, THJ05342, MAN01401, THJ05142, MAN05303, MAN030104, SJA07001, MAN08213, THJ05465, THJ05265, THJ05442, SKO02108b, THJ05261, THJ05263, THJ05165, THJ05267, THJ05368, THJ05251, MAN04208, THJ05351, THJ05369, TEK02011, THJ05161, VIN00911] via dictionary · concepts: live births, children"
+    },
+    {
+     "name": "retrieve",
+     "ms": 0,
+     "detail": "MAN00101 from [MAN00101]"
+    },
+    {
+     "name": "select",
+     "ms": 1474,
+     "detail": "value {'Unit': ['All children'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "select",
+     "ms": 2814,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compute",
+     "ms": 0,
+     "detail": "4,387 / 389,444 × 1,000"
+    },
+    {
+     "name": "compose",
+     "ms": 1210,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "births-per-1000-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve mörg börn fæddust á Íslandi árið 2025 á hverja 1.000 íbúa 1. janúar 2025?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    11.264777478
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.04,
+   "llm_calls": 6,
+   "tables": [
+    "MAN05101",
+    "MAN00101"
+   ],
+   "text": "Árið 2025 fæddust 11,3 börn á hverja 1.000 íbúa 1. janúar 2025 (Hagstofa Íslands, töflunúmer MAN05101).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1023,
+     "detail": "How many children were born in Iceland in 2025? | How many people lived in Iceland on 1 January 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 0,
+     "detail": "MAN00101 from [MAN00101]"
+    },
+    {
+     "name": "select",
+     "ms": 2188,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2676,
+     "detail": "MAN05101 from [MAN05101, MAN05100, MAN00101, MAN02005, MAN10001, MAN05102, MAN05204, MAN43002, MAN05104, MAN04120, MAN43004, MAN05111, MAN05401, MAN05321, VIN00901, MAN12103, MAN05103, MAN08000, MAN43000, MAN030104, MAN05201, MAN05110, MAN05202, MAN04119, MAN05303, SKO02108b, SKO04201a, MAN00110, VIN00931, THJ05242, THJ05342, THJ05142, THJ09001, MAN030106, SKO00005b, MAN05203, MAN08213, MAN01401, SAM08006, THJ05465, THJ05265, THJ05442, THJ05261, THJ09000, THJ05263, SKO00012, THJ05165, THJ05267, THJ05368, THJ05251, THJ05351, THJ05369, THJ05161, VIN00911, SKO04108] via keywords · concepts: population, live births, children"
+    },
+    {
+     "name": "select",
+     "ms": 1303,
+     "detail": "value {'Unit': ['All children'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compute",
+     "ms": 0,
+     "detail": "4.387 / 389.444 × 1.000"
+    },
+    {
+     "name": "compose",
+     "ms": 1036,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wages-and-unemployment-2026-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What was the wage index in August 2026, and what was the unemployment rate in Iceland in the second quarter of 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "VIN00920|VIN00910"
+   ],
+   "expected_values": [
+    1149.3,
+    6.5
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.77,
+   "llm_calls": 6,
+   "tables": [
+    "LAU04000",
+    "VIN00920"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table LAU04000, the wage index in August 2026 was 1,149.3. Based on table VIN00920, the unemployment rate in Iceland for the second quarter of 2026 was 6.5%.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1394,
+     "detail": "What was the wage index in August 2026? | What was the unemployment rate in Iceland in the second quarter of 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 111,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04005, LAU04007, LAU04800, LAU04003, LAU04802, VIS01004, TEK02001, VIS13302, VIS02500, VIN00004, VIN10032, LAU04801, UMH31109, VIN10022, VIS01103, VIN10052, VIS13303, TEK02003, VIN10001, TEK02004, VIS01000, VIS02506, LAU04107, LAU04105, LAU04101, LAU04103, LAU04109, VIN02091, THJ05813, JVS00001, UTA05002] via dictionary · concepts: wage index"
+    },
+    {
+     "name": "select",
+     "ms": 1112,
+     "detail": "value {'Month': ['2026M08'], 'Unit': ['Value of index']} notes: [\"Unit: defaulted to ['Value of index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2119,
+     "detail": "VIN00920 from [VIN00920, VIN00001, VIN00910, JVS00001, VIN01206, VIN01004, VIN00930, THJ05811, VIN01005, THJ11001, THJ05812, THJ06012, UTA04005, VIN10012, UTA05002, VIN01502, THJ01601, THJ03111, THJ01602, VIN00900, VIN10032, THJ05813, MAN10001, THJ03112, UTA05003, MAN10003, VIN01001, VIN10052, UTA04009, VIS02504, SAM08050, MAN10002, VIN01501, VIN01503, VIN01504, VIN01505, VIS02508, MAN43000, LAU04107, VIN00004, VIN10022, LAU04109, VIN10001] via keywords · concepts: unemployment"
+    },
+    {
+     "name": "select",
+     "ms": 1971,
+     "detail": "value {'Quarter': ['2026Q2'], 'Region': ['Total'], 'Sex': ['Males and females'], 'Age': ['16-74'], 'Unit': ['Unemployment rate, % (of labour force)']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 4,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1168,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wages-and-unemployment-2026-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver var launavísitalan í ágúst 2026 og hvert var atvinnuleysi á Íslandi á öðrum ársfjórðungi 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "VIN00920|VIN00910"
+   ],
+   "expected_values": [
+    1149.3,
+    6.5
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 8.7,
+   "llm_calls": 8,
+   "tables": [
+    "LAU04000",
+    "VIN00920"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) var launavísitalan í ágúst 2026 1.149,3 (tafla LAU04000). Atvinnuleysið á öðrum ársfjórðungi 2026 var 6,5% (tafla VIN00920).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1575,
+     "detail": "What was the wage index (launavísitala) in Iceland in August 2026? | What was the unemployment rate in Iceland during the second quarter of 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2296,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04003, LAU04800, LAU04007, LAU04802, LAU04005, TEK02003, VIS02506, VIN10012, TEK02001, TEK02004, VIS13302, VIS01103, VIS01004, LAU04101, LAU04103, LAU04107, LAU04105, LAU04109, VIN02091, JVS00001, THJ05813, THJ06012] via keywords · concepts: wage index, wages"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2272,
+     "detail": "VIN00920 from [VIN00920, VIN00001, VIN00910, JVS00001, VIN01004, VIN01206, VIN00930, THJ05811, VIN01005, THJ05812, THJ11001, THJ06012, UTA04005, THJ01601, VIN01001, VIN10012, UTA05002, VIN01502, THJ03111, THJ01602, VIN00900, VIN10032, THJ05813, MAN10001, VIS02504, THJ03112, UTA05003, MAN10003, UTA04009, VIN10052, SAM08050, MAN10002, VIN01501, LAU04107, VIS02508, VIN01503, VIN01504, VIN01505, MAN43000, VIN00004, VIN10022, LAU04109, VIN10001] via keywords · concepts: unemployment"
+    },
+    {
+     "name": "select",
+     "ms": 1700,
+     "detail": "value {'Month': ['2026M08'], 'Unit': ['Value of index']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "select",
+     "ms": 3122,
+     "detail": "value {'Quarter': ['2026Q2'], 'Region': ['Total'], 'Sex': ['Males and females'], 'Age': ['16-74'], 'Unit': ['Unemployment rate, % (of labour force)']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1316,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "gdp-and-stays-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What was Iceland's gross domestic product in 2025, and how many overnight stays were there in registered accommodation in Iceland in 2025?",
+   "expected_tables": [
+    "THJ01102|THJ05111|THJ05211|THJ05311|THJ05531|THJ05631",
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    4941210.91673494,
+    9850428.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.3,
+   "llm_calls": 6,
+   "tables": [
+    "THJ01102",
+    "SAM01601"
+   ],
+   "text": "In 2025, Iceland's gross domestic product was 4,941,210.9 according to Statistics Iceland (Hagstofa Íslands) table THJ01102. The same year saw 9,850,428 overnight stays in registered accommodation, as reported by Statistics Iceland (Hagstofa Íslands) table SAM01601.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1506,
+     "detail": "What was Iceland's gross domestic product (GDP) at current prices in 2025? | How many overnight stays were there in registered accommodation in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 109,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM01502, SAM08007, SAM01501, SAM01102, SAM01103, SAM08000, SAM01602, SAM03105, VIS02202, VIS02201, SAM08001, SAM08011, FYR06103, UMH31118, MAN43007, VIN01105, VIN10012, VIN01107, VIN01110, VIN01113, VIN01112, SAM08006, VIN10032, FYR06101, FYR06102, VIN10022, THJ11011, THJ02103, THJ03204, THJ11002, STI03267, VIS01104, SAM08050, THJ08401, THJ03105, VIS02504, STI03266, THJ08420, STI03265, SAM08008, THJ02105, STI03264, VIN00932, SAM08002, SAM08003, SAM08010, SAM08004, VIS01301, THJ08421] via dictionary · concepts: overnight stays"
+    },
+    {
+     "name": "select",
+     "ms": 2119,
+     "detail": "value {'Citizenship': ['Total'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3452,
+     "detail": "THJ01102 from [THJ01102, THJ01000, THJ01601, VIS01000, THJ01103, VIS02201, THJ01104, THJ05111, THJ05211, VIS02202, THJ05311, THJ03105, SAM08004, THJ05331, SAM08011, VIS06140, THJ02105, THJ03204, THJ08401, THJ05343, UMH31118, THJ05631, UMH34095, THJ08421, VIS02500, SAM08001, THJ05242, VIS02000, UMH34065, THJ05142, THJ06029, THJ05521, THJ05531, THJ05511, THJ05532, THJ06020, THJ05611, UMH51102, THJ05616, VIS02508, THJ05614, THJ05615, THJ05633, THJ05342, THJ05132, VIS01301, VIS06141, VIS01102, THJ06012, LAN1101, VIS02002, THJ06019, UMH31119, SAM08003, THJ05143, SAM08008, VIS01104, VIS01304, THJ06021, LAN1105, UTA05002, THJ02103, VIS02504, VIS01101] via keywords · concepts: gross domestic product, prices, latest"
+    },
+    {
+     "name": "select",
+     "ms": 1092,
+     "detail": "value {'Category': ['8. Gross Domestic Product'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1248,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "gdp-and-stays-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver var verg landsframleiðsla á Íslandi árið 2025 og hve margar gistinætur voru á skráðum gististöðum á Íslandi árið 2025?",
+   "expected_tables": [
+    "THJ01102|THJ05111|THJ05211|THJ05311|THJ05531|THJ05631",
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    4941210.91673494,
+    9850428.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 9.05,
+   "llm_calls": 8,
+   "tables": [
+    "THJ01102",
+    "SAM01601"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) var verg landsframleiðsla á Íslandi árið 2025 4.941.210,9 samkvæmt töflu THJ01102. Á sama tíma voru 9.850.428 gistinætur á skráðum gististöðum samkvæmt töflu SAM01601.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1569,
+     "detail": "What was the gross domestic product (GDP) at current prices in Iceland in 2025? | How many overnight stays were recorded at registered tourist accommodations in Iceland in 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2736,
+     "detail": "THJ01102 from [THJ01102, THJ01000, THJ01601, VIS01000, THJ01103, VIS02201, THJ05111, THJ01104, THJ05211, VIS02202, THJ05311, THJ03105, SAM08004, VIS06140, THJ05331, SAM08011, THJ02105, THJ03204, THJ08401, THJ05343, UMH31118, THJ05631, UMH34095, VIS02500, THJ08421, VIS02000, SAM08001, THJ05242, UMH34065, THJ05142, THJ05521, THJ05531, THJ05511, VIS02508, THJ05532, THJ05611, THJ06020, THJ05616, THJ06029, THJ05614, VIS02002, THJ05615, THJ05633, THJ05342, VIS01301, VIS06141, UMH51102, VIS01102, THJ05132, LAN1101, SAM08003, VIS02504, SAM08008, THJ05143, THJ06019, VIS01104, VIS01304, LAN1105, UTA05002, THJ06012, THJ02103, UMH31119, VIS01101] via keywords · concepts: gross domestic product, prices, latest"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2484,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM01502, SAM01501, SAM08000, SAM08007, SAM01103, SAM01102, UMH31118, THJ11002, SAM01602, SAM03105, THJ03204, THJ08401, THJ03105, THJ08420, THJ08421, VIN01105, VIN01107, SAM08001, VIN01110, VIN01113, SAM08050, VIN01112, SAM08006, SAM08010, UMH31119, VIS02202, VIN10032, SAM08011, VIN10022, MAN43007, FYR06103, FYR04101, SAM08008, FYR04111, UMH31109, SAM08002, VIN01106, SAM08004, VIN01108, VIN01111, VIS02201, VIN10012, SAM01202, SKO03208b, FYR06101, SAM08003, FYR06102, THJ11011] via keywords · concepts: overnight stays"
+    },
+    {
+     "name": "select",
+     "ms": 1528,
+     "detail": "value {'Category': ['8. Gross Domestic Product'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "select",
+     "ms": 2840,
+     "detail": "value {'Citizenship': ['Total'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1456,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "births-and-immigrants-2026-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many children were born in Iceland in 2025, and how many immigrants lived in Iceland on 1 January 2026?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321",
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    4387.0,
+    77226.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.55,
+   "llm_calls": 6,
+   "tables": [
+    "MAN05101",
+    "MAN43000"
+   ],
+   "text": "All children, 2025: 4,387. Source: Statistics Iceland, MAN05101. 2026, Immigrant: 77,226. Source: Statistics Iceland, MAN43000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1410,
+     "detail": "How many children were born in Iceland in 2025? | How many immigrants lived in Iceland on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 139,
+     "detail": "MAN05101 from [MAN05101, MAN05100, MAN05102, MAN05204, MAN43002, MAN04120, MAN05104, MAN08000, SKO04201a, MAN43000, MAN43004, MAN12103, MAN05111, SKO00012, MAN05401, MAN05321, MAN030106, VIN00901, MAN05201, MAN05110, MAN05103, MAN05202, MAN00110, VIN00931, THJ05242, THJ05342, THJ05142, MAN01401, MAN04119, MAN030102, SKO02108b, MAN030104, MAN08213, MAN05303, SKO02108, THJ05465, SJA07001, THJ05265, TEK02011, THJ05442, THJ05261, THJ05263, VIN10001, THJ05165, THJ05267, MAN07109, THJ05368, MAN00102, THJ05251, THJ05351, THJ05369, THJ05161, VIN00911] via dictionary · concepts: live births, children"
+    },
+    {
+     "name": "select",
+     "ms": 1278,
+     "detail": "value {'Unit': ['All children'], 'Age': ['Total'], 'Year': ['2025']} notes: [\"Age: defaulted to ['Total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2331,
+     "detail": "MAN43000 from [MAN43000, MAN02005, MAN00101, MAN10001, MAN43002, MAN43005, MAN43007, MAN43004, VIN10012, MAN43006, MAN00000, VIN10001, MAN04103, MAN030102, MAN12104, MAN04203, MAN12103, MAN04208, VIN10052, MAN04001, VIN10032, VIN10022, MAN03250, MAN030101, MAN03280, MAN03270, TEK02012, MAN00110, MAN00102, VIN00004, MAN10002, UTA02801, UTA03801, MAN00115, MAN10003] via keywords · concepts: population, immigrants"
+    },
+    {
+     "name": "select",
+     "ms": 1577,
+     "detail": "value {'Year': ['2026'], 'Age': ['Total'], 'Origin': ['Immigrant'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 3,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1090,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "births-and-immigrants-2026-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve mörg börn fæddust á Íslandi árið 2025 og hve margir innflytjendur bjuggu á Íslandi 1. janúar 2026?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321",
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    4387.0,
+    77226.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.95,
+   "llm_calls": 6,
+   "tables": [
+    "MAN05101",
+    "MAN43000"
+   ],
+   "text": "All children, 2025: 4.387. Heimild: Hagstofa Íslands, MAN05101. 2026, Total: 394.324; 2026, Immigrant: 77.226. Heimild: Hagstofa Íslands, MAN43000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1483,
+     "detail": "How many children were born in Iceland in 2025? | How many immigrants (by origin) lived in Iceland on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 776,
+     "detail": "MAN05101 from [MAN05101, MAN05100, MAN05102, MAN05204, MAN43002, MAN04120, MAN05104, MAN08000, SKO04201a, MAN43000, MAN43004, MAN12103, MAN05111, SKO00012, MAN05401, MAN05321, MAN030106, VIN00901, MAN05201, MAN05110, MAN05103, MAN05202, MAN00110, VIN00931, THJ05242, THJ05342, THJ05142, MAN01401, MAN04119, MAN030102, SKO02108b, MAN030104, MAN08213, MAN05303, SKO02108, THJ05465, SJA07001, THJ05265, TEK02011, THJ05442, THJ05261, THJ05263, VIN10001, THJ05165, THJ05267, MAN07109, THJ05368, MAN00102, THJ05251, THJ05351, THJ05369, THJ05161, VIN00911] via dictionary · concepts: live births, children"
+    },
+    {
+     "name": "select",
+     "ms": 2120,
+     "detail": "value {'Unit': ['All children'], 'Age': ['Total'], 'Year': ['2025']} notes: [\"Age: defaulted to ['Total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2533,
+     "detail": "MAN43000 from [MAN43000, MAN43002, VIN10012, VIN10001, VIN10052, VIN10032, VIN10022] via keywords · concepts: population, immigrants"
+    },
+    {
+     "name": "select",
+     "ms": 1716,
+     "detail": "value {'Year': ['2026'], 'Age': ['Total'], 'Origin': ['Total', 'Immigrant'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1439,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "cpi-and-unemployment-2026-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What was the consumer price index in September 2026, and what was the unemployment rate in Iceland in the second quarter of 2026?",
+   "expected_tables": [
+    "VIS01000|VIS01002",
+    "VIN00920|VIN00910"
+   ],
+   "expected_values": [
+    697.3,
+    6.5
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.98,
+   "llm_calls": 6,
+   "tables": [
+    "VIS01000",
+    "VIN00920"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands), the consumer price index was 697.3 in September 2026 (Table VIS01000). The unemployment rate for males and females aged 16-74 was 6.5% in the second quarter of 2026 (Table VIN00920).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1518,
+     "detail": "What was the consumer price index (vísitala neysluverðs) in September 2026? | What was the unemployment rate in Iceland in the second quarter of 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 809,
+     "detail": "VIS01000 from [VIS01000, VIS02502, VIS02500, VIS02506, VIS01101, VIS01106, VIS01103, VIS01004, LAU04800, VIS01300, VIS08000, VIS13302, VIS08003, VIS13000, LAU04001, VIS13303, VIS13301, UTA06005, UTA06001, UMH31109, VIS02504, THJ05813, THJ01602, SJA01101, SJA01102, LAU04109, THJ01601, THJ03111, THJ03112] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "select",
+     "ms": 1333,
+     "detail": "value {'Month': ['2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2410,
+     "detail": "VIN00920 from [VIN00920, VIN00001, VIN00910, JVS00001, VIN01004, VIN01206, VIN00930, THJ05811, VIN01005, THJ05812, THJ11001, THJ06012, UTA04005, THJ01601, VIN01001, VIN10012, UTA05002, VIN01502, THJ03111, THJ01602, VIN00900, THJ05813, VIN10032, MAN10001, VIS02504, THJ03112, UTA05003, MAN10003, UTA04009, VIN10052, SAM08050, MAN10002, VIN01501, LAU04107, VIS02508, VIN01503, VIN01504, VIN01505, MAN43000, VIN00004, VIN10022, LAU04109, VIN10001] via keywords · concepts: unemployment"
+    },
+    {
+     "name": "select",
+     "ms": 2066,
+     "detail": "value {'Quarter': ['2026Q2'], 'Region': ['Total'], 'Sex': ['Males and females'], 'Age': ['16-74'], 'Unit': ['Unemployment rate, % (of labour force)']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1162,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "cpi-and-unemployment-2026-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver var vísitala neysluverðs í september 2026 og hvert var atvinnuleysi á Íslandi á öðrum ársfjórðungi 2026?",
+   "expected_tables": [
+    "VIS01000|VIS01002",
+    "VIN00920|VIN00910"
+   ],
+   "expected_values": [
+    697.3,
+    6.5
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.23,
+   "llm_calls": 6,
+   "tables": [
+    "VIS01000",
+    "VIN00920"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) var vísitala neysluverðs í september 2026 697,3 (tafla VIS01000). Á öðrum ársfjórðungi 2026 var atvinnuleysið 6,5% (tafla VIN00920).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1480,
+     "detail": "What was the consumer price index in Iceland in September 2026? | What was the unemployment rate in Iceland in the second quarter of 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 144,
+     "detail": "VIS01000 from [VIS01000, VIS02506, VIS02500, VIS02502, VIS01004, VIS01106, LAU04800, VIS01101, VIS01300, VIS13302, VIS01103, VIS13000, UTA06005, UTA06001, VIS13301, VIS13303, UMH31109, THJ05813, VIS02504, SJA01101, SJA01102, THJ01602, THJ01601, THJ03111, THJ03112] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "select",
+     "ms": 1109,
+     "detail": "value {'Month': ['2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2153,
+     "detail": "VIN00920 from [VIN00920, VIN00001, VIN00910, JVS00001, VIN01206, VIN01004, VIN00930, THJ05811, VIN01005, THJ11001, THJ05812, THJ06012, UTA04005, VIN10012, UTA05002, VIN01502, THJ01601, THJ03111, THJ01602, VIN00900, VIN10032, THJ05813, MAN10001, THJ03112, UTA05003, MAN10003, VIN01001, VIN10052, UTA04009, VIS02504, SAM08050, MAN10002, VIN01501, VIN01503, VIN01504, VIN01505, VIS02508, MAN43000, LAU04107, VIN00004, VIN10022, LAU04109, VIN10001] via keywords · concepts: unemployment"
+    },
+    {
+     "name": "select",
+     "ms": 1998,
+     "detail": "value {'Quarter': ['2026Q2'], 'Region': ['Total'], 'Sex': ['Males and females'], 'Age': ['16-74'], 'Unit': ['Unemployment rate, % (of labour force)']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1451,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}
