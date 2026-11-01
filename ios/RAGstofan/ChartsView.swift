@@ -103,6 +103,7 @@ private struct ChartCanvas: View {
     var compare = false   // series from different tables, each set to 100 at the start
     @State private var selected: String?
     @State private var grow = 0.0   // 0 → 1 as the chart draws itself in
+    @State private var hidden: Set<String> = []   // series switched off in the legend
 
     // Everything the chart draws from, worked out once when the chart is made. These were computed properties, and
     // rise() read yDomain, which rebuilt and sorted every point: hundreds of rebuilds per frame while a long series
@@ -183,11 +184,36 @@ private struct ChartCanvas: View {
 
     // MARK: line and stacked area
 
+    /// Several series: the legend is a row of switches. Tap one to hide that series, tap again to bring it back;
+    /// the last one showing cannot be hidden. Replaces the chart's own legend, which cannot be tapped.
+    private var legendRow: some View {
+        Flow(spacing: 6) {
+            ForEach(series, id: \.self) { s in
+                let off = hidden.contains(s)
+                Button {
+                    if off { hidden.remove(s) } else if hidden.count < series.count - 1 { hidden.insert(s) }
+                } label: {
+                    HStack(spacing: 5) {
+                        Circle().fill(color(s)).frame(width: 8, height: 8).opacity(off ? 0.35 : 1)
+                        Text(s).font(.caption).lineLimit(1).strikethrough(off, color: pal.text3)
+                            .foregroundStyle(off ? pal.text3 : pal.text2)
+                    }
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .background(Capsule().fill(pal.text.opacity(off ? 0.03 : 0.06)))
+                    .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(off ? "Show \(s)" : "Hide \(s)")
+            }
+        }
+    }
+
     private var lineChart: some View {
         let stacked = view == "stacked", lo = yDomain.lowerBound
-        let last = pts.last
-        return Chart {
-            ForEach(pts) { p in
+        let shown = pts.filter { !hidden.contains($0.series) }
+        let last = shown.last
+        let chart = Chart {
+            ForEach(shown) { p in
                 if stacked {
                     AreaMark(x: .value("x", p.label), y: .value("y", scaled(p.y)), stacking: .standard)
                         .foregroundStyle(by: .value("s", p.series))
@@ -223,8 +249,8 @@ private struct ChartCanvas: View {
             }
             // several lines: each named at its end with its last value, so nobody matches colours to a legend
             if multi && !stacked && series.count <= 4 {
-                ForEach(series, id: \.self) { s in
-                    if let end = pts.last(where: { $0.series == s }) {
+                ForEach(series.filter { !hidden.contains($0) }, id: \.self) { s in
+                    if let end = shown.last(where: { $0.series == s }) {
                         PointMark(x: .value("x", end.label), y: .value("y", rise(end.y)))
                             .foregroundStyle(color(s)).symbolSize(36)
                             .annotation(position: .top, alignment: .trailing, spacing: 4) {
@@ -245,10 +271,13 @@ private struct ChartCanvas: View {
         .chartForegroundStyleScale(domain: series, range: colors(series.count))
         .chartYScale(domain: stacked ? stackDomain : yDomain)
         .modifier(Axes(ticks: ticks, pal: pal, compact: compact, yearsOnly: yearsOnly))
-        .chartLegend(multi ? .visible : .hidden)
-        .chartLegend(position: .top, alignment: .leading)
+        .chartLegend(.hidden)
         .chartXSelection(value: $selected)
         .frame(height: 240)
+        return VStack(alignment: .leading, spacing: 8) {
+            if multi { legendRow }
+            chart
+        }
     }
 
     @ChartContentBuilder

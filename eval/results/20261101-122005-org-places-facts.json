@@ -1,0 +1,208 @@
+{
+ "label": "org-places-facts",
+ "results": [
+  {
+   "id": "population-reykjavik-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many people lived in Reykjavík on 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    139804.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.45,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN02005, the population of Reykjavík on 1 January 2026 was 139,804.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1921,
+     "detail": "What was the population of Reykjavík on 1 January 2026? [places ['Reykjavík'], period year '1 January 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2680,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN03270, MAN04203, MAN12104, MAN04208, MAN43006, MAN43005, MAN43007, MAN03200, MAN030102, MAN030101, VIN10012, SJA01101, MAN07108, MAN07109] via keywords · concepts: population, smoking"
+    },
+    {
+     "name": "select",
+     "ms": 1886,
+     "detail": "value {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 23,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 939,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-share-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve stórt hlutfall landsmanna bjó í Reykjavík 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN00000|MAN00101|MAN00110|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    35.454093588
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.83,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Samkvæmt töflu MAN02005 frá Hagstofu Íslands bjó 35,5% landsmanna í Reykjavíkurborg 1. janúar 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1816,
+     "detail": "What was the share of the total population of Iceland living in Reykjavík on January 1, 2026? [places ['Reykjavík'], period year '1. janúar 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2075,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN04203, MAN12104, MAN04208, MAN43005, MAN43007, MAN030101, MAN03270, MAN07108, MAN03200, MAN07109, MAN030102, VIN10012, SJA01101, MAN43006, TEK02003, TEK02004, TEK02014] via keywords · concepts: population, smoking, region, share"
+    },
+    {
+     "name": "select",
+     "ms": 1963,
+     "detail": "share {'Municipality': ['Total', 'Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 968,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-kopavogur-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How many people lived in Reykjavík and Kópavogur together on 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN04203|MAN04208|MAN12104"
+   ],
+   "expected_values": [
+    180090.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.57,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "On 1 January 2026, the combined population of Reykjavík and Kópavogur was 180,090 people. This figure is from Statistics Iceland (Hagstofa Íslands) table MAN02005.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2109,
+     "detail": "What was the population of Reykjavík and Kópavogur on 1 January 2026? [places ['Reykjavík', 'Kópavogur'], period year '1 January 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2410,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN12104, MAN04208, MAN04203, MAN43005, MAN43007, MAN03200, MAN07108, MAN07109, MAN030101, SJA01101] via keywords · concepts: population, smoking, region"
+    },
+    {
+     "name": "select",
+     "ms": 1911,
+     "detail": "sum {'Municipality': ['Reykjavikurborg', 'Kopavogsbaer'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']} notes: ['operation value -> sum over Municipality (question wording)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1137,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-kopavogur-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve margir bjuggu samtals í Reykjavík og Kópavogi 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN04203|MAN04208|MAN12104"
+   ],
+   "expected_values": [
+    180090.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.01,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Samtals bjuggu 180.090 manns í Reykjavík og Kópavogi 1. janúar 2026 (Hagstofa Íslands, töflunúmer MAN02005).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1969,
+     "detail": "What was the total population in Reykjavík and Kópavogur on January 1, 2026? [places ['Reykjavík', 'Kópavogi'], period year '1. janúar 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1985,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN12104, MAN04203, MAN04208, MAN43005, MAN43007, MAN03200, MAN07108, MAN07109, MAN030101, SJA01101, VIN10012, TEK02003, TEK02004] via keywords · concepts: population, smoking, region"
+    },
+    {
+     "name": "select",
+     "ms": 1931,
+     "detail": "sum {'Municipality': ['Reykjavikurborg', 'Kopavogsbaer'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']} notes: ['operation value -> sum over Municipality (question wording)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1117,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}

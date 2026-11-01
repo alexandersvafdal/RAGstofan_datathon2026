@@ -1,0 +1,983 @@
+{
+ "label": "subset2-naming",
+ "results": [
+  {
+   "id": "reykjavik-growth-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By how many people did the population of Reykjavík grow from 1 January 2025 to 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    1032.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 11.16,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN02005, the population of Reykjavík grew by 1,032 people from 1 January 2025 to 1 January 2026. The figures are recorded statistics for the period 1998-2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3056,
+     "detail": "What was the population of Reykjavík from 1 January 2025 to 1 January 2026? [places ['Reykjavík'], period range '1 January 2025 to 1 January 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2776,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN03270, MAN04203, MAN04208, MAN12104, MAN43005, MAN43006, MAN43007, MAN03200, MAN03301, MAN030102, MAN030101, TEK01002, MAN05221, KOS03200a, MAN10289, MAN05110, MAN10290, MAN10292, MAN030106, MAN030104, MAN10291, SJA01101, MAN07108, SKO01000, MAN07109, MAN03105, VIN10012, MAN01201, MAN03106, MAN10293] via keywords · concepts: population, smoking, change"
+    },
+    {
+     "name": "select",
+     "ms": 1842,
+     "detail": "difference {'Municipality': [], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']} notes: [\"Reykjavík: not in the table's options\", \"Municipality: dropped ['Reykjavikurborg'] (a place the question did not name); using []\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 28,
+     "detail": "126 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 3450,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wage-index-2026-08-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hver var launavísitalan í ágúst 2026?",
+   "expected_tables": [
+    "LAU04000"
+   ],
+   "expected_values": [
+    1149.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.7,
+   "llm_calls": 4,
+   "tables": [
+    "LAU04000"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu LAU04000 var launavísitalan í ágúst 2026 1.149,3.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1721,
+     "detail": "What was the wage index (launavísitala) in August 2026? [places [], period month 'ágúst 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1906,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04003, LAU04800, LAU04802, LAU04007, LAU04005, VIS01103, VIS13302, VIS01004, VIS02506, VIS02500, TEK02001, TEK02003, TEK02004, VIS01106, VIS02502, LAU04101, LAU04103, LAU04107, LAU04105, LAU04109, VIN02091, JVS00001, THJ05813] via keywords · concepts: wage index, wages"
+    },
+    {
+     "name": "select",
+     "ms": 1033,
+     "detail": "value {'Month': ['2026M08'], 'Unit': ['Value of index']} notes: [\"Unit: defaulted to ['Value of index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 8,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1027,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-kopavogur-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve margir bjuggu samtals í Reykjavík og Kópavogi 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN04203|MAN04208|MAN12104"
+   ],
+   "expected_values": [
+    180090.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 7.66,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Skeida- og Gnupverjahreppur, 2026: 667; Blaskogabyggd, 2026: 1.453; Floahreppur, 2026: 741. Heimild: Hagstofa Íslands, MAN02005.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2075,
+     "detail": "What was the total population in Reykjavík and Kópavogur on January 1, 2026? [places ['Reykjavík', 'Kópavogi'], period year '1. janúar 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2119,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN12104, MAN04203, MAN04208, MAN43005, MAN43007, MAN03200, MAN07108, MAN07109, MAN030101, SJA01101, VIN10012, TEK02003, TEK02004] via keywords · concepts: population, smoking, region"
+    },
+    {
+     "name": "select",
+     "ms": 1829,
+     "detail": "value {'Municipality': [], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']} notes: [\"Reykjavík: not in the table's options\", \"Municipality: dropped ['Reykjavikurborg', 'Kopavogsbaer'] (a place the question did not name); using []\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "63 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1632,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "population-and-cpi-2026-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve margir bjuggu á Íslandi 1. janúar 2026 og hver var vísitala neysluverðs í september 2026?",
+   "expected_tables": [
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    394324.0,
+    697.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.75,
+   "llm_calls": 5,
+   "tables": [
+    "MAN00101",
+    "VIS01000"
+   ],
+   "text": "2026: 394.324. Heimild: Hagstofa Íslands, MAN00101. 2026M09, Consumer price index, Index: 697,3. Heimild: Hagstofa Íslands, VIS01000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2434,
+     "detail": "What was the population of Iceland on January 1, 2026? [places ['Íslandi'], period month '1. janúar 2026', breakdown False] | What was the consumer price index in September 2026? [places [], period month 'september 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 57,
+     "detail": "VIS01000 from [VIS01000, VIS02506, VIS02500, VIS02502, VIS01300, VIS01106, VIS01004, VIS01101, LAU04800, UTA06001, VIS13302, VIS01103, VIS13000, VIS13303, UTA06005, UMH31109, VIS13301, LAU04001, VIS02504, THJ05813, THJ01602, SJA01101, SJA01102, UTA05002, THJ01601, THJ03111, THJ03112] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1726,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN00000, MAN04103, MAN12104, MAN12103, MAN04203, MAN04208, MAN00102, MAN43000, MAN030101, MAN03280, MAN03250, MAN43007, MAN03270, MAN43005, MAN43002, MAN03200, MAN00110, MAN43004, SJA01101, MAN04001, MAN00115, MAN030103, MAN43006, VIN00001, VIN10012, VIN00900, SJA02201, SJA01102, SJA02202, UTA03803, MAN07108, VIN00930, UTA02801, UTA03801, MAN07209, VIN00910, MAN07109, UTA06002, UTA06003, VIS02504] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 2697,
+     "detail": "value {'Month': ['2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "1 rows"
+    },
+    {
+     "name": "select",
+     "ms": 2188,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2026']} notes: [\"Íslandi: not in the table's options\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 9,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1391,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "population-reykjavik-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve margir bjuggu í Reykjavík 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    139804.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.78,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) töflu MAN02005 bjuggu 139.804 í Reykjavíkurborg 1. janúar 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1868,
+     "detail": "What was the population of Reykjavík on January 1, 2026? [places ['Reykjavík'], period month '1. janúar 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2527,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN03270, MAN04203, MAN12104, MAN04208, MAN43005, MAN43007, MAN03200, MAN43006, MAN030101, MAN07108, MAN030102, SJA01101, VIN10012, TEK02003, TEK02004, TEK02014] via keywords · concepts: population, smoking"
+    },
+    {
+     "name": "select",
+     "ms": 1890,
+     "detail": "value {'Municipality': [], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']} notes: [\"Reykjavík: not in the table's options\", \"Municipality: dropped ['Reykjavikurborg'] (a place the question did not name); using []\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "63 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1490,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "births-2024-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many children were born in Iceland in 2024?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321"
+   ],
+   "expected_values": [
+    4311.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 4.13,
+   "llm_calls": 3,
+   "tables": [
+    "MAN05101"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN05101, there were 4,311 live births in Iceland in 2024.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1658,
+     "detail": "How many children were born in Iceland in 2024? [places ['Iceland'], period year '2024', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 151,
+     "detail": "MAN05101 from [MAN05101, MAN05100, MAN43002, MAN05102, SKO01000, SKO01109, MAN43000, SKO01106, MAN12103, SKO00012, SKO01001, SKO01305, MAN05204, MAN07109, SKO01103, MAN43004, SKO01108, SKO04201a, SKO01201, MAN05110, KOS06001, MAN04120, SKO01101, SKO01104, SKO01102, MAN05401, SKO01105, KOS02101c, MAN08000, MAN00110, MAN05201, KOS01892, UMH31230, UMH31108, VIN00931, KOS02108, MAN05103, MAN05104, VIN10040, VIN01207, MAN05321, MAN04208, MAN05111, SAM09121, SJA09005, MAN12104, MAN03200, KOS02051, SKO01304, UMH31220, SKO03202a, KOS02054, MAN08801, KOS02053, UMH31101, KOS01890] via dictionary · concepts: live births, children"
+    },
+    {
+     "name": "select",
+     "ms": 1522,
+     "detail": "value {'Unit': ['All children'], 'Age': ['Total'], 'Year': ['2024']} notes: [\"Iceland: not in the table's options\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 4,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 791,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wages-and-unemployment-2026-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What was the wage index in August 2026, and what was the unemployment rate in Iceland in the second quarter of 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "VIN00920|VIN00910"
+   ],
+   "expected_values": [
+    1149.3,
+    6.5
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 8.83,
+   "llm_calls": 5,
+   "tables": [
+    "LAU04000",
+    "VIN00920"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table LAU04000, the wage index in August 2026 was 1,149.3. Based on table VIN00920, the unemployment rate in Iceland for the second quarter of 2026 was 6.5%.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2564,
+     "detail": "What was the wage index in August 2026? [places [], period month 'August 2026', breakdown False] | What was the unemployment rate in Iceland in the second quarter of 2026? [places ['Iceland'], period quarter 'second quarter of 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 134,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04005, LAU04007, LAU04800, LAU04003, LAU04802, VIS01004, TEK02001, VIS13302, VIS02500, VIN00004, VIN10032, LAU04801, UMH31109, VIN10022, VIS01103, VIN10052, VIS13303, TEK02003, VIN10001, TEK02004, VIS01000, VIS02506, LAU04107, LAU04105, LAU04101, LAU04103, LAU04109, VIN02091, THJ05813, JVS00001, UTA05002] via dictionary · concepts: wage index"
+    },
+    {
+     "name": "select",
+     "ms": 1289,
+     "detail": "value {'Month': ['2026M08'], 'Unit': ['Value of index']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2995,
+     "detail": "VIN00920 from [VIN00920, VIN00001, VIN00910, JVS00001, VIN01206, VIN01004, VIN00930, THJ05811, VIN01005, THJ11001, THJ05812, THJ06012, UTA04005, VIN10012, UTA05002, VIN01502, THJ01601, THJ03111, THJ01602, VIN00900, VIN10032, THJ05813, MAN10001, THJ03112, UTA05003, MAN10003, VIN01001, VIN10052, UTA04009, VIS02504, SAM08050, MAN10002, VIN01501, VIN01503, VIN01504, VIN01505, VIS02508, MAN43000, LAU04107, VIN00004, VIN10022, LAU04109, VIN10001] via keywords · concepts: unemployment"
+    },
+    {
+     "name": "select",
+     "ms": 1913,
+     "detail": "value {'Quarter': ['2026Q2'], 'Region': ['Total'], 'Sex': ['Males and females'], 'Age': ['16-74'], 'Unit': ['Unemployment rate, % (of labour force)']} notes: [\"Iceland: not in the table's options\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1210,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-wage-now-12m",
+   "level": "medium",
+   "language": "is",
+   "question": "Gefðu mér launavísitöluna eins og hún er í dag og sýndu mér líka hvernig hún hefur þróast síðustu 12 mánuði",
+   "expected_tables": [
+    "LAU04000"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; wage index",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 12.14,
+   "llm_calls": 6,
+   "tables": [
+    "LAU04000"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (tafla LAU04000) var launavísitalan 1.149,3 í ágúst 2026 og hefur hún þróast frá 799,5 í september 2021.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2412,
+     "detail": "What is the current value of the wage index (launavísitala)? [no facts] | What is the development of the wage index (launavísitala) over the last 12 months? [no facts]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1657,
+     "detail": "LAU04000 from [LAU04000, VIN02001, VIN02002, LAU04201, LAU04101, LAU04001, LAU04103, LAU04003, LAU04200, LAU04203, LAU04800, LAU04107, LAU04109, LAU04105, LAU04007, LAU04802, LAU04005, LAU04207, LAU04205, VIN02091, VIN02092, LAU04209, VIN02004, VIN02003, VIN02005, LAU09923, TEK02003, LAU09917, LAU09927, LAU09925, LAU09901, VIN02010, LAU09903, LAU09902, SJA01106, LAU09915, VIN02500, VIN02013, VIN02016, VIN02012, VIN02017, VIN02011, VIN02100, VIN02019, THJ06021, VIN02015, TEK02001, THJ06029, TEK02004, VIS02508, VIS01103, VIS01104, FYR01202, VIS01000, FYR08000, FYR08001, VIS01306, VIS13302, THJ06024e, VIS08010b, FYR01204, THJ06023e, VIS01303, LIF01121, VIN02014, VIN02205, VIN02200, VIN02202, VIN02204] via keywords · concepts: wage index, wages, latest"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3217,
+     "detail": "LAU04000 from [LAU04000, VIN02001, VIN02002, LAU04001, LAU04800, LAU04003, LAU04201, LAU04101, LAU04200, LAU04007, LAU04802, LAU04103, LAU04107, LAU04005, LAU04203, LAU04207, LAU04105, LAU04109, LAU04205, LAU04209, LAU09927, LAU09923, VIN02092, LAU09925, VIN02091, VIN02004, VIN02003, VIN02005, LAU09917, VIN02010, LAU09902, LAU09901, LAU09903, LAU09915, VIN02012, TEK02001, VIS01103, TEK02003, TEK02004, VIS01306, VIN02100, THJ06021, THJ06029, VIS01301, FYR01202, SAM08048, VIS01300, VIS08000b, VIS01104, VIS01305, VIS01303, VIS08003b, VIS01004, SJA06100b, VIS02504, VIN00001, THJ11011, VIS02202, VIS01304, VIS02508, VIS02500, VIS08010b, THJ06024e, FYR01204, VIS02200, VIN02013, VIN02011, VIN02500, VIN02016, VIN02017, VIS01503, VIN02014, VIN02015, VIN02019, VIN02205, VIN02200, VIN02202, VIN02204] via keywords · concepts: wage index, wages, trend"
+    },
+    {
+     "name": "select",
+     "ms": 3869,
+     "detail": "series {'Month': ['2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08'], 'Unit': ['Value of index']} notes: ['Month: a trend, 2021M09 to 2026M08']"
+    },
+    {
+     "name": "fetch",
+     "ms": 3,
+     "detail": "60 rows"
+    },
+    {
+     "name": "select",
+     "ms": 4308,
+     "detail": "series {'Month': ['2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08'], 'Unit': ['Annual change, %']} notes: ['Month: 2026M09 is outside the table, using 2026M08', \"Unit: the question asks for the annual change; using 'Annual change, %'\", 'Month: a trend, 2021M09 to 2026M08']"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "60 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2047,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "growth-rvk-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hversu mikið fjölgaði í Reykjavík frá 2025 til 2026?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    1032
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 9.19,
+   "llm_calls": 4,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands), töflu MAN02005, fjölgaði íbúum í Reykjavíkurborg um 1.032 frá 1. janúar 2025 til 1. janúar 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1860,
+     "detail": "What was the population increase in Reykjavík from 2025 to 2026? [places ['Reykjavík'], period range '2025 til 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2050,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN03270, MAN12104, MAN04203, MAN03200, MAN04208, MAN43006, MAN43005, MAN07109, MAN03301, MAN01201, MAN43007, MAN05110, MAN07108, MAN05221, MAN030102, MAN030101, TEK01002, MAN030106, MAN030104, MAN10289, MAN10290, KOS03107, MAN10291, SKO01000, MAN10292, MAN09000, MAN08212] via keywords · concepts: population, smoking, change"
+    },
+    {
+     "name": "select",
+     "ms": 1822,
+     "detail": "difference {'Municipality': [], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']} notes: [\"Reykjavík: not in the table's options\", \"Municipality: dropped ['Reykjavikurborg'] (a place the question did not name); using []\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "126 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 3449,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "gdp-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hver var hagvöxtur á Íslandi árið 2024?",
+   "expected_tables": [
+    "THJ01000|THJ01103|THJ01104"
+   ],
+   "expected_values": [
+    -0.9
+   ],
+   "note": "values checked against the live PX-API on 30 Oct 2026",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.82,
+   "llm_calls": 4,
+   "tables": [
+    "THJ01000"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu THJ01000 var hagvöxtur á Íslandi árið 2024 -0,9%.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1825,
+     "detail": "What was the economic growth (GDP volume change) in Iceland in 2024? [places ['Íslandi'], period year '2024', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1794,
+     "detail": "THJ01000 from [THJ01000, VIS06125, THJ01104, VIS06124, THJ01102, UMH31108, THJ01103, SAM08004, UMH34055, UMH31107, UMH31101, UMH40500, LAN1107, THJ05152, UMH40100, THJ01601, VIS06142, UMH34065, THJ01401, FYR05103, UMH40210, SAM08011, UMH34095, THJ03111, UMH31118, VIS06123, THJ08401, VIS02201, THJ05631, UMH31230, THJ05111, THJ05211, THJ05311, SAM08008, VIS06140, VIS06141, UMH40220, THJ06012, FYR08010, THJ06021, THJ03204, THJ03112, THJ08422, FYR08000, VIS08000, SJA08109, SJA08103, FYR08001, THJ03105, VIN02010, SJA08107, UMH31220, FYR08011, SJA09113, THJ10001, SAM08001, SJA09005, THJ05813, MID00101, SJA01110, SJA09041, LAN05007, SJA08112, SJA08110, UMH40200, SJA08101] via keywords · concepts: economic growth, change"
+    },
+    {
+     "name": "select",
+     "ms": 1163,
+     "detail": "value {'Year': ['2024'], 'Category': ['Gross domestic product, volume change on previous year']} notes: [\"Íslandi: not in the table's options\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1025,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "friends-labour-cost-compare",
+   "level": "hard",
+   "language": "is",
+   "question": "Gefðu mér samanburð í línuriti á launakostnaði í byggingariðnaði, fiskveiðum og fjármálaþjónustu síðustu 5 árin",
+   "expected_tables": [
+    "VIN02092|VIN02091|LAU04107|LAU04109|LAU04209"
+   ],
+   "expected_values": [],
+   "note": "a friend's question, 1 Nov; several activities over several years",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 22.06,
+   "llm_calls": 8,
+   "tables": [
+    "VIN02091",
+    "SJA08101"
+   ],
+   "text": "Launakostnaður í byggingariðnaði og fjármálaþjónustu er sýndur sem vísitala frá fyrsta fjórðungi 2021 til annars fjórðungs 2026 (VIN02091, Hagstofa Íslands). Launakostnaður í fiskveiðum er sýndur sem heildarupphæð fyrir árin 2019–2024 (SJA08101, Hagstofa Íslands).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3131,
+     "detail": "What was the wage cost in the construction industry for each of the last 5 years? [no facts] | What was the wage cost in the fishing industry for each of the last 5 years? [no facts] | What was the wage cost in financial services for each of the last 5 years? [no facts]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2178,
+     "detail": "VIN02091 from [LAU04000, IDN03001, VIN02092, LAU04207, VIN02091, VIN02100, VIN02101, VIS13301, THJ02105, LAU04209, VIS03401, LAU09917, VIS13000, THJ03105, THJ03204, VIS13302, LAU09927, VIS13303, VIN02500, VIS03303, LAU09901, LAU04107, LAU04007, LAU04109, IDN03002, LAU04201, VIS03201, LAU04203, LAU09925, VIS03010, VIS03301, VIS13001, LIF03323, LAU04101, LAU04103, FYR08001, LAU04200, LAU09902, TEK02004, VIN02003, LAU04205, LAU04003, FYR08000, VIS03001, VIS01304, VIS08000b, VIS02508, VIN02002, THJ08421, THJ11011, UMH31108, VIS01300, IDN03003, LIF03214, LIF03343, LAU09915, THJ03111, LAU04001, LAU04105, VIS01104, FYR08010, FYR04111, FYR04101, VIS08010b, VIS01301, CEN04530, VIS01303, THJ03101, VIS03302, THJ03103, VIS01305, LAU09923, UMH40500, LIF03334, LIF03324, LIF03314, THJ03102, THJ03104, LIF03313, VIN02012, CEN04540, CEN04410, LAU09903, VIN08601, VIS01503] via keyword search · concepts: wage index, construction, trend"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3891,
+     "detail": "SJA08101 from [SJA01101, LAU04000, VIN02092, SJA08101, SJA09041, SJA09042, SJA02202, LAU04201, SJA09003, SJA09033, SJA08110, SJA09040, SJA04001, SJA02204, SJA08109, LAU09917, SJA09020, LAU04203, VIN02101, VIN02091, SJA09004, SJA08103, LAU09901, LAU09927, VIS08003b, SJA08104, LAU09925, VIS02508, LAU09915, UMH51102, LAU04207, FYR08001, VIN02500, SJA01106, VIN02100, LAU04200, TEK02004, LAU04101, LAU04205, LAU04107, LAN1105, UMH34055, VIN08601, VIS08000b, VIN02002, FYR08000, LAU04007, SJA09112, LAU04209, SJA02201, UMH31108, VIS08010b, SJA08107, SJA07101, VIS01306, FYR08011, TEK02001, LAU04001, LAU09923, SJA02203, SJA01102, FYR04111, FYR04101, FYR08010, SJA09005, SJA09035, LAU04105, LAU04103, VIS02201, VIS02506, VIS13301, THJ01103, SJA09001, SJA03005, VIS01305, SJA06100b, SJA09123, THJ06010, SJA04003, SJA06101, SJA07102, LAU09902, LAU09903, VIS03010, SJA06102, FYR01001, VIN08602, THJ03105b] via keyword search · concepts: wage index, fish catch, trend"
+    },
+    {
+     "name": "retrieve",
+     "ms": 7583,
+     "detail": "VIN02091 from [LAU04000, LAU04207, VIN02092, LAU04007, LAU04107, VIN02100, LAU04209, LAU04205, VIN02091, LAU04109, LAU04201, THJ06021, LAU04203, LAU09917, LAU04005, LAU04105, LAU09927, THJ05421, THJ02105, LAU09925, LAU09901, LAU09923, LAU09915, LAU09902, LAU04101, VIN02101, VIN02500, LAU09903, LAU04001, LAU04003, LAU04200, LAU04103, VIS01104, FYR08001, VIN02005, THJ10001, VIS02508, UTA04006, THJ09004, VIN02003, THJ05221, VIN02002, FYR08000, THJ05223, THJ09006, THJ05321, THJ05323, THJ10002, VIN02010, THJ05121, THJ05123, THJ01104, SAM08011, VIS02200, THJ09002, THJ09003, VIS02201, VIS13301, VIS02000, LAU04800, THJ06029, FYR08010, VIS01004, FYR08011, VIS01301, VIN02001, LAN1105, VIS01305, VIS01304, TEK01006, THJ08421, THJ09005, TEK01008, UMH53011, FEL04011, UMH53031, VIS03401, VIS03301, FYR09002, SJA08110, THJ06010, UMH53120, THJ06023e, VIS03010, THJ09004ens, THJ06028e, VIN02013, HEI01002, HEI01006, HEI01004, SAM06110, UTA04002] via keyword search · concepts: wage index, trend"
+    },
+    {
+     "name": "select",
+     "ms": 9500,
+     "detail": "series {'Quarter': ['2021Q1', '2021Q2', '2021Q3', '2021Q4', '2022Q1', '2022Q2', '2022Q3', '2022Q4', '2023Q1', '2023Q2', '2023Q3', '2023Q4', '2024Q1', '2024Q2', '2024Q3', '2024Q4', '2025Q1', '2025Q2', '2025Q3', '2025Q4', '2026Q1', '2026Q2'], 'Economic activity': ['Construction (F)'], 'Labour cost': ['Labour cost, total'], 'Unit': ['Value of index']} notes: [\"Economic activity: dropped unknown values ['B']\", \"Economic activity: dropped ['Financial and insurance activities (K)'] (not named in the question)\", 'Quarter: the last 5 years, 2021Q1 to 2026Q2']"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "22 rows"
+    },
+    {
+     "name": "select",
+     "ms": 8974,
+     "detail": "series {'Year': ['2019', '2020', '2021', '2022', '2023', '2024'], 'Categories': ['2.3 Labour related costs'], 'Type of ships': ['Total']} notes: [\"Type of ships: defaulted to ['Total']\", 'Year: the last 5 years, 2019 to 2024']"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "6 rows"
+    },
+    {
+     "name": "select",
+     "ms": 8726,
+     "detail": "series {'Quarter': ['2021Q1', '2021Q2', '2021Q3', '2021Q4', '2022Q1', '2022Q2', '2022Q3', '2022Q4', '2023Q1', '2023Q2', '2023Q3', '2023Q4', '2024Q1', '2024Q2', '2024Q3', '2024Q4', '2025Q1', '2025Q2', '2025Q3', '2025Q4', '2026Q1', '2026Q2'], 'Economic activity': ['Financial and insurance activities (K)'], 'Labour cost': ['Labour cost, total'], 'Unit': ['Value of index']} notes: ['Quarter: the last 5 years, 2021Q1 to 2026Q2']"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "22 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2340,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "unemp-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was the unemployment rate in August 2026?",
+   "expected_tables": [
+    "VIN00001"
+   ],
+   "expected_values": [
+    6.0
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 3.97,
+   "llm_calls": 3,
+   "tables": [
+    "VIN00001"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table VIN00001, the unemployment rate in August 2026 was 6.0%.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1548,
+     "detail": "What was the unemployment rate in Iceland in August 2026? [places [], period month 'August 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 142,
+     "detail": "VIN00001 from [VIN00001, VIN00004, VIN10012, VIS02506, VIN10032, UMH31109, VIN10001, VIN10022, UTA04008, VIN10052, VIN00920, VIN00910, JVS00001, VIN01206, VIN01004, VIN01005, VIN00930, UTA05002] via dictionary · concepts: unemployment"
+    },
+    {
+     "name": "select",
+     "ms": 1457,
+     "detail": "value {'Month': ['2026M08'], 'Sex/age': ['Total'], 'Unit': ['Unemployment rate']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 9,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 806,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "cpi-housing-trend-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver var söguleg breyting á vísitölu neysluverðs og vísitölu markaðsverðs íbúðarhúsnæðis frá árinu 2010 til 2026?",
+   "expected_tables": [
+    "VIS01000",
+    "VIS01106"
+   ],
+   "expected_values": [
+    700.4,
+    821.3
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 11.08,
+   "llm_calls": 6,
+   "tables": [
+    "VIS01000",
+    "VIS01106"
+   ],
+   "text": "Frá desember 2010 til september 2026 jókst vísitala neysluverðs um 330,6 (úr 366,7 í 697,3) samkvæmt töflu VIS01000 frá Hagstofu Íslands. Á sama tímabili jókst vísitala markaðsverðs íbúðarhúsnæðis um 600,0 (úr 220,6 í 820,6) samkvæmt töflu VIS01106 frá Hagstofu Íslands.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3180,
+     "detail": "What is the historical change in the consumer price index (vísitala neysluverðs) from 2010 to 2026? [places [], period range '2010 til 2026', breakdown False] | What is the historical change in the market price index for residential property (vísitala markaðsverðs íbúðarhúsnæðis) from 2010 to 2026? [places [], period range '2010 til 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2050,
+     "detail": "VIS01000 from [VIS01000, VIS02508, VIS02201, VIS02000, VIS02500, VIS02002, VIS02502, VIS01301, VIS08000b, VIS01102, VIS02202, VIS01104, VIS02506, VIS01303, THJ05813, VIS01101, VIS02001, VIS01304, VIS01300, VIS08003b, VIS01106, SJA06100b, VIS08000, VIS02200, VIS01004, VIS08010b, VIS13000, SJA01106, VIS01305, MAN04001, VIS03401, VIS02300, VIS13302, VIS01503, VIS02301, VIS02400, VIS08011, VIS01103, VIS08003, VIS02504, UMH34050, THJ02105, VIS01306, LAU04109, SAM08049, LAU04209, THJ01601, LAU04201, THJ03111, THJ03112, VIS03302, VIS06140, VIS03303, UMH51102, VIS03301, SJA06100, LAU09917, THJ01602, VIS13303, VIS13301, SAM08011, VIS06125, LAU04200, MAN00110, VIS06123, UTA07001, IDN02303, MID00101, VIS08002, SKU01005, SKU01010, VIN02500, LIF01122, SJA06102, LAN10203, LAU09915, LAU09901, VIS03201] via keywords · concepts: consumer price index, change"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3439,
+     "detail": "VIS01106 from [VIS01000, VIS01106, VIS02508, VIS08000b, VIS02201, VIS01301, VIS08003b, VIS02500, THJ05813, VIS01300, VIS02000, VIS03302, SJA06100b, LIF03323, VIS08000, VIS01303, SJA01106, VIS03401, VIS02506, VIS03301, VIS02200, VIS03303, VIS02001, VIS13000, VIS13302, VIS08011, THJ02105, VIS01102, LIF03322, VIS02504, VIS13301, VIS02202, LAU04801, LIF03217, VIS02502, VIS02002, VIS01101, VIS02400, VIS08010b, LIF03215, VIS08003, UMH31109, VIS02301, THJ06012, LFI03305, THJ01601, THJ03111, LIF03214, THJ01102, THJ03204, VIS01004, THJ03105, VIS01104, VIS13303, VIS01304, LIF03343, THJ02103, LIF03353, LIF01124, LAU09917, UTA06006, UMH34050, LAU04109, VIS01503, VIS02300, LIF03333, SAM08049, VIS01305, VIS06140, LAU04209, SJA02202, LAU04105, LFI03306, LIF03334, LIF03324, LIF03354, LIF01137, LIF01122, VIN02500, LAU09925, LAU09915, LIF03321, VIS08002, LIF03320, SJA06102, VIS06126, VIS03201, THJ01102b] via keyword search · concepts: housing, prices, change"
+    },
+    {
+     "name": "select",
+     "ms": 2744,
+     "detail": "difference {'Month': ['2010M12', '2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: ['Month: 2026M12 is outside the table, using 2026M09', \"Item: defaulted to ['Index']\", 'operation pct_change -> difference (a change asked, no percent word)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "select",
+     "ms": 2428,
+     "detail": "difference {'Month': ['2010M12', '2026M09'], 'Index': ['Whole country, total']} notes: ['Month: 2026M12 is outside the table, using 2026M09', 'operation pct_change -> difference (a change asked, no percent word)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1857,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "cpi-housing-trend-en",
+   "level": "hard",
+   "language": "en",
+   "question": "Show the consumer price index and the housing price index together in one chart from 2010 to 2026",
+   "expected_tables": [
+    "VIS01000",
+    "VIS01106"
+   ],
+   "expected_values": [
+    700.4,
+    821.3
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 33.46,
+   "llm_calls": 5,
+   "tables": [
+    "VIS01000",
+    "VIS01106"
+   ],
+   "text": "Statistics Iceland (Hagstofa Íslands) data from table VIS01000 shows the consumer price index rose from 356.8 in January 2010 to 697.3 in September 2026. Table VIS01106 records the residential property market price index increasing from 217.7 in January 2010 to 820.6 in September 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2772,
+     "detail": "What is the consumer price index (vísitala neysluverðs) from 2010 to 2026? [places [], period range '2010 to 2026', breakdown False] | What is the housing price index (búsetuverðsvísitala) from 2010 to 2026? [places [], period range '2010 to 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 144,
+     "detail": "VIS01000 from [VIS01000, VIS02508, VIS02201, VIS02002, VIS02502, VIS02000, VIS02202, VIS02506, VIS02500, VIS01104, VIS01101, VIS01102, VIS01303, VIS01301, VIS01304, VIS08000b, VIS01106, VIS02001, THJ05813, VIS08003b, VIS01004, VIS02200, VIS01103, VIS08010b, SJA06100b, THJ01602, VIS01305, MAN04001, LAU04109, VIS06140, VIS01503, THJ02105, VIS02301, VIS03401, UTA07001, VIS02300, VIS02400, VIS08011, VIS01306, UMH34050, VIS08003, LAU04201, MAN00110, VIS01300, LAU04001, SJA01106, SAM08049, LAU04800, UMH51102, SJA01101, MAN03280, VIS06123, SJA02201, SJA01102, LAU04101, LAU04209, SJA02202, THJ06019, LIF01151, LAU04200, VIS03001, VIS02504, VIS08000, LAU04107, SJA07003, LAU09917, VIS03302, VIS03303, VIS03301, VIS06125, LIF01122, VIN02500, SJA06102, VIS03201, SKU01010, LAN10203, VIS08002, SJA06101] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "select",
+     "ms": 3238,
+     "detail": "series {'Month': ['2010M01', '2010M02', '2010M03', '2010M04', '2010M05', '2010M06', '2010M07', '2010M08', '2010M09', '2010M10', '2010M11', '2010M12', '2011M01', '2011M02', '2011M03', '2011M04', '2011M05', '2011M06', '2011M07', '2011M08', '2011M09', '2011M10', '2011M11', '2011M12', '2012M01', '2012M02', '2012M03', '2012M04', '2012M05', '2012M06', '2012M07', '2012M08', '2012M09', '2012M10', '2012M11', '2012M12', '2013M01', '2013M02', '2013M03', '2013M04', '2013M05', '2013M06', '2013M07', '2013M08', '2013M09', '2013M10', '2013M11', '2013M12', '2014M01', '2014M02', '2014M03', '2014M04', '2014M05', '2014M06', '2014M07', '2014M08', '2014M09', '2014M10', '2014M11', '2014M12', '2015M01', '2015M02', '2015M03', '2015M04', '2015M05', '2015M06', '2015M07', '2015M08', '2015M09', '2015M10', '2015M11', '2015M12', '2016M01', '2016M02', '2016M03', '2016M04', '2016M05', '2016M06', '2016M07', '2016M08', '2016M09', '2016M10', '2016M11', '2016M12', '2017M01', '2017M02', '2017M03', '2017M04', '2017M05', '2017M06', '2017M07', '2017M08', '2017M09', '2017M10', '2017M11', '2017M12', '2018M01', '2018M02', '2018M03', '2018M04', '2018M05', '2018M06', '2018M07', '2018M08', '2018M09', '2018M10', '2018M11', '2018M12', '2019M01', '2019M02', '2019M03', '2019M04', '2019M05', '2019M06', '2019M07', '2019M08', '2019M09', '2019M10', '2019M11', '2019M12', '2020M01', '2020M02', '2020M03', '2020M04', '2020M05', '2020M06', '2020M07', '2020M08', '2020M09', '2020M10', '2020M11', '2020M12', '2021M01', '2021M02', '2021M03', '2021M04', '2021M05', '2021M06', '2021M07', '2021M08', '2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08', '2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\", 'Month: filled the gap, 2010M01 to 2026M09']"
+    },
+    {
+     "name": "fetch",
+     "ms": 9,
+     "detail": "201 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4928,
+     "detail": "VIS01106 from [VIS01106, VIS02508, VIS01000, THJ05813, VIS02201, VIS08003b, SJA06100b, VIS08000b, VIS02506, VIS02202, VIS01303, VIS01304, VIS01301, VIS01104, VIS02200, VIS01004, VIS03401, LIF03322, VIS08010b, LIF03323, THJ03204, THJ01602, THJ02105, VIS02001, VIS01503, LIF03324, VIS13302, VIS13301, VIS02400, VIS03302, VIS13000, VIS03301, VIS06140, VIS02504, VIS01103, THJ01601, VIS01300, THJ03111, SJA01106, VIS06141, VIS02000, VIS01101, VIS01102, VIS03303, VIS06123, LIF03217, THJ03105, VIS13001, VIS13303, THJ02103, MAN04001, MAN00110, VIS01306, LAU04801, VIS01305, SAM08049, VIS02500, UTA07001, LAU04800, LAU04200, VIS02002, LIF01132, SJA01101, MAN03280, LIF01122, LIF03343, VIS06125, VIS03001, LIF03215, LIF06112, VIS05302, LIF01124, LIF03320, LIF03321, SJA06102, VIS02300, THJ05712, THJ95144, HEI01006, THJ03101, VIS02301, THJ03103, THJ02103b] via keywords · concepts: house prices"
+    },
+    {
+     "name": "select",
+     "ms": 20862,
+     "detail": "series {'Month': ['2010M01', '2010M02', '2010M03', '2010M04', '2010M05', '2010M06', '2010M07', '2010M08', '2010M09', '2010M10', '2010M11', '2010M12', '2011M01', '2011M02', '2011M03', '2011M04', '2011M05', '2011M06', '2011M07', '2011M08', '2011M09', '2011M10', '2011M11', '2011M12', '2012M01', '2012M02', '2012M03', '2012M04', '2012M05', '2012M06', '2012M07', '2012M08', '2012M09', '2012M10', '2012M11', '2012M12', '2013M01', '2013M02', '2013M03', '2013M04', '2013M05', '2013M06', '2013M07', '2013M08', '2013M09', '2013M10', '2013M11', '2013M12', '2014M01', '2014M02', '2014M03', '2014M04', '2014M05', '2014M06', '2014M07', '2014M08', '2014M09', '2014M10', '2014M11', '2014M12', '2015M01', '2015M02', '2015M03', '2015M04', '2015M05', '2015M06', '2015M07', '2015M08', '2015M09', '2015M10', '2015M11', '2015M12', '2016M01', '2016M02', '2016M03', '2016M04', '2016M05', '2016M06', '2016M07', '2016M08', '2016M09', '2016M10', '2016M11', '2016M12', '2017M01', '2017M02', '2017M03', '2017M04', '2017M05', '2017M06', '2017M07', '2017M08', '2017M09', '2017M10', '2017M11', '2017M12', '2018M01', '2018M02', '2018M03', '2018M04', '2018M05', '2018M06', '2018M07', '2018M08', '2018M09', '2018M10', '2018M11', '2018M12', '2019M01', '2019M02', '2019M03', '2019M04', '2019M05', '2019M06', '2019M07', '2019M08', '2019M09', '2019M10', '2019M11', '2019M12', '2020M01', '2020M02', '2020M03', '2020M04', '2020M05', '2020M06', '2020M07', '2020M08', '2020M09', '2020M10', '2020M11', '2020M12', '2021M01', '2021M02', '2021M03', '2021M04', '2021M05', '2021M06', '2021M07', '2021M08', '2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08', '2026M09'], 'Index': ['Whole country, total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "201 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4741,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "housing-by-region-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hvernig hefur vísitala markaðsverðs íbúðarhúsnæðis þróast eftir landshlutum frá 2010?",
+   "expected_tables": [
+    "VIS01106"
+   ],
+   "expected_values": [
+    821.3,
+    826.0
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 14.65,
+   "llm_calls": 5,
+   "tables": [
+    "VIS01106"
+   ],
+   "text": "Capital area, multi-flat houses: 220,9 (2010M01), 795,7 (2026M09); hæst 804,3 (2026M04). Capital area, single-flat houses: 256,6 (2010M01), 896,1 (2026M09); hæst 896,1 (2026M09). Outside capital area, total: 191,6 (2010M01), 833,9 (2026M09); hæst 833,9 (2026M09). Whole country, total: 217,7 (2010M01), 820,6 (2026M09); hæst 823,2 (2026M05). Heimild: Hagstofa Íslands, VIS01106.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1699,
+     "detail": "How has the market price index for residential housing developed by region from 2010? [places [], period range 'frá 2010', breakdown True]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2230,
+     "detail": "VIS01106 from [VIS01000, VIS01106, VIS02201, LIF03217, VIS01303, VIS02200, LIF03323, VIS08000b, VIS02001, LIF03343, LIF01124, THJ02105, VIS08003b, LIF03322, VIS02000, VIS01102, LIF03215, THJ03204, THJ03105, HEI09104, UMH31109, VIS01301, VIS08010b, UTA06006, THJ08421, VIS06140, VIS03302, SJA06100b, LIF03324, LIF01122, LIF03353, LIF03342, VIS01104, VIS01304, LAN10102, LIF03354, VIS06141, VIS03303, LIF03214, THJ02103, PEN01105, HEI09103, LAU09917, LAN1001, LIF01137, LIF03321, MEN02110, KOS03206] via keyword search · concepts: housing, prices, region, trend"
+    },
+    {
+     "name": "select",
+     "ms": 3687,
+     "detail": "series {'Month': ['2010M01', '2010M02', '2010M03', '2010M04', '2010M05', '2010M06', '2010M07', '2010M08', '2010M09', '2010M10', '2010M11', '2010M12', '2011M01', '2011M02', '2011M03', '2011M04', '2011M05', '2011M06', '2011M07', '2011M08', '2011M09', '2011M10', '2011M11', '2011M12', '2012M01', '2012M02', '2012M03', '2012M04', '2012M05', '2012M06', '2012M07', '2012M08', '2012M09', '2012M10', '2012M11', '2012M12', '2013M01', '2013M02', '2013M03', '2013M04', '2013M05', '2013M06', '2013M07', '2013M08', '2013M09', '2013M10', '2013M11', '2013M12', '2014M01', '2014M02', '2014M03', '2014M04', '2014M05', '2014M06', '2014M07', '2014M08', '2014M09', '2014M10', '2014M11', '2014M12', '2015M01', '2015M02', '2015M03', '2015M04', '2015M05', '2015M06', '2015M07', '2015M08', '2015M09', '2015M10', '2015M11', '2015M12', '2016M01', '2016M02', '2016M03', '2016M04', '2016M05', '2016M06', '2016M07', '2016M08', '2016M09', '2016M10', '2016M11', '2016M12', '2017M01', '2017M02', '2017M03', '2017M04', '2017M05', '2017M06', '2017M07', '2017M08', '2017M09', '2017M10', '2017M11', '2017M12', '2018M01', '2018M02', '2018M03', '2018M04', '2018M05', '2018M06', '2018M07', '2018M08', '2018M09', '2018M10', '2018M11', '2018M12', '2019M01', '2019M02', '2019M03', '2019M04', '2019M05', '2019M06', '2019M07', '2019M08', '2019M09', '2019M10', '2019M11', '2019M12', '2020M01', '2020M02', '2020M03', '2020M04', '2020M05', '2020M06', '2020M07', '2020M08', '2020M09', '2020M10', '2020M11', '2020M12', '2021M01', '2021M02', '2021M03', '2021M04', '2021M05', '2021M06', '2021M07', '2021M08', '2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08', '2026M09'], 'Index': ['Capital area, multi-flat houses', 'Capital area, single-flat houses', 'Outside capital area, total', 'Whole country, total']} notes: ['Month: a trend, 2010M01 to 2026M09']"
+    },
+    {
+     "name": "fetch",
+     "ms": 18,
+     "detail": "804 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 7007,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "housing-2010-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hver var vísitala markaðsverðs íbúðarhúsnæðis árið 2010?",
+   "expected_tables": [
+    "VIS01106"
+   ],
+   "expected_values": [
+    220.6
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.78,
+   "llm_calls": 4,
+   "tables": [
+    "VIS01106"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu VIS01106 var vísitala markaðsverðs íbúðarhúsnæðis árið 2010, 220,6.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1520,
+     "detail": "What was the market price index for residential housing in 2010? [places [], period year '2010', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1853,
+     "detail": "VIS01106 from [VIS01000, VIS01106, VIS02201, LIF03323, VIS01303, VIS02200, VIS01304, LIF01124, VIS02001, VIS01004, LIF03214, LIF03343, THJ02105, LAU04801, VIS03302, LIF03322, VIS03301, VIS01301, VIS08003b, VIS03303, VIS08000b, VIS01102, VIS08010b, THJ03204, THJ03105, VIS01104, VIS03401, LIF03324, LIF03217, THJ02103, UTA06006, LIF03215, VIS06140, LIF03321, VIS13001, VIS08003, VIS01305, SJA06100b, UMH31109, SJA01106, THJ01104, VIS06141, VIS06123, VIS03304, LIF03320, THJ05813, LFI03305, LAU04802, LIF03342, THJ05751, PEN01105, LAU09917, UTA07001, LIF03353, LIF01137, LIF01122, LIF03354, LIF03313, LIF01123, VIN02500, LAU09915] via keyword search · concepts: housing, prices"
+    },
+    {
+     "name": "select",
+     "ms": 1296,
+     "detail": "value {'Month': ['2010M12'], 'Index': ['Whole country, total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1109,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "cpi-housing-2010-2020-is",
+   "level": "hard",
+   "language": "is",
+   "question": "hver var vísitala neysluverðs árið 2010 til 2020, sýndu mér einnig í sama grafi vísitölu húsnæðismarkaði",
+   "expected_tables": [
+    "VIS01000",
+    "VIS01106"
+   ],
+   "expected_values": [
+    490.3,
+    496.5
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 27.77,
+   "llm_calls": 5,
+   "tables": [
+    "VIS01000",
+    "VIS01106"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) sýna tölurnar frá töflunum VIS01000 og VIS01106 að vísitala neysluverðs jókst úr 356,8 í janúar 2010 í 490,3 í desember 2020. Á sama tímabili jókst vísitala markaðsverðs íbúðarhúsnæðis úr 217,7 í janúar 2010 í 496,5 í desember 2020.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3077,
+     "detail": "What was the consumer price index (vísitala neysluverðs) from 2010 to 2020? [places [], period range '2010 til 2020', breakdown False] | What was the housing market index (vísitala húsnæðismarkaðar) from 2010 to 2020? [places [], period range '2010 til 2020', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 143,
+     "detail": "VIS01000 from [VIS01000, VIS02201, VIS02508, VIS02002, VIS02502, VIS02000, VIS01104, VIS02202, VIS02500, VIS01102, VIS01304, VIS01303, VIS01301, VIS02506, VIS08000b, VIS01101, VIS01106, VIS02001, VIS08003b, VIS08010b, VIS01004, VIS02200, SJA06100b, VIS01103, SJA01106, VIS06140, VIS01503, THJ05813, VIS01305, VIS03401, UTA07001, LAU04209, VIS02301, VIS02300, VIS02400, VIS08011, VIN02500, LAU04201, UMH34050, VIS08003, VIS01300, UTA06004, THJ03201, LAU04109, THJ02105, VIS06123, LAU04800, LAU04101, VIS01306, LAU04001, THJ06019, VIS03001, MAN06100, MEN05102, MEN05103, MAN06202, LAU09917, MAN06201, MEN06119, SKU01010, VIS03302, VIS03303, VIS03301, MEN05101, LIF01151, LIF01122, LIF03324, SKU01005, LIF01121, LAN10203, VIS08002, VIS03201, LAU09901, LAU09915, VIS06126, SAM06111, SJA06102] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "select",
+     "ms": 3751,
+     "detail": "series {'Month': ['2010M01', '2010M02', '2010M03', '2010M04', '2010M05', '2010M06', '2010M07', '2010M08', '2010M09', '2010M10', '2010M11', '2010M12', '2011M01', '2011M02', '2011M03', '2011M04', '2011M05', '2011M06', '2011M07', '2011M08', '2011M09', '2011M10', '2011M11', '2011M12', '2012M01', '2012M02', '2012M03', '2012M04', '2012M05', '2012M06', '2012M07', '2012M08', '2012M09', '2012M10', '2012M11', '2012M12', '2013M01', '2013M02', '2013M03', '2013M04', '2013M05', '2013M06', '2013M07', '2013M08', '2013M09', '2013M10', '2013M11', '2013M12', '2014M01', '2014M02', '2014M03', '2014M04', '2014M05', '2014M06', '2014M07', '2014M08', '2014M09', '2014M10', '2014M11', '2014M12', '2015M01', '2015M02', '2015M03', '2015M04', '2015M05', '2015M06', '2015M07', '2015M08', '2015M09', '2015M10', '2015M11', '2015M12', '2016M01', '2016M02', '2016M03', '2016M04', '2016M05', '2016M06', '2016M07', '2016M08', '2016M09', '2016M10', '2016M11', '2016M12', '2017M01', '2017M02', '2017M03', '2017M04', '2017M05', '2017M06', '2017M07', '2017M08', '2017M09', '2017M10', '2017M11', '2017M12', '2018M01', '2018M02', '2018M03', '2018M04', '2018M05', '2018M06', '2018M07', '2018M08', '2018M09', '2018M10', '2018M11', '2018M12', '2019M01', '2019M02', '2019M03', '2019M04', '2019M05', '2019M06', '2019M07', '2019M08', '2019M09', '2019M10', '2019M11', '2019M12', '2020M01', '2020M02', '2020M03', '2020M04', '2020M05', '2020M06', '2020M07', '2020M08', '2020M09', '2020M10', '2020M11', '2020M12'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\", \"Index: dropped ['Consumer price index less housing cost'] (not named in the question)\", 'Month: filled the gap, 2010M01 to 2020M12']"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "132 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 5616,
+     "detail": "VIS01106 from [VIS01106, VIS02508, LIF03214, LIF03323, LIF03343, VIS01000, VIS02201, VIS01303, LIF03322, VIS08000b, LIF03334, LIF01124, VIS02200, LIF03354, LIF03313, LIF03217, VIS01503, LIF03215, VIS08010b, VIS03401, VIS08003b, VIS13302, VIS03302, VIS02202, VIS01101, THJ06019, VIS01102, VIS01004, LAU04201, VIS13000, VIS02506, VIS13301, SKO03206c, UMH34050, SKO03208a, VIS13001, SJA01106, SKO03208b, SJA06100b, LIF01134a, LIF03342, SKO04205b, THJ02105, VIS03301, VIS01300, VIS01103, VIS01104, LFI03305, VIS01301, VIS01304, PEN01105, LIF03324, LAU09917, THJ03201, LIF01122, VIS13303, LAU04109, VIS03303, SJA09041, VIS01305, IDN03001, LAU09915, VIS02001, LIF03353, VIN01205, LIF01133, LIF03321, LIF03341, LIF01137, LIF03210, VIN02500, LIF01123, VIS03201, VIS02400, LIF03320, LIF03340, LAU09901, IDN03004] via keyword search · concepts: housing"
+    },
+    {
+     "name": "select",
+     "ms": 14746,
+     "detail": "series {'Month': ['2010M01', '2010M02', '2010M03', '2010M04', '2010M05', '2010M06', '2010M07', '2010M08', '2010M09', '2010M10', '2010M11', '2010M12', '2011M01', '2011M02', '2011M03', '2011M04', '2011M05', '2011M06', '2011M07', '2011M08', '2011M09', '2011M10', '2011M11', '2011M12', '2012M01', '2012M02', '2012M03', '2012M04', '2012M05', '2012M06', '2012M07', '2012M08', '2012M09', '2012M10', '2012M11', '2012M12', '2013M01', '2013M02', '2013M03', '2013M04', '2013M05', '2013M06', '2013M07', '2013M08', '2013M09', '2013M10', '2013M11', '2013M12', '2014M01', '2014M02', '2014M03', '2014M04', '2014M05', '2014M06', '2014M07', '2014M08', '2014M09', '2014M10', '2014M11', '2014M12', '2015M01', '2015M02', '2015M03', '2015M04', '2015M05', '2015M06', '2015M07', '2015M08', '2015M09', '2015M10', '2015M11', '2015M12', '2016M01', '2016M02', '2016M03', '2016M04', '2016M05', '2016M06', '2016M07', '2016M08', '2016M09', '2016M10', '2016M11', '2016M12', '2017M01', '2017M02', '2017M03', '2017M04', '2017M05', '2017M06', '2017M07', '2017M08', '2017M09', '2017M10', '2017M11', '2017M12', '2018M01', '2018M02', '2018M03', '2018M04', '2018M05', '2018M06', '2018M07', '2018M08', '2018M09', '2018M10', '2018M11', '2018M12', '2019M01', '2019M02', '2019M03', '2019M04', '2019M05', '2019M06', '2019M07', '2019M08', '2019M09', '2019M10', '2019M11', '2019M12', '2020M01', '2020M02', '2020M03', '2020M04', '2020M05', '2020M06', '2020M07', '2020M08', '2020M09', '2020M10', '2020M11', '2020M12'], 'Index': ['Whole country, total']} notes: [\"Index: none of ['Capital area, multi-flat houses', 'Capital area, single-flat houses'] named in the question; using ['Whole country, total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "132 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4175,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}

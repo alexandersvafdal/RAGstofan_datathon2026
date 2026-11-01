@@ -1,0 +1,305 @@
+{
+ "label": "cpi-housing-total",
+ "results": [
+  {
+   "id": "cpi-housing-trend-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver var söguleg breyting á vísitölu neysluverðs og vísitölu markaðsverðs íbúðarhúsnæðis frá árinu 2010 til 2026?",
+   "expected_tables": [
+    "VIS01000",
+    "VIS01106"
+   ],
+   "expected_values": [
+    700.4,
+    821.3
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 11.02,
+   "llm_calls": 6,
+   "tables": [
+    "VIS01000",
+    "VIS01106"
+   ],
+   "text": "Frá desember 2010 til september 2026 jókst vísitala neysluverðs um 330,6 (úr 366,7 í 697,3) samkvæmt töflu VIS01000 frá Hagstofu Íslands. Á sama tímabili jókst vísitala markaðsverðs íbúðarhúsnæðis um 600,0 (úr 220,6 í 820,6) samkvæmt töflu VIS01106 frá Hagstofu Íslands.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3384,
+     "detail": "What is the historical change in the consumer price index (vísitala neysluverðs) from 2010 to 2026? [places [], period range '2010 til 2026', breakdown False] | What is the historical change in the market price index for residential property (vísitala markaðsverðs íbúðarhúsnæðis) from 2010 to 2026? [places [], period range '2010 til 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2539,
+     "detail": "VIS01000 from [VIS01000, VIS02508, VIS02201, VIS02000, VIS02500, VIS02002, VIS02502, VIS01301, VIS08000b, VIS01102, VIS02202, VIS01104, VIS02506, VIS01303, THJ05813, VIS01101, VIS02001, VIS01304, VIS01300, VIS08003b, VIS01106, SJA06100b, VIS08000, VIS02200, VIS01004, VIS08010b, VIS13000, SJA01106, VIS01305, MAN04001, VIS03401, VIS02300, VIS13302, VIS01503, VIS02301, VIS02400, VIS08011, VIS01103, VIS08003, VIS02504, UMH34050, THJ02105, VIS01306, LAU04109, SAM08049, LAU04209, THJ01601, LAU04201, THJ03111, THJ03112, VIS03302, VIS06140, VIS03303, UMH51102, VIS03301, SJA06100, LAU09917, THJ01602, VIS13303, VIS13301, SAM08011, VIS06125, LAU04200, MAN00110, VIS06123, UTA07001, IDN02303, MID00101, VIS08002, SKU01005, SKU01010, VIN02500, LIF01122, SJA06102, LAN10203, LAU09915, LAU09901, VIS03201] via keywords · concepts: consumer price index, change"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2943,
+     "detail": "VIS01106 from [VIS01000, VIS01106, VIS02508, VIS08000b, VIS02201, VIS01301, VIS08003b, VIS02500, THJ05813, VIS01300, VIS02000, VIS03302, SJA06100b, LIF03323, VIS08000, VIS01303, SJA01106, VIS03401, VIS02506, VIS03301, VIS02200, VIS03303, VIS02001, VIS13000, VIS13302, VIS08011, THJ02105, VIS01102, LIF03322, VIS02504, VIS13301, VIS02202, LAU04801, LIF03217, VIS02502, VIS02002, VIS01101, VIS02400, VIS08010b, LIF03215, VIS08003, UMH31109, VIS02301, THJ06012, LFI03305, THJ01601, THJ03111, LIF03214, THJ01102, THJ03204, VIS01004, THJ03105, VIS01104, VIS13303, VIS01304, LIF03343, THJ02103, LIF03353, LIF01124, LAU09917, UTA06006, UMH34050, LAU04109, VIS01503, VIS02300, LIF03333, SAM08049, VIS01305, VIS06140, LAU04209, SJA02202, LAU04105, LFI03306, LIF03334, LIF03324, LIF03354, LIF01137, LIF01122, VIN02500, LAU09925, LAU09915, LIF03321, VIS08002, LIF03320, SJA06102, VIS06126, VIS03201, THJ01102b] via keyword search · concepts: housing, prices, change"
+    },
+    {
+     "name": "select",
+     "ms": 2193,
+     "detail": "difference {'Month': ['2010M12', '2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: ['Month: 2026M12 is outside the table, using 2026M09', \"Item: defaulted to ['Index']\", 'operation pct_change -> difference (a change asked, no percent word)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "2 rows"
+    },
+    {
+     "name": "select",
+     "ms": 2021,
+     "detail": "difference {'Month': ['2010M12', '2026M09'], 'Index': ['Whole country, total']} notes: ['Month: 2026M12 is outside the table, using 2026M09', 'operation pct_change -> difference (a change asked, no percent word)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 4,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1874,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "cpi-housing-trend-en",
+   "level": "hard",
+   "language": "en",
+   "question": "Show the consumer price index and the housing price index together in one chart from 2010 to 2026",
+   "expected_tables": [
+    "VIS01000",
+    "VIS01106"
+   ],
+   "expected_values": [
+    700.4,
+    821.3
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 33.19,
+   "llm_calls": 5,
+   "tables": [
+    "VIS01000",
+    "VIS01106"
+   ],
+   "text": "Statistics Iceland (Hagstofa Íslands) data from table VIS01000 shows the consumer price index rose from 356.8 in January 2010 to 697.3 in September 2026. Table VIS01106 records the residential property market price index increasing from 217.7 in January 2010 to 820.6 in September 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2816,
+     "detail": "What is the consumer price index (vísitala neysluverðs) from 2010 to 2026? [places [], period range '2010 to 2026', breakdown False] | What is the housing price index (búsetuverðsvísitala) from 2010 to 2026? [places [], period range '2010 to 2026', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 145,
+     "detail": "VIS01000 from [VIS01000, VIS02508, VIS02201, VIS02002, VIS02502, VIS02000, VIS02202, VIS02506, VIS02500, VIS01104, VIS01101, VIS01102, VIS01303, VIS01301, VIS01304, VIS08000b, VIS01106, VIS02001, THJ05813, VIS08003b, VIS01004, VIS02200, VIS01103, VIS08010b, SJA06100b, THJ01602, VIS01305, MAN04001, LAU04109, VIS06140, VIS01503, THJ02105, VIS02301, VIS03401, UTA07001, VIS02300, VIS02400, VIS08011, VIS01306, UMH34050, VIS08003, LAU04201, MAN00110, VIS01300, LAU04001, SJA01106, SAM08049, LAU04800, UMH51102, SJA01101, MAN03280, VIS06123, SJA02201, SJA01102, LAU04101, LAU04209, SJA02202, THJ06019, LIF01151, LAU04200, VIS03001, VIS02504, VIS08000, LAU04107, SJA07003, LAU09917, VIS03302, VIS03303, VIS03301, VIS06125, LIF01122, VIN02500, SJA06102, VIS03201, SKU01010, LAN10203, VIS08002, SJA06101] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1903,
+     "detail": "VIS01106 from [VIS01106, VIS02508, VIS01000, THJ05813, VIS02201, VIS08003b, SJA06100b, VIS08000b, VIS02506, VIS02202, VIS01303, VIS01304, VIS01301, VIS01104, VIS02200, VIS01004, VIS03401, LIF03322, VIS08010b, LIF03323, THJ03204, THJ01602, THJ02105, VIS02001, VIS01503, LIF03324, VIS13302, VIS13301, VIS02400, VIS03302, VIS13000, VIS03301, VIS06140, VIS02504, VIS01103, THJ01601, VIS01300, THJ03111, SJA01106, VIS06141, VIS02000, VIS01101, VIS01102, VIS03303, VIS06123, LIF03217, THJ03105, VIS13001, VIS13303, THJ02103, MAN04001, MAN00110, VIS01306, LAU04801, VIS01305, SAM08049, VIS02500, UTA07001, LAU04800, LAU04200, VIS02002, LIF01132, SJA01101, MAN03280, LIF01122, LIF03343, VIS06125, VIS03001, LIF03215, LIF06112, VIS05302, LIF01124, LIF03320, LIF03321, SJA06102, VIS02300, THJ05712, THJ95144, HEI01006, THJ03101, VIS02301, THJ03103, THJ02103b] via keywords · concepts: house prices"
+    },
+    {
+     "name": "select",
+     "ms": 4941,
+     "detail": "series {'Month': ['2010M01', '2010M02', '2010M03', '2010M04', '2010M05', '2010M06', '2010M07', '2010M08', '2010M09', '2010M10', '2010M11', '2010M12', '2011M01', '2011M02', '2011M03', '2011M04', '2011M05', '2011M06', '2011M07', '2011M08', '2011M09', '2011M10', '2011M11', '2011M12', '2012M01', '2012M02', '2012M03', '2012M04', '2012M05', '2012M06', '2012M07', '2012M08', '2012M09', '2012M10', '2012M11', '2012M12', '2013M01', '2013M02', '2013M03', '2013M04', '2013M05', '2013M06', '2013M07', '2013M08', '2013M09', '2013M10', '2013M11', '2013M12', '2014M01', '2014M02', '2014M03', '2014M04', '2014M05', '2014M06', '2014M07', '2014M08', '2014M09', '2014M10', '2014M11', '2014M12', '2015M01', '2015M02', '2015M03', '2015M04', '2015M05', '2015M06', '2015M07', '2015M08', '2015M09', '2015M10', '2015M11', '2015M12', '2016M01', '2016M02', '2016M03', '2016M04', '2016M05', '2016M06', '2016M07', '2016M08', '2016M09', '2016M10', '2016M11', '2016M12', '2017M01', '2017M02', '2017M03', '2017M04', '2017M05', '2017M06', '2017M07', '2017M08', '2017M09', '2017M10', '2017M11', '2017M12', '2018M01', '2018M02', '2018M03', '2018M04', '2018M05', '2018M06', '2018M07', '2018M08', '2018M09', '2018M10', '2018M11', '2018M12', '2019M01', '2019M02', '2019M03', '2019M04', '2019M05', '2019M06', '2019M07', '2019M08', '2019M09', '2019M10', '2019M11', '2019M12', '2020M01', '2020M02', '2020M03', '2020M04', '2020M05', '2020M06', '2020M07', '2020M08', '2020M09', '2020M10', '2020M11', '2020M12', '2021M01', '2021M02', '2021M03', '2021M04', '2021M05', '2021M06', '2021M07', '2021M08', '2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08', '2026M09'], 'Index': ['Consumer price index'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\", 'Month: filled the gap, 2010M01 to 2026M09']"
+    },
+    {
+     "name": "fetch",
+     "ms": 9,
+     "detail": "201 rows"
+    },
+    {
+     "name": "select",
+     "ms": 23641,
+     "detail": "series {'Month': ['2010M01', '2010M02', '2010M03', '2010M04', '2010M05', '2010M06', '2010M07', '2010M08', '2010M09', '2010M10', '2010M11', '2010M12', '2011M01', '2011M02', '2011M03', '2011M04', '2011M05', '2011M06', '2011M07', '2011M08', '2011M09', '2011M10', '2011M11', '2011M12', '2012M01', '2012M02', '2012M03', '2012M04', '2012M05', '2012M06', '2012M07', '2012M08', '2012M09', '2012M10', '2012M11', '2012M12', '2013M01', '2013M02', '2013M03', '2013M04', '2013M05', '2013M06', '2013M07', '2013M08', '2013M09', '2013M10', '2013M11', '2013M12', '2014M01', '2014M02', '2014M03', '2014M04', '2014M05', '2014M06', '2014M07', '2014M08', '2014M09', '2014M10', '2014M11', '2014M12', '2015M01', '2015M02', '2015M03', '2015M04', '2015M05', '2015M06', '2015M07', '2015M08', '2015M09', '2015M10', '2015M11', '2015M12', '2016M01', '2016M02', '2016M03', '2016M04', '2016M05', '2016M06', '2016M07', '2016M08', '2016M09', '2016M10', '2016M11', '2016M12', '2017M01', '2017M02', '2017M03', '2017M04', '2017M05', '2017M06', '2017M07', '2017M08', '2017M09', '2017M10', '2017M11', '2017M12', '2018M01', '2018M02', '2018M03', '2018M04', '2018M05', '2018M06', '2018M07', '2018M08', '2018M09', '2018M10', '2018M11', '2018M12', '2019M01', '2019M02', '2019M03', '2019M04', '2019M05', '2019M06', '2019M07', '2019M08', '2019M09', '2019M10', '2019M11', '2019M12', '2020M01', '2020M02', '2020M03', '2020M04', '2020M05', '2020M06', '2020M07', '2020M08', '2020M09', '2020M10', '2020M11', '2020M12', '2021M01', '2021M02', '2021M03', '2021M04', '2021M05', '2021M06', '2021M07', '2021M08', '2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08', '2026M09'], 'Index': ['Whole country, total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "201 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4668,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "housing-by-region-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hvernig hefur vísitala markaðsverðs íbúðarhúsnæðis þróast eftir landshlutum frá 2010?",
+   "expected_tables": [
+    "VIS01106"
+   ],
+   "expected_values": [
+    821.3,
+    826.0
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 10.34,
+   "llm_calls": 5,
+   "tables": [
+    "VIS01106"
+   ],
+   "text": "Capital area, multi-flat houses: 220,9 (2010M01), 795,7 (2026M09); hæst 804,3 (2026M04). Capital area, single-flat houses: 256,6 (2010M01), 896,1 (2026M09); hæst 896,1 (2026M09). Outside capital area, total: 191,6 (2010M01), 833,9 (2026M09); hæst 833,9 (2026M09). Whole country, total: 217,7 (2010M01), 820,6 (2026M09); hæst 823,2 (2026M05). Heimild: Hagstofa Íslands, VIS01106.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1716,
+     "detail": "How has the market price index for residential housing developed by region from 2010? [places [], period range 'frá 2010', breakdown True]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2277,
+     "detail": "VIS01106 from [VIS01000, VIS01106, VIS02201, LIF03217, VIS01303, VIS02200, LIF03323, VIS08000b, VIS02001, LIF03343, LIF01124, THJ02105, VIS08003b, LIF03322, VIS02000, VIS01102, LIF03215, THJ03204, THJ03105, HEI09104, UMH31109, VIS01301, VIS08010b, UTA06006, THJ08421, VIS06140, VIS03302, SJA06100b, LIF03324, LIF01122, LIF03353, LIF03342, VIS01104, VIS01304, LAN10102, LIF03354, VIS06141, VIS03303, LIF03214, THJ02103, PEN01105, HEI09103, LAU09917, LAN1001, LIF01137, LIF03321, MEN02110, KOS03206] via keyword search · concepts: housing, prices, region, trend"
+    },
+    {
+     "name": "select",
+     "ms": 2291,
+     "detail": "series {'Month': ['2010M01', '2010M02', '2010M03', '2010M04', '2010M05', '2010M06', '2010M07', '2010M08', '2010M09', '2010M10', '2010M11', '2010M12', '2011M01', '2011M02', '2011M03', '2011M04', '2011M05', '2011M06', '2011M07', '2011M08', '2011M09', '2011M10', '2011M11', '2011M12', '2012M01', '2012M02', '2012M03', '2012M04', '2012M05', '2012M06', '2012M07', '2012M08', '2012M09', '2012M10', '2012M11', '2012M12', '2013M01', '2013M02', '2013M03', '2013M04', '2013M05', '2013M06', '2013M07', '2013M08', '2013M09', '2013M10', '2013M11', '2013M12', '2014M01', '2014M02', '2014M03', '2014M04', '2014M05', '2014M06', '2014M07', '2014M08', '2014M09', '2014M10', '2014M11', '2014M12', '2015M01', '2015M02', '2015M03', '2015M04', '2015M05', '2015M06', '2015M07', '2015M08', '2015M09', '2015M10', '2015M11', '2015M12', '2016M01', '2016M02', '2016M03', '2016M04', '2016M05', '2016M06', '2016M07', '2016M08', '2016M09', '2016M10', '2016M11', '2016M12', '2017M01', '2017M02', '2017M03', '2017M04', '2017M05', '2017M06', '2017M07', '2017M08', '2017M09', '2017M10', '2017M11', '2017M12', '2018M01', '2018M02', '2018M03', '2018M04', '2018M05', '2018M06', '2018M07', '2018M08', '2018M09', '2018M10', '2018M11', '2018M12', '2019M01', '2019M02', '2019M03', '2019M04', '2019M05', '2019M06', '2019M07', '2019M08', '2019M09', '2019M10', '2019M11', '2019M12', '2020M01', '2020M02', '2020M03', '2020M04', '2020M05', '2020M06', '2020M07', '2020M08', '2020M09', '2020M10', '2020M11', '2020M12', '2021M01', '2021M02', '2021M03', '2021M04', '2021M05', '2021M06', '2021M07', '2021M08', '2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08', '2026M09'], 'Index': ['Capital area, multi-flat houses', 'Capital area, single-flat houses', 'Outside capital area, total', 'Whole country, total']} notes: ['Month: a trend, 2010M01 to 2026M09']"
+    },
+    {
+     "name": "fetch",
+     "ms": 18,
+     "detail": "804 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 4032,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "housing-2010-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hver var vísitala markaðsverðs íbúðarhúsnæðis árið 2010?",
+   "expected_tables": [
+    "VIS01106"
+   ],
+   "expected_values": [
+    220.6
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 5.4,
+   "llm_calls": 4,
+   "tables": [
+    "VIS01106"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu VIS01106 var vísitala markaðsverðs íbúðarhúsnæðis árið 2010, 220,6.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1409,
+     "detail": "What was the market price index for residential housing in 2010? [places [], period year '2010', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1732,
+     "detail": "VIS01106 from [VIS01000, VIS01106, VIS02201, LIF03323, VIS01303, VIS02200, VIS01304, LIF01124, VIS02001, VIS01004, LIF03214, LIF03343, THJ02105, LAU04801, VIS03302, LIF03322, VIS03301, VIS01301, VIS08003b, VIS03303, VIS08000b, VIS01102, VIS08010b, THJ03204, THJ03105, VIS01104, VIS03401, LIF03324, LIF03217, THJ02103, UTA06006, LIF03215, VIS06140, LIF03321, VIS13001, VIS08003, VIS01305, SJA06100b, UMH31109, SJA01106, THJ01104, VIS06141, VIS06123, VIS03304, LIF03320, THJ05813, LFI03305, LAU04802, LIF03342, THJ05751, PEN01105, LAU09917, UTA07001, LIF03353, LIF01137, LIF01122, LIF03354, LIF03313, LIF01123, VIN02500, LAU09915] via keyword search · concepts: housing, prices"
+    },
+    {
+     "name": "select",
+     "ms": 1202,
+     "detail": "value {'Month': ['2010M12'], 'Index': ['Whole country, total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1049,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "cpi-housing-2010-2020-is",
+   "level": "hard",
+   "language": "is",
+   "question": "hver var vísitala neysluverðs árið 2010 til 2020, sýndu mér einnig í sama grafi vísitölu húsnæðismarkaði",
+   "expected_tables": [
+    "VIS01000",
+    "VIS01106"
+   ],
+   "expected_values": [
+    490.3,
+    496.5
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 27.57,
+   "llm_calls": 5,
+   "tables": [
+    "VIS01000",
+    "VIS01106"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) sýna gögnin frá töflunum VIS01000 og VIS01106 að vísitala neysluverðs jókst úr 356,8 í janúar 2010 í 490,3 í desember 2020. Á sama tímabili jókst vísitala markaðsverðs íbúðarhúsnæðis úr 217,7 í janúar 2010 í 496,5 í desember 2020.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2889,
+     "detail": "What was the consumer price index (vísitala neysluverðs) from 2010 to 2020? [places [], period range '2010 til 2020', breakdown False] | What was the housing market index (vísitala húsnæðismarkaðar) from 2010 to 2020? [places [], period range '2010 til 2020', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 156,
+     "detail": "VIS01000 from [VIS01000, VIS02201, VIS02508, VIS02002, VIS02502, VIS02000, VIS01104, VIS02202, VIS02500, VIS01102, VIS01304, VIS01303, VIS01301, VIS02506, VIS08000b, VIS01101, VIS01106, VIS02001, VIS08003b, VIS08010b, VIS01004, VIS02200, SJA06100b, VIS01103, SJA01106, VIS06140, VIS01503, THJ05813, VIS01305, VIS03401, UTA07001, LAU04209, VIS02301, VIS02300, VIS02400, VIS08011, VIN02500, LAU04201, UMH34050, VIS08003, VIS01300, UTA06004, THJ03201, LAU04109, THJ02105, VIS06123, LAU04800, LAU04101, VIS01306, LAU04001, THJ06019, VIS03001, MAN06100, MEN05102, MEN05103, MAN06202, LAU09917, MAN06201, MEN06119, SKU01010, VIS03302, VIS03303, VIS03301, MEN05101, LIF01151, LIF01122, LIF03324, SKU01005, LIF01121, LAN10203, VIS08002, VIS03201, LAU09901, LAU09915, VIS06126, SAM06111, SJA06102] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "select",
+     "ms": 3528,
+     "detail": "series {'Month': ['2010M01', '2010M02', '2010M03', '2010M04', '2010M05', '2010M06', '2010M07', '2010M08', '2010M09', '2010M10', '2010M11', '2010M12', '2011M01', '2011M02', '2011M03', '2011M04', '2011M05', '2011M06', '2011M07', '2011M08', '2011M09', '2011M10', '2011M11', '2011M12', '2012M01', '2012M02', '2012M03', '2012M04', '2012M05', '2012M06', '2012M07', '2012M08', '2012M09', '2012M10', '2012M11', '2012M12', '2013M01', '2013M02', '2013M03', '2013M04', '2013M05', '2013M06', '2013M07', '2013M08', '2013M09', '2013M10', '2013M11', '2013M12', '2014M01', '2014M02', '2014M03', '2014M04', '2014M05', '2014M06', '2014M07', '2014M08', '2014M09', '2014M10', '2014M11', '2014M12', '2015M01', '2015M02', '2015M03', '2015M04', '2015M05', '2015M06', '2015M07', '2015M08', '2015M09', '2015M10', '2015M11', '2015M12', '2016M01', '2016M02', '2016M03', '2016M04', '2016M05', '2016M06', '2016M07', '2016M08', '2016M09', '2016M10', '2016M11', '2016M12', '2017M01', '2017M02', '2017M03', '2017M04', '2017M05', '2017M06', '2017M07', '2017M08', '2017M09', '2017M10', '2017M11', '2017M12', '2018M01', '2018M02', '2018M03', '2018M04', '2018M05', '2018M06', '2018M07', '2018M08', '2018M09', '2018M10', '2018M11', '2018M12', '2019M01', '2019M02', '2019M03', '2019M04', '2019M05', '2019M06', '2019M07', '2019M08', '2019M09', '2019M10', '2019M11', '2019M12', '2020M01', '2020M02', '2020M03', '2020M04', '2020M05', '2020M06', '2020M07', '2020M08', '2020M09', '2020M10', '2020M11', '2020M12'], 'Index': ['Consumer price index', 'Consumer price index less housing cost'], 'Item': ['Index']} notes: [\"Item: defaulted to ['Index']\", 'Month: filled the gap, 2010M01 to 2020M12']"
+    },
+    {
+     "name": "fetch",
+     "ms": 7,
+     "detail": "264 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4932,
+     "detail": "VIS01106 from [VIS01106, VIS02508, LIF03214, LIF03323, LIF03343, VIS01000, VIS02201, VIS01303, LIF03322, VIS08000b, LIF03334, LIF01124, VIS02200, LIF03354, LIF03313, LIF03217, VIS01503, LIF03215, VIS08010b, VIS03401, VIS08003b, VIS13302, VIS03302, VIS02202, VIS01101, THJ06019, VIS01102, VIS01004, LAU04201, VIS13000, VIS02506, VIS13301, SKO03206c, UMH34050, SKO03208a, VIS13001, SJA01106, SKO03208b, SJA06100b, LIF01134a, LIF03342, SKO04205b, THJ02105, VIS03301, VIS01300, VIS01103, VIS01104, LFI03305, VIS01301, VIS01304, PEN01105, LIF03324, LAU09917, THJ03201, LIF01122, VIS13303, LAU04109, VIS03303, SJA09041, VIS01305, IDN03001, LAU09915, VIS02001, LIF03353, VIN01205, LIF01133, LIF03321, LIF03341, LIF01137, LIF03210, VIN02500, LIF01123, VIS03201, VIS02400, LIF03320, LIF03340, LAU09901, IDN03004] via keyword search · concepts: housing"
+    },
+    {
+     "name": "select",
+     "ms": 14137,
+     "detail": "series {'Month': ['2010M01', '2010M02', '2010M03', '2010M04', '2010M05', '2010M06', '2010M07', '2010M08', '2010M09', '2010M10', '2010M11', '2010M12', '2011M01', '2011M02', '2011M03', '2011M04', '2011M05', '2011M06', '2011M07', '2011M08', '2011M09', '2011M10', '2011M11', '2011M12', '2012M01', '2012M02', '2012M03', '2012M04', '2012M05', '2012M06', '2012M07', '2012M08', '2012M09', '2012M10', '2012M11', '2012M12', '2013M01', '2013M02', '2013M03', '2013M04', '2013M05', '2013M06', '2013M07', '2013M08', '2013M09', '2013M10', '2013M11', '2013M12', '2014M01', '2014M02', '2014M03', '2014M04', '2014M05', '2014M06', '2014M07', '2014M08', '2014M09', '2014M10', '2014M11', '2014M12', '2015M01', '2015M02', '2015M03', '2015M04', '2015M05', '2015M06', '2015M07', '2015M08', '2015M09', '2015M10', '2015M11', '2015M12', '2016M01', '2016M02', '2016M03', '2016M04', '2016M05', '2016M06', '2016M07', '2016M08', '2016M09', '2016M10', '2016M11', '2016M12', '2017M01', '2017M02', '2017M03', '2017M04', '2017M05', '2017M06', '2017M07', '2017M08', '2017M09', '2017M10', '2017M11', '2017M12', '2018M01', '2018M02', '2018M03', '2018M04', '2018M05', '2018M06', '2018M07', '2018M08', '2018M09', '2018M10', '2018M11', '2018M12', '2019M01', '2019M02', '2019M03', '2019M04', '2019M05', '2019M06', '2019M07', '2019M08', '2019M09', '2019M10', '2019M11', '2019M12', '2020M01', '2020M02', '2020M03', '2020M04', '2020M05', '2020M06', '2020M07', '2020M08', '2020M09', '2020M10', '2020M11', '2020M12'], 'Index': ['Whole country, total']} notes: [\"Index: none of ['Capital area, multi-flat houses', 'Capital area, single-flat houses'] named in the question; using ['Whole country, total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "132 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 5441,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}

@@ -196,17 +196,24 @@ def _period_from_question(var: Variable, text: str) -> str | None:
     return y if y in var.values else None
 
 
-def _default(var: Variable) -> list[str]:
-    """The latest period; for other dimensions the total, a whole-country option, or a "…, total" option, in that order."""
-    if var.time:
-        return [var.values[-1]]
+def _total_of(var: Variable) -> str | None:
+    """The option that stands for everything: a total, a whole-country option, or a "…, total" option, in that order;
+    None when the dimension has no such option (a table of municipalities only)."""
     pairs = list(zip(var.values, var.value_texts))
     for pattern in (re.compile(r"^(total|alls|samtals|all)$"), re.compile(r"whole country|landid allt|all of iceland|^iceland$|^island$"),
                     re.compile(r"\b(total|alls|samtals|allir|allar|oll)\b")):
         for code, label in pairs:
             if pattern.search(normalize(label)):
-                return [code]
-    return [var.values[0]]
+                return code
+    return None
+
+
+def _default(var: Variable) -> list[str]:
+    """The latest period; for other dimensions the total (see _total_of), else the first option."""
+    if var.time:
+        return [var.values[-1]]
+    total = _total_of(var)
+    return [total] if total is not None else [var.values[0]]
 
 
 def _resolve_value(var: Variable, v: str) -> str | None:
@@ -240,8 +247,9 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     the user clicked, a published rate) the same facts are read from the text by the patterns below."""
     notes, out, beyond, alternatives = [], {}, None, {}
     from .retrieve import named_places
-    if facts is not None:
-        places_part, places_all = list(facts.places), list(facts.all_places or facts.places)
+    if facts is not None:   # the planner's places as normalized words, as the patterns would give them
+        places_part = [t for pl in facts.places for t in tokens(pl) if len(t) >= 4]
+        places_all = [t for pl in (facts.all_places or facts.places) for t in tokens(pl) if len(t) >= 4]
         breakdown = facts.breakdown
         subyear = facts.period_kind in ("month", "quarter")
         period_text = facts.period or (part or question)
@@ -275,9 +283,26 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
         out[var.code] = sorted(set(codes), key=var.values.index)
 
     q = normalize(question)
-    qwords = [w for w in tokens(question) if len(w) >= 4]
-    def mentioned(label: str) -> bool:
-        return any(_same_word(t, w) for t in tokens(label) if len(t) >= 4 for w in qwords)
+    # the question's words through the search synonyms, so "men"/"karlar" name Males and "verðbólga" the CPI
+    qwords = [w for t in tokens(question) for w in SYNONYMS.get(t, t).split() if len(w) >= 4]
+    def mentioned(label: str, siblings: list[str] = ()) -> bool:
+        """Does the question name this category? Among siblings that share words ("Consumer price index" and
+        "Consumer price index less housing cost"), a category is named only when the words that set it apart are
+        all in the question; a category with no words of its own (the plain one) is named by any of its words."""
+        words = lambda s: [t for t in tokens(s) if len(t) >= 4]
+        hit = lambda t: any(_same_word(t, w) for w in qwords)
+        own, others = words(label), [s for s in siblings if s != label]
+        shared = {t for s in others for t in words(s)}
+        distinct_of = lambda s: [t for t in words(s) if t not in {t for o in [label, *others] if o != s for t in words(o)}]
+        distinct = distinct_of(label)
+        if not distinct:                      # the plain one ("Consumer price index"): any of its words names it
+            return any(hit(t) for t in own)
+        if all(hit(t) for t in distinct):     # "multi-flat", "less housing cost" spelled out
+            return True
+        # only the shared words are in the question ("capital area"): that names every sibling sharing them, unless
+        # one sibling is the plain one (then the question meant it) or another's own words are in the question
+        return (any(hit(t) for t in own if t in shared) and not any(not distinct_of(s) for s in others)
+                and not any(hit(t) for s in others for t in distinct_of(s)))
     # "Unknown domicile", "Not stated": never the answer unless asked for; a place the model made up (Garðabær for
     # Egilsstaðir, which the table lacks) goes too when the others chosen are the ones the question names
     for var in meta.variables:
@@ -289,20 +314,22 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             if len(kept) < len(chosen):
                 notes.append(f"{var.text}: dropped {[var.label_of(c) for c in chosen if c not in kept]} (not asked for)")
                 out[var.code] = chosen = kept or _default(var)
-        if sel.operation == "value" and len(chosen) >= 2 and not coded(var):
-            in_question = [c for c in chosen if mentioned(var.label_of(c))]
+        if sel.operation in ("value", "series") and len(chosen) >= 2 and not coded(var):
+            labels = [var.label_of(c) for c in chosen]
+            in_question = [c for c in chosen if mentioned(var.label_of(c), labels)]
             if in_question and len(in_question) < len(chosen):
                 notes.append(f"{var.text}: dropped {[var.label_of(c) for c in chosen if c not in in_question]} (not named in the question)")
+                alternatives[var.code] = [c for c in chosen if c not in in_question]   # offered as chips
                 out[var.code] = chosen = in_question
         # "the housing price index from 2010": one line, the whole country, not every region and house type the model
         # could chart. Several categories stay when the question names one of them, asks for a breakdown ("by region",
         # "eftir landshlutum", "all regions"), or compares along this dimension.
         if (sel.operation in ("value", "series") and len(chosen) >= 2 and not coded(var) and var.code != sel.compare_dimension
-                and not any(mentioned(var.label_of(c)) for c in chosen) and not breakdown
-                and (dflt := _default(var))[0] in chosen):
-            notes.append(f"{var.text}: none of {[var.label_of(c) for c in chosen]} named in the question; using {[var.label_of(dflt[0])]}")
-            out[var.code] = dflt
-            alternatives[var.code] = [c for c in chosen if c not in dflt]
+                and not any(mentioned(var.label_of(c), [var.label_of(x) for x in chosen]) for c in chosen) and not breakdown
+                and (total := _total_of(var)) is not None):
+            notes.append(f"{var.text}: none of {[var.label_of(c) for c in chosen]} named in the question; using {[var.label_of(total)]}")
+            out[var.code] = [total]
+            alternatives[var.code] = [c for c in chosen if c != total]
     # a place the question names that no option and no title of this table carries: say so, rather than answer as if
     place_note = None
     texts = [t for v in meta.variables if not v.time for t in v.value_texts] + [meta.title]
@@ -337,7 +364,10 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             dflt = _default(var)
             keep = [c for c in chosen if c in named_options or c in dflt]
             if len(keep) < len(chosen):
-                out[var.code] = keep or (named_options if len(named_options) <= 2 else dflt)
+                # none of the chosen is named: the named options (up to two) answer; else the total; a table with
+                # no total and no named option keeps the model's choice under the note
+                total = _total_of(var)
+                out[var.code] = keep or (named_options if 0 < len(named_options) <= 2 else [total] if total else chosen)
                 notes.append(f"{var.text}: dropped {[var.label_of(c) for c in chosen if c not in keep]} (a place the question did "
                              f"not name); using {[var.label_of(c) for c in out[var.code]]}")
 

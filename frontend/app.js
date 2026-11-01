@@ -772,6 +772,10 @@ function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", com
   const tooltip = [{ field: "label", title: c.x_label || " " }, ...(multi ? [{ field: "series", title: " " }] : []),
     { field: "y", title: c.unit || " ", format: fmt }];
   const hover = { name: "hover", select: { type: "point", on: "pointerover", clear: "pointerout" } };
+  // several series: the legend is a switch. Click an entry to keep that series alone, shift-click to add others,
+  // click it again to show all. The rest fade rather than vanish, so the scale and the context stay.
+  const pick = multi ? { name: "pick", select: { type: "point", fields: ["series"], toggle: "true" }, bind: "legend" } : null;
+  const picked = multi ? { condition: { param: "pick", value: 1 }, value: 0.12 } : { value: 1 };
   let spec, width = "container", height = 260;
 
   if (view === "line" || view === "stacked") {
@@ -789,13 +793,15 @@ function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", com
     if (c.compare && c.unit !== "%") layers.push({ data: { values: [{ y: 100 }] },
       mark: { type: "rule", color: muted, strokeDash: [4, 4], opacity: 0.7 }, encoding: { y: { field: "y", type: "quantitative" } } });
     if (view === "stacked") {
-      layers.push({ mark: { type: "area", interpolate: "monotone", opacity: 0.85, line: { strokeWidth: 1.5, color: card } },
-        encoding: { x, y: { ...y, stack: "zero", scale: { zero: true } }, color, tooltip } });
+      layers.push({ ...(pick ? { params: [pick] } : {}), mark: { type: "area", interpolate: "monotone", opacity: 0.85, line: { strokeWidth: 1.5, color: card } },
+        encoding: { x, y: { ...y, stack: "zero", scale: { zero: true } }, color, tooltip,
+                    opacity: multi ? { condition: { param: "pick", value: 0.85 }, value: 0.1 } : { value: 0.85 } } });
     } else {
       if (!multi) layers.push({ mark: { type: "area", interpolate: "monotone", line: false,
         color: { gradient: "linear", x1: 0, y1: 1, x2: 0, y2: 0, stops: [{ offset: 0, color: "rgba(0,0,0,0)" }, { offset: 1, color: accent + "55" }] } },
         encoding: { x, y } });
-      layers.push({ mark: { type: "line", interpolate: "monotone", strokeWidth: 2.5, strokeCap: "round" }, encoding: { x, y, color } });
+      layers.push({ ...(pick ? { params: [pick] } : {}), mark: { type: "line", interpolate: "monotone", strokeWidth: 2.5, strokeCap: "round" },
+        encoding: { x, y, color, opacity: picked } });
       layers.push({ params: [{ name: "near", select: { type: "point", fields: ["label"], nearest: true, on: "pointerover", clear: "pointerout" } }],
         mark: { type: "point", filled: true, size: 70, stroke: card, strokeWidth: 2 },
         encoding: { x, y, color, opacity: { condition: { param: "near", empty: false, value: 1 }, value: 0 }, tooltip } });
@@ -810,7 +816,7 @@ function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", com
           { joinaggregate: [{ op: "max", field: "i", as: "n" }], groupby: ["series"] }, { filter: "datum.i === datum.n" },
           { calculate: `datum.series + '  ' + format(datum.y, '${fmt}')`, as: "end" }],
         mark: { type: "text", align: "right", dx: -2, dy: -10, fontWeight: 600, fontSize: 12 },
-        encoding: { x, y, color: { ...color, legend: null },
+        encoding: { x, y, color: { ...color, legend: null }, opacity: picked,
           text: { field: "end" } } });
     }
     spec = { layer: layers };

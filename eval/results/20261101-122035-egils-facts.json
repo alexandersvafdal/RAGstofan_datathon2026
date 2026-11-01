@@ -1,0 +1,127 @@
+{
+ "label": "egils-facts",
+ "results": [
+  {
+   "id": "egils-3part-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Segðu mér hversu margir fluttu frá Egilstöðum til Reykjavíkur árið 1989, segðu mér einnig hver verðbólgan var á því ári. sýndu mér einnig fólksfjölda alls íslands á því tímabili",
+   "expected_tables": [],
+   "expected_values": [],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 13.85,
+   "llm_calls": 6,
+   "tables": [
+    "MAN01201",
+    "VIS01000",
+    "MAN00101"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) fengu 17.345 manns innflytjendamerki í Reykjavík árið 1989 (MAN01201). Verðbólgan var 25,2% árið 1989 (VIS01000) og fólksfjöldi á Íslandi var 251.919 (MAN00101).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3889,
+     "detail": "How many people moved from Egilsstaðir to Reykjavík in 1989? [places ['Egilstöðum', 'Reykjavíkur'], period year 'árið 1989', breakdown False] | What was the inflation rate in 1989? [places [], period year 'árið 1989', breakdown False] | What was the total population of Iceland in 1989? [places ['íslands'], period year 'á því tímabili', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 61,
+     "detail": "VIS01000 from [VIS01000, LAU04800, LAU04200, LAU04000, VIS01004, THJ01104, THJ02101, THJ02102, SJA06101, LAU04802, THJ03201, PEN01101, IDN02302] via dictionary · concepts: consumer price index"
+    },
+    {
+     "name": "retrieve",
+     "ms": 52,
+     "detail": "MAN00101 from [MAN00101, LAU04200, MAN00102, MAN00110, LAU04000, LAU04800, MAN05311, MAN06100, MAN06201, MAN00000, HEI07102, MAN08000, HEI04400, MAN02120, SKO00011, FYR01004, MAN01301, SKO04210] via dictionary · concepts: population"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3706,
+     "detail": "MAN01201 from [MAN01201, HEI07102, SJA09042, MAN01301, MAN01300, MAN00110, UMH11165, MAN05221, MEN02102, VIN08601, MAN05311, MAN06100, MAN06201, SAM02101, SAM02002, MAN02120] via keyword search · concepts: migration, smoking"
+    },
+    {
+     "name": "select",
+     "ms": 4229,
+     "detail": "value {'Month': ['1989M12'], 'Index': ['Consumer price index'], 'Item': ['Annual change, %']} notes: [\"Index: defaulted to ['Consumer price index']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 7,
+     "detail": "1 rows"
+    },
+    {
+     "name": "select",
+     "ms": 5185,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['1989']} notes: [\"islands: not in the table's options\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 9,
+     "detail": "1 rows"
+    },
+    {
+     "name": "select",
+     "ms": 4480,
+     "detail": "value {'Municipality': ['Reykjavikurborg'], 'Sex': ['Total'], 'Year': ['1989'], 'Migration region': ['Total'], 'Type of migration': ['Immigration']} notes: [\"Municipality: dropped ['Fjardabyggd'] (not named in the question)\", \"Egilsstaðir: not in the table's options\", \"Migration region: dropped ['Between regions'] (a place the question did not name); using ['Total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 8,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1769,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "egils-1part-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hversu margir fluttu frá Egilsstöðum til Reykjavíkur árið 1989?",
+   "expected_tables": [],
+   "expected_values": [],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.71,
+   "llm_calls": 4,
+   "tables": [
+    "MAN01201"
+   ],
+   "text": "Samkvæmt töflu MAN01201 frá Hagstofu Íslands fluttu 41.440 manns til Reykjavíkur árið 1989.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2093,
+     "detail": "How many people moved from Egilsstaðir to Reykjavík in 1989? [places ['Egilsstöðum', 'Reykjavíkur'], period year 'árið 1989', breakdown False]"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1569,
+     "detail": "MAN01201 from [MAN01201, SJA09042, MAN01301, MAN01300, SAM02002, UMH11165, HEI07102, KOS03107, MAN05221, MEN02102, KOS02006, SAM02101, MAN01001, MAN02120, IDN02302] via keyword search · concepts: migration, smoking"
+    },
+    {
+     "name": "select",
+     "ms": 2100,
+     "detail": "value {'Municipality': ['Total'], 'Sex': ['Total'], 'Year': ['1989'], 'Migration region': ['Total'], 'Type of migration': ['Immigration']} notes: [\"Municipality: dropped ['Unknown domicile'] (not asked for)\", \"Egilsstaðir: not in the table's options\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 941,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}
