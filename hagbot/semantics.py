@@ -10,8 +10,9 @@ import re
 from pydantic import BaseModel
 
 from .outcomes import AnswerFailure
+from .catalog import _same_word
 from .sources import TableMeta, table_url
-from .specification import Compatibility, QuestionSpec, TableVerification
+from .specification import Compatibility, Evidence, QuestionSpec, TableVerification
 from .text import normalize, tokens
 
 
@@ -142,7 +143,9 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
         raise AnswerFailure("unverified", "incomplete_compatibility", str(indices))
     desired = {facet: set().union(*(_tags(facet, r.value) for r in spec.requirements if r.facet == facet))
                for facet in _AXES}
+    checks = []
     for check in proof.checks:
+        check = check.model_copy(deep=True)
         req = spec.requirements[check.requirement]
         for ref in check.evidence:
             quote = " ".join(tokens(ref.quote))
@@ -169,6 +172,18 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
             raise AnswerFailure("unavailable", "incompatible_definition", f"unrequested {req.facet}: {sorted(extra)}")
         # A median/real/net label must actually be present in the cited fields, not merely somewhere in the table.
         cited = " ".join(allowed[ref.field] for ref in check.evidence)
+        if req.facet == "measure" and wanted and not wanted <= _tags("measure", cited):
+            # The code already checked the selected query's measure above. When
+            # the model cites a real but unhelpful field (e.g. a town label for
+            # population), an unambiguous source title/description can provide
+            # the missing evidence. Never repair fabricated citations, unknown
+            # verdicts, or contradictory selected measures.
+            for field in ("title", "description"):
+                text = allowed.get(field, "")
+                if _tags("measure", text) == wanted:
+                    check.evidence.append(Evidence(field=field, quote=text))
+                    cited += " " + text
+                    break
         if wanted and not wanted <= _tags(req.facet, cited):
             raise AnswerFailure("unverified", "insufficient_metadata_evidence", f"{req.facet}: {req.value}")
         if req.facet in ("population", "geography", "period"):
@@ -178,7 +193,23 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
         if req.facet == "geography":
             names = [w for w in tokens(req.value) if len(w) >= 4]
             cited_words = tokens(cited)
-            if not names or not all(any(a.startswith(b) or b.startswith(a) for b in cited_words if len(b) >= 4) for a in names):
+            literal = names and all(any(a.startswith(b) or b.startswith(a) for b in cited_words if len(b) >= 4) for a in names)
+            # Icelandic inflections/official names are already recognized by
+            # the dictionary finder. Accept them as evidence only when they
+            # identify ONE option in a geographic dimension, and that exact
+            # option is selected and cited. Shared ambiguous stems still fail.
+            equivalent = False
+            if len(names) == 1:
+                for var in meta.variables:
+                    if not re.search(r"municipal|region|area|town|sveitarfel|landshlut|domicile|logheimil", normalize(var.text)):
+                        continue
+                    matches = [code for code, label in zip(var.values, var.value_texts)
+                               if any(_same_word(word, names[0]) for word in tokens(label) if len(word) >= 4)]
+                    if (len(matches) == 1 and matches[0] in selections[var.code]
+                            and any(ref.field == f"value:{var.code}:{matches[0]}" for ref in check.evidence)):
+                        equivalent = True
+                        break
+            if not literal and not equivalent:
                 raise AnswerFailure("unverified", "insufficient_metadata_evidence", req.value)
         if req.facet == "unit":
             wanted_unit = _unit(req.value)
@@ -194,6 +225,7 @@ def validate_compatibility(meta: TableMeta, selections: dict[str, list[str]], sp
             offered = {v for k, v in allowed.items() if k.startswith("frequency:")}
             if normalize(req.value) not in offered:
                 raise AnswerFailure("unavailable", "incompatible_frequency", req.value)
+        checks.append(check)
     return TableVerification(table_id=meta.id, metadata_sha256=p.metadata_sha256,
                              question_sha256=fingerprint(spec.model_dump()), selection_sha256=fingerprint(selections),
-                             executed_selection_sha256=fingerprint(selections), specification=spec, checks=proof.checks)
+                             executed_selection_sha256=fingerprint(selections), specification=spec, checks=checks)

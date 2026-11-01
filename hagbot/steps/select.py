@@ -85,6 +85,9 @@ Copy selection codes from options[].code, never from a label. Copy evidence.fiel
 field IDs; a dimension field contains only its label, while each option has its own value field.
 For geography cite a geographic option or source text establishing the national scope. A sex/age "Total" alone
 does not establish the country. For the latest period, cite the selected time option's field and label.
+For the measure cite the source title/description or selected measure option that actually names it: a municipality
+label proves the place, not that the table measures population. For example a population sum needs the population
+title for its measure check and each selected municipality's own option field for its geography checks.
 - If the question does not mention a dimension, choose its total (e.g. "Total", "Alls") or, for time, the latest period.
 - For "how much did X grow from A to B" select both periods and use difference or pct_change along the time dimension.
 - For "what share of ... is X" select X and the total, and use share with part=X and whole=total.

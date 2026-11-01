@@ -190,6 +190,32 @@ class CompatibilityTests(FailureAssertions, unittest.TestCase):
                             spec(requirement("measure", "income"), requirement("geography", "Reykjavík")),
                             proof([("title", "income")], [("dimension:Measure", "Measure")]))
 
+    def test_source_title_can_supply_missing_measure_evidence_without_model_retry(self):
+        m = TableMeta(id="POP", title="Population by municipality", path="People/population", variables=[
+            Variable(code="Area", text="Municipality", values=["1"], value_texts=["Reykjavík"])])
+        evidence = proof([("value:Area:1", "Reykjavík")])
+        verified = validate_compatibility(m, {"Area": ["1"]}, spec(requirement("measure", "population")), evidence)
+        self.assertIn("title", [e.field for e in verified.checks[0].evidence])
+        self.assertEqual(len(evidence.checks[0].evidence), 1)  # input proof is not mutated
+        m.title = "Employment and unemployment by municipality"
+        self.assert_failure("incompatible_definition", validate_compatibility, m, {"Area": ["1"]},
+                            spec(requirement("measure", "unemployment")), evidence, status="unavailable")
+
+    def test_official_place_names_require_unique_selected_and_cited_option(self):
+        m = TableMeta(id="POP", title="Population by municipality", path="People/population", variables=[
+            Variable(code="Area", text="Municipality", values=["0", "1", "2"],
+                     value_texts=["Total", "Kopavogsbaer", "Hafnarfjardarkaupstadur"])])
+        s = spec(requirement("measure", "population"), requirement("geography", "Kópavogur"),
+                 requirement("geography", "Hafnarfjörður"), operation="sum")
+        evidence = proof([("title", "Population")], [("value:Area:1", "Kopavogsbaer")],
+                         [("value:Area:2", "Hafnarfjardarkaupstadur")])
+        verified = validate_compatibility(m, {"Area": ["1", "2"]}, s, evidence)
+        self.assertEqual(verified.specification.operation, "sum")
+        self.assert_failure("invalid_metadata_evidence", validate_compatibility, m, {"Area": ["0"]}, s, evidence)
+        m.var("Area").values.append("3")
+        m.var("Area").value_texts.append("Kopavogs another municipality")
+        self.assert_failure("insufficient_metadata_evidence", validate_compatibility, m, {"Area": ["1", "2"]}, s, evidence)
+
     def test_cpi_level_is_not_inflation_but_annual_change_is(self):
         self.meta.title = "Consumer price index"
         self.meta.var("Measure").value_texts = ["Index value", "Annual change, %"]
