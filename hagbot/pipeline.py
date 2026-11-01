@@ -272,23 +272,30 @@ class Pipeline:
             chart=chart.model_copy(update={"title": title}) if chart else None,
             note=note,
             ranking=r.ranking,
-            drill=self._drill(meta, res, rows, lang),
+            drill=self._drill(meta, res, rows, lang, original if alone else sq.question),
         )
 
     @staticmethod
-    def _drill(meta, res, rows, lang: str) -> list[dict]:
-        """Categories listed that open further: each with the question that lists its own subcategories from this
-        table. Read from the classification codes, so any coded table gets it."""
-        if not res.breakdown:
-            return []
-        var = meta.var(res.breakdown)
+    def _drill(meta, res, rows, lang: str, asked: str) -> list[dict]:
+        """Chips under the answer that ask this table again. Two kinds: categories listed that open further (each
+        with the question that lists its own subcategories, read from the classification codes, so any coded table
+        gets it), and categories the model chose that the question did not name, answered with the default instead
+        ("Whole country" for a housing index): each chip asks the same question for that category."""
         out = []
-        for r in rows:
-            code = r.key.get(var.code)
-            if code and children(var, code):
-                label = r.labels[var.text]
-                out.append({"label": label, "table_id": meta.id,
-                            "question": f"Hverjir eru undirflokkar {label}?" if lang == "is" else f"What are the subcategories of {label}?"})
+        if res.breakdown:
+            var = meta.var(res.breakdown)
+            for r in rows:
+                code = r.key.get(var.code)
+                if code and children(var, code):
+                    label = r.labels[var.text]
+                    out.append({"label": label, "table_id": meta.id, "kind": "subcategories",
+                                "question": f"Hverjir eru undirflokkar {label}?" if lang == "is" else f"What are the subcategories of {label}?"})
+        for code, codes in res.alternatives.items():
+            var = meta.var(code)
+            for c in codes:
+                label = var.label_of(c)
+                out.append({"label": label, "table_id": meta.id, "kind": "alternative", "language": lang,
+                            "question": f"{asked.rstrip('?. ')} — {label}"})
         return out
 
     async def _sibling_with(self, meta, candidates: list[str], period: str):

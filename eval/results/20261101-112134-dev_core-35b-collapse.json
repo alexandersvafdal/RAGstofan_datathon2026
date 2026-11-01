@@ -1,0 +1,534 @@
+{
+ "label": "dev_core-35b-collapse",
+ "results": [
+  {
+   "id": "pop-rvk-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many people live in Reykjavík?",
+   "expected_tables": [
+    "MAN02005|MAN03270"
+   ],
+   "expected_values": [
+    139804
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.61,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN02005, the population of Reykjavík was 139,804 in 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 919,
+     "detail": "What is the population of Reykjavík?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3032,
+     "detail": "MAN02005 from [MAN10001, MAN02005, MAN03270, MAN03200, MAN04203, MAN04208, MAN12104, MAN03301, MAN10289, MAN10290, MAN10292, MAN10291, MAN09000, MAN10296, MAN10200, MAN43006, MAN08212, MAN03105, MAN03106, MAN02120, MAN07108, MAN07109, KOS03200a, MAN02009, MAN030106, MAN02114, SJA09112, MAN030104, VIN10012, MAN030102, MAN030101, MAN02115, MAN10293, MAN10294, VIN01205, MAN10297, MAN05110, MAN10295, MAN03108, MAN10298, MAN10299, MAN10300, MAN10301, CEN08010, MAN03107, CEN01560, MAN02116, MAN02117, MAN02118] via keywords · concepts: population, smoking"
+    },
+    {
+     "name": "select",
+     "ms": 1813,
+     "detail": "value {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 23,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 823,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "pop-rvk-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hvað búa margir í Reykjavík?",
+   "expected_tables": [
+    "MAN02005|MAN03270"
+   ],
+   "expected_values": [
+    139804
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.58,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) í töflu MAN02005 bjuggu 139.804 manns í Reykjavíkurborg á árinu 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1009,
+     "detail": "What is the population of Reykjavík?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2677,
+     "detail": "MAN02005 from [MAN10001, MAN02005, MAN03270, MAN03200, MAN04203, MAN04208, MAN12104, MAN03301, MAN10290, MAN10289, MAN10291, MAN10292, MAN09000, MAN10296, MAN43006, MAN08212, MAN03106, MAN02120, MAN10200, MAN03105, MAN02009, MAN07108, MAN07109, VIN10012, MAN030106, MAN02114, SJA09112, MAN10300, MAN10301, MAN02116, MAN030104, MAN02115, MAN030102, MAN030101, KOS03200a, MAN10293, MAN10294, VIN01205, MAN05110, MAN10297, MAN10295, KOS03204b, MAN03108, MAN10298, MAN10299, CEN08010, MAN02119, CEN01560, MAN03107, MAN02117, MAN02118] via keywords · concepts: population, smoking"
+    },
+    {
+     "name": "select",
+     "ms": 1798,
+     "detail": "value {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1088,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "pop-ice-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What is the population of Iceland?",
+   "expected_tables": [
+    "MAN00101|MAN02005|MAN00000"
+   ],
+   "expected_values": [
+    394324
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 3.18,
+   "llm_calls": 3,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN00101, the population of Iceland was 394,324 in 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 931,
+     "detail": "What is the total population of Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 134,
+     "detail": "MAN00101 from [MAN00101, MAN10001, MAN02005, MAN43000, MAN00102, MAN03200, MAN10290, MAN030102, MAN08000, MAN10289, MAN12104, MAN12103, MAN10291, MAN10292, MAN00000, VIN00900, VIN00901, MAN00110, FYR08001, MAN08213, MAN030106, VIN07216, MAN030104, MAN03250, MAN04203, MAN04208, MAN10200, MAN030101, MAN03280, MAN04103, MAN07209, MAN03270, VIN07210, MAN43004, FYR01205, MAN43002, KOS03217a, FYR05201a, THJ05111, KOS01892, THJ05211, THJ05311, THJ01000, MAN07108, MAN07109, MAN00115, MAN09000, MAN030103, FYR09006, MAN43006, MAN03260, FYR01202, MAN02009, KOS03217, FYR01204, MAN02120, CEN03350] via dictionary · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 1298,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2026']} notes: ['Year: no period asked, using latest 2026']"
+    },
+    {
+     "name": "fetch",
+     "ms": 8,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 810,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "unemp-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was the unemployment rate in August 2026?",
+   "expected_tables": [
+    "VIN00001"
+   ],
+   "expected_values": [
+    6.0
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 3.66,
+   "llm_calls": 3,
+   "tables": [
+    "VIN00001"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table VIN00001, the unemployment rate in August 2026 was 6.0%.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1216,
+     "detail": "What was the unemployment rate in Iceland in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 140,
+     "detail": "VIN00001 from [VIN00001, VIN00004, VIN10012, UTA04008, VIS02506, VIN10032, VIN10001, UMH31109, VIN10022, UTA05000, VIS13000, SAM02001, VIN10052, UTA06001, SAM08049, UTA06002, UTA06003, VIS01000, UTA06101, UTA06102, UTA06203, VIS02502, UTA02801, UTA02802, UTA03801, UTA03802, UTA03803, THJ05636B, UTA06005, LAU04001, UTA06107, UTA06201, VIN00920, VIN00910, VIN01206, VIN01004, JVS00001, VIN00930, VIN01005, UTA05002] via dictionary · concepts: unemployment, monthly"
+    },
+    {
+     "name": "select",
+     "ms": 1512,
+     "detail": "value {'Month': ['2026M08'], 'Sex/age': ['Total'], 'Unit': ['Unemployment rate']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 8,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 780,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "unemp-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hvert var atvinnuleysið í ágúst 2026?",
+   "expected_tables": [
+    "VIN00001"
+   ],
+   "expected_values": [
+    6.0
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 3.7,
+   "llm_calls": 3,
+   "tables": [
+    "VIN00001"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu VIN00001 var atvinnuleysið 6,0% í ágúst 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1255,
+     "detail": "What was the unemployment rate in Iceland in August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 143,
+     "detail": "VIN00001 from [VIN00001, VIN00004, VIN10012, UTA04008, UTA06002, VIN10001, VIN10032, VIN10022, VIN10052, VIS02506, UMH31109, UTA05000, VIS13000, SAM02001, UTA06001, SAM08049, UTA06003, VIS01000, UTA06101, UTA06102, UTA06203, LAU04800, VIS02502, UTA02801, UTA02802, UTA03801, UTA03802, UTA03803, LAU04001, THJ05636B, UTA06005, VIS13302, UTA06107, UTA06201, VIN00920, VIN00910, VIN01004, VIN01206, JVS00001, VIN00930, VIN01005, LAU04109, UTA05002] via dictionary · concepts: unemployment, monthly"
+    },
+    {
+     "name": "select",
+     "ms": 1395,
+     "detail": "value {'Month': ['2026M08'], 'Sex/age': ['Total'], 'Unit': ['Unemployment rate']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 899,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "growth-rvk-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How much did Reykjavík grow from 2025 to 2026?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    1032
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.05,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN02005, Reykjavík's population grew by 1,032 from 2025 to 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1092,
+     "detail": "What was the population of Reykjavík in 2025 and 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3244,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN03270, MAN04203, MAN03200, MAN04208, MAN12104, MAN43006, MAN07109, MAN07108, MAN030101, MAN030104, MAN03301, MAN43005, MAN43007, MAN030102, MAN05221, TEK01002, MAN030106, MAN01201, MAN05110, KOS03200a, VIN10012, SKO01000, MAN09000, KOS02006, MAN08212, MAN02120] via keywords · concepts: population, smoking, change"
+    },
+    {
+     "name": "select",
+     "ms": 1811,
+     "detail": "difference {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']} notes: ['operation pct_change -> difference (a change asked, no percent word)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 895,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "growth-rvk-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hversu mikið fjölgaði í Reykjavík frá 2025 til 2026?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    1032
+   ],
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.6,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Samkvæmt töflu MAN02005 frá Hagstofu Íslands fjölgaði íbúum í Reykjavíkurborg um 1.032 manns á tímabilinu 2025 til 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1486,
+     "detail": "What was the population of Reykjavík from 2025 to 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3146,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN03270, MAN04203, MAN03200, MAN12104, MAN04208, MAN43006, MAN07109, MAN43005, MAN43007, MAN03301, MAN07108, MAN05221, MAN05110, MAN030102, MAN030101, TEK01002, MAN030106, MAN030104, MAN01201, SKO01000, KOS03200a, MAN10289, VIN10012, MAN10290, SKO04201, KOS03107, MAN10292, MAN09000, MAN10291, MAN08212] via keywords · concepts: population, smoking, change"
+    },
+    {
+     "name": "select",
+     "ms": 1843,
+     "detail": "difference {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1122,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "share-rvk-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What share of Iceland's people live in Reykjavík?",
+   "expected_tables": [
+    "MAN02005"
+   ],
+   "expected_values": [
+    35.5
+   ],
+   "tolerance": 0.01,
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.4,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN02005, the share of Iceland's population living in Reykjavík was 35.5% in 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1033,
+     "detail": "What is the population of Iceland and the population of Reykjavík?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3356,
+     "detail": "MAN02005 from [MAN10001, MAN02005, MAN01201, MAN04203, MAN12104, MAN04208, MAN09000, MAN02117, MAN02118, KOS03204a, MAN02114, HEI09104, HEI09101, MAN02115, MAN07108, MAN07109, MAN02119, VIN10012, MAN02116, KOS03202, MAN08211, VIN01205, MAN02120, KOS03107, MAN030106, MAN030104, HEI09103, MAN030102, MAN030101, KOS03208, MAN43006, KOS03204b, KOS03303, CEN01560, MAN02009, MAN08212, CEN08010, FYR03020, KOS03201, KOS03206, CEN06030, KOS03207, KOS03203, KOS03204, KOS03205, CEN05110] via keywords · concepts: population, smoking, region, share"
+    },
+    {
+     "name": "select",
+     "ms": 2080,
+     "detail": "share {'Municipality': ['Total', 'Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 924,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "pop-unemp-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many people live in Iceland, and what is the unemployment rate?",
+   "expected_tables": [
+    "MAN00101|MAN02005|MAN00000",
+    "VIN00001"
+   ],
+   "expected_values": [
+    394324,
+    6.0
+   ],
+   "note": "latest month; 5.1% for 2026M09 as of 28 Oct unemployment: latest month in the snapshot is 2026M08 = 6.0%",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.2,
+   "llm_calls": 6,
+   "tables": [
+    "MAN00101",
+    "VIN00001"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands), the population of Iceland was 394,324 in 2026 (Table MAN00101). The unemployment rate for August 2026 was 6.0% (Table VIN00001).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1178,
+     "detail": "What is the total population of Iceland? | What is the unemployment rate in Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 136,
+     "detail": "MAN00101 from [MAN00101, MAN10001, MAN02005, MAN43000, MAN00102, MAN030102, MAN03200, MAN08000, MAN12103, MAN04103, MAN10290, MAN04208, MAN12104, MAN10289, MAN00000, VIN00900, VIN00901, MAN00110, KOS03217a, VIN07216, MAN08213, MAN030106, MAN030104, FYR08001, MAN03250, MAN04203, MAN030101, MAN03280, SKO00012, KOS03217, MAN07209, MAN03270, MAN10200, MAN43004, FYR01205, MAN10291, VIN07210, MAN10292, MAN43002, VIN10012, THJ05111, KOS01892, THJ05211, THJ05311, THJ01000, MAN07108, MAN07109, FYR05201a, MAN00115, MAN09000, MAN030103, MAN43006, MAN03260, KOS03200a, CEN03350, FYR01202, MAN02009, CEN01090, CEN03340, CEN01040] via dictionary · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 1313,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2026']} notes: ['Year: no period asked, using latest 2026']"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3299,
+     "detail": "VIN00001 from [VIN00920, VIN00001, VIN00911, VIN00910, VIN01002, VIN00921, VIN00951, VIN01401, VIN01104, VIN01004, FYR04111, FYR04112, FYR04102, VIN01703, VIN10012, FYR01202, FYR01201, VIN10052, FYR05103, FYR01205, VIN00931, VIN10032, FYR08000, JVS00001, UMH31118, MAN05202, VIN01402, VIN10022, VIN01403, VIN01404, MAN05303, FYR05201a, SAM01104, VIN10001, FYR04101, VIN00930, VIN01206, FYR08010, VIN00971, SKO00002, VIN10040, VIN01204, FYR08001, VIN01202, UMH53120, LIF01133, LIF03307, LIF03304, MAN05210, LIF01132, FYR09004, LIF01134, CEN03350, LFI03305, VIN01203, PEN01101, SKU01008, VIN01003, LFI03306, HEI03111, LIF01130, VIN01105, VIN01201, LIF01131, FYR08011, CEN03340, FYR09005, SKO04206, FYR01204, LIF01141, LIF01140, SKO03226, FYR03010, LIF01142, UMH31108, CEN05000, CEN09002, FYR09006, CEN02151, FYR09001, PEN02102, STI03233, THJ01301, SKU01007, LIF01134a, LIF01135, PEN02101, CEN02161, SKU01010, SKO04126, LIF01120, FYR03001, SKO04128, CEN03103, SAM03405, MAN06203, VIS06128, MAN06104] via keywords · concepts: unemployment"
+    },
+    {
+     "name": "select",
+     "ms": 1533,
+     "detail": "value {'Month': ['2026M08'], 'Sex/age': ['Total'], 'Unit': ['Unemployment rate']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1052,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "pop-unemp-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hvað búa margir á Íslandi og hvert er atvinnuleysið?",
+   "expected_tables": [
+    "MAN00101|MAN02005|MAN00000",
+    "VIN00001"
+   ],
+   "expected_values": [
+    394324,
+    6.0
+   ],
+   "note": "latest month; 5.1% for 2026M09 as of 28 Oct unemployment: latest month in the snapshot is 2026M08 = 6.0%",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.82,
+   "llm_calls": 6,
+   "tables": [
+    "MAN00101",
+    "VIN00001"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) bjuggu á Íslandi 394.324 manns árið 2026 (MAN00101). Atvinnuleysið var 6,0% í ágúst 2026 (VIN00001).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1147,
+     "detail": "What is the total population of Iceland? | What is the unemployment rate in Iceland?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 116,
+     "detail": "MAN00101 from [MAN00101, MAN10001, MAN02005, MAN43000, MAN00102, MAN030102, MAN03200, MAN08000, MAN12103, MAN04103, MAN10290, MAN04208, MAN12104, MAN10289, MAN00000, VIN00900, VIN00901, MAN00110, KOS03217a, VIN07216, MAN08213, MAN030106, MAN030104, FYR08001, MAN03250, MAN04203, MAN030101, MAN03280, SKO00012, KOS03217, MAN07209, MAN03270, MAN10200, MAN43004, FYR01205, MAN10291, VIN07210, MAN10292, MAN43002, VIN10012, THJ05111, KOS01892, THJ05211, THJ05311, THJ01000, MAN07108, MAN07109, FYR05201a, MAN00115, MAN09000, MAN030103, MAN43006, MAN03260, KOS03200a, CEN03350, FYR01202, MAN02009, CEN01090, CEN03340, CEN01040] via dictionary · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 1259,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2026']} notes: ['Year: no period asked, using latest 2026']"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2816,
+     "detail": "VIN00001 from [VIN00920, VIN00001, VIN00911, VIN00910, VIN01002, VIN00921, VIN00951, VIN01401, VIN01104, VIN01004, FYR04111, FYR04112, FYR04102, VIN01703, VIN10012, FYR01202, FYR01201, VIN10052, FYR05103, FYR01205, VIN00931, VIN10032, FYR08000, JVS00001, UMH31118, MAN05202, VIN01402, VIN10022, VIN01403, VIN01404, MAN05303, FYR05201a, SAM01104, VIN10001, FYR04101, VIN00930, VIN01206, FYR08010, VIN00971, SKO00002, VIN10040, VIN01204, FYR08001, VIN01202, UMH53120, LIF01133, LIF03307, LIF03304, MAN05210, LIF01132, FYR09004, LIF01134, CEN03350, LFI03305, VIN01203, PEN01101, SKU01008, VIN01003, LFI03306, HEI03111, LIF01130, VIN01105, VIN01201, LIF01131, FYR08011, CEN03340, FYR09005, SKO04206, FYR01204, LIF01141, LIF01140, SKO03226, FYR03010, LIF01142, UMH31108, CEN05000, CEN09002, FYR09006, CEN02151, FYR09001, PEN02102, STI03233, THJ01301, SKU01007, LIF01134a, LIF01135, PEN02101, CEN02161, SKU01010, SKO04126, LIF01120, FYR03001, SKO04128, CEN03103, SAM03405, MAN06203, VIS06128, MAN06104] via keywords · concepts: unemployment"
+    },
+    {
+     "name": "select",
+     "ms": 1419,
+     "detail": "value {'Month': ['2026M08'], 'Sex/age': ['Total'], 'Unit': ['Unemployment rate']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1311,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}

@@ -448,7 +448,7 @@ async function askStream(body, onStep, signal) {
 const history = [];
 const HISTORY_TURNS = 3;
 
-async function ask(question, tableId = null, fast = false, spoken = false) {
+async function ask(question, tableId = null, fast = false, spoken = false, language = null) {
   showChat();
   const chat = $("#chat");
   const guess = lang === "auto" ? (/[þðæöáéíóúý]/i.test(question) ? "is" : "en") : lang;
@@ -459,13 +459,13 @@ async function ask(question, tableId = null, fast = false, spoken = false) {
   // "Answer now": stop this question (the server stops with it) and ask again with the fast model, thinking off
   const stop = new AbortController();
   if (!fast) progress.prepend(el("button", { class: "pill now", type: "button", onclick: () => {
-    stop.abort(); bot.remove(); ask(question, tableId, true, spoken); } }, `⚡ ${t("now", guess)}`));
+    stop.abort(); bot.remove(); ask(question, tableId, true, spoken, language); } }, `⚡ ${t("now", guess)}`));
   const bot = el("div", { class: "msg bot" }, card);
   chat.append(bot);
   setTimeout(() => bot.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "end" }), 380);
   $("#send").disabled = true;
   try {
-    const body = JSON.stringify({ question, language: lang === "auto" ? null : lang, table_id: tableId, model: modelChoice,
+    const body = JSON.stringify({ question, language: language || (lang === "auto" ? null : lang), table_id: tableId, model: modelChoice,
                                   reasoning: reasoningChoice, temperature: temperatureChoice, fast,
                                   history: history.slice(-HISTORY_TURNS) });
     const answer = await askStream(body, st => progress.step(st), stop.signal);
@@ -568,11 +568,18 @@ function renderAnswer(card, a) {
     if (p.chart && p.chart.type !== "kpi" && p.chart.data.length > 1) card.append(chartBlock(p, L));
   }
 
-  // categories that open further: each asks for its own subcategories from the same table
-  for (const p of a.parts) if (p.drill?.length) card.append(el("div", { class: "drill" },
-    el("span", { class: "drill-head" }, L === "is" ? "Skoða undirflokka" : "Open a category"),
-    el("div", { class: "drill-chips" }, p.drill.map(d =>
-      el("button", { type: "button", class: "drill-chip", onclick: () => ask(d.question, d.table_id) }, d.label, el("span", { "aria-hidden": "true" }, " ›"))))));
+  // chips that ask the same table again: categories that open further (their subcategories), and categories the
+  // model chose that the question did not name, answered with the default instead (the same question for that one)
+  const DRILL_HEAD = { subcategories: { is: "Skoða undirflokka", en: "Open a category" },
+                       alternative: { is: "Sama spurning fyrir annan flokk", en: "Same question for another category" } };
+  for (const p of a.parts) for (const kind of ["subcategories", "alternative"]) {
+    const chips = (p.drill || []).filter(d => (d.kind || "subcategories") === kind);
+    if (chips.length) card.append(el("div", { class: "drill" },
+      el("span", { class: "drill-head" }, DRILL_HEAD[kind][L === "is" ? "is" : "en"]),
+      el("div", { class: "drill-chips" }, chips.map(d =>
+        el("button", { type: "button", class: "drill-chip", onclick: () => ask(d.question, d.table_id, false, false, d.language || null) },
+           d.label, el("span", { "aria-hidden": "true" }, " ›"))))));
+  }
 
   for (const p of a.parts) if (p.note) card.append(el("p", { class: "note" }, prettyPeriods(p.note, L)));
 

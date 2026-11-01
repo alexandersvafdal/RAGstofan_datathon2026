@@ -1,0 +1,113 @@
+{
+ "label": "org-500b",
+ "results": [
+  {
+   "id": "reykjavik-share-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve stórt hlutfall landsmanna bjó í Reykjavík 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN00000|MAN00101|MAN00110|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    35.454093588
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 14.26,
+   "llm_calls": 5,
+   "tables": [
+    "MAN04203"
+   ],
+   "text": "Samkvæmt töflu MAN04203 frá Hagstofu Íslands bjó 35,5% landsmanna í Reykjavíkurborg 1. janúar 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1142,
+     "detail": "What was the population of Iceland and Reykjavík on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 10146,
+     "detail": "MAN04203 from [MAN02005, MAN10001, MAN04203, MAN12104, MAN04208, MAN43005, MAN43007, MAN03270, MAN030101, MAN030102, MAN07108, MAN07109, MAN43006, MAN03200, VIN10012, SJA01101, TEK02003, TEK02004, TEK02014] via keyword search · concepts: population, smoking, region, share"
+    },
+    {
+     "name": "select",
+     "ms": 1918,
+     "detail": "share {'Municipality': ['Total', 'Reykjavikurborg'], 'Citizenship': ['Total'], 'Sex': ['Total'], 'Year': ['2026']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 27,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1027,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "stays-and-population-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve margar gistinætur voru á skráðum gististöðum á Íslandi árið 2025 og hve margir bjuggu á Íslandi 1. janúar 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    9850428.0,
+    389444.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 33.78,
+   "llm_calls": 8,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "2025: 389.444. Heimild: Hagstofa Íslands, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1540,
+     "detail": "What was the number of overnight stays at registered guesthouses in Iceland in 2025? | What was the population of Iceland on January 1, 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 25918,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN08000, MAN12104, VIN00901, MAN04203, MAN04208, MAN04103, MAN030106, VIN00931, MAN12103, THJ05211, MAN05401, THJ05111, MAN00000, MAN03250, MAN030101, MAN03280, MAN03270, MAN43000, VIS02201, MAN05202, MAN04120, TEK01002, VIS01102, MAN00110, THJ06029, THJ01000, MAN00102, UMH31118, MAN030104, MAN05110, VIS01301, MAN08213, MAN04119, SJA02204, SJA02203, MAN04001, VIN00921, SJA07001, SKO00012, THJ05611, THJ05616, THJ05614, THJ05615, STI03267, THJ05311, THJ05633, MAN05201, THJ05631, VIS02202, SAM08004, SKO03200, MAN43005, TEK01006, MAN05303, THJ05521, THJ05331, MAN43007, THJ05511, THJ05532, SKO03203, SKO03207, MAN01401, VIN00971] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 3461,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 9,
+     "detail": "1 rows"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: Model did not return valid Verdict: 1 validation error for Verdict\ntable_id\n  Field required [type=missing, input_value={'properties': {'table_id... only hotels/camping.\"}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/missing"
+    },
+    {
+     "name": "compose",
+     "ms": 1425,
+     "detail": "template"
+    }
+   ]
+  }
+ ]
+}

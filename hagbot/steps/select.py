@@ -40,6 +40,8 @@ class Resolved(BaseModel):
     top: int | None = None        # rank: keep the n largest (by size, either sign); None lists them all
     beyond: str | None = None     # a period asked for that lies after this table's last one ("2026M09" in a table to 2026M08)
     place_note: dict[str, str] | None = None  # en/is, when a place the question names is not among the table's options
+    alternatives: dict[str, list[str]] = {}   # dimension -> categories the model chose that the question did not name,
+                                              # answered with the default instead and offered to the user as choices
 
 
 def _mention_order(var: Variable, codes: list[str], question: str) -> list[str] | None:
@@ -217,9 +219,18 @@ def guess_op(question: str) -> str | None:
     return next((op for op, rx in _INTENT if rx.search(q)), None)
 
 
+_BREAKDOWN_ALL = re.compile(r"\b(all|allar|allir|oll|ollum|each|every|hvert|hverju|hverjum|per|a milli|milli)\b")
+
+
+def _asks_breakdown(text: str) -> bool:
+    """"by region", "eftir landshlutum", "in all regions", "each year": the question wants the categories apart."""
+    from .retrieve import breakdown_words
+    return bool(breakdown_words(text)) or bool(_BREAKDOWN_ALL.search(normalize(text)))
+
+
 def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | None = None) -> Resolved:
     """Map whatever the model returned onto valid codes; fill gaps with defaults."""
-    notes, out, beyond = [], {}, None
+    notes, out, beyond, alternatives = [], {}, None, {}
     by_key = {normalize(k): k for k in sel.selections}
     for var in meta.variables:
         raw = sel.selections.get(var.code) or sel.selections.get(by_key.get(normalize(var.text), ""), [])
@@ -261,18 +272,54 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             in_question = [c for c in chosen if mentioned(var.label_of(c))]
             if in_question and len(in_question) < len(chosen):
                 notes.append(f"{var.text}: dropped {[var.label_of(c) for c in chosen if c not in in_question]} (not named in the question)")
-                out[var.code] = in_question
+                out[var.code] = chosen = in_question
+        # "the housing price index from 2010": one line, the whole country, not every region and house type the model
+        # could chart. Several categories stay when the question names one of them, asks for a breakdown ("by region",
+        # "eftir landshlutum", "all regions"), or compares along this dimension.
+        if (sel.operation in ("value", "series") and len(chosen) >= 2 and not coded(var) and var.code != sel.compare_dimension
+                and not any(mentioned(var.label_of(c)) for c in chosen) and not _asks_breakdown(part or question)
+                and (dflt := _default(var))[0] in chosen):
+            notes.append(f"{var.text}: none of {[var.label_of(c) for c in chosen]} named in the question; using {[var.label_of(dflt[0])]}")
+            out[var.code] = dflt
+            alternatives[var.code] = [c for c in chosen if c not in dflt]
     # a place the question names that no option and no title of this table carries: say so, rather than answer as if
     place_note = None
     from .retrieve import named_places
     texts = [t for v in meta.variables if not v.time for t in v.value_texts] + [meta.title]
-    for place in named_places(part or question):
-        if not any(_same_word(t, place) for label in texts for t in tokens(label)):
-            shown = next((w for w in re.findall(r"[A-ZÁÐÉÍÓÚÝÞÆÖ][\wáðéíóúýþæö]+", part or question) if normalize(w).startswith(place[:5])), place)
-            place_note = {"en": f"{shown} is not among this table's options; the figures are for the options selected.",
-                          "is": f"{shown} er ekki meðal valkosta í þessari töflu; tölurnar eru fyrir það sem valið var."}
-            notes.append(f"{shown}: not in the table's options")
-            break
+    places = named_places(part or question)
+    def has_place(label: str, place: str) -> bool:
+        return any(_same_word(t, place) for t in tokens(label))
+    missing = [p for p in places if not any(has_place(label, p) for label in texts)]
+    # the whole question's places, not this part's alone: "Reykjavík and Kópavogur together" is planned as one part
+    # per town, yet both towns are selected in each and summed
+    places = named_places(f"{part or ''} {question}")
+    for place in missing:
+        shown = next((w for w in re.findall(r"[A-ZÁÐÉÍÓÚÝÞÆÖ][\wáðéíóúýþæö]+", part or question) if normalize(w).startswith(place[:5])), place)
+        place_note = {"en": f"{shown} is not among this table's options; the figures are for the options selected.",
+                      "is": f"{shown} er ekki meðal valkosta í þessari töflu; tölurnar eru fyrir það sem valið var."}
+        notes.append(f"{shown}: not in the table's options")
+        break
+    # ...and the model must not stand another place in for a place the question names (Garðabær for Egilsstaðir,
+    # Kópavogur for Reykjavík): in a place dimension, only options the question names, or the total, may stay; with
+    # none of them chosen, the named ones answer, or the total under the note. A breakdown ("by municipality") or a
+    # ranking along the dimension keeps every category.
+    if places and sel.operation != "rank" and not _asks_breakdown(part or question):
+        for var in meta.variables:
+            if var.time:
+                continue
+            named_options = [c for c in var.values if any(has_place(var.label_of(c), p) for p in places)]
+            if not (named_options or re.search(r"municipal|sveitarf|region|landsv|landshlut|svaed|domicile|logheimil|\barea\b|\bplace",
+                                               normalize(var.text))):
+                continue
+            if var.code == sel.compare_dimension:
+                continue
+            chosen = out[var.code]
+            dflt = _default(var)
+            keep = [c for c in chosen if c in named_options or c in dflt]
+            if len(keep) < len(chosen):
+                out[var.code] = keep or (named_options if len(named_options) <= 2 else dflt)
+                notes.append(f"{var.text}: dropped {[var.label_of(c) for c in chosen if c not in keep]} (a place the question did "
+                             f"not name); using {[var.label_of(c) for c in out[var.code]]}")
 
     # "Iceland" in a question means the whole country, not Icelandic citizens or people born in Iceland
     # ...unless the question compares groups ("Icelanders and foreigners") or the model chose several of them
@@ -512,7 +559,8 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             notes.append(f"{var.text}: {'the largest ' + str(top) + ' of ' if top else ''}{len(kids)} categories"
                          + (f" under {var.label_of(named(var, question))!r}" if named(var, question) else ""))
     return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes,
-                    window_note=window_note, breakdown=breakdown, top=top, beyond=beyond, place_note=place_note)
+                    window_note=window_note, breakdown=breakdown, top=top, beyond=beyond, place_note=place_note,
+                    alternatives=alternatives)
 
 
 async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None) -> Resolved:
