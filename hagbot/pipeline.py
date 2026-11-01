@@ -16,11 +16,11 @@ from .steps.chart import choose_chart, comparison_chart
 from .steps.compose import compose
 from .steps.compute import compute
 from .steps.followup import looks_like_followup, rewrite
-from .steps.plan import Plan, SubQuestion, plan
-from .steps.ratio import POPULATION_TABLE, detect_ratio, ratio_parts, stored_rate
+from .steps.plan import Plan, SubQuestion, merge_period_parts, plan
+from .steps.ratio import POPULATION_TABLE, detect_ratio, difference_parts, ratio_parts, share_parts, stored_rate
 from .steps.retrieve import _INDEXATION_TABLE, period_end, retrieve
 from .steps.tiered import retrieve_tiered
-from .steps.select import select
+from .steps.select import guess_op, select
 from .steps.suggest import suggest
 from .text import detect_language, normalize
 
@@ -82,6 +82,10 @@ class Pipeline:
 
     async def _answer(self, req: AskRequest, on_step: Callable[[Step], None] | None = None) -> Answer:
         lang = req.language or detect_language(req.question)
+        if lang == "en" and detect_language(req.question) == "is":
+            # unmistakably Icelandic (ð, þ, æ … or Icelandic question words) under an English setting: the question's
+            # own language wins, so a spoken Icelandic question is not answered, and read aloud, in English
+            lang = "is"
         total, steps = Timer(), StepLog(on_step)
         calls_before = self.llm.calls
         ans = Answer(question=req.question, language=lang, status="error", text="", model=self.llm.model)
@@ -114,7 +118,7 @@ class Pipeline:
                 steps.append(Step(name="plan", ms=t.ms(), detail=f"{num.question} | {pop.question}"))
             else:
                 t = Timer()
-                p = await plan(self.llm, req.question)
+                p = merge_period_parts(await plan(self.llm, req.question))
                 forced = [None] * len(p.sub_questions)
                 steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(s.question for s in p.sub_questions)))
 
@@ -133,6 +137,14 @@ class Pipeline:
             if ratio and len(parts) == 2 and (rp := ratio_parts(ratio, parts[0], parts[1], lang)):
                 parts = list(rp)
                 steps.append(Step(name="compute", ms=0, detail=rp[0].computation.expression))
+            elif (not ratio and len(parts) == 2 and guess_op(req.question) == "share"
+                  and (sp := share_parts(parts[0], parts[1], lang))):   # a share the planner split across two tables
+                parts = list(sp)
+                steps.append(Step(name="compute", ms=0, detail=sp[0].computation.expression))
+            elif (not ratio and len(parts) == 2 and guess_op(req.question) in ("difference", "pct_change")
+                  and (dp := difference_parts(parts[0], parts[1], lang))):   # a change the planner split in two
+                parts = list(dp)
+                steps.append(Step(name="compute", ms=0, detail=dp[0].computation.expression))
             for e in errors:
                 steps.append(Step(name="error", ms=0, detail=f"{type(e).__name__}: {e}"))
             if not parts:
@@ -201,6 +213,13 @@ class Pipeline:
         t = Timer()
         meta = await self.source.meta(r.table.id)
         res = await select(self.llm, meta, sq.question, original)
+        if res.beyond and (alt := await self._sibling_with(meta, r.candidates, res.beyond)):
+            # "September 2026" in a table whose figures stop at August, while the table next door has September
+            # (LAU04000 / LAU04001 in the snapshot): the neighbour answers, selected afresh
+            swapped = f"{res.beyond} is after {meta.id}'s last period; switched to {alt.id}"
+            meta = alt
+            res = await select(self.llm, meta, sq.question, original)
+            res.notes.append(swapped)
         chosen = {meta.var(c).text: [meta.var(c).label_of(v) for v in vals] for c, vals in res.selections.items()}
         steps.append(Step(name="select", ms=t.ms(),
                           detail=f"{res.operation} {chosen}" + (f" notes: {res.notes}" if res.notes else "")))
@@ -273,6 +292,23 @@ class Pipeline:
                 out.append({"label": label, "table_id": meta.id,
                             "question": f"Hverjir eru undirflokkar {label}?" if lang == "is" else f"What are the subcategories of {label}?"})
         return out
+
+    async def _sibling_with(self, meta, candidates: list[str], period: str):
+        """A table in the same folder, among the candidates, whose figures reach the period asked for: the one
+        sharing the most options with the chosen table first. None when no neighbour has it."""
+        own = self.catalog.get(meta.id)
+        if not own:
+            return None
+        siblings = [e for cid in candidates if (e := self.catalog.get(cid)) and e.id != meta.id and e.path == own.path]
+        siblings.sort(key=lambda e: -len(set(own.values) & set(e.values)))
+        for e in siblings[:3]:
+            try:
+                m = await self.source.meta(e.id)
+            except Exception:
+                continue
+            if any(v.time and period in v.values for v in m.variables):
+                return m
+        return None
 
     def _freshness_note(self, meta, selections: dict[str, list[str]], candidates: list[str], question: str, lang: str) -> str:
         """When nobody asked for a period and the newest one here is from an earlier year, say so, and name a table

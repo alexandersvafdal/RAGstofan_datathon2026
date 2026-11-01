@@ -138,14 +138,20 @@ def sample_tables(catalog: Catalog, per_prefix: int, seed: int) -> list:
 
 async def cmd_tables(args) -> None:
     catalog = Catalog.load(Path(args.catalog))
-    es = sample_tables(catalog, args.per_prefix, args.seed)
+    if args.all:   # every table not already in gen_tables.jsonl: examples for search by example (hagbot/examples.py)
+        done = set()
+        if (OUT / "gen_tables.jsonl").exists():
+            done = {json.loads(l)["expected_tables"][0] for l in (OUT / "gen_tables.jsonl").read_text().splitlines() if l.strip()}
+        es = [e for e in catalog.entries if e.last_period and e.title_en and e.id not in done]
+    else:
+        es = sample_tables(catalog, args.per_prefix, args.seed)
     print(f"{len(es)} tables from {len({_area(e.id) for e in es})} prefixes")
     llm = _llm()
     try:
         rows = await _gather([_table_questions(llm, e) for e in es], "tables")
     finally:
         await llm.aclose()
-    _write(OUT / "gen_tables.jsonl", [q for qs in rows for q in qs])
+    _write(OUT / (args.out or "gen_tables.jsonl"), [q for qs in rows for q in qs])
 
 
 # ---------------------------------------------------------------- paraphrase
@@ -278,6 +284,8 @@ def main() -> None:
         p.add_argument("--seed", type=int, default=2026)
         if name == "tables":
             p.add_argument("--per-prefix", type=int, default=6)
+            p.add_argument("--all", action="store_true", help="every table not yet in gen_tables.jsonl")
+            p.add_argument("--out", default="", help="file name under eval/, default gen_tables.jsonl")
         if name == "siblings":
             p.add_argument("--pairs", type=int, default=60)
     args = ap.parse_args()

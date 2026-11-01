@@ -14,7 +14,7 @@ import re
 
 from ..catalog import STOPWORDS, Catalog, CatalogEntry
 from ..schemas import AnswerPart, Computation, Fact
-from ..text import fmt_number, normalize, tokens
+from ..text import fmt_number, fmt_value, normalize, tokens
 
 POPULATION_TABLE = "MAN00101"  # population by sex and age, 1 January, every year since 1841
 
@@ -151,3 +151,46 @@ def ratio_parts(ask: RatioAsk, num: AnswerPart, den: AnswerPart, lang: str) -> t
         "facts": [a, b, fact],
         "chart": None,
     }), den.model_copy(update={"facts": [b]})
+
+
+def share_parts(first: AnswerPart, second: AnswerPart, lang: str) -> tuple[AnswerPart, AnswerPart] | None:
+    """A share the planner split in two ("what percentage of Iceland's population lived in Reykjavík": Reykjavík from
+    the municipality table, the country from the population table): the smaller number over the larger, as a
+    percentage, on the part that holds the smaller one. None unless each side is one plain number."""
+    if any(len(p.facts) != 1 or p.computation for p in (first, second)):
+        return None
+    a, b = first.facts[0], second.facts[0]
+    if not a.value or not b.value or a.value < 0 or b.value < 0:
+        return None
+    if a.value > b.value:
+        first, second, a, b = second, first, b, a
+    result = round(a.value / b.value * 100, 4)
+    label = f"{'Hlutfall' if lang == 'is' else 'Share'}: {a.label} / {b.label}"
+    fact = Fact(label=label, value=result, unit="%", formatted=fmt_value(result, "%", lang))
+    return first.model_copy(update={
+        "computation": Computation(op="share", expression=f"{a.formatted} ÷ {b.formatted}", result=result, unit="%"),
+        "facts": [a, b, fact],
+        "chart": None,
+    }), second
+
+
+def difference_parts(first: AnswerPart, second: AnswerPart, lang: str) -> tuple[AnswerPart, AnswerPart] | None:
+    """A change the planner split in two (the same measure at two years, each a plain number): later minus earlier,
+    on the later part. None unless both sides are one number with a year in the label."""
+    if any(len(p.facts) != 1 or p.computation for p in (first, second)):
+        return None
+    ya, yb = (re.search(r"\b(?:18|19|20)\d\d(?:M\d\d|Q\d)?\b", p.facts[0].label) for p in (first, second))
+    if not ya or not yb or ya.group(0) == yb.group(0):
+        return None
+    if ya.group(0) > yb.group(0):
+        first, second = second, first
+    a, b = first.facts[0], second.facts[0]
+    result = round(b.value - a.value, 4)
+    sign = "+" if result > 0 else ""
+    label = f"{'Breyting' if lang == 'is' else 'Change'} {a.label} → {b.label}"
+    fact = Fact(label=label, value=result, unit=b.unit, formatted=sign + fmt_value(result, b.unit, lang))
+    return second.model_copy(update={
+        "computation": Computation(op="difference", expression=f"{b.formatted} − {a.formatted}", result=result, unit=b.unit),
+        "facts": [a, b, fact],
+        "chart": None,
+    }), first

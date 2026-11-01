@@ -193,9 +193,10 @@ struct ChatView: View {
         let voice = model.voice
         if voice.state == .listening {
             Task {
-                let lang = model.langChoice == .auto ? nil : model.langChoice.rawValue
+                // Whisper hears which language is spoken; the language setting is for the interface and typed
+                // questions, and forcing it here turned Icelandic speech into English text
                 // into the box, not straight off: the user reads what Whisper heard, fixes it, then sends
-                if let heard = await voice.finishListening(api: model.apiClient, language: lang) {
+                if let heard = await voice.finishListening(api: model.apiClient, language: nil) {
                     draft = heard
                     fromVoice = true
                     focused = true

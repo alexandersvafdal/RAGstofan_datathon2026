@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from ..catalog import MIN_PREFIX, STOPWORDS, Catalog, CatalogEntry
+from ..catalog import MIN_PREFIX, STOPWORDS, Catalog, CatalogEntry, _same_word
 from ..llm import LLM
 from ..hierarchy import code_of
 from ..text import asked_bases, base_year, normalize, tokens
@@ -60,6 +60,29 @@ def named_places(text: str) -> list[str]:
                               if len(t) >= MIN_PREFIX and t not in STOPWORDS and not re.fullmatch(MONTHS, t)))
 
 
+# Icelandic breakdown words (normalized) and the dimension name the tables use for them
+_DIMENSION_IS = {
+    "aldri": "age", "aldur": "age", "aldurshopum": "age", "aldursflokkum": "age", "kyni": "sex", "kyn": "sex",
+    "sveitarfelogum": "municipality", "sveitarfelagi": "municipality", "sveitarfelag": "municipality",
+    "landshlutum": "region", "landshluta": "region", "landsvaedum": "region", "londum": "country", "landi": "country",
+    "rikisfangi": "citizenship", "uppruna": "origin", "faedingarlandi": "country", "atvinnugrein": "economic",
+    "atvinnugreinum": "economic", "starfsstett": "occupation", "starfsstettum": "occupation", "menntun": "education",
+    "menntunarstigi": "education", "manudum": "month", "arsfjordungum": "quarter", "tegund": "type", "tegundum": "type",
+    "postnumerum": "postcode", "byggdakjornum": "urban", "skolastigi": "school", "fisktegundum": "species",
+    "fisktegund": "species", "hjuskaparstodu": "marital", "trufelogum": "religious", "flokkum": "category",
+}
+
+
+def breakdown_words(q: str) -> list[str]:
+    """Dimension names a normalized question asks a breakdown by: "by municipality", "eftir aldri" -> age."""
+    out = []
+    for w in re.findall(r"(?<!\bwere )(?<!\bwas )(?<!\bare )(?<!\bis )(?<!\bmade )\b(?:by|eftir|skipt eftir|sundurlidad eftir)\s+(\w{3,})", q):
+        if w in STOPWORDS or w.isdigit():
+            continue
+        out.append(_DIMENSION_IS.get(w, w))
+    return list(dict.fromkeys(out))
+
+
 def _title_has(entry: CatalogEntry, word: str) -> bool:
     return any(t.startswith(word) for t in tokens(entry.title_en))
 
@@ -99,6 +122,12 @@ def narrow(entries: list[CatalogEntry], question: str) -> list[CatalogEntry]:
         has = lambda e: bool(e.matching_values(place)) or _title_has(e, place)
         if any(has(e) for e in entries[:3]):
             keep_if(has)
+    # "by municipality", "eftir aldri", "by sector": the breakdown named must be one of the table's dimensions;
+    # checked only when one of the top hits has it, so "stays were by foreigners" does not throw the right tables out
+    for word in breakdown_words(q):
+        has_dim = lambda e, w=word: any(_same_word(t, w) for d in e.dimensions for t in tokens(d))
+        if any(has_dim(e) for e in entries[:3]):
+            keep_if(has_dim)
     # A month asked wants a monthly table, a quarterly one failing that, or a yearly table that reports that month
     # ("beneficiaries in December", "students in autumn"). "1 January" / "Jan 1" is the date yearly population
     # figures refer to, not a month. Monthly tables go first; the rest stay, in their order.

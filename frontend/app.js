@@ -1270,7 +1270,7 @@ async function finishListening() {
     const body = new FormData();
     const type = rec.mimeType || "audio/webm";
     body.append("audio", new Blob(recordChunks, { type }), "question." + (type.includes("mp4") ? "m4a" : "webm"));
-    if (lang !== "auto") body.append("language", lang);
+    // Whisper hears which language is spoken; forcing the interface language here turned Icelandic speech into English
     const heard = await (await fetch("/api/stt", { method: "POST", body })).json();
     if (heard.text) ask(heard.text, null, false, true);
   } catch { flashNote(t("failed", L)); }

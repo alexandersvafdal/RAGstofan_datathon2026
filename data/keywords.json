@@ -7805,6 +7805,2580 @@
         "VIN00001",
         "VIN00910"
       ]
+    },
+    {
+      "id": "compulsory_school_teachers",
+      "role": "topic",
+      "aliases": [
+        "teachers",
+        "compulsory school teachers",
+        "primary school teachers",
+        "teaching staff",
+        "teaching personnel",
+        "number of teachers",
+        "kennarar",
+        "kennara",
+        "kennurum",
+        "grunnskólakennarar",
+        "grunnskólakennara",
+        "grunnskólakennurum",
+        "starfsfólk grunnskóla",
+        "starfsfólk við kennslu"
+      ],
+      "search_terms": "teaching personnel licence",
+      "table_paths": [
+        "Samfelag/skolamal/2_grunnskolastig"
+      ],
+      "table_phrases": [
+        "Teaching personnel",
+        "Starfsfólk við kennslu",
+        "compulsory schools"
+      ],
+      "tables": [
+        "SKO02301",
+        "SKO02303",
+        "SKO02307"
+      ],
+      "broader": [
+        "primary_school"
+      ],
+      "concept": "compulsory school teachers",
+      "search": "teaching personnel licence",
+      "terms": [
+        "teachers",
+        "compulsory school teachers",
+        "primary school teachers",
+        "teaching staff",
+        "teaching personnel",
+        "number of teachers",
+        "kennarar",
+        "kennara",
+        "kennurum",
+        "grunnskólakennarar",
+        "grunnskólakennara",
+        "grunnskólakennurum",
+        "starfsfólk grunnskóla",
+        "starfsfólk við kennslu"
+      ]
+    },
+    {
+      "id": "preschool_staff",
+      "role": "topic",
+      "aliases": [
+        "preschool teachers",
+        "pre-primary teachers",
+        "preschool staff",
+        "kindergarten teachers",
+        "pre-primary personnel",
+        "preschool employees",
+        "leikskólakennarar",
+        "leikskólakennara",
+        "leikskólakennurum",
+        "starfsfólk leikskóla",
+        "starfsfólk í leikskólum",
+        "leikskólastarfsfólk",
+        "stöðugildi í leikskólum"
+      ],
+      "search_terms": "personnel pre-primary institutions",
+      "table_paths": [
+        "Samfelag/skolamal/1_leikskolastig"
+      ],
+      "table_phrases": [
+        "Personnel in pre-primary",
+        "Starfsfólk í leikskólum",
+        "Stöðugildi í leikskólum"
+      ],
+      "tables": [
+        "SKO01300",
+        "SKO01303",
+        "SKO01321"
+      ],
+      "broader": [
+        "preschool"
+      ],
+      "concept": "preschool staff",
+      "search": "personnel pre-primary institutions",
+      "terms": [
+        "preschool teachers",
+        "pre-primary teachers",
+        "preschool staff",
+        "kindergarten teachers",
+        "pre-primary personnel",
+        "preschool employees",
+        "leikskólakennarar",
+        "leikskólakennara",
+        "leikskólakennurum",
+        "starfsfólk leikskóla",
+        "starfsfólk í leikskólum",
+        "leikskólastarfsfólk",
+        "stöðugildi í leikskólum"
+      ]
+    },
+    {
+      "id": "preschool_institutions",
+      "role": "topic",
+      "aliases": [
+        "number of preschools",
+        "pre-primary institutions",
+        "preschool operators",
+        "preschool opening weeks",
+        "private preschools",
+        "daily attendance in preschool",
+        "fjöldi leikskóla",
+        "leikskólar",
+        "leikskóla",
+        "leikskólum",
+        "rekstraraðilar leikskóla",
+        "starfstími leikskóla",
+        "barngildi",
+        "einkareknir leikskólar"
+      ],
+      "search_terms": "pre-primary institutions children",
+      "table_paths": [
+        "Samfelag/skolamal/1_leikskolastig"
+      ],
+      "table_phrases": [
+        "Pre-primary institutions",
+        "Leikskólar",
+        "Börn í leikskólum"
+      ],
+      "tables": [
+        "SKO01201",
+        "SKO01202",
+        "SKO01001"
+      ],
+      "broader": [
+        "preschool"
+      ],
+      "concept": "preschool institutions",
+      "search": "pre-primary institutions children",
+      "terms": [
+        "number of preschools",
+        "pre-primary institutions",
+        "preschool operators",
+        "preschool opening weeks",
+        "private preschools",
+        "daily attendance in preschool",
+        "fjöldi leikskóla",
+        "leikskólar",
+        "leikskóla",
+        "leikskólum",
+        "rekstraraðilar leikskóla",
+        "starfstími leikskóla",
+        "barngildi",
+        "einkareknir leikskólar"
+      ]
+    },
+    {
+      "id": "foreign_mother_tongue",
+      "role": "topic",
+      "aliases": [
+        "foreign mother tongue",
+        "another mother tongue",
+        "mother tongue other than Icelandic",
+        "pupils with foreign mother tongue",
+        "non-Icelandic speaking pupils",
+        "children with foreign mother tongue",
+        "erlent móðurmál",
+        "erlendu móðurmáli",
+        "nemendur með erlent móðurmál",
+        "börn með erlent móðurmál",
+        "móðurmál",
+        "móðurmáls",
+        "annað móðurmál en íslensku"
+      ],
+      "search_terms": "another mother tongue Icelandic",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "table_phrases": [
+        "another mother tongue",
+        "erlent móðurmál"
+      ],
+      "tables": [
+        "SKO02103",
+        "SKO02103b",
+        "SKO01103"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "foreign mother tongue",
+      "search": "another mother tongue Icelandic",
+      "terms": [
+        "foreign mother tongue",
+        "another mother tongue",
+        "mother tongue other than Icelandic",
+        "pupils with foreign mother tongue",
+        "non-Icelandic speaking pupils",
+        "children with foreign mother tongue",
+        "erlent móðurmál",
+        "erlendu móðurmáli",
+        "nemendur með erlent móðurmál",
+        "börn með erlent móðurmál",
+        "móðurmál",
+        "móðurmáls",
+        "annað móðurmál en íslensku"
+      ]
+    },
+    {
+      "id": "students_by_background",
+      "role": "topic",
+      "aliases": [
+        "immigrant students",
+        "immigrant pupils",
+        "students by background",
+        "pupils with immigrant background",
+        "pupils by citizenship",
+        "foreign pupils",
+        "innflytjendur í skólum",
+        "nemendur af erlendum uppruna",
+        "nemendur með erlendan bakgrunn",
+        "bakgrunnur nemenda",
+        "ríkisfang nemenda",
+        "erlendir nemendur",
+        "nemendur eftir bakgrunni",
+        "ríkisfang grunnskólanema"
+      ],
+      "search_terms": "students background citizenship",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "table_phrases": [
+        "by background",
+        "bakgrunni",
+        "citizenship",
+        "Ríkisfang"
+      ],
+      "tables": [
+        "SKO00013",
+        "SKO02108b",
+        "SKO02108"
+      ],
+      "broader": [
+        "education",
+        "immigrants"
+      ],
+      "concept": "students by background",
+      "search": "students background citizenship",
+      "terms": [
+        "immigrant students",
+        "immigrant pupils",
+        "students by background",
+        "pupils with immigrant background",
+        "pupils by citizenship",
+        "foreign pupils",
+        "innflytjendur í skólum",
+        "nemendur af erlendum uppruna",
+        "nemendur með erlendan bakgrunn",
+        "bakgrunnur nemenda",
+        "ríkisfang nemenda",
+        "erlendir nemendur",
+        "nemendur eftir bakgrunni",
+        "ríkisfang grunnskólanema"
+      ]
+    },
+    {
+      "id": "special_education",
+      "role": "topic",
+      "aliases": [
+        "special education",
+        "special needs education",
+        "special support",
+        "pupils receiving special education",
+        "learning support",
+        "children receiving special support",
+        "sérkennsla",
+        "sérkennslu",
+        "sérkennslunemendur",
+        "sérkennslunemenda",
+        "sérstakur stuðningur",
+        "sérstakan stuðning",
+        "stuðningur í skóla",
+        "nemendur sem njóta sérkennslu"
+      ],
+      "search_terms": "special education support",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "table_phrases": [
+        "special education",
+        "special support",
+        "sérkennslu",
+        "sérstaks stuðnings"
+      ],
+      "tables": [
+        "SKO02107",
+        "SKO02107a",
+        "SKO01105"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "special education",
+      "search": "special education support",
+      "terms": [
+        "special education",
+        "special needs education",
+        "special support",
+        "pupils receiving special education",
+        "learning support",
+        "children receiving special support",
+        "sérkennsla",
+        "sérkennslu",
+        "sérkennslunemendur",
+        "sérkennslunemenda",
+        "sérstakur stuðningur",
+        "sérstakan stuðning",
+        "stuðningur í skóla",
+        "nemendur sem njóta sérkennslu"
+      ]
+    },
+    {
+      "id": "class_size",
+      "role": "topic",
+      "aliases": [
+        "class size",
+        "class sizes",
+        "pupils per teacher",
+        "pupil teacher ratio",
+        "students per teacher",
+        "average class size",
+        "bekkjarstærð",
+        "bekkjarstærðir",
+        "bekkjardeildir",
+        "bekkjardeild",
+        "fjöldi nemenda á kennara",
+        "nemendur á hvern kennara",
+        "meðalfjöldi nemenda í bekk"
+      ],
+      "search_terms": "pupils class size teacher",
+      "table_paths": [
+        "Samfelag/skolamal/2_grunnskolastig"
+      ],
+      "table_phrases": [
+        "class size",
+        "Pupils per teacher",
+        "bekkjardeildum",
+        "nemenda á hvern kennara"
+      ],
+      "tables": [
+        "SKO02106",
+        "SKO02105"
+      ],
+      "broader": [
+        "primary_school"
+      ],
+      "concept": "class size",
+      "search": "pupils class size teacher",
+      "terms": [
+        "class size",
+        "class sizes",
+        "pupils per teacher",
+        "pupil teacher ratio",
+        "students per teacher",
+        "average class size",
+        "bekkjarstærð",
+        "bekkjarstærðir",
+        "bekkjardeildir",
+        "bekkjardeild",
+        "fjöldi nemenda á kennara",
+        "nemendur á hvern kennara",
+        "meðalfjöldi nemenda í bekk"
+      ]
+    },
+    {
+      "id": "school_days",
+      "role": "topic",
+      "aliases": [
+        "school days",
+        "number of school days",
+        "instruction time",
+        "teaching hours",
+        "lessons per week",
+        "length of school year",
+        "skóladagar",
+        "skóladaga",
+        "skóladögum",
+        "fjöldi skóladaga",
+        "kennslustundir",
+        "kennslustunda",
+        "nemendastundir",
+        "kennslustundir á viku"
+      ],
+      "search_terms": "school days instruction time",
+      "table_paths": [
+        "Samfelag/skolamal/2_grunnskolastig"
+      ],
+      "table_phrases": [
+        "School days",
+        "Days at school",
+        "Skóladagar",
+        "Nemendastundir"
+      ],
+      "tables": [
+        "SKO02204",
+        "SKO02203",
+        "SKO02205"
+      ],
+      "broader": [
+        "primary_school"
+      ],
+      "concept": "school days",
+      "search": "school days instruction time",
+      "terms": [
+        "school days",
+        "number of school days",
+        "instruction time",
+        "teaching hours",
+        "lessons per week",
+        "length of school year",
+        "skóladagar",
+        "skóladaga",
+        "skóladögum",
+        "fjöldi skóladaga",
+        "kennslustundir",
+        "kennslustunda",
+        "nemendastundir",
+        "kennslustundir á viku"
+      ]
+    },
+    {
+      "id": "private_schools",
+      "role": "topic",
+      "aliases": [
+        "private schools",
+        "private compulsory schools",
+        "independent schools",
+        "public and private schools",
+        "school ownership",
+        "privately run schools",
+        "einkaskólar",
+        "einkaskóla",
+        "einkaskólum",
+        "einkareknir skólar",
+        "sjálfstætt starfandi skólar",
+        "sjálfstætt reknir skólar",
+        "rekstrarform skóla",
+        "rekstrarform grunnskóla"
+      ],
+      "search_terms": "private public schools",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "table_phrases": [
+        "Private, public",
+        "private and public",
+        "Rekstrarform"
+      ],
+      "tables": [
+        "SKO02202",
+        "SKO00006"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "private schools",
+      "search": "private public schools",
+      "terms": [
+        "private schools",
+        "private compulsory schools",
+        "independent schools",
+        "public and private schools",
+        "school ownership",
+        "privately run schools",
+        "einkaskólar",
+        "einkaskóla",
+        "einkaskólum",
+        "einkareknir skólar",
+        "sjálfstætt starfandi skólar",
+        "sjálfstætt reknir skólar",
+        "rekstrarform skóla",
+        "rekstrarform grunnskóla"
+      ]
+    },
+    {
+      "id": "matriculation",
+      "role": "topic",
+      "aliases": [
+        "matriculation",
+        "matriculation examination",
+        "matriculation exam",
+        "students passing matriculation",
+        "high school graduates",
+        "upper secondary graduates",
+        "stúdentspróf",
+        "stúdentsprófi",
+        "stúdentsprófs",
+        "stúdentar",
+        "stúdenta",
+        "brautskráðir stúdentar",
+        "nýstúdentar",
+        "útskrifaðir stúdentar"
+      ],
+      "search_terms": "matriculation examination students",
+      "table_paths": [
+        "Samfelag/skolamal/3_framhaldsskolastig"
+      ],
+      "table_phrases": [
+        "matriculation examination",
+        "Brautskráðir stúdentar"
+      ],
+      "tables": [
+        "SKO03200",
+        "SKO03201",
+        "SKO03204"
+      ],
+      "broader": [
+        "secondary_school",
+        "graduations"
+      ],
+      "concept": "matriculation",
+      "search": "matriculation examination students",
+      "terms": [
+        "matriculation",
+        "matriculation examination",
+        "matriculation exam",
+        "students passing matriculation",
+        "high school graduates",
+        "upper secondary graduates",
+        "stúdentspróf",
+        "stúdentsprófi",
+        "stúdentsprófs",
+        "stúdentar",
+        "stúdenta",
+        "brautskráðir stúdentar",
+        "nýstúdentar",
+        "útskrifaðir stúdentar"
+      ]
+    },
+    {
+      "id": "vocational_education",
+      "role": "topic",
+      "aliases": [
+        "vocational education",
+        "vocational training",
+        "vocational programmes",
+        "vocational students",
+        "apprenticeship",
+        "trades",
+        "starfsnám",
+        "starfsnámi",
+        "starfsnáms",
+        "iðnnám",
+        "iðnnámi",
+        "iðnnáms",
+        "verknám",
+        "nemendur í starfsnámi"
+      ],
+      "search_terms": "vocational programmes type education",
+      "table_paths": [
+        "Samfelag/skolamal/3_framhaldsskolastig"
+      ],
+      "table_phrases": [
+        "vocational",
+        "type of education",
+        "starfsnámi",
+        "tegund náms"
+      ],
+      "tables": [
+        "SKO03107b",
+        "SKO03206",
+        "SKO03206c"
+      ],
+      "broader": [
+        "secondary_school"
+      ],
+      "concept": "vocational education",
+      "search": "vocational programmes type education",
+      "terms": [
+        "vocational education",
+        "vocational training",
+        "vocational programmes",
+        "vocational students",
+        "apprenticeship",
+        "trades",
+        "starfsnám",
+        "starfsnámi",
+        "starfsnáms",
+        "iðnnám",
+        "iðnnámi",
+        "iðnnáms",
+        "verknám",
+        "nemendur í starfsnámi"
+      ]
+    },
+    {
+      "id": "field_of_study",
+      "role": "topic",
+      "aliases": [
+        "field of study",
+        "fields of study",
+        "study programme",
+        "what people study",
+        "students by field",
+        "subject area",
+        "námssvið",
+        "námssviði",
+        "námssviðum",
+        "fræðasvið",
+        "fræðasviði",
+        "námsbraut",
+        "námsbrautir",
+        "námsbrautum"
+      ],
+      "search_terms": "field of study students",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "table_phrases": [
+        "field of study",
+        "fields of study",
+        "sviði náms",
+        "námsbraut"
+      ],
+      "tables": [
+        "SKO04106",
+        "SKO04205",
+        "SKO03107"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "field of study",
+      "search": "field of study students",
+      "terms": [
+        "field of study",
+        "fields of study",
+        "study programme",
+        "what people study",
+        "students by field",
+        "subject area",
+        "námssvið",
+        "námssviði",
+        "námssviðum",
+        "fræðasvið",
+        "fræðasviði",
+        "námsbraut",
+        "námsbrautir",
+        "námsbrautum"
+      ]
+    },
+    {
+      "id": "students_abroad",
+      "role": "topic",
+      "aliases": [
+        "students abroad",
+        "studying abroad",
+        "Icelandic students abroad",
+        "study abroad",
+        "students overseas",
+        "Icelanders studying abroad",
+        "nám erlendis",
+        "námsmenn erlendis",
+        "nemendur erlendis",
+        "nemendur í námi erlendis",
+        "íslenskir námsmenn erlendis",
+        "nám í útlöndum",
+        "háskólanám erlendis"
+      ],
+      "search_terms": "students abroad country",
+      "table_paths": [
+        "Samfelag/skolamal/4_haskolastig"
+      ],
+      "table_phrases": [
+        "Students abroad",
+        "námi erlendis"
+      ],
+      "tables": [
+        "SKO04107"
+      ],
+      "broader": [
+        "university"
+      ],
+      "concept": "students abroad",
+      "search": "students abroad country",
+      "terms": [
+        "students abroad",
+        "studying abroad",
+        "Icelandic students abroad",
+        "study abroad",
+        "students overseas",
+        "Icelanders studying abroad",
+        "nám erlendis",
+        "námsmenn erlendis",
+        "nemendur erlendis",
+        "nemendur í námi erlendis",
+        "íslenskir námsmenn erlendis",
+        "nám í útlöndum",
+        "háskólanám erlendis"
+      ]
+    },
+    {
+      "id": "university_degrees",
+      "role": "topic",
+      "aliases": [
+        "university degrees",
+        "bachelor degrees",
+        "master degrees",
+        "bachelor's degree",
+        "master's degree",
+        "graduations by degree",
+        "prófgráða",
+        "prófgráður",
+        "prófgráðu",
+        "bakkalárpróf",
+        "meistarapróf",
+        "meistaragráða",
+        "bakkalárgráða",
+        "háskólagráður"
+      ],
+      "search_terms": "graduations tertiary diploma degree",
+      "table_paths": [
+        "Samfelag/skolamal/4_haskolastig"
+      ],
+      "table_phrases": [
+        "diploma and degree",
+        "prófgráðu",
+        "tertiary level and doctorate level"
+      ],
+      "tables": [
+        "SKO04203",
+        "SKO04205",
+        "SKO04205b"
+      ],
+      "broader": [
+        "university",
+        "graduations"
+      ],
+      "concept": "university degrees",
+      "search": "graduations tertiary diploma degree",
+      "terms": [
+        "university degrees",
+        "bachelor degrees",
+        "master degrees",
+        "bachelor's degree",
+        "master's degree",
+        "graduations by degree",
+        "prófgráða",
+        "prófgráður",
+        "prófgráðu",
+        "bakkalárpróf",
+        "meistarapróf",
+        "meistaragráða",
+        "bakkalárgráða",
+        "háskólagráður"
+      ]
+    },
+    {
+      "id": "doctorates",
+      "role": "topic",
+      "aliases": [
+        "doctorate",
+        "doctorates",
+        "doctoral degree",
+        "doctoral degrees",
+        "PhD",
+        "PhD graduates",
+        "doctoral graduates",
+        "doktorspróf",
+        "doktorsprófi",
+        "doktorsgráða",
+        "doktorsgráður",
+        "doktorsgráðu",
+        "doktorsvarnir",
+        "doktorsvörn"
+      ],
+      "search_terms": "doctorate level degree",
+      "table_paths": [
+        "Samfelag/skolamal/4_haskolastig"
+      ],
+      "table_phrases": [
+        "doctorate level",
+        "doctoral degree",
+        "doktorsstigi",
+        "Doktorsvarnir"
+      ],
+      "tables": [
+        "SKO04203",
+        "SKO04210",
+        "SKO04212"
+      ],
+      "broader": [
+        "university",
+        "graduations"
+      ],
+      "concept": "doctorates",
+      "search": "doctorate level degree",
+      "terms": [
+        "doctorate",
+        "doctorates",
+        "doctoral degree",
+        "doctoral degrees",
+        "PhD",
+        "PhD graduates",
+        "doctoral graduates",
+        "doktorspróf",
+        "doktorsprófi",
+        "doktorsgráða",
+        "doktorsgráður",
+        "doktorsgráðu",
+        "doktorsvarnir",
+        "doktorsvörn"
+      ]
+    },
+    {
+      "id": "university_completion",
+      "role": "topic",
+      "aliases": [
+        "university completion rate",
+        "tertiary completion",
+        "bachelor completion",
+        "university dropout",
+        "retention rate",
+        "dropout from university",
+        "brautskráningarhlutfall háskóla",
+        "brottfall úr háskóla",
+        "brotthvarf úr háskóla",
+        "brotthvarf á háskólastigi",
+        "brautskráningarhlutfall",
+        "endurinnritunarhlutfall",
+        "námsframvinda í háskóla"
+      ],
+      "search_terms": "completion rate tertiary bachelor",
+      "table_paths": [
+        "Samfelag/skolamal/4_haskolastig"
+      ],
+      "table_phrases": [
+        "Completion rate",
+        "tertiary education",
+        "Bachelor programmes",
+        "Brautskráningarhlutfall"
+      ],
+      "tables": [
+        "SKO04206",
+        "SKO04207",
+        "SKO04126"
+      ],
+      "broader": [
+        "university",
+        "dropout"
+      ],
+      "concept": "university completion",
+      "search": "completion rate tertiary bachelor",
+      "terms": [
+        "university completion rate",
+        "tertiary completion",
+        "bachelor completion",
+        "university dropout",
+        "retention rate",
+        "dropout from university",
+        "brautskráningarhlutfall háskóla",
+        "brottfall úr háskóla",
+        "brotthvarf úr háskóla",
+        "brotthvarf á háskólastigi",
+        "brautskráningarhlutfall",
+        "endurinnritunarhlutfall",
+        "námsframvinda í háskóla"
+      ]
+    },
+    {
+      "id": "upper_secondary_teachers",
+      "role": "topic",
+      "aliases": [
+        "upper secondary teachers",
+        "secondary school teachers",
+        "high school teachers",
+        "upper secondary staff",
+        "upper secondary personnel",
+        "teachers in upper secondary schools",
+        "framhaldsskólakennarar",
+        "framhaldsskólakennara",
+        "framhaldsskólakennurum",
+        "starfsfólk framhaldsskóla",
+        "starfsfólk í framhaldsskólum",
+        "kennarar í framhaldsskólum",
+        "kennarar framhaldsskóla"
+      ],
+      "search_terms": "educational personnel upper secondary",
+      "table_paths": [
+        "Samfelag/skolamal/3_framhaldsskolastig"
+      ],
+      "table_phrases": [
+        "Educational personnel",
+        "upper secondary level",
+        "Starfsfólk við kennslu"
+      ],
+      "tables": [
+        "SKO03305",
+        "SKO03306",
+        "SKO03307"
+      ],
+      "broader": [
+        "secondary_school"
+      ],
+      "concept": "upper secondary teachers",
+      "search": "educational personnel upper secondary",
+      "terms": [
+        "upper secondary teachers",
+        "secondary school teachers",
+        "high school teachers",
+        "upper secondary staff",
+        "upper secondary personnel",
+        "teachers in upper secondary schools",
+        "framhaldsskólakennarar",
+        "framhaldsskólakennara",
+        "framhaldsskólakennurum",
+        "starfsfólk framhaldsskóla",
+        "starfsfólk í framhaldsskólum",
+        "kennarar í framhaldsskólum",
+        "kennarar framhaldsskóla"
+      ]
+    },
+    {
+      "id": "university_staff",
+      "role": "topic",
+      "aliases": [
+        "university staff",
+        "university personnel",
+        "university teachers",
+        "academic staff",
+        "professors",
+        "lecturers",
+        "starfsfólk háskóla",
+        "starfsfólk í háskólum",
+        "háskólakennarar",
+        "háskólakennara",
+        "prófessorar",
+        "prófessora",
+        "lektorar",
+        "akademískt starfsfólk"
+      ],
+      "search_terms": "personnel occupation school",
+      "table_paths": [
+        "Samfelag/skolamal/4_haskolastig"
+      ],
+      "table_phrases": [
+        "Personnel by occupation",
+        "Starfsfólk eftir starfsheiti",
+        "location of school"
+      ],
+      "tables": [
+        "SKO04301",
+        "SKO04302"
+      ],
+      "broader": [
+        "university"
+      ],
+      "concept": "university staff",
+      "search": "personnel occupation school",
+      "terms": [
+        "university staff",
+        "university personnel",
+        "university teachers",
+        "academic staff",
+        "professors",
+        "lecturers",
+        "starfsfólk háskóla",
+        "starfsfólk í háskólum",
+        "háskólakennarar",
+        "háskólakennara",
+        "prófessorar",
+        "prófessora",
+        "lektorar",
+        "akademískt starfsfólk"
+      ]
+    },
+    {
+      "id": "new_entrants",
+      "role": "topic",
+      "aliases": [
+        "new entrants",
+        "new students",
+        "first year students",
+        "freshmen",
+        "new university students",
+        "entry rate",
+        "nýnemar",
+        "nýnema",
+        "nýnemum",
+        "nýnemar í háskóla",
+        "nýnemar á háskólastigi",
+        "nýnemar í framhaldsskóla",
+        "nýir nemendur",
+        "innritunarhlutfall"
+      ],
+      "search_terms": "new entrants tertiary level",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "table_phrases": [
+        "New entrants",
+        "Nýnemar",
+        "entry rate"
+      ],
+      "tables": [
+        "SKO04121",
+        "SKO03109",
+        "SKO04128"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "new entrants",
+      "search": "new entrants tertiary level",
+      "terms": [
+        "new entrants",
+        "new students",
+        "first year students",
+        "freshmen",
+        "new university students",
+        "entry rate",
+        "nýnemar",
+        "nýnema",
+        "nýnemum",
+        "nýnemar í háskóla",
+        "nýnemar á háskólastigi",
+        "nýnemar í framhaldsskóla",
+        "nýir nemendur",
+        "innritunarhlutfall"
+      ]
+    },
+    {
+      "id": "income_by_education",
+      "role": "topic",
+      "aliases": [
+        "income by education",
+        "earnings by education",
+        "education and income",
+        "does education pay",
+        "income by educational attainment",
+        "graduate earnings",
+        "tekjur eftir menntun",
+        "tekjur eftir menntunarstigi",
+        "tekjur og menntun",
+        "laun eftir menntun",
+        "menntun og tekjur",
+        "tekjur háskólamenntaðra",
+        "tekjur eftir menntunarstöðu"
+      ],
+      "search_terms": "income education sex age",
+      "table_paths": [
+        "Samfelag/skolamal/0_yfirlit"
+      ],
+      "table_phrases": [
+        "Income by education",
+        "Tekjur eftir menntun"
+      ],
+      "tables": [
+        "SKO00031"
+      ],
+      "broader": [
+        "education",
+        "income"
+      ],
+      "concept": "income by education",
+      "search": "income education sex age",
+      "terms": [
+        "income by education",
+        "earnings by education",
+        "education and income",
+        "does education pay",
+        "income by educational attainment",
+        "graduate earnings",
+        "tekjur eftir menntun",
+        "tekjur eftir menntunarstigi",
+        "tekjur og menntun",
+        "laun eftir menntun",
+        "menntun og tekjur",
+        "tekjur háskólamenntaðra",
+        "tekjur eftir menntunarstöðu"
+      ]
+    },
+    {
+      "id": "foreign_languages_school",
+      "role": "topic",
+      "aliases": [
+        "foreign languages",
+        "foreign language learning",
+        "languages studied",
+        "language teaching",
+        "pupils learning English",
+        "pupils learning Danish",
+        "erlend tungumál",
+        "erlend tungumál í grunnskóla",
+        "tungumálanám",
+        "tungumálakennsla",
+        "nemendur sem læra erlend tungumál",
+        "enskunám",
+        "dönskunám",
+        "fjöldi tungumála"
+      ],
+      "search_terms": "foreign languages studied students",
+      "table_paths": [
+        "Samfelag/skolamal"
+      ],
+      "table_phrases": [
+        "foreign language",
+        "erlend tungumál",
+        "erlent tungumál"
+      ],
+      "tables": [
+        "SKO02110",
+        "SKO02109",
+        "SKO03111"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "foreign languages school",
+      "search": "foreign languages studied students",
+      "terms": [
+        "foreign languages",
+        "foreign language learning",
+        "languages studied",
+        "language teaching",
+        "pupils learning English",
+        "pupils learning Danish",
+        "erlend tungumál",
+        "erlend tungumál í grunnskóla",
+        "tungumálanám",
+        "tungumálakennsla",
+        "nemendur sem læra erlend tungumál",
+        "enskunám",
+        "dönskunám",
+        "fjöldi tungumála"
+      ]
+    },
+    {
+      "id": "distance_learning",
+      "role": "topic",
+      "aliases": [
+        "distance learning",
+        "distance education",
+        "mode of teaching",
+        "evening school",
+        "online students",
+        "remote study",
+        "fjarnám",
+        "fjarnámi",
+        "fjarnáms",
+        "fjarnemar",
+        "fjarnema",
+        "kennsluform",
+        "kvöldskóli",
+        "nemendur í fjarnámi"
+      ],
+      "search_terms": "students mode of teaching",
+      "table_paths": [
+        "Samfelag/skolamal/0_yfirlit"
+      ],
+      "table_phrases": [
+        "mode of teaching",
+        "kennsluformi"
+      ],
+      "tables": [
+        "SKO00005b",
+        "SKO00003b"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "distance learning",
+      "search": "students mode of teaching",
+      "terms": [
+        "distance learning",
+        "distance education",
+        "mode of teaching",
+        "evening school",
+        "online students",
+        "remote study",
+        "fjarnám",
+        "fjarnámi",
+        "fjarnáms",
+        "fjarnemar",
+        "fjarnema",
+        "kennsluform",
+        "kvöldskóli",
+        "nemendur í fjarnámi"
+      ]
+    },
+    {
+      "id": "lifelong_learning",
+      "role": "topic",
+      "aliases": [
+        "lifelong learning",
+        "adult education",
+        "continuing education",
+        "adult learning",
+        "participation in lifelong learning",
+        "further education",
+        "símenntun",
+        "símenntunar",
+        "símenntun fullorðinna",
+        "fullorðinsfræðsla",
+        "fullorðinsfræðslu",
+        "endurmenntun",
+        "endurmenntunar",
+        "þátttaka í símenntun"
+      ],
+      "search_terms": "participation lifelong learning",
+      "table_paths": [
+        "Samfelag/skolamal/6_simenntun"
+      ],
+      "table_phrases": [
+        "lifelong learning",
+        "Símenntun"
+      ],
+      "tables": [
+        "SKO00021",
+        "SKO00022"
+      ],
+      "broader": [
+        "education"
+      ],
+      "concept": "lifelong learning",
+      "search": "participation lifelong learning",
+      "terms": [
+        "lifelong learning",
+        "adult education",
+        "continuing education",
+        "adult learning",
+        "participation in lifelong learning",
+        "further education",
+        "símenntun",
+        "símenntunar",
+        "símenntun fullorðinna",
+        "fullorðinsfræðsla",
+        "fullorðinsfræðslu",
+        "endurmenntun",
+        "endurmenntunar",
+        "þátttaka í símenntun"
+      ]
+    },
+    {
+      "id": "catch_value",
+      "role": "topic",
+      "aliases": [
+        "catch value",
+        "value of catch",
+        "catch and value",
+        "landed value",
+        "value of landings",
+        "fish catch value",
+        "aflaverðmæti",
+        "aflaverðmætis",
+        "aflaverðmætið",
+        "verðmæti afla",
+        "verðmæti aflans",
+        "afli og verðmæti",
+        "verðmæti sjávarafla"
+      ],
+      "search_terms": "catch value species",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur/aflatolur"
+      ],
+      "table_phrases": [
+        "Catch and value",
+        "Afli og verðmæti",
+        "aflaverðmæti"
+      ],
+      "tables": [
+        "SJA09001",
+        "SJA02202",
+        "SJA09020"
+      ],
+      "broader": [
+        "fisheries"
+      ],
+      "concept": "catch value",
+      "search": "catch value species",
+      "terms": [
+        "catch value",
+        "value of catch",
+        "catch and value",
+        "landed value",
+        "value of landings",
+        "fish catch value",
+        "aflaverðmæti",
+        "aflaverðmætis",
+        "aflaverðmætið",
+        "verðmæti afla",
+        "verðmæti aflans",
+        "afli og verðmæti",
+        "verðmæti sjávarafla"
+      ]
+    },
+    {
+      "id": "catch_by_species",
+      "role": "topic",
+      "aliases": [
+        "catch by species",
+        "cod catch",
+        "capelin catch",
+        "herring catch",
+        "mackerel catch",
+        "total catch",
+        "afli eftir tegundum",
+        "afli eftir fisktegundum",
+        "þorskafli",
+        "þorskafla",
+        "loðnuafli",
+        "síldarafli",
+        "makrílafli",
+        "heildarafli"
+      ],
+      "search_terms": "catch species fishing areas",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur/aflatolur"
+      ],
+      "table_phrases": [
+        "Catch of Icelandic vessels",
+        "by species",
+        "eftir fisktegundum",
+        "Afli íslenskra fiskiskipa"
+      ],
+      "tables": [
+        "SJA09005",
+        "SJA09001",
+        "SJA01102"
+      ],
+      "broader": [
+        "fish_catch"
+      ],
+      "concept": "catch by species",
+      "search": "catch species fishing areas",
+      "terms": [
+        "catch by species",
+        "cod catch",
+        "capelin catch",
+        "herring catch",
+        "mackerel catch",
+        "total catch",
+        "afli eftir tegundum",
+        "afli eftir fisktegundum",
+        "þorskafli",
+        "þorskafla",
+        "loðnuafli",
+        "síldarafli",
+        "makrílafli",
+        "heildarafli"
+      ]
+    },
+    {
+      "id": "fishing_fleet",
+      "role": "topic",
+      "aliases": [
+        "fishing fleet",
+        "fishing vessels",
+        "number of fishing vessels",
+        "trawlers",
+        "fishing boats",
+        "decked vessels",
+        "fiskiskip",
+        "fiskiskipa",
+        "fiskiskipaflotinn",
+        "fiskiskipaflotans",
+        "togarar",
+        "togara",
+        "vélskip",
+        "fjöldi fiskiskipa"
+      ],
+      "search_terms": "fishing vessels region type",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur/skip"
+      ],
+      "table_phrases": [
+        "fishing vessels",
+        "Fiskiskipaflotinn",
+        "Trawlers",
+        "togarar"
+      ],
+      "tables": [
+        "SJA05001",
+        "SJA05004",
+        "SJA05002"
+      ],
+      "broader": [
+        "fisheries"
+      ],
+      "concept": "fishing fleet",
+      "search": "fishing vessels region type",
+      "terms": [
+        "fishing fleet",
+        "fishing vessels",
+        "number of fishing vessels",
+        "trawlers",
+        "fishing boats",
+        "decked vessels",
+        "fiskiskip",
+        "fiskiskipa",
+        "fiskiskipaflotinn",
+        "fiskiskipaflotans",
+        "togarar",
+        "togara",
+        "vélskip",
+        "fjöldi fiskiskipa"
+      ]
+    },
+    {
+      "id": "coastal_fishing",
+      "role": "topic",
+      "aliases": [
+        "coastal fishing",
+        "small boats",
+        "undecked vessels",
+        "open boats",
+        "small boat fishing",
+        "boat operating accounts",
+        "strandveiðar",
+        "strandveiða",
+        "strandveiðum",
+        "strandveiðibátar",
+        "smábátar",
+        "smábáta",
+        "opnir fiskibátar",
+        "trillur"
+      ],
+      "search_terms": "coastal fishing undecked boats",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur"
+      ],
+      "table_phrases": [
+        "costal fishing",
+        "strandveiða",
+        "Undecked vessels",
+        "Opnir fiskibátar"
+      ],
+      "tables": [
+        "SJA08110",
+        "SJA05003",
+        "SJA08112"
+      ],
+      "broader": [
+        "fisheries"
+      ],
+      "concept": "coastal fishing",
+      "search": "coastal fishing undecked boats",
+      "terms": [
+        "coastal fishing",
+        "small boats",
+        "undecked vessels",
+        "open boats",
+        "small boat fishing",
+        "boat operating accounts",
+        "strandveiðar",
+        "strandveiða",
+        "strandveiðum",
+        "strandveiðibátar",
+        "smábátar",
+        "smábáta",
+        "opnir fiskibátar",
+        "trillur"
+      ]
+    },
+    {
+      "id": "fish_processing",
+      "role": "topic",
+      "aliases": [
+        "fish processing",
+        "fish processing industry",
+        "processing of catch",
+        "freezing",
+        "salting",
+        "disposal of catch",
+        "fiskvinnsla",
+        "fiskvinnslu",
+        "fiskvinnslur",
+        "vinnsla afla",
+        "ráðstöfun afla",
+        "frysting",
+        "söltun",
+        "fiskvinnslufyrirtæki"
+      ],
+      "search_terms": "fish processing type",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur"
+      ],
+      "table_phrases": [
+        "fish processing",
+        "processing type",
+        "fiskvinnslu",
+        "tegund vinnslu"
+      ],
+      "tables": [
+        "SJA08103",
+        "SJA09110",
+        "SJA09111"
+      ],
+      "broader": [
+        "fisheries"
+      ],
+      "concept": "fish processing",
+      "search": "fish processing type",
+      "terms": [
+        "fish processing",
+        "fish processing industry",
+        "processing of catch",
+        "freezing",
+        "salting",
+        "disposal of catch",
+        "fiskvinnsla",
+        "fiskvinnslu",
+        "fiskvinnslur",
+        "vinnsla afla",
+        "ráðstöfun afla",
+        "frysting",
+        "söltun",
+        "fiskvinnslufyrirtæki"
+      ]
+    },
+    {
+      "id": "fisheries_profitability",
+      "role": "topic",
+      "aliases": [
+        "fisheries profitability",
+        "profit in fishing",
+        "operating accounts of fishing",
+        "fishing company profits",
+        "fisheries earnings",
+        "net profit fishing",
+        "afkoma sjávarútvegs",
+        "afkoma sjávarútvegsins",
+        "hagnaður sjávarútvegs",
+        "hagnaður í sjávarútvegi",
+        "rekstur sjávarútvegs",
+        "rekstraryfirlit sjávarútvegs",
+        "rekstraryfirlit fiskveiða",
+        "afkoma fiskveiða"
+      ],
+      "search_terms": "operating accounts fishing profit",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur/afkomasja"
+      ],
+      "table_phrases": [
+        "Operating accounts",
+        "Net profit",
+        "Rekstraryfirlit",
+        "Efnahagsyfirlit sjávarútvegsins"
+      ],
+      "tables": [
+        "SJA08109",
+        "SJA08107",
+        "SJA08104"
+      ],
+      "broader": [
+        "fisheries"
+      ],
+      "concept": "fisheries profitability",
+      "search": "operating accounts fishing profit",
+      "terms": [
+        "fisheries profitability",
+        "profit in fishing",
+        "operating accounts of fishing",
+        "fishing company profits",
+        "fisheries earnings",
+        "net profit fishing",
+        "afkoma sjávarútvegs",
+        "afkoma sjávarútvegsins",
+        "hagnaður sjávarútvegs",
+        "hagnaður í sjávarútvegi",
+        "rekstur sjávarútvegs",
+        "rekstraryfirlit sjávarútvegs",
+        "rekstraryfirlit fiskveiða",
+        "afkoma fiskveiða"
+      ]
+    },
+    {
+      "id": "marine_exports",
+      "role": "topic",
+      "aliases": [
+        "marine exports",
+        "exports of marine products",
+        "seafood exports",
+        "fish exports",
+        "export of fish products",
+        "exported marine products",
+        "útflutningur sjávarafurða",
+        "útflutningi sjávarafurða",
+        "útflutningsverðmæti sjávarafurða",
+        "sjávarafurðir",
+        "sjávarafurða",
+        "sjávarafurðum",
+        "útfluttar sjávarafurðir",
+        "fiskútflutningur"
+      ],
+      "search_terms": "exported marine products countries",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur/utf"
+      ],
+      "table_phrases": [
+        "Exported marine products",
+        "marine products for export",
+        "Útflutningur sjávarafurða"
+      ],
+      "tables": [
+        "SJA04903",
+        "SJA04906",
+        "SJA04904"
+      ],
+      "broader": [
+        "fisheries",
+        "exports"
+      ],
+      "concept": "marine exports",
+      "search": "exported marine products countries",
+      "terms": [
+        "marine exports",
+        "exports of marine products",
+        "seafood exports",
+        "fish exports",
+        "export of fish products",
+        "exported marine products",
+        "útflutningur sjávarafurða",
+        "útflutningi sjávarafurða",
+        "útflutningsverðmæti sjávarafurða",
+        "sjávarafurðir",
+        "sjávarafurða",
+        "sjávarafurðum",
+        "útfluttar sjávarafurðir",
+        "fiskútflutningur"
+      ]
+    },
+    {
+      "id": "marine_product_prices",
+      "role": "topic",
+      "aliases": [
+        "marine product prices",
+        "price index of marine products",
+        "seafood prices",
+        "fish prices",
+        "fish price index",
+        "producer prices of marine products",
+        "verðvísitala sjávarafurða",
+        "verðvísitölur sjávarafurða",
+        "verð sjávarafurða",
+        "fiskverð",
+        "fiskverðs",
+        "verð á fiski",
+        "afurðaverð sjávarútvegs"
+      ],
+      "search_terms": "PPI subindices marine products",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur/verdvisitolursjav"
+      ],
+      "table_phrases": [
+        "PPI subindices for marine products",
+        "Verðvísitölur sjávarafurða"
+      ],
+      "tables": [
+        "SJA06100"
+      ],
+      "broader": [
+        "fisheries",
+        "producer_prices"
+      ],
+      "concept": "marine product prices",
+      "search": "PPI subindices marine products",
+      "terms": [
+        "marine product prices",
+        "price index of marine products",
+        "seafood prices",
+        "fish prices",
+        "fish price index",
+        "producer prices of marine products",
+        "verðvísitala sjávarafurða",
+        "verðvísitölur sjávarafurða",
+        "verð sjávarafurða",
+        "fiskverð",
+        "fiskverðs",
+        "verð á fiski",
+        "afurðaverð sjávarútvegs"
+      ]
+    },
+    {
+      "id": "landings_by_harbour",
+      "role": "topic",
+      "aliases": [
+        "landings by harbour",
+        "landing ports",
+        "place of landing",
+        "catch by harbour",
+        "catch by home harbour",
+        "landings by region",
+        "löndunarhafnir",
+        "löndunarhöfn",
+        "löndunarhöfnum",
+        "landanir",
+        "afli eftir höfnum",
+        "heimahöfn",
+        "heimahafnir"
+      ],
+      "search_terms": "catch place of landing harbour",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur/aflatolur"
+      ],
+      "table_phrases": [
+        "place of landing",
+        "home harbour",
+        "löndunarhöfn",
+        "heimahöfnum"
+      ],
+      "tables": [
+        "SJA09042",
+        "SJA09020",
+        "SJA09040"
+      ],
+      "broader": [
+        "fish_catch"
+      ],
+      "concept": "landings by harbour",
+      "search": "catch place of landing harbour",
+      "terms": [
+        "landings by harbour",
+        "landing ports",
+        "place of landing",
+        "catch by harbour",
+        "catch by home harbour",
+        "landings by region",
+        "löndunarhafnir",
+        "löndunarhöfn",
+        "löndunarhöfnum",
+        "landanir",
+        "afli eftir höfnum",
+        "heimahöfn",
+        "heimahafnir"
+      ]
+    },
+    {
+      "id": "foreign_landings",
+      "role": "topic",
+      "aliases": [
+        "foreign vessel landings",
+        "landings by foreign vessels",
+        "foreign ships landing in Iceland",
+        "foreign catch landed",
+        "foreign fishing vessels",
+        "landanir erlendra skipa",
+        "löndun erlendra skipa",
+        "erlend skip",
+        "erlendra skipa",
+        "erlend fiskiskip",
+        "afli erlendra skipa",
+        "landanir erlendra fiskiskipa"
+      ],
+      "search_terms": "landing foreign vessels species",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur/innf"
+      ],
+      "table_phrases": [
+        "foreign vessels",
+        "erlendra skipa"
+      ],
+      "tables": [
+        "SJA04001",
+        "SJA04003"
+      ],
+      "broader": [
+        "fisheries"
+      ],
+      "concept": "foreign landings",
+      "search": "landing foreign vessels species",
+      "terms": [
+        "foreign vessel landings",
+        "landings by foreign vessels",
+        "foreign ships landing in Iceland",
+        "foreign catch landed",
+        "foreign fishing vessels",
+        "landanir erlendra skipa",
+        "löndun erlendra skipa",
+        "erlend skip",
+        "erlendra skipa",
+        "erlend fiskiskip",
+        "afli erlendra skipa",
+        "landanir erlendra fiskiskipa"
+      ]
+    },
+    {
+      "id": "whaling",
+      "role": "topic",
+      "aliases": [
+        "whaling",
+        "whale hunting",
+        "whale catch",
+        "whale products",
+        "whale meat exports",
+        "fin whale",
+        "minke whale",
+        "hvalveiðar",
+        "hvalveiða",
+        "hvalveiðum",
+        "hvalir",
+        "hvalaafurðir",
+        "langreyður",
+        "hrefna"
+      ],
+      "search_terms": "whaling export whale products",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur/aflatolur/kvotaflokkar"
+      ],
+      "table_phrases": [
+        "Whaling",
+        "Hvalveiðar",
+        "hvalaafurða"
+      ],
+      "tables": [
+        "SJA01110"
+      ],
+      "broader": [
+        "fisheries"
+      ],
+      "concept": "whaling",
+      "search": "whaling export whale products",
+      "terms": [
+        "whaling",
+        "whale hunting",
+        "whale catch",
+        "whale products",
+        "whale meat exports",
+        "fin whale",
+        "minke whale",
+        "hvalveiðar",
+        "hvalveiða",
+        "hvalveiðum",
+        "hvalir",
+        "hvalaafurðir",
+        "langreyður",
+        "hrefna"
+      ]
+    },
+    {
+      "id": "lumpfish",
+      "role": "topic",
+      "aliases": [
+        "lumpfish",
+        "lumpfish catch",
+        "lumpfish roe",
+        "lumpsucker",
+        "lumpfish fishing",
+        "hrognkelsi",
+        "hrognkelsa",
+        "hrognkelsaafli",
+        "hrognkelsisafli",
+        "grásleppa",
+        "grásleppu",
+        "grásleppuveiðar",
+        "grásleppuafli",
+        "rauðmagi"
+      ],
+      "search_terms": "catch value lumpfish",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur/aflatolur/londunartegundir"
+      ],
+      "table_phrases": [
+        "lumpfish",
+        "Hrognkelsisafli"
+      ],
+      "tables": [
+        "SJA09035"
+      ],
+      "broader": [
+        "fish_catch"
+      ],
+      "concept": "lumpfish",
+      "search": "catch value lumpfish",
+      "terms": [
+        "lumpfish",
+        "lumpfish catch",
+        "lumpfish roe",
+        "lumpsucker",
+        "lumpfish fishing",
+        "hrognkelsi",
+        "hrognkelsa",
+        "hrognkelsaafli",
+        "hrognkelsisafli",
+        "grásleppa",
+        "grásleppu",
+        "grásleppuveiðar",
+        "grásleppuafli",
+        "rauðmagi"
+      ]
+    },
+    {
+      "id": "aquaculture_exports",
+      "role": "topic",
+      "aliases": [
+        "aquaculture exports",
+        "export of farmed fish",
+        "farmed salmon exports",
+        "salmon exports",
+        "export of aquaculture products",
+        "farmed fish sold abroad",
+        "útflutningur eldisfisks",
+        "útflutningur á eldisfiski",
+        "eldisfiskur",
+        "eldisfisks",
+        "eldislax",
+        "laxaútflutningur",
+        "útflutningur á laxi"
+      ],
+      "search_terms": "export aquaculture products countries",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur"
+      ],
+      "table_phrases": [
+        "aquaculture products",
+        "eldisfisk"
+      ],
+      "tables": [
+        "SJA07003",
+        "SJA04905"
+      ],
+      "broader": [
+        "aquaculture",
+        "exports"
+      ],
+      "concept": "aquaculture exports",
+      "search": "export aquaculture products countries",
+      "terms": [
+        "aquaculture exports",
+        "export of farmed fish",
+        "farmed salmon exports",
+        "salmon exports",
+        "export of aquaculture products",
+        "farmed fish sold abroad",
+        "útflutningur eldisfisks",
+        "útflutningur á eldisfiski",
+        "eldisfiskur",
+        "eldisfisks",
+        "eldislax",
+        "laxaútflutningur",
+        "útflutningur á laxi"
+      ]
+    },
+    {
+      "id": "world_catch",
+      "role": "topic",
+      "aliases": [
+        "world catch",
+        "global fish catch",
+        "world fisheries",
+        "largest fishing nations",
+        "catch by country",
+        "Iceland share of world catch",
+        "heimsafli",
+        "heimsafla",
+        "heimsaflinn",
+        "afli í heiminum",
+        "aflahæstu ríki",
+        "aflahæstu þjóðir",
+        "afli annarra ríkja við Ísland"
+      ],
+      "search_terms": "world catch species states",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur/aflatolur/x_eldraefni"
+      ],
+      "table_phrases": [
+        "World catch",
+        "most productive",
+        "Heimsafli",
+        "aflahæstu ríkja"
+      ],
+      "tables": [
+        "SJA03003",
+        "SJA03005",
+        "SJA03001"
+      ],
+      "broader": [
+        "fisheries"
+      ],
+      "concept": "world catch",
+      "search": "world catch species states",
+      "terms": [
+        "world catch",
+        "global fish catch",
+        "world fisheries",
+        "largest fishing nations",
+        "catch by country",
+        "Iceland share of world catch",
+        "heimsafli",
+        "heimsafla",
+        "heimsaflinn",
+        "afli í heiminum",
+        "aflahæstu ríki",
+        "aflahæstu þjóðir",
+        "afli annarra ríkja við Ísland"
+      ]
+    },
+    {
+      "id": "fish_by_products",
+      "role": "topic",
+      "aliases": [
+        "by-products",
+        "fish by-products",
+        "byproducts of catch",
+        "fish offal",
+        "roe and liver",
+        "fish heads",
+        "aukaafurðir",
+        "aukaafurða",
+        "aukaafurðum",
+        "aukaafurðir afla",
+        "hliðarafurðir",
+        "hrogn og lifur",
+        "slóg",
+        "fiskhausar"
+      ],
+      "search_terms": "by-products species processing",
+      "table_paths": [
+        "Atvinnuvegir/sjavarutvegur/aflatolur/radsofun_afla_vinnsla"
+      ],
+      "table_phrases": [
+        "By-products",
+        "by-products",
+        "aukaafurða"
+      ],
+      "tables": [
+        "SJA09114",
+        "SJA09113"
+      ],
+      "broader": [
+        "fish_processing"
+      ],
+      "concept": "fish by products",
+      "search": "by-products species processing",
+      "terms": [
+        "by-products",
+        "fish by-products",
+        "byproducts of catch",
+        "fish offal",
+        "roe and liver",
+        "fish heads",
+        "aukaafurðir",
+        "aukaafurða",
+        "aukaafurðum",
+        "aukaafurðir afla",
+        "hliðarafurðir",
+        "hrogn og lifur",
+        "slóg",
+        "fiskhausar"
+      ]
+    },
+    {
+      "id": "bank_interest_rates",
+      "role": "topic",
+      "aliases": [
+        "bank interest rates",
+        "commercial bank interest rates",
+        "average interest rates",
+        "deposit interest rates",
+        "lending rates of banks",
+        "historical interest rates",
+        "vextir banka",
+        "vextir innlánsstofnana",
+        "meðalvextir",
+        "meðalársvextir",
+        "innlánsvextir",
+        "útlánsvextir",
+        "bankavextir"
+      ],
+      "search_terms": "weighted average interest rates",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar/fjarmalareikningar/peningamal"
+      ],
+      "table_phrases": [
+        "interest rates of commercial banks",
+        "meðalársvextir innlánsstofnana"
+      ],
+      "tables": [
+        "PEN01101"
+      ],
+      "broader": [
+        "interest_rates"
+      ],
+      "concept": "bank interest rates",
+      "search": "weighted average interest rates",
+      "terms": [
+        "bank interest rates",
+        "commercial bank interest rates",
+        "average interest rates",
+        "deposit interest rates",
+        "lending rates of banks",
+        "historical interest rates",
+        "vextir banka",
+        "vextir innlánsstofnana",
+        "meðalvextir",
+        "meðalársvextir",
+        "innlánsvextir",
+        "útlánsvextir",
+        "bankavextir"
+      ]
+    },
+    {
+      "id": "currency_rates",
+      "role": "topic",
+      "aliases": [
+        "dollar exchange rate",
+        "euro exchange rate",
+        "USD rate",
+        "EUR rate",
+        "average selling rate",
+        "dollar to krona",
+        "euro to krona",
+        "gengi dollars",
+        "gengi dollara",
+        "gengi evru",
+        "gengi evrunnar",
+        "dollaragengi",
+        "evrugengi",
+        "meðalsölugengi"
+      ],
+      "search_terms": "average selling rates USD EUR",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar/fjarmalareikningar/peningamal"
+      ],
+      "table_phrases": [
+        "selling rates of USD",
+        "Meðalsölugengi"
+      ],
+      "tables": [
+        "PEN02101"
+      ],
+      "broader": [
+        "exchange_rates"
+      ],
+      "concept": "currency rates",
+      "search": "average selling rates USD EUR",
+      "terms": [
+        "dollar exchange rate",
+        "euro exchange rate",
+        "USD rate",
+        "EUR rate",
+        "average selling rate",
+        "dollar to krona",
+        "euro to krona",
+        "gengi dollars",
+        "gengi dollara",
+        "gengi evru",
+        "gengi evrunnar",
+        "dollaragengi",
+        "evrugengi",
+        "meðalsölugengi"
+      ]
+    },
+    {
+      "id": "exchange_rate_index",
+      "role": "topic",
+      "aliases": [
+        "exchange rate index",
+        "exchange rate indices",
+        "trade weighted exchange rate",
+        "krona index",
+        "currency index",
+        "effective exchange rate",
+        "gengisvísitala",
+        "gengisvísitölu",
+        "gengisvísitölur",
+        "gengisvísitalan",
+        "vísitala gengis",
+        "gengi krónunnar",
+        "gengisþróun"
+      ],
+      "search_terms": "exchange rate indice",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar/fjarmalareikningar/peningamal"
+      ],
+      "table_phrases": [
+        "Exchange rate indice",
+        "Gengisvísitölur"
+      ],
+      "tables": [
+        "PEN02102"
+      ],
+      "broader": [
+        "exchange_rates"
+      ],
+      "concept": "exchange rate index",
+      "search": "exchange rate indice",
+      "terms": [
+        "exchange rate index",
+        "exchange rate indices",
+        "trade weighted exchange rate",
+        "krona index",
+        "currency index",
+        "effective exchange rate",
+        "gengisvísitala",
+        "gengisvísitölu",
+        "gengisvísitölur",
+        "gengisvísitalan",
+        "vísitala gengis",
+        "gengi krónunnar",
+        "gengisþróun"
+      ]
+    },
+    {
+      "id": "bank_deposits_lending",
+      "role": "topic",
+      "aliases": [
+        "bank deposits",
+        "deposits",
+        "bank lending",
+        "deposits and lending",
+        "loans of commercial banks",
+        "deposit taking corporations",
+        "innlán",
+        "innlána",
+        "útlán",
+        "útlána",
+        "innlán og útlán",
+        "útlán banka",
+        "innlán banka",
+        "innlánsstofnanir"
+      ],
+      "search_terms": "deposits lending commercial banks",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar/fjarmalareikningar/peningamal"
+      ],
+      "table_phrases": [
+        "Deposits and lending",
+        "Innlán og útlán",
+        "innlánsstofnana"
+      ],
+      "tables": [
+        "PEN01105",
+        "PEN01106"
+      ],
+      "broader": [
+        "financial_markets"
+      ],
+      "concept": "bank deposits lending",
+      "search": "deposits lending commercial banks",
+      "terms": [
+        "bank deposits",
+        "deposits",
+        "bank lending",
+        "deposits and lending",
+        "loans of commercial banks",
+        "deposit taking corporations",
+        "innlán",
+        "innlána",
+        "útlán",
+        "útlána",
+        "innlán og útlán",
+        "útlán banka",
+        "innlán banka",
+        "innlánsstofnanir"
+      ]
+    },
+    {
+      "id": "bank_lending_by_borrower",
+      "role": "topic",
+      "aliases": [
+        "lending by borrower",
+        "loans by sector",
+        "loans to households",
+        "loans to companies",
+        "household borrowing from banks",
+        "corporate loans",
+        "útlán eftir lántakendum",
+        "útlánaflokkun",
+        "útlán til heimila",
+        "útlán til fyrirtækja",
+        "lántakendur",
+        "lán til heimila",
+        "lán til fyrirtækja"
+      ],
+      "search_terms": "lending by borrowers sectoral",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar/fjarmalareikningar/peningamal"
+      ],
+      "table_phrases": [
+        "lending by borrowers",
+        "Útlánaflokkun",
+        "Lánaflokkun",
+        "Sectoral breakdown"
+      ],
+      "tables": [
+        "PEN01106",
+        "PEN03102"
+      ],
+      "broader": [
+        "financial_markets"
+      ],
+      "concept": "bank lending by borrower",
+      "search": "lending by borrowers sectoral",
+      "terms": [
+        "lending by borrower",
+        "loans by sector",
+        "loans to households",
+        "loans to companies",
+        "household borrowing from banks",
+        "corporate loans",
+        "útlán eftir lántakendum",
+        "útlánaflokkun",
+        "útlán til heimila",
+        "útlán til fyrirtækja",
+        "lántakendur",
+        "lán til heimila",
+        "lán til fyrirtækja"
+      ]
+    },
+    {
+      "id": "banking_system",
+      "role": "topic",
+      "aliases": [
+        "banking system",
+        "banking system accounts",
+        "bank balance sheet",
+        "commercial banks",
+        "savings banks",
+        "banks in Iceland",
+        "bankakerfið",
+        "bankakerfi",
+        "bankakerfisins",
+        "reikningar bankakerfisins",
+        "bankar",
+        "banka",
+        "viðskiptabankar"
+      ],
+      "search_terms": "account banking system",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar/fjarmalareikningar/peningamal"
+      ],
+      "table_phrases": [
+        "banking system",
+        "bankakerfisins",
+        "innlánsstofnana"
+      ],
+      "tables": [
+        "PEN01104",
+        "PEN01105",
+        "PEN01108"
+      ],
+      "broader": [
+        "financial_markets"
+      ],
+      "concept": "banking system",
+      "search": "account banking system",
+      "terms": [
+        "banking system",
+        "banking system accounts",
+        "bank balance sheet",
+        "commercial banks",
+        "savings banks",
+        "banks in Iceland",
+        "bankakerfið",
+        "bankakerfi",
+        "bankakerfisins",
+        "reikningar bankakerfisins",
+        "bankar",
+        "banka",
+        "viðskiptabankar"
+      ]
+    },
+    {
+      "id": "central_bank",
+      "role": "topic",
+      "aliases": [
+        "central bank",
+        "Central Bank of Iceland",
+        "central bank accounts",
+        "central bank balance sheet",
+        "foreign reserves",
+        "currency reserves",
+        "Seðlabanki",
+        "Seðlabankinn",
+        "Seðlabanka",
+        "Seðlabankans",
+        "Seðlabanki Íslands",
+        "reikningar Seðlabankans",
+        "gjaldeyrisforði"
+      ],
+      "search_terms": "Central Bank accounts summary",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar/fjarmalareikningar/peningamal"
+      ],
+      "table_phrases": [
+        "Central Bank accounts",
+        "Seðlabanka Íslands"
+      ],
+      "tables": [
+        "PEN01108"
+      ],
+      "broader": [
+        "financial_markets"
+      ],
+      "concept": "central bank",
+      "search": "Central Bank accounts summary",
+      "terms": [
+        "central bank",
+        "Central Bank of Iceland",
+        "central bank accounts",
+        "central bank balance sheet",
+        "foreign reserves",
+        "currency reserves",
+        "Seðlabanki",
+        "Seðlabankinn",
+        "Seðlabanka",
+        "Seðlabankans",
+        "Seðlabanki Íslands",
+        "reikningar Seðlabankans",
+        "gjaldeyrisforði"
+      ]
+    },
+    {
+      "id": "credit_undertakings",
+      "role": "topic",
+      "aliases": [
+        "credit undertakings",
+        "credit institutions",
+        "miscellaneous credit undertakings",
+        "non-bank lenders",
+        "housing financing fund",
+        "lending companies",
+        "lánafyrirtæki",
+        "lánafyrirtækja",
+        "lánafyrirtækjum",
+        "ýmis lánafyrirtæki",
+        "lánastofnanir",
+        "lánastofnana",
+        "Íbúðalánasjóður"
+      ],
+      "search_terms": "miscellaneous credit undertakings balance",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar/fjarmalareikningar/peningamal"
+      ],
+      "table_phrases": [
+        "credit undertakings",
+        "lánafyrirtækja"
+      ],
+      "tables": [
+        "PEN01107",
+        "PEN03102"
+      ],
+      "broader": [
+        "financial_markets"
+      ],
+      "concept": "credit undertakings",
+      "search": "miscellaneous credit undertakings balance",
+      "terms": [
+        "credit undertakings",
+        "credit institutions",
+        "miscellaneous credit undertakings",
+        "non-bank lenders",
+        "housing financing fund",
+        "lending companies",
+        "lánafyrirtæki",
+        "lánafyrirtækja",
+        "lánafyrirtækjum",
+        "ýmis lánafyrirtæki",
+        "lánastofnanir",
+        "lánastofnana",
+        "Íbúðalánasjóður"
+      ]
+    },
+    {
+      "id": "payment_intermediation",
+      "role": "topic",
+      "aliases": [
+        "payment intermediation",
+        "payment cards",
+        "card payments",
+        "debit cards",
+        "credit cards",
+        "card turnover",
+        "payment systems",
+        "greiðslumiðlun",
+        "greiðslumiðlunar",
+        "greiðslukort",
+        "greiðslukorta",
+        "kortavelta",
+        "kortaveltu",
+        "debetkort"
+      ],
+      "search_terms": "payment intermediation",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar/fjarmalareikningar/peningamal"
+      ],
+      "table_phrases": [
+        "Payment intermediation",
+        "Greiðslumiðlun"
+      ],
+      "tables": [
+        "PEN01102"
+      ],
+      "broader": [
+        "financial_markets"
+      ],
+      "concept": "payment intermediation",
+      "search": "payment intermediation",
+      "terms": [
+        "payment intermediation",
+        "payment cards",
+        "card payments",
+        "debit cards",
+        "credit cards",
+        "card turnover",
+        "payment systems",
+        "greiðslumiðlun",
+        "greiðslumiðlunar",
+        "greiðslukort",
+        "greiðslukorta",
+        "kortavelta",
+        "kortaveltu",
+        "debetkort"
+      ]
+    },
+    {
+      "id": "foreign_loans",
+      "role": "topic",
+      "aliases": [
+        "long-term foreign debt",
+        "foreign loans",
+        "foreign borrowing",
+        "external debt",
+        "long term foreign loans",
+        "foreign debt of Iceland",
+        "erlend lán",
+        "erlendra lána",
+        "erlendum lánum",
+        "löng erlend lán",
+        "erlendar skuldir",
+        "erlendra skulda",
+        "erlend lántaka"
+      ],
+      "search_terms": "long-term foreign debt",
+      "table_paths": [
+        "Efnahagur/thjodhagsreikningar/fjarmalareikningar/peningamal"
+      ],
+      "table_phrases": [
+        "Long-term foreign debt",
+        "Löng erlend lán"
+      ],
+      "tables": [
+        "PEN01103"
+      ],
+      "broader": [
+        "economy",
+        "debts"
+      ],
+      "concept": "foreign loans",
+      "search": "long-term foreign debt",
+      "terms": [
+        "long-term foreign debt",
+        "foreign loans",
+        "foreign borrowing",
+        "external debt",
+        "long term foreign loans",
+        "foreign debt of Iceland",
+        "erlend lán",
+        "erlendra lána",
+        "erlendum lánum",
+        "löng erlend lán",
+        "erlendar skuldir",
+        "erlendra skulda",
+        "erlend lántaka"
+      ]
     }
   ],
   "_about": "Bilingual search associations. concept/terms/search/tables are compatible with the tiered finder. id/role/aliases/search_terms/table_paths/table_phrases/broader/clarification provide richer metadata for role-aware consumers; the current harness does not automatically apply those fields. Terms are normalized and prefix-matched by the harness. Generic population hints are metadata-only; use explicit population phrases. Preferred IDs retain existing team choices and add selected financial/subject tables, not exhaustive lists. Subjective meanings and demographic thresholds still need clarification."

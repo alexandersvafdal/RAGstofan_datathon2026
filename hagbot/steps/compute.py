@@ -56,6 +56,21 @@ def compute(meta: TableMeta, rows: list[Row], res: Resolved, lang: str) -> tuple
                 comp = Computation(op=res.operation, expression=expr, result=best.value, unit=unit)
         return comp, facts
 
+    if res.operation == "sum":
+        # "Reykjavík and Kópavogur together": the chosen categories added up, per line of the other dimensions
+        for group in _groups(rows, dim).values():
+            present = sorted(group, key=order.index)
+            if len(present) < 2:
+                continue
+            total = sum(group[c].value for c in present)
+            names = " + ".join(group[c].labels[meta.var(dim).text] for c in present)
+            facts.append(Fact(label=f"{'Samtals' if lang == 'is' else 'Total'}: {names}", value=total, unit=unit,
+                              formatted=fmt_value(total, unit, lang)))
+            if comp is None:
+                comp = Computation(op="sum", expression=" + ".join(fmt_number(group[c].value, lang) for c in present),
+                                   result=total, unit=unit)
+        return comp, facts
+
     for group in _groups(rows, dim).values():
         if res.operation in ("difference", "pct_change"):
             present = sorted(group, key=order.index)

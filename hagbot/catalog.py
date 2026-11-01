@@ -71,7 +71,9 @@ class CatalogEntry(BaseModel):
         """The short description the reranker reads, with the options that match words in the question."""
         freq = "monthly" if "M" in self.last_period else "quarterly" if "Q" in self.last_period else "yearly"
         period = f" [{freq}, {self.first_period}–{self.last_period}]" if self.first_period else ""
-        card = f"{self.id}: {self.title_en}{period}. Dimensions: {', '.join(self.dimensions)}"
+        # the Icelandic title too: an Icelandic question's own words ("launavísitala", "byggðakjarnar") are on it
+        is_title = f" ({self.title_is})" if self.title_is and self.title_is != self.title_en else ""
+        card = f"{self.id}: {self.title_en}{is_title}{period}. Dimensions: {', '.join(self.dimensions)}"
         hits = self.matching_values(question)
         return card + (f". Has options: {', '.join(hits)}" if hits else "")
 
@@ -79,11 +81,18 @@ class CatalogEntry(BaseModel):
         words = [w for w in tokens(question) if len(w) >= MIN_PREFIX and w not in STOPWORDS and w not in SYNONYMS]
         out = []
         for label in self.values:
-            if any(t.startswith(w) or (w.startswith(t) and len(t) >= MIN_PREFIX) for t in tokens(label) for w in words):
+            if any(_same_word(t, w) for t in tokens(label) for w in words):
                 out.append(label)
                 if len(out) == limit:
                     break
         return out
+
+
+def _same_word(label_token: str, word: str) -> bool:
+    """A question word names an option: by prefix either way, or by a shared stem of 7+ letters, so "Kópavogur",
+    "Kópavogi" and "Hafnarfjörður" find "Kopavogsbaer" and "Hafnarfjardarkaupstadur"."""
+    return (label_token.startswith(word) or (word.startswith(label_token) and len(label_token) >= MIN_PREFIX)
+            or (len(label_token) >= 7 and len(word) >= 7 and label_token[:7] == word[:7]))
 
 
 def recency_factor(last_period: str, title: str = "") -> float:

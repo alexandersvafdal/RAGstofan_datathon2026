@@ -29,7 +29,7 @@ class Selection(BaseModel):
 
 class Resolved(BaseModel):
     selections: dict[str, list[str]]
-    operation: Op | Literal["rank"]  # rank: categories of a coded dimension, listed or largest first (set in code)
+    operation: Op | Literal["rank", "sum"]  # set in code: rank lists a coded dimension's categories, sum adds the chosen ones
     compare_dimension: str | None = None
     part: str | None = None
     whole: str | None = None
@@ -38,6 +38,7 @@ class Resolved(BaseModel):
     window_note: dict[str, str] | None = None  # en/is, when the period asked for starts before the table does
     breakdown: str | None = None  # rank: the coded dimension listed, so its categories can be opened further
     top: int | None = None        # rank: keep the n largest (by size, either sign); None lists them all
+    beyond: str | None = None     # a period asked for that lies after this table's last one ("2026M09" in a table to 2026M08)
 
 
 def _mention_order(var: Variable, codes: list[str], question: str) -> list[str] | None:
@@ -66,9 +67,11 @@ For every dimension choose the value codes the question needs, copied exactly fr
 Never compute anything yourself."""
 
 _INTENT = [  # cheap keyword check; overrides a "value" answer when the question clearly asks for a calculation
+    ("share", re.compile(r"(share|proportion|what part|percentage of|percent of|hlutfall|hluti)", re.I)),
     ("pct_change", re.compile(r"(percent|%|prosent)", re.I)),
-    ("share", re.compile(r"(share|proportion|what part|hlutfall|hluti)", re.I)),
-    ("difference", re.compile(r"(grow|grew|increase|decrease|declin|change|differ|fjolg|faekk|breyt|aukn|munur)", re.I)),
+    ("difference", re.compile(r"(grow|grew|increase|decrease|declin|change|differ|\brise|\brose|risen|\bfell|\bfall|\bdrop"
+                              r"|fjolg|faekk|breyt|aukn|munur|haekk|laekk)", re.I)),
+    ("sum", re.compile(r"(together|combined|altogether|in total|samtals|samanlagt|til samans)", re.I)),
 ]
 _ANNUAL_ASK = r"12 month|twelve month|\bannual|year on year|inflation|verdbolg|\bgrowth|hagvoxt|arsbreyt|tolf manud"
 _CHANGE_OPTION = r"annual change|12.month|change on previous year|change from previous year|arsbreyting|fra fyrra ari"
@@ -122,10 +125,21 @@ def _options_for_prompt(var: Variable, question: str) -> list[tuple[str, str]]:
 _IS_UNIT = {"year": "árin", "month": "mánuðina", "quarter": "ársfjórðungana"}
 
 
+_PERCENT_OPTION = r"(?<![\d.])%|\bpercent|prosent|change|breyting|hlutfall"   # an option that is a change, not a level
+_NUMBER_WORDS = {  # "síðustu tíu ár", "the last five years": the number spelt out, in the normalized spelling
+    "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "twelve": 12,
+    "fifteen": 15, "twenty": 20, "thirty": 30, "fifty": 50,
+    "tvo": 2, "tvau": 2, "tveggja": 2, "thrju": 3, "thriggja": 3, "fjogur": 4, "fjogurra": 4, "fimm": 5, "sex": 6, "sjo": 7,
+    "atta": 8, "niu": 9, "tiu": 10, "tolf": 12, "fimmtan": 15, "tuttugu": 20, "thrjatiu": 30, "fimmtiu": 50,
+}
+_NUMBER_WORD = re.compile(r"\b(" + "|".join(_NUMBER_WORDS) + r")\b")
+
+
 def _window(q: str) -> tuple[int, str] | None:
     """(n, "year" | "month" | "quarter") for "the last n years" and the like, in a normalized question."""
     if _DECADE.search(q):
         return 10, "year"
+    q = _NUMBER_WORD.sub(lambda m: str(_NUMBER_WORDS[m.group(1)]), q)
     m = _WINDOW.search(q)
     if not m:
         return None
@@ -173,7 +187,7 @@ def guess_op(question: str) -> str | None:
 
 def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | None = None) -> Resolved:
     """Map whatever the model returned onto valid codes; fill gaps with defaults."""
-    notes, out = [], {}
+    notes, out, beyond = [], {}, None
     by_key = {normalize(k): k for k in sel.selections}
     for var in meta.variables:
         raw = sel.selections.get(var.code) or sel.selections.get(by_key.get(normalize(var.text), ""), [])
@@ -183,6 +197,8 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                 if not _resolve_value(var, v) and (near := _same_year_edge(var, v)):
                     codes.append(near)
                     notes.append(f"{var.text}: {v} is outside the table, using {near}")
+                    if v > near:
+                        beyond = v
             raw = [v for v in raw if _resolve_value(var, v) or not _same_year_edge(var, v)]
         if len(codes) < len(raw):
             notes.append(f"{var.text}: dropped unknown values {[v for v in raw if not _resolve_value(var, v)]}")
@@ -227,7 +243,8 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             best = max(changes, key=lambda c: len(words & set(tokens(var.label_of(c)))))
             out[var.code] = [best]
             notes.append(f"{var.text}: the question asks for the annual change; using {var.label_of(best)!r}")
-    if op in ("difference", "pct_change") and any(
+    points = bool(re.search(r"\bstig\b|\bstigum\b|\bpoints?\b", q))   # "um hve mörg stig": the index itself, two periods
+    if op in ("difference", "pct_change") and not points and any(
             re.search(_CHANGE_OPTION, normalize(var.label_of(c))) for var in meta.variables if not var.time
             for c in out[var.code]):
         for var in meta.variables:
@@ -337,6 +354,24 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     if op == "value" and hint == "share":
         notes.append("operation value -> share (question wording)")
         op = "share"
+    if op == "pct_change" and re.search(r"\bstig\b|\bstigum\b|\bpoints?\b", q):   # "um hve mörg stig": index points, not %
+        notes.append("operation pct_change -> difference (points asked)")
+        op = "difference"
+    if op == "difference" and re.search(r"\bstig\b|\bstigum\b|\bpoints?\b", q):
+        # points are a difference of the index itself: a dimension chosen as "Annual change, %" goes back to the level
+        for var in meta.variables:
+            chosen = out.get(var.code) or []
+            if var.time or not chosen or not all(re.search(_PERCENT_OPTION, normalize(var.label_of(c))) for c in chosen):
+                continue
+            level = [c for c in var.values if not re.search(_PERCENT_OPTION, normalize(var.label_of(c)))]
+            if level:
+                notes.append(f"{var.text}: points asked, {var.label_of(level[0])!r} instead of {var.label_of(chosen[0])!r}")
+                out[var.code] = [level[0]]
+    if op == "value" and hint == "sum":   # "Reykjavík and Kópavogur together": the chosen categories added up
+        dim = next((c for c, v in out.items() if len(v) >= 2 and not meta.var(c).time), None)
+        if dim:
+            notes.append(f"operation value -> sum over {meta.var(dim).text} (question wording)")
+            op, compare = "sum", dim
     if op in ("difference", "pct_change", "share") and not compare:
         compare = next((c for c, v in out.items() if len(v) > 1), None)
     if op in ("difference", "pct_change") and (not compare or len(out[compare]) < 2):
@@ -358,6 +393,10 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
         var = meta.var(compare) if compare else None
         part = _resolve_value(var, sel.part or "") if var else None
         whole = _resolve_value(var, sel.whole or "") if var else None
+        if part and whole and var and {part, whole} - set(out[compare]):
+            # the model named the part and the whole but selected only one of them ("Females", not "Total")
+            out[compare] = sorted(set(out[compare]) | {part, whole}, key=var.values.index)
+            notes.append(f"share: selecting both {var.label_of(part)!r} and {var.label_of(whole)!r}")
         if not (part and whole and var):
             # the model picked only the part ("Reykjavík"): the whole is that dimension's total
             for v in meta.variables:
@@ -401,7 +440,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             notes.append(f"{var.text}: {'the largest ' + str(top) + ' of ' if top else ''}{len(kids)} categories"
                          + (f" under {var.label_of(named(var, question))!r}" if named(var, question) else ""))
     return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes,
-                    window_note=window_note, breakdown=breakdown, top=top)
+                    window_note=window_note, breakdown=breakdown, top=top, beyond=beyond)
 
 
 async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None) -> Resolved:
