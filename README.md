@@ -211,19 +211,31 @@ Everything is set in `.env` (see `.env.example`): the model endpoint and default
 the context the server gives each request (`LLM_CONTEXT`; otherwise `data/models.json`, refreshed with
 `python -m hagbot.models`), and majority voting on the model's choices (`VOTES`, `VOTE_MODELS`).
 
-## Known limits
+## Limits and next steps
 
-- **One table per part.** A question needs tables that can each answer one part; the planner splits into at most four.
-- **The snapshot is from 18 October 2026.** Newer periods come from the live API, which rate-limits bursts.
-- **Speed.** An answer takes several model calls (about 5–10 for a one-table question); on a laptop that is 30–90 s;
-  on the DGX Spark about 7 s at the median for the earlier versions. Questions that need splitting take longer.
-- **Icelandic answers** are worded less well than English ones on smaller models; the numbers are checked either way.
-- **No forecasts, opinions or causes** ("why did inflation rise?").
+The system is good at finding the correct table: in the final benchmark it found the right table for 9 of 10
+questions. Its weaknesses are downstream, in the calculations done once the table is found: dividing one figure by
+another (figures per inhabitant across two tables), summing several categories, and aggregating over a dimension (a
+total over all age groups or countries when the table has none). The right table and categories can still give the
+wrong number, for example when the division is never made, or when categories are summed that should not be.
+
+Next steps should focus there: deciding more reliably which calculation a question asks for, checking that the units
+being combined allow it (a percentage is not summed, a count is not divided by a rate), and a test set aimed at
+calculations, as ours was aimed at table finding. A further step is choosing the model automatically by how hard the
+question is: a small, fast model for a plain lookup, a larger one for questions that must be split, compared or
+calculated.
 
 ## Live demonstration
 
 The demo runs on our NVIDIA DGX Spark: **http://10.10.40.10:8000**, reachable from the **Myrin-Guest** wifi at the
 venue. The team also reaches it over Tailscale.
+
+## Use of AI agents
+
+We built RAGstofan with AI coding agents throughout: **Claude Code** (Anthropic) and **OpenAI Codex**. They wrote and
+changed code, ran tests and evaluations, and wrote documentation, including this README and the project report; the
+team set the direction, decided the design and reviewed the work. This is documented in the commit history: most
+commits carry a `Co-Authored-By: Claude` line, and work done with Codex is on branches named `codex/`.
 
 ## License
 

@@ -242,9 +242,26 @@ questions where BM25 did not, which is why merging beats either alone.
 
 \section*{Limits and next steps}
 
-The final system needs a full run on all 60 organiser questions and on our frozen test sets; that is the next step.
-Each part of a question must be answerable from one table, with at most four parts. Numbers are as recent as the
-snapshot, with newer periods from the live API. Icelandic answers are worded less well than English ones on smaller
-models, though their numbers are checked the same way. RAGstofan does not forecast, give opinions or explain causes.
+The system is good at finding the correct table: in the final benchmark it found the right table for 9 of the 10
+questions. Its weaknesses are downstream of that, in the calculations done once the table is found: dividing one
+figure by another (figures per inhabitant across two tables), summing several categories, and aggregating over a
+dimension (a total over all age groups or all countries when the table has none). Here the right table and the right
+categories can still give the wrong number, for example when a part is read but the division is never made, or when
+categories are summed that should not be.
+
+Future work should focus on this step: deciding more reliably \emph{which} calculation a question asks for, checking
+that the units of the figures being combined allow it (a percentage is not summed, a count is not divided by a rate),
+and building a test set aimed at calculations, as we built ours for table finding. A further step is choosing the
+model automatically by how hard the question is: a small, fast model for a plain lookup (``population of
+Reykjavík''), a larger one for questions that must be split, compared or calculated, so that simple questions are
+answered in seconds and hard ones get the strongest model.
+
+\section*{Use of AI agents}
+
+We built RAGstofan with AI coding agents throughout: \textbf{Claude Code} (Anthropic) and \textbf{OpenAI Codex}. They
+wrote and changed code, ran tests and evaluations, and wrote documentation, including this report and the README;
+the team set the direction, decided the design and reviewed the work. This is documented in the repository's commit
+history: 94 of the 105 commits on the main branch carry a ``Co-Authored-By: Claude'' line, and work done with Codex is
+on branches named \texttt{codex/}.
 
 \end{document}
