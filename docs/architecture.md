@@ -39,8 +39,8 @@ flowchart TD
         FIT{"Does a list of every table fit<br/>the model's context? (data/models.json)<br/>English titles + years: 54k · + Icelandic titles: 93k · + dimensions: 115k"}:::code
         ALL[["LLM ③ Name the best 3 of all 1,857 tables,<br/>listed as fully as the context allows"]]:::llm
         AR[["LLM ③ Pick ≤ 2 subject areas of 34"]]:::llm
-        AT[["LLM ③ Name the best 3 of the tables in those areas<br/>(narrowed by rule, listed as fully as fits)"]]
-        Y3[["LLM ③ Does the first of those hold<br/>the figures asked for? yes / no"]]:::llm:::llm
+        AT[["LLM ③ Name the best 3 of the tables in those areas<br/>(narrowed by rule, listed as fully as fits)"]]:::llm
+        Y3[["LLM ③ Does the first of those hold<br/>the figures asked for? yes / no"]]:::llm
         F["Freshest sibling<br/>same table, newer edition"]:::code
     end
     ASK(["The user picks from each method's top 3:<br/>dictionary · search · the model's best 3"])
@@ -85,7 +85,7 @@ flowchart TD
     Y1 -- no --> search
     search --> RK --> N --> Y2
     Y2 -- "yes" --> F
-    Y2 -- "no to all 3" --> FIT
+    Y2 -- "no" --> FIT
     FIT -- "yes: 54k+ context" --> ALL --> Y3
     FIT -- "no: the Spark today, 16k" --> AR --> AT --> Y3
     Y3 -- yes --> F
