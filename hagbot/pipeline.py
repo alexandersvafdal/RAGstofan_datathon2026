@@ -18,7 +18,7 @@ from .steps.check import check_answer
 from .steps.compute import aggregate_rows, compute
 from .steps.followup import looks_like_followup, rewrite
 from .steps.plan import Plan, SubQuestion, merge_period_parts, plan
-from .steps.ratio import POPULATION_TABLE, detect_ratio, difference_parts, ratio_parts, share_parts, stored_rate
+from .steps.ratio import difference_parts, divide_parts, share_parts
 from .steps.retrieve import _INDEXATION_TABLE, period_end
 from .steps.tiered import _check, retrieve_tiered
 from .steps.select import guess_op, select
@@ -123,25 +123,10 @@ class Pipeline:
                 full = await rewrite(self.llm, req.question, req.history)
                 steps.append(Step(name="context", ms=t.ms(), detail=full))
                 req = req.model_copy(update={"question": full})
-            ratio = None if req.table_id else detect_ratio(req.question)
-            # "GDP per capita": many tables publish the rate itself, so read it rather than divide
-            stored = stored_rate(self.catalog, ratio, req.question) if ratio else None
             forced: list[str | None]
-            if stored:
-                ratio = None
-                p = Plan(sub_questions=[SubQuestion(question=req.question, search_query=req.question)])
-                forced = [stored.id]
-                steps.append(Step(name="plan", ms=0, detail=f"rate published in {stored.id}: {stored.title_en}"))
-            elif req.table_id:  # the user already chose a table: skip planning
+            if req.table_id:  # the user already chose a table: skip planning
                 p = Plan(sub_questions=[SubQuestion(question=req.question, search_query=req.question)])
                 forced = [req.table_id]
-            elif ratio:  # "X per inhabitant": X from its own table, divided by the population in code
-                t = Timer()
-                num = (await plan(self.llm, ratio.numerator)).sub_questions[0]
-                pop = SubQuestion(question=ratio.population_question(lang), search_query=ratio.population_search())
-                p = Plan(sub_questions=[num, pop])
-                forced = [None, None if ratio.place else POPULATION_TABLE]  # a named place: find its population table
-                steps.append(Step(name="plan", ms=t.ms(), detail=f"{num.question} | {pop.question}"))
             else:
                 t = Timer()
                 p = merge_period_parts(await plan(self.llm, req.question))
@@ -149,11 +134,10 @@ class Pipeline:
                 steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(
                     s.question + (f" [places {s.places}, period {s.period_kind} {s.period!r}, breakdown {s.breakdown}{' by ' + s.breakdown_by if s.breakdown_by else ''}]"
                                   if s.places or s.period_kind != "none" or s.breakdown else " [no facts]")
-                    for s in p.sub_questions)))
+                    for s in p.sub_questions) + (f" · per {p.per_inhabitant} inhabitant(s): part 1 ÷ part 2" if p.per_inhabitant else "")))
 
             results = await asyncio.gather(
-                *(self._answer_part(sq, ratio.numerator if ratio and i == 0 else req.question, lang, f, steps,
-                                    alone=len(p.sub_questions) == 1 or (ratio is not None and i == 0))
+                *(self._answer_part(sq, req.question, lang, f, steps, alone=len(p.sub_questions) == 1)
                   for i, (sq, f) in enumerate(zip(p.sub_questions, forced))),
                 return_exceptions=True,
             )
@@ -163,7 +147,9 @@ class Pipeline:
                 return ans
             errors = [r for r in results if isinstance(r, Exception)]
             parts = await self._merge_series([r for r in results if isinstance(r, AnswerPart)])
-            if ratio and len(parts) == 2 and (rp := ratio_parts(ratio, parts[0], parts[1], lang)):
+            # per inhabitant, as the planner split it: the figure divided by the population
+            ratio = p.per_inhabitant > 0 and len(p.sub_questions) == 2
+            if ratio and len(parts) == 2 and (rp := divide_parts(parts[0], parts[1], p.per_inhabitant, lang)):
                 parts = list(rp)
                 steps.append(Step(name="compute", ms=0, detail=rp[0].computation.expression))
             elif (not ratio and len(parts) == 2 and guess_op(req.question) == "share"

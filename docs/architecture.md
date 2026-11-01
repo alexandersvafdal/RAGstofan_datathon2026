@@ -19,10 +19,7 @@ flowchart TD
         FU{"Follow-up?<br/>what about last year · hvað með árið áður · the highest category"}:::code
         RW[["LLM ① Rewrite as a question that stands alone,<br/>from the previous question and answer;<br/>'that category' becomes the name the answer gave"]]:::llm
         TB{"Table already chosen?<br/>the user clicked a chip: another category, a drill-down"}:::code
-        R{"Ratio to population?<br/>per inhabitant · á hvern íbúa"}:::code
-        SR{"Rate published in a table?<br/>GDP per capita · Vehicles per 1,000 inhabitants<br/>(not when the population date is named)"}:::code
-        RP["Split in code: numerator, and the population<br/>of the place asked on 1 January (MAN00101 for Iceland)"]:::code
-        P[["LLM ② Plan<br/>split into 1–3 parts, reword in English, English search words,<br/>and per part the facts: places · period and its kind · breakdown wanted"]]:::llm
+        P[["LLM ② Plan<br/>split into 1–6 parts, reword in English, English search words;<br/>per inhabitant: one part when a table publishes the rate (GDP per capita),<br/>else the figure + the population on 1 January, divided in code;<br/>and per part the facts: places · period and its kind · breakdown wanted"]]:::llm
         VF["Check the facts in code<br/>a place, period or breakdown word not in the question's own words is dropped ·<br/>one measure at two periods becomes one part"]:::code
     end
 
@@ -58,7 +55,7 @@ flowchart TD
 
     subgraph answer["4 · Answer (all parts together)"]
         M["Merge parts from the same table<br/>into one chart with a line each"]:::code
-        RD["Two parts into one number, in code<br/>per inhabitant: divide by the population ·<br/>share across two tables · change between two parts"]:::code
+        RD["Two parts into one number, in code<br/>per inhabitant (when the plan says so): divide by the population ·<br/>share across two tables · change between two parts"]:::code
         G["Chart type from the data's shape<br/>line · bars · slope · donut · heatmap …<br/>series from different tables: one chart, each set to 100"]:::code
         W[["LLM ⑤ Write 1–3 sentences in the user's language"]]:::llm
         X{"Every number in the text<br/>is in the table?"}:::code
@@ -73,11 +70,7 @@ flowchart TD
     FU -- yes --> RW --> TB
     FU -- no --> TB
     TB -- yes --> C
-    TB -- no --> R
-    R -- yes --> SR
-    SR -- "yes: read it, no division" --> C
-    SR -- no --> RP --> P
-    R -- no --> P
+    TB -- no --> P
     P --> VF --> DICT
     DICT -- "a subject named" --> Y1
     DICT -- "none named" --> search
@@ -116,8 +109,8 @@ browser the moment it finishes.</sub>
 | # | Call | When | Calls |
 |---|---|---|---|
 | ① | Rewrite a follow-up | the wording leans on the previous turn | 0–1 |
-| ② | Plan, with each part's places, period and breakdown | always, unless the user clicked a table or a published per-inhabitant rate answers it | 0–1 |
-| ③ | Find the table | per part: none when the table is fixed (clicked, or population for a ratio); yes/no on the dictionary's table 0–1; yes/no on the search's table 0–1; if both say no, the best 3 from every table 1 (or subject areas + best 3: 2) and a yes/no on the first 1; a year or month the table lacks adds a neighbour pick 1 | 0–6 per part |
+| ② | Plan: 1–6 parts, each with its places, period and breakdown, and whether to divide per inhabitant | always, unless the user clicked a table | 0–1 |
+| ③ | Find the table | per part: none when the table is fixed (clicked); yes/no on the dictionary's table 0–1; yes/no on the search's table 0–1; if both say no, the best 3 from every table 1 (or subject areas + best 3: 2) and a yes/no on the first 1; a year or month the table lacks adds a neighbour pick 1 | 0–6 per part |
 | ④ | Choose categories | per part; again if it switches to a neighbouring table | 1–2 per part |
 | ⑤ | Write the answer | when at least one part has numbers | 0–1 |
 | ⑥ | Check the answer against the question: answers, uncertain or wrong | after every written answer; uncertain is qualified up front, wrong is said to be no answer with the figures kept as connected | 0–1 |
@@ -150,7 +143,7 @@ languages. It would make sense with a model that is strong in Icelandic.
 | Step | File | Model? |
 |---|---|---|
 | Plan, and the check of its facts | `hagbot/steps/plan.py` | plan only |
-| Ratio to population | `hagbot/steps/ratio.py` | no |
+| Two parts into one number: per inhabitant, share, change | `hagbot/steps/ratio.py` | no |
 | Follow-up rewrite | `hagbot/steps/followup.py` | rewrite only |
 | Search | `hagbot/catalog.py` (BM25 over three fields) and `hagbot/e5.py` (e5 vectors, on by default; optional bge-m3 in `hagbot/vectors.py`), run in parallel and fused by rank | no |
 | Table finder: dictionary, search, every table, then the user | `hagbot/steps/tiered.py`, keyword dictionary `data/keywords.json` | yes/no checks and the best-3 pick |

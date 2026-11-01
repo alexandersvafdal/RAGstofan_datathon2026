@@ -24,12 +24,18 @@ class SubQuestion(BaseModel):
     all_places: list[str] = []   # set in code: the places of every sub-question of the same question
 
 
+MAX_PARTS = 6
+
+
 class Plan(BaseModel):
-    sub_questions: list[SubQuestion] = Field(min_length=1, max_length=3)
+    sub_questions: list[SubQuestion] = Field(min_length=1, max_length=MAX_PARTS)
+    per_inhabitant: int = Field(default=0, description="0, or when the question asks for a figure per inhabitant split "
+                                "into two sub-questions (the figure, then the population): the number of inhabitants it "
+                                "is per (1 for per inhabitant / per capita, 1000 for per 1,000 inhabitants)")
 
 
 SYSTEM = """You plan lookups in Statistics Iceland's official statistics tables.
-Split the user's question into the smallest number of sub-questions (1 to 3) where each can be answered from ONE table.
+Split the user's question into the smallest number of sub-questions (1 to 6) where each can be answered from ONE table.
 Most questions need exactly one. Only split when the question asks about clearly different topics
 (for example population AND unemployment).
 Never split a comparison within one measure: "how many more men than women", "Reykjavík vs Kópavogur",
@@ -38,6 +44,13 @@ sub-question, because one table holds both sides (a municipality table also has 
 A comparison of two different measures ("the wage index compared with the consumer price index", "launavísitala
 borin saman við vísitölu neysluverðs", "exports and imports") is TWO sub-questions, one per measure, over the same
 period; without a period, each asks for the development over the last years.
+A figure per inhabitant ("per capita", "per 1,000 inhabitants", "á hvern íbúa", "á hverja 1.000 íbúa", "á mann"):
+- When it is a rate statistics offices publish as such (GDP per capita, vehicles per 1,000 inhabitants, alcohol
+  consumption per inhabitant) and the question does not name the population date, keep ONE sub-question asking for
+  that rate, and per_inhabitant 0.
+- Otherwise TWO sub-questions, in this order: the figure itself without "per ..." (the same place and period), then the
+  population of that place on 1 January of that year ("How many people lived in Iceland on 1 January 2025?"); set
+  per_inhabitant to the number it is per (1, or 1000 for "per 1,000"). The division is done in code.
 Write sub-questions and search queries in English even if the user wrote Icelandic.
 Keep place names in their Icelandic spelling (Reykjavík, Kópavogur, Akureyri).
 For each sub-question also report what the user's own words say: the places named (as written), the period and its
