@@ -170,6 +170,37 @@ def _meta_from_api(table_id: str, d: dict, catalog: Catalog) -> TableMeta:
 
 _STATEMENT = re.compile(r'([A-Z][A-Z0-9-]*)((?:\[[a-z]{2}\])?(?:\((?:"[^"]*"|[^)"])*\))?)\s*=')
 _CODEPAGES = {"windows-1252": "cp1252", "ansi": "cp1252"}
+# A unit that only says the figures are counts says nothing the label does not
+_COUNT_UNIT = re.compile(r"^(number|count|persons?|people|fjoldi|einstaklingar|mannfjoldi|tala|-)$")
+# What a real unit is made of: money, mass, energy, length, volume, time, a multiplier or a "per"
+_UNIT_WORD = re.compile(r"isk|\bkr|kron|tonn|\bkg\b|gram|joule|watt|\bwh\b|hour|klst|\bkm\b|met(re|er)|lit(re|er)|percent|"
+                        r"prosent|hlutfall|\bper\b|a hver|thousand|million|billion|thus|millj|milljard|hectare|hektar|"
+                        r"\bha\b|head|cubic|rummet|degree|grad|\bdays?\b|dag|\byears?\b|\bar\b|month|manud|week|vik|minute|"
+                        r"\bmin\b|second|sek|\bm2\b|\bm3\b|fermet|rummet")
+
+
+def px_unit(path: Path, lang: str) -> str:
+    """The table's unit from the px header (UNITS[en], else UNITS), when it is one unit: "Kilotonnes", "Million ISK".
+    Empty for a count ("Number"), a compound unit of several measures ("Million ISK/percent") or a pointer ("See
+    unit title"); "%" for a percentage."""
+    from .text import normalize
+    try:
+        with path.open("rb") as f:
+            raw = f.read(65536)
+    except OSError:
+        return ""
+    enc = re.search(rb'CODEPAGE="([^"]+)"', raw)
+    enc = _CODEPAGES.get(enc.group(1).decode().lower(), enc.group(1).decode()) if enc else "utf-8"
+    head = raw.removeprefix(b"\xef\xbb\xbf").decode(enc, errors="replace")
+    m = (re.search(rf'(?m)^UNITS\[{lang}\]="([^"]*)"', head) if lang != "is" else None) or re.search(r'(?m)^UNITS="([^"]*)"', head)
+    unit = m.group(1).strip() if m else ""
+    low = normalize(unit)
+    if not unit or "/" in unit or "," in unit or " and " in low or len(unit.split()) > 3 or low.startswith(("see ", "sja ")) \
+            or _COUNT_UNIT.match(low):   # several units, or a description ("Indices and annualized rates")
+        return ""
+    if re.fullmatch(r"(percent(age)?|prosent|hlutfall)( \(%\))?|%", low):
+        return "%"
+    return unit if _UNIT_WORD.search(low) else ""   # "Indices", "Ratio", "Various": the kind of measure, not a unit
 
 
 def _px_items(value: str) -> list[str]:
@@ -271,8 +302,11 @@ class LocalPxSource:
         folder = self._folder(table_id)
         if not folder:
             return await self.live.meta(table_id)
-        return _meta_from_api(table_id, json.loads((folder / "metadata.json").read_text(encoding="utf-8-sig")),
+        meta = _meta_from_api(table_id, json.loads((folder / "metadata.json").read_text(encoding="utf-8-sig")),
                               self.catalog)
+        if not meta.unit:   # the catalog carries no unit; the px file's UNITS does
+            meta.unit = await asyncio.to_thread(px_unit, folder / "data.px", self.lang)
+        return meta
 
     def _table(self, table_id: str, meta: TableMeta) -> PxTable:
         if table_id in self._tables:

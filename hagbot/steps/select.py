@@ -41,6 +41,8 @@ class Resolved(BaseModel):
     beyond: str | None = None     # a period asked for that lies after this table's last one ("2026M09" in a table to 2026M08)
     place_note: dict[str, str] | None = None  # en/is, when a place the question names is not among the table's options
     missing_period: str = ""                  # the year the question names that the table's periods do not reach
+    partial: str = ""   # a dimension the question names as a whole ("greenhouse gas") that this table has only in
+                         # parts, with no total: the answer would be one part (CO2) for the whole
     aggregate_over: list[str] = []            # dimensions summed in code: a long list with no total (253 partner
                                               # countries) when the question names none of them
     alternatives: dict[str, list[str]] = {}   # dimension -> categories the model chose that the question did not name,
@@ -215,16 +217,31 @@ def _total_of(var: Variable) -> str | None:
     for pattern in (re.compile(r"^(total|alls|samtals|all)$"), re.compile(r"whole country|landid allt|all of iceland|^iceland$|^island$"),
                     re.compile(r"\b(total|alls|samtals|allir|allar|oll)\b|^(all|allt) \w")):   # "All species", "All products"
         for code, label in pairs:
-            if pattern.search(normalize(label)):
+            if pattern.search(normalize(label)) and not _subtotal(label):
                 return code
     return None
+
+
+# "Total emission from energy production", "Samtals frá …": a total with a qualifier after it is the total of one
+# part, not of the whole dimension. "Total of all industries" stays a total.
+_SUBTOTAL = re.compile(r"\b(total|samtals|alls)\b,? (emissions? |losun )?(from|of|in|for|by|excluding|excl\.?|without|"
+                       r"fra|i|af|fyrir|an|utan)\b")
+_ALL = re.compile(r"\b(all|alls|allir|allar|oll|allt)\b")
+# "Therein: Cattle", "Þar af: …", "of which": a part of the option above it, not a category of its own
+_SUBITEM = re.compile(r"\b(therein|thereof|of which|whereof|thar af|thar med talid|hluti af)\b")
+
+
+def _subtotal(label: str) -> bool:
+    n = normalize(label)
+    return bool(_SUBTOTAL.search(n)) and not _ALL.search(n)
 
 
 # A figure that is already a ratio: a percentage, share, rate, index, average or median. Read from the labels of the
 # options chosen and the table's unit. Such figures are not summed over a dimension and not divided by a total: the
 # "percentage of immigrants" row is the share asked for, and a share of it over the population would be nonsense.
 _RATIO = re.compile(r"(?<![\d.])%|\bpercent|prosent|hlutfall|hlutf\b|\bshare\b|proportion|\brate\b|\btidni|"
-                    r"\bper (1 ?000|100|10 ?000|capita|ibua)|a hverja|\bindex|visitala|\baverage|\bmean\b|median|"
+                    r"\bper (1[ ,.]?000|100|10[ ,.]?000|capita|ibua|inhabitant|head|person|resident)|a hverja|a hvern|\ba mann\b|"
+                    r"\bindex|visitala|\baverage|\bmean\b|median|"
                     r"midgildi|\bmedal", re.I)
 
 
@@ -252,8 +269,12 @@ def row_unit(meta: TableMeta, labels: dict[str, str]) -> str:
 
 def _partition(var: Variable) -> bool:
     """A long list of options with no total (partner countries, products): the whole is their sum, so when the
-    question names none of them the code sums them all rather than answer for the first one alphabetically."""
-    return not var.time and len(var.values) >= 10 and _total_of(var) is None
+    question names none of them the code sums them all rather than answer for the first one alphabetically.
+    Not a partition: a list with sub-totals ("Total emission from energy production") or sub-items ("Therein:
+    Cattle"), whose options overlap; summing them counts figures twice."""
+    if var.time or len(var.values) < 10 or _total_of(var) is not None:
+        return False
+    return not any(_subtotal(t) or _SUBITEM.search(normalize(t)) or _TOTAL.search(normalize(t)) for t in var.value_texts)
 
 
 def _default(var: Variable) -> list[str]:
@@ -300,7 +321,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     """Map whatever the model returned onto valid codes; fill gaps with defaults. `facts` is the planner's reading of
     the question (places, period, breakdown; hagbot/steps/plan.py), checked against the text; without it (a table
     the user clicked, a published rate) the same facts are read from the text by the patterns below."""
-    notes, out, beyond, alternatives, aggregate_over, missing_period = [], {}, None, {}, [], ""
+    notes, out, beyond, alternatives, aggregate_over, missing_period, partial = [], {}, None, {}, [], "", ""
     from .retrieve import _DIMENSION_IS, breakdown_words, named_places
     if facts is not None:   # the planner's places as normalized words, as the patterns would give them
         places_part = [t for pl in facts.places for t in tokens(pl) if len(t) >= 4]
@@ -350,6 +371,8 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             notes.append(f"{var.text}: defaulted to {[var.label_of(c) for c in codes]}")
             if not var.time and _total_of(var) is None and 2 <= len(var.values) < 10:   # Unit: Fob value / Quantity
                 alternatives[var.code] = [c for c in var.values if c not in codes]   # the user may want another
+            if not var.time and _total_of(var) is None and _names_dim(var, [normalize(t) for t in tokens(question)]):
+                partial = var.text   # "greenhouse gas emissions": every gas asked, the table has them one at a time
         out[var.code] = sorted(set(codes), key=var.values.index)
 
     q = normalize(question)
@@ -737,7 +760,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
         aggregate_over = []
     return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes,
                     window_note=window_note, breakdown=breakdown, top=top, beyond=beyond, place_note=place_note,
-                    alternatives=alternatives, aggregate_over=aggregate_over, missing_period=missing_period)
+                    alternatives=alternatives, aggregate_over=aggregate_over, missing_period=missing_period, partial=partial)
 
 
 async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None, facts=None) -> Resolved:

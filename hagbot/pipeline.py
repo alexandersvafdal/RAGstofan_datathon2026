@@ -21,9 +21,9 @@ from .steps.plan import MAX_PARTS, Plan, SubQuestion, merge_period_parts, plan
 from .steps.ratio import difference_parts, divide_parts, share_parts
 from .steps.retrieve import _INDEXATION_TABLE, Retrieved, period_end
 from .steps.tiered import _check, retrieve_tiered
-from .steps.select import guess_op, select
+from .steps.select import _RATIO, guess_op, select
 from .steps.suggest import suggest
-from .text import detect_language, normalize
+from .text import detect_language, fmt_value, normalize
 
 # A label that is itself a percentage: "Annual change, %", "Unemployment rate", "Percentage of GDP". A % after a
 # number is a product's description, not its unit ("wine of alcoholic strength > 8.5%"), so it does not count.
@@ -147,6 +147,14 @@ class Pipeline:
             parts = await self._merge_series([r for r in results if isinstance(r, AnswerPart)])
             # per inhabitant, as the planner split it: the figure divided by the population
             ratio = p.per_inhabitant > 0 and len(p.sub_questions) == 2
+            if ratio and len(parts) == 2 and parts[0].rows and any(
+                    _RATIO.search(normalize(t)) for t in parts[0].rows[0].labels.values()):
+                # the figure found is already the rate ("Vehicles per 1,000 inhabitants"): it is the answer as it
+                # stands, and dividing it by the population again would be nonsense
+                steps.append(Step(name="compute", ms=0, detail=f"{parts[0].table.id} publishes the rate; no division"))
+                parts, ratio = parts[:1], False
+            if ratio and len(parts) == 2:   # the population of the figure's own year, not the latest one
+                parts[1] = await self._same_period(parts[1], parts[0], lang, steps)
             if ratio and len(parts) == 2 and (rp := divide_parts(parts[0], parts[1], p.per_inhabitant, lang)):
                 parts = list(rp)
                 steps.append(Step(name="compute", ms=0, detail=rp[0].computation.expression))
@@ -243,12 +251,43 @@ class Pipeline:
             cache.update({k: r for (k, _), r in zip(new, got)})
             found = [cache[k] for k in keys]
             last = (p, found)
-            if all(isinstance(r, Retrieved) and not r.ambiguous for r in found):
+            # one part with a division by the population flagged: the part lost its "per inhabitant" and asks for the
+            # total, so the rate needs the two parts (the figure and the population) the next round gives
+            divides = p.per_inhabitant > 0 and len(p.sub_questions) < 2
+            if all(isinstance(r, Retrieved) and not r.ambiguous for r in found) and not divides:
                 return last
             if n < MAX_PARTS:
                 missing = [sq.question for sq, r in zip(p.sub_questions, found) if not isinstance(r, Retrieved) or r.ambiguous]
                 steps.append(Step(name="plan", ms=0, detail=f"no table confirmed for: {' | '.join(missing)}; splitting into {n + 1} parts"))
         return last
+
+    async def _same_period(self, part: AnswerPart, other: AnswerPart, lang: str, steps: list[Step]) -> AnswerPart:
+        """`part` (one figure) read again at the period of `other`'s figure, when its table has that period: the
+        population of the year the emissions are for, not of the latest year. Unchanged otherwise."""
+        if len(part.rows) != 1 or len(other.rows) != 1:
+            return part
+        try:
+            meta, mine = await self.source.meta(part.table.id), await self.source.meta(other.table.id)
+            time, theirs = (next(v for v in m.variables if v.time) for m in (meta, mine))
+        except (StopIteration, Exception):
+            return part
+        want = other.rows[0].key.get(theirs.code, "")
+        have = part.rows[0].key.get(time.code, "")
+        year = want[:4]
+        match = next((c for c in time.values if c == want), None) or next((c for c in time.values if c == year), None)
+        if not want or not match or match == have:
+            return part
+        rows = await self.source.query(meta.id, {**{k: [v] for k, v in part.rows[0].key.items()}, time.code: [match]})
+        if len(rows) != 1 or rows[0].value is None:
+            return part
+        f = part.facts[0]
+        label = f.label.replace(time.label_of(have), time.label_of(match)) if have else f.label
+        steps.append(Step(name="period", ms=0, detail=f"{meta.id}: {time.label_of(have)} -> {time.label_of(match)}, "
+                                                      f"the period of {other.table.id}"))
+        return part.model_copy(update={
+            "rows": rows, "selection": {**part.selection, time.text: [time.label_of(match)]},
+            "facts": [f.model_copy(update={"label": label, "value": rows[0].value,
+                                           "formatted": fmt_value(rows[0].value, f.unit, lang)})]})
 
     async def _find(self, sq: SubQuestion, original: str, forced_table: str | None, steps: list[Step],
                     alone: bool = True) -> Retrieved:
@@ -301,6 +340,15 @@ class Pipeline:
                 raise NoFigures(f"Taflan {title} ({meta.id}) nær yfir {first} til {last}, ekki {asked_p}."
                                 if lang == "is" else
                                 f"{title} ({meta.id}) covers {first} to {last}, not {asked_p}.")
+        if res.partial:
+            # "greenhouse gas emissions" from a table with one gas at a time and no total: a table next door that
+            # has the whole (a total in CO2 equivalents) answers instead, when the model confirms it is on the subject
+            # a part of a split question is judged on its own words (the population part is another table's job)
+            if alt := await self._sibling_with(meta, r.candidates, "", sq.question, original if alone else ""):
+                res2 = await select(self.llm, alt, sq.question, original, facts=facts)
+                if not res2.partial:
+                    res2.notes.append(f"{meta.id} has {res.partial} only one at a time, no total; switched to {alt.id}")
+                    meta, res = alt, res2
         chosen = {meta.var(c).text: [meta.var(c).label_of(v) for v in vals] for c, vals in res.selections.items()}
         steps.append(Step(name="select", ms=t.ms(),
                           detail=f"{res.operation} {chosen}" + (f" notes: {res.notes}" if res.notes else "")))
@@ -391,7 +439,7 @@ class Pipeline:
 
     async def _sibling_with(self, meta, candidates: list[str], period: str, question: str = "", original: str = ""):
         """A table in the same folder, among the candidates, whose figures reach the period asked for ("2017",
-        "2026M09"). The model picks among those that have it (the check it uses on the hitlist), or says none:
+        "2026M09"; any period when none is given). The model picks among those that have it (the check it uses on the hitlist), or says none:
         the one sharing the most options with the chosen table is not always the one on the same subject."""
         own = self.catalog.get(meta.id)
         if not own:
@@ -404,8 +452,8 @@ class Pipeline:
                 m = await self.source.meta(e.id)
             except Exception:
                 continue
-            if any(v.time and any(x.startswith(period) or t.startswith(period) for x, t in zip(v.values, v.value_texts))
-                   for v in m.variables):
+            if not period or any(v.time and any(x.startswith(period) or t.startswith(period) for x, t in zip(v.values, v.value_texts))
+                                 for v in m.variables):
                 with_period.append((e, m))
         if not with_period:
             return None

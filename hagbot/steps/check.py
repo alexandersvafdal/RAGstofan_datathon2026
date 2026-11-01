@@ -9,6 +9,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from ..llm import LLM
+from ..text import fmt_number
 from ..schemas import AnswerPart
 
 SYSTEM = """You check an answer written from a Statistics Iceland table against the question it was meant to answer.
@@ -40,7 +41,8 @@ def _shown(parts: list[AnswerPart]) -> str:
         if p.unit:
             out.append(f"  unit: {p.unit}")
         if p.computation:
-            out.append(f"  computed: {p.computation.expression}")
+            c = p.computation   # the result too, in its unit: the checker judges the match, it need not redo the sum
+            out.append(f"  computed in code: {c.expression} = {fmt_number(c.result, 'en')}{' ' + c.unit if c.unit else ''}")
         if p.chart:
             out.append("  a chart of every figure read is shown with the answer")
         # what was read, by label only (period, category, measure): the numbers were checked in code already, and

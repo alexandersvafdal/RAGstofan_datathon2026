@@ -1,5 +1,6 @@
 """Text helpers: Icelandic-aware normalisation, language detection, number formatting."""
 
+import math
 import re
 import unicodedata
 
@@ -31,6 +32,9 @@ def detect_language(s: str) -> str:
 def fmt_number(x: float, lang: str, decimals: int | None = None) -> str:
     if decimals is None:
         decimals = 0 if float(x).is_integer() else 1
+        if x and abs(x) < 1:   # 0.0041 is not "0.0": two significant digits for a small number, no trailing zero
+            g = f"{abs(x):.2g}"
+            decimals = len(g.split(".")[1]) if "." in g and "e" not in g else 6
     s = f"{x:,.{decimals}f}"
     if lang == "is":  # 139.804,5
         s = s.replace(",", "_").replace(".", ",").replace("_", ".")
@@ -39,8 +43,29 @@ def fmt_number(x: float, lang: str, decimals: int | None = None) -> str:
 
 def fmt_value(x: float, unit: str, lang: str) -> str:
     if unit == "%":
-        return fmt_number(x, lang, 1) + "%"
+        return fmt_number(x, lang, None if 0 < abs(x) < 0.1 else 1) + "%"
     return fmt_number(x, lang)
+
+
+# A unit's multiplier word: "thousand tonnes", "Kilotonnes", "Million ISK", "millj. kr.", "ISK billion"
+_SCALE = [(re.compile(r"\b(thousands?|[þt]h?[úu]s(?:\.|und(?:ir|um)?)?)\s*", re.I), 1e3),
+          (re.compile(r"\b(kilo|kíló)(?=[a-záðéíóúýþæö])", re.I), 1e3),
+          (re.compile(r"\b(millions?|millj\.?|millj[óo]n(?:ir|um|a)?)\s*", re.I), 1e6),
+          (re.compile(r"\b(billions?|milljar[ðd](?:ar|ur|a)?|ma\.)\s*", re.I), 1e9)]
+
+
+def unscale(value: float, unit: str) -> tuple[float, str]:
+    """A value below 1 in a scaled unit, in the plain unit instead: 0.0041 kilotonnes is 4.1 tonnes, 0.02 million
+    ISK is 20,000 ISK. The multiplier word leaves the unit and enters the number, as often as needed."""
+    while unit and 0 < abs(value) < 1:
+        for pattern, factor in _SCALE:
+            new = pattern.sub("", unit, count=1).strip()
+            if new != unit:
+                value, unit = value * factor, new
+                break
+        else:
+            break
+    return value, unit
 
 
 def numbers_in(text: str) -> list[float]:
