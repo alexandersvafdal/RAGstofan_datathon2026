@@ -20,7 +20,8 @@ flowchart TD
         RW[["LLM ① Rewrite as a question that stands alone,<br/>from the previous question and answer"]]:::llm
         TB{"Table already chosen?<br/>the user clicked a clarification button"}:::code
         R{"Ratio to population?<br/>per inhabitant · á hvern íbúa"}:::code
-        RP["Split in code: numerator, and<br/>population from MAN00101"]:::code
+        SR{"Rate published in a table?<br/>GDP per capita · Vehicles per 1,000 inhabitants<br/>(not when the population date is named)"}:::code
+        RP["Split in code: numerator, and the population<br/>of the place asked on 1 January (MAN00101 for Iceland)"]:::code
         P[["LLM ② Plan<br/>split into 1–3 parts, reword in English,<br/>English search words for each part"]]:::llm
     end
 
@@ -68,7 +69,9 @@ flowchart TD
     FU -- no --> TB
     TB -- yes --> C
     TB -- no --> R
-    R -- yes --> RP --> P
+    R -- yes --> SR
+    SR -- "yes: read it, no division" --> C
+    SR -- no --> RP --> P
     R -- no --> P
     P --> A
     A -- yes --> ASK
@@ -104,7 +107,7 @@ with `RETRIEVAL=tiered`; the classic finder is the default. Each step is streame
 | # | Call | When | Calls |
 |---|---|---|---|
 | ① | Rewrite a follow-up | the wording leans on the previous turn | 0–1 |
-| ② | Plan | always, unless the user clicked a table | 0–1 |
+| ② | Plan | always, unless the user clicked a table or a published per-inhabitant rate answers it | 0–1 |
 | ③ | Pick the table, classic | per part; skipped when one table is left, or when the table is fixed (clicked, or population for a ratio) | 0–1 per part |
 | ③ | Find the table, tiered | per part: check 1–2 rounds; if none fits, browse 1 + check 1–4 rounds; if still none, the classic pick 1 | 1–8 per part |
 | ④ | Choose categories | per part | 1 per part |

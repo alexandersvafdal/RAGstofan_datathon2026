@@ -17,7 +17,7 @@ from .steps.compose import compose
 from .steps.compute import compute
 from .steps.followup import looks_like_followup, rewrite
 from .steps.plan import Plan, SubQuestion, plan
-from .steps.ratio import POPULATION_TABLE, detect_ratio, ratio_parts
+from .steps.ratio import POPULATION_TABLE, detect_ratio, ratio_parts, stored_rate
 from .steps.retrieve import _INDEXATION_TABLE, period_end, retrieve
 from .steps.tiered import retrieve_tiered
 from .steps.select import select
@@ -94,16 +94,23 @@ class Pipeline:
                 steps.append(Step(name="context", ms=t.ms(), detail=full))
                 req = req.model_copy(update={"question": full})
             ratio = None if req.table_id else detect_ratio(req.question)
+            # "GDP per capita": many tables publish the rate itself, so read it rather than divide
+            stored = stored_rate(self.catalog, ratio, req.question) if ratio else None
             forced: list[str | None]
-            if req.table_id:  # the user already chose a table: skip planning
+            if stored:
+                ratio = None
+                p = Plan(sub_questions=[SubQuestion(question=req.question, search_query=req.question)])
+                forced = [stored.id]
+                steps.append(Step(name="plan", ms=0, detail=f"rate published in {stored.id}: {stored.title_en}"))
+            elif req.table_id:  # the user already chose a table: skip planning
                 p = Plan(sub_questions=[SubQuestion(question=req.question, search_query=req.question)])
                 forced = [req.table_id]
             elif ratio:  # "X per inhabitant": X from its own table, divided by the population in code
                 t = Timer()
                 num = (await plan(self.llm, ratio.numerator)).sub_questions[0]
-                pop = SubQuestion(question=ratio.population_question(lang), search_query="population 1 January")
+                pop = SubQuestion(question=ratio.population_question(lang), search_query=ratio.population_search())
                 p = Plan(sub_questions=[num, pop])
-                forced = [None, POPULATION_TABLE]
+                forced = [None, None if ratio.place else POPULATION_TABLE]  # a named place: find its population table
                 steps.append(Step(name="plan", ms=t.ms(), detail=f"{num.question} | {pop.question}"))
             else:
                 t = Timer()
