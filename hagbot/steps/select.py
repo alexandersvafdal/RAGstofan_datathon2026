@@ -69,6 +69,9 @@ For every dimension choose the value codes the question needs, copied exactly fr
 - For "when was X highest / lowest" select the periods (or categories) to search and use max or min.
 - Inflation means the annual % change of the consumer price index. If the table has an option that already is the
   change asked for ("Annual change, %", "volume change on previous year"), select it with operation value.
+- A dimension of measures (tonnes or kg against a value in ISK, a count against an index): "how much / how many of a
+  good" with no money word takes the quantity (tonnes, kg, number); "value", "worth", "verðmæti", "fyrir hve mikið"
+  takes the value measure.
 Never compute anything yourself."""
 
 _INTENT = [  # cheap keyword check; overrides a "value" answer when the question clearly asks for a calculation
@@ -94,6 +97,12 @@ _EXTREME = [("max", re.compile(r"\b(highest|peak\w*|maximum|haest\w*|hamark\w*)\
 # the question asks when, so the extreme is searched over time ("which occupation earns the most" is not)
 _WHEN = r"\bwhen\b|which (year|month|period)|what (year|month)|hvenaer|hvada (ar|manud)|\bever\b|fra upphafi|all time"
 _TOTAL = re.compile(r"\b(total|alls|samtals|all)\b", re.I)
+# A dimension of measures: "how much fish was exported" is tonnes, "the value of fish exports" is ISK. The question's
+# wording decides between a quantity option and a value option when the table has both.
+_HOW_MUCH = re.compile(r"\b(how much|how many|hve miki|hversu miki|hve mikl|hversu mikl|hve mor|hversu mor|hvad mor|hvad miki)")
+_MONEY = re.compile(r"\b(value|worth|price|revenue|isk|kr|kronu|verd|verdmaet|fob|cif|upphaed|tekjur|million|billion|milljon|milljard)\w*")
+_QUANTITY_OPTION = re.compile(r"\b(tonn|tons|kg|kilo|magn|quantity|number|fjoldi|stk|pieces|litr|liter)\w*")
+_VALUE_OPTION = re.compile(r"\b(value|verd|fob|cif|isk|kr|kronu|price)\w*")
 # "Hverjir eru undirflokkar …", "what are the categories of …": list a dimension's categories
 _LIST = (r"undirflokk|undirvisitol|\bflokk(ar|um|a|i)\b|skipting|sundurlid|samsetning|categor|sub-?ind|breakdown|"
          r"\bcomponents?\b|consist|made up of|split (by|into)|broken down")
@@ -346,6 +355,18 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                 out[var.code] = chosen = in_question
         # (named among its siblings: "Aluminium" names "360 Aluminium and aluminium products", whose other words
         # the question need not repeat)
+        # a measure the question did not name (Tonnes against FOB value): the others as chips, so the user can switch
+        if (len(chosen) == 1 and not var.time and _total_of(var) is None and 2 <= len(var.values) < 10
+                and var.code != sel.compare_dimension and not mentioned(var.label_of(chosen[0]), var.value_texts)):
+            kind = lambda c: ("value" if _VALUE_OPTION.search(normalize(var.label_of(c))) else
+                              "quantity" if _QUANTITY_OPTION.search(normalize(var.label_of(c))) else "")
+            # read from the user's own words: the planner's English part may say "value" where the user said "how much"
+            asked = normalize(question[:-len(part)]) if part and question.endswith(part) and question[:-len(part)].strip() else q
+            wanted = "value" if _MONEY.search(asked) else "quantity" if _HOW_MUCH.search(asked) else ""
+            if wanted and kind(chosen[0]) not in ("", wanted) and (fit := [c for c in var.values if kind(c) == wanted]):
+                notes.append(f"{var.text}: {var.label_of(fit[0])!r} for the {wanted} asked, not {var.label_of(chosen[0])!r}")
+                out[var.code] = chosen = fit[:1]
+            alternatives[var.code] = [c for c in var.values if c != chosen[0]]
         if (len(chosen) == 1 and _partition(var) and var.code != sel.compare_dimension and var.code not in aggregate_over
                 and not mentioned(var.label_of(chosen[0]), var.value_texts)):
             notes.append(f"{var.text}: {var.label_of(chosen[0])!r} is not named in the question and the table has no total; "
