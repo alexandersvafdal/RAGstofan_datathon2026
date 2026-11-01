@@ -46,7 +46,7 @@ flowchart TD
 
     subgraph read["3 · Read the numbers (each part)"]
         C[["LLM ④ Choose categories<br/>Sex: Males, Females · Year: 2026 · votes"]]:::llm
-        V["Validate and fix every choice, using the plan's facts<br/>codes must exist · defaults: total, latest period · period from the question ·<br/>only the places named · categories not named → the total, the rest as chips ·<br/>a long list with no total (253 partner countries) → summed in code ·<br/>'by countries' → ranked along that dimension, the largest ten ·<br/>Iceland = whole country · current index base · the table's own % change ·<br/>trend wording → whole series · highest / lowest · share needs a whole"]:::code
+        V["Validate and fix every choice, using the plan's facts<br/>codes must exist · defaults: total, latest period · period from the question ·<br/>only the places named · categories not named → the total ('All products' counts), the rest as chips ·<br/>quantity or value from the user's words: 'how much fish' → tonnes, 'the value' → ISK, the other as a chip ·<br/>a long list with no total (253 partner countries) → summed in code ·<br/>'by countries' → ranked along that dimension, the largest ten ·<br/>Iceland = whole country · current index base · the table's own % change ·<br/>trend wording → whole series · highest / lowest · share needs a whole"]:::code
         SW{"Year asked is not among the table's periods,<br/>or the month asked is past its last?"}:::code
         SB[["LLM ③ Pick the neighbouring table that has it<br/>(DOM0502 → DOM0503, LAU04000 → LAU04001), choose again;<br/>none: a missing year is refused, naming the years the table has;<br/>a month just past the last gets the latest figure, labelled"]]:::llm
         D[("Data<br/>organisers' snapshot of 18 Oct 2026 on disk,<br/>live PX-API for what it lacks")]:::data
@@ -101,7 +101,7 @@ flowchart TD
 ```
 
 <sub>Gold, double-edged boxes are LLM calls (through Ollama or any OpenAI-compatible server; `.env.example` sets
-qwen2.5:14b, and the latest eval runs use qwen3.6:35b-a3b); the circled
+qwen2.5:14b, and the latest eval runs use qwen3.6:35b-a3b; every call at temperature 0 with thinking off); the circled
 number is the call's kind, counted in the table below. Blue is plain code. "votes": with `VOTES` > 1 or `VOTE_MODELS`
 set, that call is asked several times in parallel and the majority wins (off by default). Each step is streamed to the
 browser the moment it finishes.</sub>
@@ -112,7 +112,7 @@ browser the moment it finishes.</sub>
 |---|---|---|---|
 | ① | Rewrite a follow-up | the wording leans on the previous turn | 0–1 |
 | ② | Plan, with each part's places, period and breakdown | always, unless the user clicked a table or a published per-inhabitant rate answers it | 0–1 |
-| ③ | Find the table | per part: none when the table is fixed (clicked, or population for a ratio) or the dictionary decides alone; otherwise check 1–2 rounds; if none fits, browse 1 + check 1–4 rounds; if still none, a forced pick 1 | 0–8 per part |
+| ③ | Find the table | per part: none when the table is fixed (clicked, or population for a ratio) or the dictionary decides alone; otherwise check 1–2 rounds; if none fits, browse 1 + check 1–4 rounds; if still none, a forced pick 1; a round-2 pick adds a head-to-head re-check 1; a year or month the table lacks adds a neighbour pick 1 | 0–10 per part |
 | ④ | Choose categories | per part; again if it switches to a neighbouring table | 1–2 per part |
 | ⑤ | Write the answer | when at least one part has numbers | 0–1 |
 | ⑥ | Follow-up suggestions | after the answer is on screen (`/api/suggest`), so it adds no answer time | 0–1 |
