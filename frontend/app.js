@@ -8,9 +8,8 @@ const I18N = {
     steps: ["Understanding the question", "Finding the right table", "Choosing the categories", "Reading the numbers", "Writing the answer"],
     working: "Working on it", how: "How I got this", data: "Data", details: "Details", checkedShort: "Checked", source: "Source", checked: "Numbers checked against the table",
     calc: "Calculated", failed: "Something went wrong", retry: "Try again", seconds: "s", calls: "model calls",
-    pts: "pts", more: "Ask next", palette: "Colour", appearance: "Appearance", model: "Model", thinking: "Thinking", temp: "Temperature",
+    pts: "pts", more: "Ask next", palette: "Colour", appearance: "Appearance", model: "Model",
     now: "Answer now", fastNote: "Answered quickly with the fast model, thinking off.",
-    effort: { none: "Off", low: "Short", medium: "Medium", high: "Long" },
     voice: "Voice", listen: "Listen", stopVoice: "Stop", copy: "Copy", copied: "Copied", listening: "Listening…",
     writing: "Writing it down…", micHttps: "Asking by voice needs HTTPS (or localhost) in the browser", best: "best",
     icelandic: "Icelandic", english: "English", micBlocked: "Microphone access is blocked", shortlist: "Shortlist", chosen: "chosen",
@@ -29,9 +28,8 @@ const I18N = {
     steps: ["Skil spurninguna", "Finn réttu töfluna", "Vel flokkana", "Les tölurnar", "Skrifa svarið"],
     working: "Augnablik", how: "Hvernig svarið varð til", data: "Gögn", details: "Nánar", checkedShort: "Yfirfarið", source: "Heimild", checked: "Tölur bornar saman við töfluna",
     calc: "Reiknað", failed: "Eitthvað fór úrskeiðis", retry: "Reyna aftur", seconds: "s", calls: "köll í líkan",
-    pts: "pst.", more: "Spyrðu næst", palette: "Litir", appearance: "Útlit", model: "Líkan", thinking: "Hugsun", temp: "Hitastig",
+    pts: "pst.", more: "Spyrðu næst", palette: "Litir", appearance: "Útlit", model: "Líkan",
     now: "Svara strax", fastNote: "Svarað í flýti með hraða líkaninu, án hugsunar.",
-    effort: { none: "Engin", low: "Stutt", medium: "Miðlungs", high: "Löng" },
     voice: "Rödd", listen: "Hlusta", stopVoice: "Stöðva", copy: "Afrita", copied: "Afritað", listening: "Hlusta…",
     writing: "Skrifa upp…", micHttps: "Raddspurningar þurfa HTTPS (eða localhost) í vafranum", best: "besta",
     icelandic: "Íslenska", english: "Enska", micBlocked: "Aðgangur að hljóðnema er lokaður", shortlist: "Stuttlisti", chosen: "valin",
@@ -466,7 +464,7 @@ async function ask(question, tableId = null, fast = false, spoken = false, langu
   $("#send").disabled = true;
   try {
     const body = JSON.stringify({ question, language: language || (lang === "auto" ? null : lang), table_id: tableId, model: modelChoice,
-                                  reasoning: reasoningChoice, temperature: temperatureChoice, fast,
+                                  fast,
                                   history: history.slice(-HISTORY_TURNS) });
     const answer = await askStream(body, st => progress.step(st), stop.signal);
     if (fast) answer.parts.forEach((p, i) => { if (!i) p.note = [t("fastNote", guess), p.note].filter(Boolean).join(" "); });
@@ -950,11 +948,9 @@ function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", com
 
 /* ---------- wiring ---------- */
 // The model questions go to: null means the server's default, the best one we measured. Kept per browser.
-let modelChoice = null, reasoningChoice = null, temperatureChoice = null;
+let modelChoice = null;
 try {
   modelChoice = localStorage.getItem("ragstofan-model") || null;
-  reasoningChoice = localStorage.getItem("ragstofan-reasoning") || null;
-  temperatureChoice = localStorage.getItem("ragstofan-temperature") ? +localStorage.getItem("ragstofan-temperature") : null;
 } catch {}
 const remember = (key, v) => { try { v == null ? localStorage.removeItem(key) : localStorage.setItem(key, v); } catch {} };
 
@@ -1081,7 +1077,7 @@ health();
 loadIndicators();
 pills.start();
 
-/* ---------- answer settings: model, thinking, temperature, as chips with menus (as in the app) ---------- */
+/* ---------- answer settings: the model, as a chip with a menu (as in the app) ---------- */
 let serverModels = null, statusLine = () => {};
 const SVG = (d, extra = "") => `<svg viewBox="0 0 24 24" aria-hidden="true" ${extra}>${d}</svg>`;
 const ICON = {
@@ -1095,16 +1091,15 @@ const ICON = {
 const prettyModel = n => (n.toLowerCase().startsWith("gpt-oss") ? "GPT-OSS" + n.slice(7) : n[0].toUpperCase() + n.slice(1))
   .replace(/(\d+(?:\.\d+)?)([bm])\b/, (_, a, b) => a + b.toUpperCase());
 
-/** The model in use as a button next to the menu; it opens one layered panel with the model, thinking length and
- *  temperature. The recommended settings are chosen until the user picks something else; a dot says something did. */
+/** The model in use as a button next to the menu; it opens a layered panel with the models. The recommended one is
+ *  chosen until the user picks another; a dot says so. Thinking is off and the temperature 0, set by the server. */
 function renderTuning(open = false) {
   const box = $("#tuning"), m = serverModels;
   if (!box || !m) return;
-  const L = ui(), names = t("effort"), is = L === "is";
-  const levels = m.reasoning || ["none", "low", "medium", "high"];
-  const best = m.default, longest = m.reasoning_default;
-  const active = modelChoice || best, effort = reasoningChoice || longest, temp = temperatureChoice ?? 0;
-  const changed = modelChoice != null || reasoningChoice != null || temperatureChoice != null;
+  const L = ui(), is = L === "is";
+  const best = m.default;
+  const active = modelChoice || best;
+  const changed = modelChoice != null;
   const pick = (fn) => e => { e.stopPropagation(); fn(); renderTuning(true); };
 
   const btn = el("button", { type: "button", class: "model-title", "aria-haspopup": "true", "aria-expanded": String(open) });
@@ -1119,27 +1114,16 @@ function renderTuning(open = false) {
     b.addEventListener("click", pick(() => { modelChoice = x === best ? null : x; remember("ragstofan-model", modelChoice); statusLine(); }));
     return b;
   };
-  const segs = (opts, current, recommended, set) => el("div", { class: "segs" }, opts.map(([v, label]) => {
-    const b = el("button", { type: "button", class: (v === current ? "on" : "") + (v === recommended ? " rec" : "") }, label);
-    b.addEventListener("click", pick(() => set(v)));
-    return b;
-  }));
   const section = (title, note, body) => el("div", { class: "psec" },
     el("div", { class: "phead" }, el("span", {}, title), note ? el("small", {}, note) : null), body);
 
   const panel = el("div", { class: "tpanel", role: "menu" },
     section(is ? "Líkan" : "Model", null, el("div", { class: "mrows" }, m.models.map(row))),
-    section(is ? "Hugsun" : "Thinking", `${is ? "Mælt með" : "Recommended"}: ${names[longest] || longest}`,
-      segs(levels.map(x => [x, names[x] || x]), effort, longest,
-        v => { reasoningChoice = v === longest ? null : v; remember("ragstofan-reasoning", reasoningChoice); })),
-    section(is ? "Hitastig" : "Temperature", is ? "0 gefur sama svar í hvert sinn" : "0 gives the same answer every time",
-      segs([0, 0.3, 0.7, 1].map(x => [x, x.toFixed(1)]), temp, 0,
-        v => { temperatureChoice = v === 0 ? null : v; remember("ragstofan-temperature", temperatureChoice); })),
     changed ? (() => {
       const r = el("button", { type: "button", class: "preset" }, is ? "↺ Nota ráðlagðar stillingar" : "↺ Reset to recommended");
       r.addEventListener("click", pick(() => {
-        modelChoice = reasoningChoice = temperatureChoice = null;
-        ["ragstofan-model", "ragstofan-reasoning", "ragstofan-temperature"].forEach(k => remember(k, null)); statusLine(); }));
+        modelChoice = null;
+        remember("ragstofan-model", null); statusLine(); }));
       return r;
     })() : null);
   panel.addEventListener("click", e => e.stopPropagation());

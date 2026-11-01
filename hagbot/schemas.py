@@ -20,8 +20,8 @@ class AskRequest(BaseModel):
     table_id: str | None = None  # set when the user picked a table in a clarification
     history: list[Turn] = []  # the conversation so far, oldest first (the browser keeps the last few)
     model: str | None = None  # one of /api/models; None: the server's default, the best one we have measured
-    temperature: float | None = None  # None: 0, the same answer every time
-    reasoning: Literal["none", "low", "medium", "high"] | None = None  # thinking length; None: the server's default
+    # temperature and reasoning are no longer accepted: 0 and the server's LLM_REASONING_EFFORT ("none") for every
+    # question, so an older app that still sends them is ignored (extra fields are)
     fast: bool = False  # "Answer now": the fast model with thinking off, whatever else is asked
     request_id: str | None = None  # set by a client that may drop the connection (a phone going to sleep): the
                                    # answer is then finished anyway and kept for GET /api/ask/<id>

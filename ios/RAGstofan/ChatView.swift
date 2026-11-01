@@ -321,7 +321,7 @@ func prettyModel(_ name: String) -> String {
     return n
 }
 
-/// The model in use as the screen's title, with a chevron: it opens the panel for model, thinking and temperature.
+/// The model in use as the screen's title, with a chevron: it opens the panel to pick a model.
 /// A tinted dot says something differs from the recommended settings; the Private tag sits beside it.
 private struct ModelTitle: View {
     @Environment(AppModel.self) private var model
@@ -330,7 +330,7 @@ private struct ModelTitle: View {
     let action: () -> Void
 
     var body: some View {
-        let changed = model.modelChoice != nil || model.reasoningChoice != nil || model.temperatureChoice != nil
+        let changed = model.modelChoice != nil
         Button(action: action) {
             HStack(spacing: 5) {
                 Text(model.activeModel.map(prettyModel) ?? "RAGstofan")
@@ -359,8 +359,8 @@ private struct ModelTitle: View {
     }
 }
 
-/// The dropdown: model, thinking length and temperature in one layered card. The server's best settings are chosen
-/// until the user picks something else, and are tagged "Recommended"; one tap puts them all back.
+/// The dropdown: the models in a layered card. The server's best is chosen until the user picks another, and is
+/// tagged "Recommended"; one tap puts it back. Thinking is off and the temperature 0, set by the server.
 private struct TuningPanel: View {
     @Environment(AppModel.self) private var model
     @Environment(\.pal) private var pal
@@ -369,11 +369,7 @@ private struct TuningPanel: View {
         let isl = model.ui == .is
         let best = model.models?.default
         let fast = model.models?.fast
-        let longest = model.models?.reasoningDefault ?? "high"
-        let levels = model.models?.reasoning ?? ["none", "low", "medium", "high"]
-        let names = isl ? ["none": "Engin", "low": "Stutt", "medium": "Miðl.", "high": "Löng"]
-                        : ["none": "Off", "low": "Short", "medium": "Medium", "high": "Long"]
-        let changed = model.modelChoice != nil || model.reasoningChoice != nil || model.temperatureChoice != nil
+        let changed = model.modelChoice != nil
         VStack(alignment: .leading, spacing: 0) {
             section(isl ? "Líkan" : "Model") {
                 VStack(spacing: 2) {
@@ -404,23 +400,10 @@ private struct TuningPanel: View {
                     }
                 }
             }
-            divider
-            section(isl ? "Hugsun" : "Thinking", note: names[longest].map { (isl ? "Mælt með: " : "Recommended: ") + $0 }) {
-                Segments(options: levels.map { ($0, names[$0] ?? $0) }, recommended: longest,
-                         selection: Binding(get: { model.activeReasoning },
-                                            set: { model.reasoningChoice = $0 == longest ? nil : $0 }))
-            }
-            divider
-            section(isl ? "Hitastig" : "Temperature",
-                    note: isl ? "0 gefur sama svar í hvert sinn" : "0 gives the same answer every time") {
-                Segments(options: [0.0, 0.3, 0.7, 1.0].map { ($0, String(format: "%.1f", $0)) }, recommended: 0.0,
-                         selection: Binding(get: { model.temperatureChoice ?? 0 },
-                                            set: { model.temperatureChoice = $0 == 0 ? nil : $0 }))
-            }
             if changed {
                 divider
                 Button {
-                    model.modelChoice = nil; model.reasoningChoice = nil; model.temperatureChoice = nil
+                    model.modelChoice = nil
                 } label: {
                     Label(isl ? "Nota ráðlagðar stillingar" : "Reset to recommended", systemImage: "arrow.counterclockwise")
                         .font(.subheadline.weight(.medium)).foregroundStyle(pal.accent)
@@ -439,8 +422,6 @@ private struct TuningPanel: View {
         .animation(.spring(duration: 0.35, bounce: 0.2), value: model.modelChoice)
         .animation(.spring(duration: 0.35, bounce: 0.2), value: changed)
         .sensoryFeedback(.selection, trigger: model.modelChoice)
-        .sensoryFeedback(.selection, trigger: model.reasoningChoice)
-        .sensoryFeedback(.selection, trigger: model.temperatureChoice)
     }
 
     private var divider: some View { Rectangle().fill(pal.text.opacity(0.07)).frame(height: 1).padding(.horizontal, 14) }
@@ -460,37 +441,3 @@ private struct TuningPanel: View {
 }
 
 /// A row of options with a sliding highlight; the recommended one carries a small dot.
-private struct Segments<V: Hashable>: View {
-    @Environment(\.pal) private var pal
-    let options: [(V, String)]
-    let recommended: V
-    @Binding var selection: V
-    @Namespace private var ns
-
-    var body: some View {
-        HStack(spacing: 2) {
-            ForEach(options, id: \.0) { value, label in
-                let on = value == selection
-                Button { withAnimation(.spring(duration: 0.35, bounce: 0.25)) { selection = value } } label: {
-                    VStack(spacing: 3) {
-                        Text(label).font(.subheadline.weight(on ? .semibold : .regular))
-                            .foregroundStyle(on ? pal.text : pal.text2)
-                        Circle().fill(value == recommended ? pal.accent : .clear).frame(width: 4, height: 4)
-                    }
-                    .frame(maxWidth: .infinity).padding(.vertical, 7)
-                    .background {
-                        if on {
-                            RoundedRectangle(cornerRadius: 10, style: .continuous).fill(pal.card)
-                                .shadow(color: .black.opacity(0.12), radius: 3, y: 1)
-                                .matchedGeometryEffect(id: "on", in: ns)
-                        }
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(3)
-        .background(pal.text.opacity(0.06), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-    }
-}

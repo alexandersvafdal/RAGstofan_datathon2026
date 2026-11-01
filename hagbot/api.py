@@ -66,8 +66,7 @@ async def models():
             _models = (time.monotonic(), [])
     names = _models[1]
     return {"default": settings.llm_model, "models": [settings.llm_model, *(m for m in names if m != settings.llm_model)],
-            "fast": settings.fast_model, "reasoning_default": settings.llm_reasoning_effort or "high",
-            "reasoning": ["none", "low", "medium", "high"]}
+            "fast": settings.fast_model}
 
 
 @app.get("/api/indicators", response_model=Indicators)

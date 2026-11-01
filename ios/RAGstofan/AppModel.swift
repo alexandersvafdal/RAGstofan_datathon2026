@@ -54,10 +54,9 @@ final class AppModel {
     var langChoice: LangChoice { didSet { UserDefaults.standard.set(langChoice.rawValue, forKey: "lang") } }
     var paletteName: PaletteName { didSet { UserDefaults.standard.set(paletteName.rawValue, forKey: "palette") } }
     var appearance: String { didSet { UserDefaults.standard.set(appearance, forKey: "appearance") } }  // auto | light | dark
-    /// How questions are answered. nil everywhere means the server's defaults: the best model, the longest thinking.
+    /// The model questions go to. nil means the server's default, its best one. Thinking is off and the temperature
+    /// 0 on the server; the app no longer offers them.
     var modelChoice: String? { didSet { UserDefaults.standard.set(modelChoice, forKey: "model") } }
-    var reasoningChoice: String? { didSet { UserDefaults.standard.set(reasoningChoice, forKey: "reasoning") } }
-    var temperatureChoice: Double? { didSet { UserDefaults.standard.set(temperatureChoice, forKey: "temperature") } }
     var models: ModelList?
     /// The first-run introduction has been seen.
     var onboarded: Bool { didSet { UserDefaults.standard.set(onboarded, forKey: "onboarded") } }
@@ -94,8 +93,6 @@ final class AppModel {
         paletteName = PaletteName(rawValue: d.string(forKey: "palette") ?? "") ?? .sterling
         appearance = d.string(forKey: "appearance") ?? "auto"
         modelChoice = d.string(forKey: "model")
-        reasoningChoice = d.string(forKey: "reasoning")
-        temperatureChoice = d.object(forKey: "temperature") as? Double
         conversations = Self.load()
         onboarded = d.bool(forKey: "onboarded")
         autoSpeak = d.object(forKey: "autoSpeak") as? Bool ?? true
@@ -149,7 +146,6 @@ final class AppModel {
 
     /// The model answering now: the chosen one, or the server's default.
     var activeModel: String? { modelChoice ?? models?.default ?? health?.model }
-    var activeReasoning: String { reasoningChoice ?? models?.reasoningDefault ?? "high" }
 
     /// The last few answered turns, the full question each was read as, so follow-ups can chain.
     private var history: [Turn] {
@@ -188,8 +184,7 @@ final class AppModel {
         guard !q.isEmpty, let api else { return }
         let lang: Lang = langChoice == .auto ? guessLang(q) : (langChoice == .is ? .is : .en)
         let request = AskRequest(question: q, language: langChoice == .auto ? nil : langChoice.rawValue,
-                                 tableId: tableId, history: history, model: modelChoice,
-                                 temperature: temperatureChoice, reasoning: reasoningChoice, fast: fast,
+                                 tableId: tableId, history: history, model: modelChoice, fast: fast,
                                  requestId: "")
         let ex = Exchange(question: q, tableId: tableId, lang: lang, fast: fast)
         ex.spoken = spoken

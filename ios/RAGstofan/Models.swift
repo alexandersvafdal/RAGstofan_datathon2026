@@ -76,16 +76,14 @@ struct AskRequest: Encodable {
     let tableId: String?
     let history: [Turn]
     let model: String?        // nil: the server's default, the best one measured
-    let temperature: Double?  // nil: 0
-    let reasoning: String?    // thinking length none / low / medium / high; nil: the server's default (the longest)
-    let fast: Bool            // "Answer now": the fast model, thinking off
+    let fast: Bool            // "Answer now": the fast model
     let requestId: String     // the server finishes and keeps the answer under this if the phone drops the line
 }
 
 extension AskRequest {
     func with(requestId: String) -> AskRequest {
         AskRequest(question: question, language: language, tableId: tableId, history: history, model: model,
-                   temperature: temperature, reasoning: reasoning, fast: fast, requestId: requestId)
+                   fast: fast, requestId: requestId)
     }
 }
 
@@ -105,8 +103,6 @@ struct ModelList: Codable {
     let `default`: String
     let models: [String]
     let fast: String?
-    let reasoningDefault: String?
-    let reasoning: [String]?
 }
 
 struct Health: Codable { let model: String; let dataSource: String; let tablesInCatalog: Int }

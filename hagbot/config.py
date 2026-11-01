@@ -21,7 +21,7 @@ class Settings:
     llm_timeout_s: float = float(os.getenv("LLM_TIMEOUT_S", "300"))
     # Reasoning models think before they answer. "none" turns that off for Qwen3-style models (2-3x faster here);
     # gpt-oss takes "low" / "medium" / "high". Empty: send nothing, the server's default.
-    llm_reasoning_effort: str = os.getenv("LLM_REASONING_EFFORT", "")
+    llm_reasoning_effort: str = os.getenv("LLM_REASONING_EFFORT", "none")   # off unless .env says otherwise
     # "Answer now": a quick model with thinking off, for when the default is taking too long
     fast_model: str = os.getenv("FAST_MODEL", "gpt-oss:20b")
 

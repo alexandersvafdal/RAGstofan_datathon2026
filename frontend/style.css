@@ -1194,13 +1194,6 @@ td.num { text-align: right; }
 .mrow .mic { color: var(--text-3); display: grid; } .mrow.on .mic, .mrow .tick { color: var(--accent); display: grid; }
 .mrow .mname { display: grid; font-size: 14.5px; } .mrow.on .mname { font-weight: 600; }
 .mrow .mname small { font-size: 12px; font-weight: 400; color: var(--text-3); } .mrow .mname small.rec { color: var(--accent); }
-.segs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; padding: 3px; border-radius: 12px;
-  background: color-mix(in srgb, var(--text) 6%, transparent); }
-.segs button { position: relative; border: 0; background: transparent; font: inherit; font-size: 14px; color: var(--text-2);
-  padding: 7px 4px 10px; border-radius: 9px; cursor: pointer; transition: background .2s var(--ease), color .2s var(--ease); }
-.segs button.on { background: var(--card); color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.14); }
-.segs button.rec::after { content: ""; position: absolute; left: 50%; bottom: 3px; width: 4px; height: 4px; margin-left: -2px;
-  border-radius: 50%; background: var(--accent); }
 .tpanel .preset { display: block; width: 100%; border: 0; border-top: 1px solid var(--hairline); background: transparent;
   font: inherit; font-size: 14px; font-weight: 500; color: var(--accent); padding: 12px; cursor: pointer; }
 .nav-left { display: flex; align-items: center; gap: 6px; min-width: 0; }
