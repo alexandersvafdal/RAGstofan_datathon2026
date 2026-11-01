@@ -14,7 +14,7 @@ from .sources import DataSource, make_source, table_url
 from .hierarchy import children
 from .steps.chart import choose_chart, comparison_chart
 from .steps.compose import compose
-from .steps.compute import compute
+from .steps.compute import aggregate_rows, compute
 from .steps.followup import looks_like_followup, rewrite
 from .steps.plan import Plan, SubQuestion, merge_period_parts, plan
 from .steps.ratio import POPULATION_TABLE, detect_ratio, difference_parts, ratio_parts, share_parts, stored_rate
@@ -239,6 +239,12 @@ class Pipeline:
                 res.selections[time_var.code] = [last]
                 rows = [r for r in wide if r.key[time_var.code] == last]
                 detail += f"; {time_var.values[-1]} has no numbers yet, using {last}"
+        if res.aggregate_over:   # a dimension with no total the question did not name: its options summed in code
+            rows = aggregate_rows(meta, rows, res.aggregate_over, lang)
+            for code in res.aggregate_over:
+                res.selections[code] = ["__all__"]
+                chosen[meta.var(code).text] = [f"{'Samtals' if lang == 'is' else 'Total'} ({len(meta.var(code).values)} {'lagðir saman' if lang == 'is' else 'summed'})"]
+            detail += f"; summed over {', '.join(meta.var(c).text for c in res.aggregate_over)}"
         if res.operation == "rank":   # categories with a number, largest first when only the top few were asked for
             rows = [r for r in rows if r.value is not None]
             if res.top:

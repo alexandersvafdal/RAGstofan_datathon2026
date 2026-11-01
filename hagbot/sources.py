@@ -36,6 +36,8 @@ class Variable(BaseModel):
     elimination: bool = False
 
     def label_of(self, code: str) -> str:
+        if code == "__all__":   # every option summed in code (aggregate_rows): no row of the table carries it
+            return "Total"
         return self.value_texts[self.values.index(code)]
 
 

@@ -38,7 +38,7 @@ flowchart TD
         N["Narrow by rule<br/>drop trend / seasonal / forecast / census and old index bases unless asked,<br/>keep tables with the place, month or year asked for,<br/>and with the breakdown named (by age · eftir sveitarfélögum)"]:::code
         DD{"One subject, its headline table on top,<br/>nothing asked beyond it?"}:::code
         T[["LLM ③ Last resort: must pick one table<br/>from the hitlist"]]:::llm
-        CK[["LLM ③ Check the hitlist, 8 tables at a time, ≤ 2 rounds<br/>pick one, or say none fits · votes"]]:::llm
+        CK[["LLM ③ Check the hitlist, 8 tables at a time, ≤ 2 rounds<br/>pick one, or say none fits · votes<br/>a round-2 pick is re-checked head to head with the top 4 of round 1"]]:::llm
         BR[["LLM ③ Browse: choose ≤ 2 subject areas"]]:::llm
         CK2[["LLM ③ Check tables in those areas,<br/>8 at a time, ≤ 4 rounds · votes"]]:::llm
         F["Freshest sibling<br/>same table, newer edition"]:::code
@@ -46,7 +46,7 @@ flowchart TD
 
     subgraph read["3 · Read the numbers (each part)"]
         C[["LLM ④ Choose categories<br/>Sex: Males, Females · Year: 2026 · votes"]]:::llm
-        V["Validate and fix every choice, using the plan's facts<br/>codes must exist · defaults: total, latest period · period from the question ·<br/>only the places named · categories not named → the total, the rest as chips ·<br/>Iceland = whole country · current index base · the table's own % change ·<br/>trend wording → whole series · highest / lowest · share needs a whole"]:::code
+        V["Validate and fix every choice, using the plan's facts<br/>codes must exist · defaults: total, latest period · period from the question ·<br/>only the places named · categories not named → the total, the rest as chips ·<br/>a long list with no total (253 partner countries) → summed in code ·<br/>Iceland = whole country · current index base · the table's own % change ·<br/>trend wording → whole series · highest / lowest · share needs a whole"]:::code
         SW{"Month or quarter asked is after<br/>the table's last period?"}:::code
         SB["Switch to the neighbouring table that has it<br/>(LAU04000 → LAU04001), choose again"]:::code
         D[("Data<br/>organisers' snapshot of 18 Oct 2026 on disk,<br/>live PX-API for what it lacks")]:::data

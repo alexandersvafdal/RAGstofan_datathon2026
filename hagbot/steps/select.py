@@ -40,6 +40,8 @@ class Resolved(BaseModel):
     top: int | None = None        # rank: keep the n largest (by size, either sign); None lists them all
     beyond: str | None = None     # a period asked for that lies after this table's last one ("2026M09" in a table to 2026M08)
     place_note: dict[str, str] | None = None  # en/is, when a place the question names is not among the table's options
+    aggregate_over: list[str] = []            # dimensions summed in code: a long list with no total (253 partner
+                                              # countries) when the question names none of them
     alternatives: dict[str, list[str]] = {}   # dimension -> categories the model chose that the question did not name,
                                               # answered with the default instead and offered to the user as choices
 
@@ -208,6 +210,12 @@ def _total_of(var: Variable) -> str | None:
     return None
 
 
+def _partition(var: Variable) -> bool:
+    """A long list of options with no total (partner countries, products): the whole is their sum, so when the
+    question names none of them the code sums them all rather than answer for the first one alphabetically."""
+    return not var.time and len(var.values) >= 10 and _total_of(var) is None
+
+
 def _default(var: Variable) -> list[str]:
     """The latest period; for other dimensions the total (see _total_of), else the first option."""
     if var.time:
@@ -245,7 +253,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     """Map whatever the model returned onto valid codes; fill gaps with defaults. `facts` is the planner's reading of
     the question (places, period, breakdown; hagbot/steps/plan.py), checked against the text; without it (a table
     the user clicked, a published rate) the same facts are read from the text by the patterns below."""
-    notes, out, beyond, alternatives = [], {}, None, {}
+    notes, out, beyond, alternatives, aggregate_over = [], {}, None, {}, []
     from .retrieve import named_places
     if facts is not None:   # the planner's places as normalized words, as the patterns would give them
         places_part = [t for pl in facts.places for t in tokens(pl) if len(t) >= 4]
@@ -277,6 +285,10 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
         if not codes and var.time and (asked := _period_from_question(var, period_text)):
             codes = [asked]   # the model left the period out: the one the question names, not the latest
             notes.append(f"{var.text}: {asked} from the question")
+        if not codes and _partition(var) and var.code != sel.compare_dimension:
+            codes = list(var.values)
+            aggregate_over.append(var.code)
+            notes.append(f"{var.text}: no total in the table; summed over all {len(codes)} options")
         if not codes:
             codes = _default(var)
             notes.append(f"{var.text}: defaulted to {[var.label_of(c) for c in codes]}")
@@ -321,6 +333,12 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                 notes.append(f"{var.text}: dropped {[var.label_of(c) for c in chosen if c not in in_question]} (not named in the question)")
                 alternatives[var.code] = [c for c in chosen if c not in in_question]   # offered as chips
                 out[var.code] = chosen = in_question
+        if (len(chosen) == 1 and _partition(var) and var.code != sel.compare_dimension and var.code not in aggregate_over
+                and not mentioned(var.label_of(chosen[0]))):
+            notes.append(f"{var.text}: {var.label_of(chosen[0])!r} is not named in the question and the table has no total; "
+                         f"summed over all {len(var.values)} options")
+            out[var.code] = chosen = list(var.values)
+            aggregate_over.append(var.code)
         # "the housing price index from 2010": one line, the whole country, not every region and house type the model
         # could chart. Several categories stay when the question names one of them, asks for a breakdown ("by region",
         # "eftir landshlutum", "all regions"), or compares along this dimension.
@@ -367,7 +385,11 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                 # none of the chosen is named: the named options (up to two) answer; else the total; a table with
                 # no total and no named option keeps the model's choice under the note
                 total = _total_of(var)
-                out[var.code] = keep or (named_options if 0 < len(named_options) <= 2 else [total] if total else chosen)
+                if not keep and not named_options and not total and _partition(var):
+                    aggregate_over.append(var.code)
+                    out[var.code] = list(var.values)
+                else:
+                    out[var.code] = keep or (named_options if 0 < len(named_options) <= 2 else [total] if total else chosen)
                 notes.append(f"{var.text}: dropped {[var.label_of(c) for c in chosen if c not in keep]} (a place the question did "
                              f"not name); using {[var.label_of(c) for c in out[var.code]]}")
 
@@ -486,7 +508,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     extreme = next((o for o, rx in _EXTREME if rx.search(q)), None) if op in ("value", "series") else None
     if op in ("max", "min") or extreme:
         op = op if op in ("max", "min") else extreme
-        multi = [c for c, v in out.items() if len(v) > 1]
+        multi = [c for c, v in out.items() if len(v) > 1 and c not in aggregate_over]   # a summed list is one value
         time_var = next((v for v in meta.variables if v.time), None)
         compare = sel.compare_dimension if sel.compare_dimension in multi else \
             (time_var.code if time_var and time_var.code in multi else (multi[0] if multi else None))
@@ -510,6 +532,9 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                 out[var.code] = [var.values[-1]]
 
     compare = sel.compare_dimension if sel.compare_dimension in out else None
+    if compare in aggregate_over:   # the dimension an operation runs along is never summed away
+        aggregate_over.remove(compare)
+        notes.append(f"{meta.var(compare).text}: compared, not summed")
     hint = guess_op(question)
     gives_change = any(re.search(_CHANGE_OPTION, normalize(var.label_of(c))) for var in meta.variables if not var.time
                        for c in out[var.code])
@@ -600,7 +625,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                 if v.time:   # one period: the latest unless the question names one
                     named_period = [c for c in out[v.code] if c[:4] in question]
                     out[v.code] = [named_period[-1] if named_period else v.values[-1]]
-                elif len(out[v.code]) > 1:   # one measure per category
+                elif len(out[v.code]) > 1 and v.code not in aggregate_over:   # one measure per category
                     out[v.code] = out[v.code][:1]
             if re.search(_TOP, q):
                 m = re.search(r"\b(\d{1,2})\b", re.sub(r"\b(?:18|19|20)\d\d\b", "", q))
@@ -610,7 +635,7 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
                          + (f" under {var.label_of(named(var, question))!r}" if named(var, question) else ""))
     return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes,
                     window_note=window_note, breakdown=breakdown, top=top, beyond=beyond, place_note=place_note,
-                    alternatives=alternatives)
+                    alternatives=alternatives, aggregate_over=aggregate_over)
 
 
 async def select(llm: LLM, meta: TableMeta, question: str, original: str | None = None, facts=None) -> Resolved:

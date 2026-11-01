@@ -21,6 +21,23 @@ def row_label(meta: TableMeta, row: Row, keep: set[str] = frozenset()) -> str:
     return ", ".join(parts) or meta.title
 
 
+def aggregate_rows(meta: TableMeta, rows: list[Row], dims: list[str], lang: str) -> list[Row]:
+    """Rows summed over `dims` (partner countries, say): one row per combination of the other dimensions, labelled
+    "Total"/"Samtals" for the summed ones (row_label leaves that out). Missing cells are skipped; a sum with no
+    cell at all stays None."""
+    out: dict[tuple, Row] = {}
+    for r in rows:
+        rest = tuple(sorted((k, v) for k, v in r.key.items() if k not in dims))
+        if rest not in out:
+            key = {k: ("__all__" if k in dims else v) for k, v in r.key.items()}
+            labels = {meta.var(k).text if k in dims else lab_k: ("Samtals" if lang == "is" else "Total") if k in dims else lab
+                      for (k, _), (lab_k, lab) in zip(r.key.items(), r.labels.items())}
+            out[rest] = Row(key=key, labels=labels, value=None)
+        if r.value is not None:
+            out[rest].value = (out[rest].value or 0) + r.value
+    return list(out.values())
+
+
 def _groups(rows: list[Row], dim: str) -> dict[tuple, dict[str, Row]]:
     groups: dict[tuple, dict[str, Row]] = defaultdict(dict)
     for r in rows:

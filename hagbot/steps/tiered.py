@@ -33,6 +33,7 @@ from .retrieve import AMBIGUOUS, MONTHS, Retrieved, SYSTEM as PICK_RULES, freshe
 KEYWORDS = ROOT / "data" / "keywords.json"
 BATCH = 8   # tables the model sees per check
 BATCHES = 2  # the hitlist is checked in at most two batches before falling back
+RECHECK = 4  # a hit from the second batch is re-checked against this many tables from the top of the first
 RRF_K = 60  # reciprocal-rank fusion: a list's #1 adds 1/61, its #10 adds 1/70
 DICT_BONUS = 1.0  # dictionary tables are hand-picked: they always lead, the searches order the rest
 
@@ -232,6 +233,10 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
     heads = {c["tables"][0]: c["concept"] for c in with_tables if catalog.get(c["tables"][0])}
     for i in range(0, min(len(shortlist), BATCHES * BATCH), BATCH):
         if (hit := await _check(llm, shortlist[i:i + BATCH], question, original, start=i, heads=heads)):
+            if i:  # a hit from a later batch: head to head with the top of the hitlist, which the model rejected
+                # in a batch it may have read too strictly ("none" to eight tables, then yes to a weaker ninth)
+                top = [e for e in shortlist[:RECHECK] if e.id != hit.id]
+                hit = await _check(llm, top + [hit], question, original, heads=heads) or hit
             # the snap reads this part alone: in "GDP in 2025 and how many children were born", the births words
             # are not a breakdown of GDP; and the planner's English part has no Icelandic inflections ("árið")
             hit = headline(hit, found, catalog, question)
