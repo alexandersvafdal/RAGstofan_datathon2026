@@ -7,6 +7,11 @@ import unicodedata
 _IS_CHARS = set("þðæöáéíóúýÞÐÆÖÁÉÍÓÚÝ")
 _IS_WORDS = {"hvað", "hve", "hversu", "margir", "margar", "búa", "árið", "og", "í", "á", "er", "var", "hvert", "hver",
              "hverjir", "hverjar", "eru", "undirflokkar"}
+# English function words: "how many seyðisfjörður populations would fit in reykjavíks population" is English even
+# with its place names typed in lower case
+_EN_WORDS = {"how", "many", "much", "what", "which", "when", "where", "who", "why", "the", "of", "in", "is", "are",
+             "was", "were", "would", "could", "did", "does", "do", "has", "have", "and", "per", "than", "from", "to",
+             "with", "there", "people", "population", "number"}
 
 
 def normalize(s: str) -> str:
@@ -21,6 +26,9 @@ def tokens(s: str) -> list[str]:
 
 def detect_language(s: str) -> str:
     words = re.findall(r"\w+", s)
+    low = {w.lower() for w in words}
+    if len(low & _EN_WORDS) >= 2 and len(low & _IS_WORDS) < 2:
+        return "en"
     # Place names (Reykjavík, Kópavogur) carry Icelandic letters in English questions, so skip capitalised words
     if any(c in _IS_CHARS for w in words[1:] if not w[0].isupper() for c in w):
         return "is"
