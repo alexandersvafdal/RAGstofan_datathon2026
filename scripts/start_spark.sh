@@ -6,7 +6,8 @@ export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
 APP="$HOME/RAGstofan"
 TS="$HOME/tailscale"   # Tailscale's static build, run in user space (no root); keeps its login in $TS/state
 
-start() { tmux has-session -t "$1" 2>/dev/null && echo "$1 already running" || { tmux new-session -d -s "$1" "$2" && echo "$1 started"; }; }
+# "=name": the exact session, so "ragstofan" is not taken for a running "ragstofan-preview"
+start() { tmux has-session -t "=$1" 2>/dev/null && echo "$1 already running" || { tmux new-session -d -s "$1" "$2" && echo "$1 started"; }; }
 
 echo "== $(date '+%F %T')"
 if [ -x "$TS/tailscaled" ]; then
