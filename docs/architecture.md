@@ -18,7 +18,7 @@ flowchart TD
     subgraph understand["1 · Understand"]
         FU{"Follow-up?<br/>what about last year · hvað með árið áður · the highest category"}:::code
         RW[["LLM ① Rewrite as a question that stands alone,<br/>from the previous question and answer;<br/>'that category' becomes the name the answer gave"]]:::llm
-        TB{"Table already chosen?<br/>the user clicked a clarification button"}:::code
+        TB{"Table already chosen?<br/>the user clicked a chip: another category, a drill-down"}:::code
         R{"Ratio to population?<br/>per inhabitant · á hvern íbúa"}:::code
         SR{"Rate published in a table?<br/>GDP per capita · Vehicles per 1,000 inhabitants<br/>(not when the population date is named)"}:::code
         RP["Split in code: numerator, and the population<br/>of the place asked on 1 January (MAN00101 for Iceland)"]:::code
@@ -28,20 +28,22 @@ flowchart TD
 
     subgraph find["2 · Find the table (each part in parallel)"]
         DICT["Keyword dictionary · data/keywords.json<br/>the most specific subject named (longest matching word)<br/>→ its first table: verðbólga → consumer price index → VIS01000"]:::code
-        Y1[["LLM ③ Does this table hold the figures asked for?<br/>yes / no"]]:::llm
+        Y1[["LLM ③ Does the dictionary's table hold<br/>the figures asked for? yes / no"]]:::llm
         subgraph search["Search 1,857 tables, in parallel · English wording + the original"]
-            S1["BM25 keywords · top 60<br/>titles EN + IS, dimension names, option labels,<br/>prefix match, synonyms, tables matching every word first"]:::code
-            S2["e5 vectors · top 60<br/>meaning of each table's description:<br/>titles, dimensions IS + EN, period, options"]:::code
+            S1["BM25 keywords · top 120<br/>titles EN + IS, dimension names, option labels,<br/>prefix match, synonyms, tables matching every word first"]:::code
+            S2["e5 vectors · top 120<br/>meaning of each table's description:<br/>titles, dimensions IS + EN, period, options"]:::code
         end
-        RK["Fuse the two rankings: 1 / (60 + rank) from each, × recency"]:::code
-        N["Narrow by rule<br/>drop trend / seasonal / forecast / census and old index bases unless asked,<br/>keep tables with the place, month or year asked for,<br/>and with the breakdown named (by age · eftir sveitarfélögum)"]:::code
-        Y2[["LLM ③ The top 3, one at a time:<br/>does this table hold the figures asked for? yes / no"]]:::llm
-        FIT{"Does a list of every table fit<br/>the model's context? (data/models.json)"}:::code
-        ALL[["LLM ③ Pick one from every table<br/>titles EN + IS, years, and dimensions when they fit"]]:::llm
+        RK["Fuse the two rankings: 1 / (60 + rank) from each, × recency · top 30"]:::code
+        N["Narrow by rule<br/>drop trend / seasonal / forecast / census and old index bases unless asked,<br/>keep tables with the place, month or year asked for,<br/>and with the breakdown named (by age · eftir sveitarfélögum) · top 15"]:::code
+        Y2[["LLM ③ Does the top search table hold the figures asked for? yes / no<br/>(the next one if the dictionary's table came first)"]]:::llm
+        FIT{"Does a list of every table fit<br/>the model's context? (data/models.json)<br/>English titles + years: 54k · + Icelandic titles: 93k · + dimensions: 115k"}:::code
+        ALL[["LLM ③ Name the best 3 of all 1,857 tables,<br/>listed as fully as the context allows"]]:::llm
         AR[["LLM ③ Pick ≤ 2 subject areas of 34"]]:::llm
-        AT[["LLM ③ Pick one from every table in those areas"]]:::llm
+        AT[["LLM ③ Name the best 3 of the tables in those areas<br/>(narrowed by rule, listed as fully as fits)"]]
+        Y3[["LLM ③ Does the first of those hold<br/>the figures asked for? yes / no"]]:::llm:::llm
         F["Freshest sibling<br/>same table, newer edition"]:::code
     end
+    ASK(["The user picks from each method's top 3:<br/>dictionary · search · the model's best 3"])
 
     subgraph read["3 · Read the numbers (each part)"]
         C[["LLM ④ Choose categories<br/>Sex: Males, Females · Year: 2026 · votes"]]:::llm
@@ -84,8 +86,11 @@ flowchart TD
     search --> RK --> N --> Y2
     Y2 -- "yes" --> F
     Y2 -- "no to all 3" --> FIT
-    FIT -- "yes (64k+ today: no)" --> ALL --> F
-    FIT -- "no (16k on the Spark)" --> AR --> AT --> F
+    FIT -- "yes: 54k+ context" --> ALL --> Y3
+    FIT -- "no: the Spark today, 16k" --> AR --> AT --> Y3
+    Y3 -- yes --> F
+    Y3 -- no --> ASK
+    ASK -. "a click asks again, table fixed" .-> TB
     F --> C --> V --> SW
     SW -- yes --> SB --> D
     SW -- no --> D
@@ -112,13 +117,13 @@ browser the moment it finishes.</sub>
 |---|---|---|---|
 | ① | Rewrite a follow-up | the wording leans on the previous turn | 0–1 |
 | ② | Plan, with each part's places, period and breakdown | always, unless the user clicked a table or a published per-inhabitant rate answers it | 0–1 |
-| ③ | Find the table | per part: none when the table is fixed (clicked, or population for a ratio); yes/no on the dictionary's table 0–1; yes/no on up to 3 search hits; if all say no, a pick from every table 1, or subject areas + a pick 2; a year or month the table lacks adds a neighbour pick 1 | 0–7 per part |
+| ③ | Find the table | per part: none when the table is fixed (clicked, or population for a ratio); yes/no on the dictionary's table 0–1; yes/no on the search's table 0–1; if both say no, the best 3 from every table 1 (or subject areas + best 3: 2) and a yes/no on the first 1; a year or month the table lacks adds a neighbour pick 1 | 0–6 per part |
 | ④ | Choose categories | per part; again if it switches to a neighbouring table | 1–2 per part |
 | ⑤ | Write the answer | when at least one part has numbers | 0–1 |
 | ⑥ | Check the answer against the question: answers, uncertain or wrong | after every written answer; uncertain is qualified up front, wrong is said to be no answer with the figures kept as connected | 0–1 |
 | ⑦ | Follow-up suggestions | after the answer is on screen (`/api/suggest`), so it adds no answer time | 0–1 |
 
-A one-part question makes 5–8 calls before the answer (plan, find 1–4, categories, write, check), and one more for suggestions. Voting multiplies the
+A one-part question makes 5–9 calls before the answer (plan, find 1–5, categories, write, check), and one more for suggestions. Voting multiplies the
 calls marked "votes" by the number of votes; they run in parallel, so it costs compute more than time.
 
 ## Why Icelandic questions are reworded in English
@@ -148,7 +153,7 @@ languages. It would make sense with a model that is strong in Icelandic.
 | Ratio to population | `hagbot/steps/ratio.py` | no |
 | Follow-up rewrite | `hagbot/steps/followup.py` | rewrite only |
 | Search | `hagbot/catalog.py` (BM25 over three fields) and `hagbot/e5.py` (e5 vectors, on by default; optional bge-m3 in `hagbot/vectors.py`), run in parallel and fused by rank | no |
-| Table finder: dictionary, search, every table | `hagbot/steps/tiered.py`, keyword dictionary `data/keywords.json` | yes/no checks and the last pick |
+| Table finder: dictionary, search, every table, then the user | `hagbot/steps/tiered.py`, keyword dictionary `data/keywords.json` | yes/no checks and the best-3 pick |
 | Context each model gets | `hagbot/models.py`, `data/models.json` (`python -m hagbot.models` refreshes it) | no |
 | Narrow by rule, freshest sibling | `hagbot/steps/retrieve.py` | no |
 | Majority voting (`VOTES`, `VOTE_MODELS`) | `hagbot/vote.py` | repeats a call |

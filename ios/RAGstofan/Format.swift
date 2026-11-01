@@ -127,9 +127,9 @@ struct Words {
     func votes(_ v: String) -> String { t("Votes: \(v)", "Atkvæði: \(v)") }
     func via(_ tier: String) -> String {
         let en = ["keywords": "found through the keyword dictionary", "search": "found by keyword and semantic search",
-                  "all tables": "picked by the model from every table", "best search hit": "the best search hit"]
+                  "all tables": "picked by the model from every table", "user choice": "none confirmed, so you choose"]
         let is_ = ["keywords": "fundin með orðasafninu", "search": "fundin með leitarorða- og merkingarleit",
-                   "all tables": "valin af líkaninu úr öllum töflum", "best search hit": "efsta leitarniðurstaðan"]
+                   "all tables": "valin af líkaninu úr öllum töflum", "user choice": "engin staðfest, svo þú velur"]
         return (lang == .is ? is_ : en)[tier] ?? tier
     }
     func signal(_ s: String) -> String {

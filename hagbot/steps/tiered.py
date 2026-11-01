@@ -1,15 +1,16 @@
-"""Table finder: one candidate at a time, each confirmed by the model before it is used.
+"""Table finder: three methods in turn, each suggesting one table that the model confirms or rejects.
 
   1. Dictionary. data/keywords.json maps everyday words (English or Icelandic) to Statistics Iceland's subjects and
      their tables ("verðbólga" -> consumer prices -> VIS01000). Of the subjects the question matches, the one whose
-     matching word is longest (the most specific) gives its first table. The model answers yes or no: does this
-     table hold the figures the question asks for?
-  2. Search. Keyword search (BM25) and e5 vectors run in parallel on the question; their rankings are fused, the
-     code-side rules (narrow) drop variants nobody asked for, and the model answers yes or no for the top three,
-     one at a time.
-  3. Every table. The model picks from a list of all 1,857 tables. How much of each table the list shows depends on
-     the context the model gets (hagbot/models.py): titles, years and dimensions when they fit; less when not; and
-     when even titles alone do not fit, two passes: subject areas first, then every table in the chosen areas.
+     matching word is longest (the most specific) gives its first table.
+  2. Search. Keyword search (BM25) and e5 vectors run in parallel on the question; their rankings are fused and the
+     code-side rules (narrow) drop variants nobody asked for. The top table is the suggestion.
+  3. Every table. The model names the three best tables from a list of all 1,857. How much of each table the list
+     shows depends on the context the model gets (hagbot/models.py): titles, years and dimensions when they fit;
+     less when not; and when even titles alone do not fit, two passes: subject areas first, then the tables in them.
+
+Each method's table gets a yes or no from the model: does it hold the figures the question asks for? The first yes
+answers. When all three say no, the user picks from each method's top three.
 
 The chosen table is swapped for a newer edition of itself when one exists (freshest sibling).
 """
@@ -28,7 +29,7 @@ from ..vote import vote_json, voting_on
 from .retrieve import Retrieved, SYSTEM as PICK_RULES, freshest_sibling, narrow
 
 KEYWORDS = ROOT / "data" / "keywords.json"
-SEARCH_CHECKS = 3      # search hits the model checks one at a time
+OPTIONS = 3            # each method's tables offered to the user when every method's suggestion was rejected
 RESERVE = 3000         # tokens kept free in step 3 for the rules, the question and the answer
 CHARS_PER_TOKEN = 3.0  # a cautious estimate: Icelandic titles take more tokens than English ones
 
@@ -67,13 +68,16 @@ def match_concepts(text: str) -> list[dict]:
     return [c for c in hits if c["id"] not in narrower]
 
 
-def dictionary_table(found: list[dict], catalog: Catalog) -> tuple[CatalogEntry | None, dict | None]:
-    """Step 1: the first table of the most specific subject matched, the one whose matching word is longest."""
-    with_tables = [c for c in found if any(catalog.get(t) for t in c["tables"])]
+def dictionary_tables(found: list[dict], catalog: Catalog) -> tuple[list[CatalogEntry], dict | None]:
+    """Step 1, best first: the tables of the most specific subject matched (the one whose matching word is longest),
+    then the first table of each other subject matched. The first is the suggestion."""
+    with_tables = sorted((c for c in found if any(catalog.get(t) for t in c["tables"])),
+                         key=lambda c: -len(c["_matched"]))
     if not with_tables:
-        return None, None
-    best = max(with_tables, key=lambda c: len(c["_matched"]))
-    return next(e for t in best["tables"] if (e := catalog.get(t))), best
+        return [], None
+    best, *others = with_tables
+    ids = [*best["tables"], *(c["tables"][0] for c in others)]
+    return [e for t in dict.fromkeys(ids) if (e := catalog.get(t))], best
 
 
 # ---------- step 1 and 2: does this one table answer? ----------
@@ -114,7 +118,8 @@ async def fits(llm: LLM, e: CatalogEntry, question: str, original: str) -> bool:
 # ---------- step 3: the model picks from every table ----------
 
 class Pick(BaseModel):
-    table_id: str = Field(description="ID of the table that best answers the question, copied exactly from the list")
+    table_ids: list[str] = Field(description="IDs of the three tables that best answer the question, best first, "
+                                             "copied exactly from the list")
 
 
 class Subjects(BaseModel):
@@ -142,16 +147,18 @@ def listing(entries: list[CatalogEntry], budget: int) -> tuple[str, str] | None:
     return None
 
 
-async def _pick(llm: LLM, entries: list[CatalogEntry], text: str, kind: str, asked: str) -> CatalogEntry | None:
+async def _pick(llm: LLM, entries: list[CatalogEntry], text: str, kind: str, asked: str) -> list[CatalogEntry]:
     # the list goes first and the question last, so the server can reuse the list's work from one question to the next
-    system = f"{PICK_RULES}\n\nTables ({kind}):\n{text}"
+    system = f"{PICK_RULES.replace('Copy the table ID exactly.', 'Copy the table IDs exactly.')}\n\nTables ({kind}):\n{text}"
     pick = await llm.complete_json(system, asked, Pick)
-    return {e.id: e for e in entries}.get(pick.table_id.strip())
+    by_id = {e.id: e for e in entries}
+    return [by_id[t] for t in dict.fromkeys(t.strip() for t in pick.table_ids) if t in by_id][:OPTIONS]
 
 
 async def pick_from_all(llm: LLM, catalog: Catalog, question: str, original: str, breakdown_by: str = "") \
-        -> tuple[CatalogEntry | None, str]:
-    """Step 3. Returns the table (or None) and how it was listed, for the step log."""
+        -> tuple[list[CatalogEntry], str]:
+    """Step 3: the model's three best tables, best first (fewer if it named IDs not on the list), and how they were
+    listed, for the step log."""
     budget = usable_context(llm.model) - RESERVE
     asked = f"User asked: {original}\nThis part: {question}" if original and original != question else f"Question: {question}"
     if (whole := listing(catalog.entries, budget)):
@@ -169,7 +176,7 @@ async def pick_from_all(llm: LLM, catalog: Catalog, question: str, original: str
     while pool and not (part := listing(pool, budget)):
         pool = pool[: int(len(pool) * 0.8)]   # still too long: keep the first tables of the areas
     if not pool:
-        return None, "subject areas: none chosen"
+        return [], "subject areas: none chosen"
     return await _pick(llm, pool, part[1], part[0], asked), f"subject areas {', '.join(chosen.subjects[:2])} ({part[0]})"
 
 
@@ -188,35 +195,38 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
         return Retrieved(table=table, candidates=list(dict.fromkeys(e.id for e in [table, *pool])), via=tier,
                          concepts=[c["concept"] for c in found], ranking=checked)
 
-    # 1. the dictionary's table for the most specific subject named
-    dict_table, subject = dictionary_table(found, catalog)
-    subject_tables = [e for t in (subject["tables"] if subject else []) if (e := catalog.get(t))]
-    if dict_table:
-        ok = await fits(llm, dict_table, question, original)
-        checked.append({"id": dict_table.id, "title": dict_table.title_en, "score": 1.0 if ok else 0.0,
-                        "signals": [f"dictionary: {subject['concept']}", "yes" if ok else "no"]})
-        if ok:
-            return done(dict_table, subject_tables, "keywords")
+    async def confirmed(e: CatalogEntry, signal: str, score: float) -> bool:
+        """The model's yes or no on one method's suggestion."""
+        ok = await fits(llm, e, question, original)
+        checked.append({"id": e.id, "title": e.title_en, "score": score, "signals": [signal, "yes" if ok else "no"]})
+        return ok
 
-    # 2. keyword search and e5, fused; the top three, one at a time
+    # 1. dictionary: the first table of the most specific subject named
+    dict_top, subject = dictionary_tables(found, catalog)
+    if dict_top and await confirmed(dict_top[0], f"dictionary: {subject['concept']}", 1.0):
+        return done(dict_top[0], dict_top, "keywords")
+
+    # 2. search: keyword search and e5 fused, narrowed by rule; its top table
     hits = catalog.search(text, 2 * k)
     shortlist = narrow([e for e, _ in hits], f"{question} {original}", breakdown_by)[:k]
     score = {e.id: s for e, s in hits}
-    for e in [e for e in shortlist if not dict_table or e.id != dict_table.id][:SEARCH_CHECKS]:
-        ok = await fits(llm, e, question, original)
-        checked.append({"id": e.id, "title": e.title_en, "score": round(score.get(e.id, 0.0), 4),
-                        "signals": [f"search #{shortlist.index(e) + 1}", "yes" if ok else "no"]})
-        if ok:
-            return done(e, [*shortlist, *subject_tables], "search")
+    search_top = shortlist[:OPTIONS]
+    # a method's suggestion is its best table the model has not already turned down
+    untried = lambda es: next((e for e in es if e.id not in {c["id"] for c in checked}), None)
+    if (s := untried(shortlist)) and await confirmed(s, f"search #{shortlist.index(s) + 1}", round(score.get(s.id, 0.0), 4)):
+        return done(s, [*shortlist, *dict_top], "search")
 
-    # 3. the model picks from every table, listed to fit its context
-    hit, how = await pick_from_all(llm, catalog, question, original, breakdown_by)
-    if hit:
-        checked.append({"id": hit.id, "title": hit.title_en, "score": 1.0, "signals": [how, "picked"]})
-        return done(hit, [*shortlist, *subject_tables], "all tables")
-    if shortlist:   # the model's pick was not on the list: the best search hit
-        return done(shortlist[0], [*shortlist, *subject_tables], "best search hit")
-    raise LookupError(f"No table found for “{question}”")
+    # 3. every table: the model's best three, listed to fit its context
+    all_top, how = await pick_from_all(llm, catalog, question, original, breakdown_by)
+    if (a := untried(all_top)) and await confirmed(a, how, 1.0):
+        return done(a, [*all_top, *shortlist, *dict_top], "all tables")
+
+    # 4. every suggestion was rejected: the user picks from each method's top three
+    options = list({e.id: e for e in [*dict_top[:OPTIONS], *search_top, *all_top]}.values())
+    if not options:
+        raise LookupError(f"No table found for “{question}”")
+    return Retrieved(table=options[0], alternatives=options[1:], ambiguous=True, candidates=[e.id for e in options],
+                     via="user choice", concepts=[c["concept"] for c in found], ranking=checked)
 
 
 # ---------- a choice among a few tables (the pipeline's neighbour-table switch uses it) ----------

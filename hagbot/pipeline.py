@@ -33,9 +33,10 @@ _PERCENT = re.compile(r"(?<![\d.])%|\bpercent|prosent|hlutfall|volume change|cha
                       r"arleg fjolgun|atvinnuleysi")
 _RELATIVE = r"\blast (year|month|quarter)\b|\bprevious year\b|\bsidasta (ar|manud|arsfjord)|\bi fyrra\b|\bfyrra ar"
 
+# shown when no method's table was confirmed: the user picks from each method's best three
 CLARIFY = {
-    "en": "Several tables could answer this. Which one do you mean?",
-    "is": "Fleiri en ein tafla gæti svarað þessu. Hverja áttu við?",
+    "en": "I could not find a table that clearly answers this. Is it one of these?",
+    "is": "Ég fann ekki töflu sem svarar þessu með vissu. Er það ein af þessum?",
 }
 
 

@@ -31,8 +31,8 @@ struct AboutView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         Text(t("The table finder", "Töfluleitin")).font(.headline).foregroundStyle(pal.text)
                         tier("1", t("Keyword dictionary", "Orðasafn"), t("Words like “inflation” or “verðbólga” point at a subject's main table. The model checks: does it hold the figures asked for?", "Orð eins og „verðbólga“ benda á aðaltöflu efnisins. Líkanið staðfestir: eru tölurnar sem spurt er um í henni?"))
-                        tier("2", t("Search", "Leit"), t("Keyword search (BM25) and meaning search (e5) rank every table together. The model checks the top three, one at a time.", "Leitarorðaleit (BM25) og merkingarleit (e5) raða öllum töflum saman. Líkanið skoðar efstu þrjár, eina í einu."))
-                        tier("3", t("Every table", "Allar töflur"), t("If none fits, the model picks from a list of every table, or a subject area first and then a table in it.", "Ef engin passar velur líkanið úr lista yfir allar töflur, eða fyrst efnisflokk og svo töflu í honum."))
+                        tier("2", t("Search", "Leit"), t("Keyword search (BM25) and meaning search (e5) rank every table together. The model checks the top table.", "Leitarorðaleit (BM25) og merkingarleit (e5) raða öllum töflum saman. Líkanið staðfestir efstu töfluna."))
+                        tier("3", t("Every table", "Allar töflur"), t("The model names its three best from every table and checks the first. If all three methods are turned down, you pick from each one's top three.", "Líkanið nefnir þrjár bestu úr öllum töflum og staðfestir þá fyrstu. Ef öllum þremur leiðum er hafnað velur þú úr þremur efstu frá hverri."))
                         Text(t("Open “Shortlist” under an answer to see the tables it checked.", "Opnaðu „Stuttlisti“ undir svari til að sjá töflurnar sem voru skoðaðar."))
                             .font(.caption).foregroundStyle(pal.text3)
                     }

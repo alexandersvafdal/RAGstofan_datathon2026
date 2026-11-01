@@ -19,7 +19,7 @@ const I18N = {
             template: "Written from the numbers directly", error: "Hit a problem", followup: q => `Follow-up, read as: ${q}`,
             votes: v => `Votes: ${v}`,
             via: t => ({ "keywords": "found through the keyword dictionary", "search": "found by keyword and semantic search",
-                         "all tables": "picked by the model from every table", "best search hit": "the best search hit" }[t] || t) },
+                         "all tables": "picked by the model from every table", "user choice": "none confirmed, so you choose" }[t] || t) },
   },
   is: {
     eyebrow: "Hagstofa Íslands · Gagnaþon 2026", hello: "Ísland í tölum.",
@@ -39,7 +39,7 @@ const I18N = {
             template: "Skrifað beint upp úr tölunum", error: "Vandamál kom upp", followup: q => `Framhaldsspurning, skilin sem: ${q}`,
             votes: v => `Atkvæði: ${v}`,
             via: t => ({ "keywords": "fundin með orðasafninu", "search": "fundin með leitarorða- og merkingarleit",
-                         "all tables": "valin af líkaninu úr öllum töflum", "best search hit": "efsta leitarniðurstaðan" }[t] || t) },
+                         "all tables": "valin af líkaninu úr öllum töflum", "user choice": "engin staðfest, svo þú velur" }[t] || t) },
   },
 };
 
@@ -989,12 +989,12 @@ $("#ask").addEventListener("submit", e => {
 const FINDER = {
   en: { title: "How a table is found", tiers: [
       ["Keyword dictionary", "Everyday words map to Statistics Iceland's subjects: “verðbólga”, “inflation” → consumer price index → its main table. The language model checks it: does it hold the figures asked for?"],
-      ["Search", "Keyword search and e5 vectors (meaning) search all 1,857 tables together. The model checks the top three, one at a time."],
-      ["Every table", "Last resort: the model picks from a list of every table, as much of each as fits in what it can read at once; or a subject area first, then a table in it."]] },
+      ["Search", "Keyword search and e5 vectors (meaning) search all 1,857 tables together. The model checks the top table."],
+      ["Every table", "The model names its three best from a list of every table (or a subject area first, then a table in it) and checks the first. If all three methods' tables are turned down, you pick from each method's top three."]] },
   is: { title: "Svona finnst rétta taflan", tiers: [
       ["Orðasafn", "Hversdagsorð vísa á efnisflokka Hagstofunnar: „verðbólga“, „inflation“ → vísitala neysluverðs → aðaltafla hennar. Mállíkanið staðfestir: eru tölurnar sem spurt er um í henni?"],
-      ["Leit", "Leitarorðaleit og e5 vigrar (merking) leita saman í öllum 1.857 töflunum. Líkanið skoðar efstu þrjár, eina í einu."],
-      ["Allar töflur", "Síðasta úrræði: líkanið velur úr lista yfir allar töflur, eins mikið um hverja og það getur lesið í einu; eða fyrst efnisflokk og svo töflu í honum."]] },
+      ["Leit", "Leitarorðaleit og e5 vigrar (merking) leita saman í öllum 1.857 töflunum. Líkanið staðfestir efstu töfluna."],
+      ["Allar töflur", "Líkanið nefnir þrjár bestu úr lista yfir allar töflur (eða fyrst efnisflokk og svo töflu í honum) og staðfestir þá fyrstu. Ef töflum allra þriggja leiða er hafnað velur þú úr þremur efstu frá hverri."]] },
 };
 const ABOUT = {
   en: { title: "About RAGstofan", how: "How it works", cant: "What it can't do yet",
