@@ -46,7 +46,7 @@ struct Drill: Codable, Hashable {
     var kind: String? = nil   // "subcategories" (default) or "alternative": a category the question did not name
 }
 
-struct ClarifyOption: Codable, Hashable { let label: String; let tableId: String }
+struct ClarifyOption: Codable, Hashable { let label: String; let tableId: String; let note: String? }
 struct Clarification: Codable, Hashable { let message: String; let options: [ClarifyOption] }
 
 struct Step: Codable, Hashable { let name: String; let ms: Int; let detail: String }

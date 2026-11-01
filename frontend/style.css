@@ -900,6 +900,7 @@ td.num { text-align: right; }
   transition: border-color .2s var(--ease);
 }
 .clarify button:hover { border-color: var(--accent); }
+.clarify button .why { display: block; margin-top: 3px; font-size: 12px; color: var(--text-3); }
 .clarify .muted { color: var(--text-3); font-size: 13px; }
 
 /* Waiting: live steps reported by the server */

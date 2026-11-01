@@ -80,7 +80,12 @@ struct AnswerCard: View {
                         ForEach(Array(c.options.enumerated()), id: \.offset) { i, o in
                             Button { ask(a.question, o.tableId) } label: {
                                 HStack(spacing: 10) {
-                                    Text(o.label).foregroundStyle(pal.text).multilineTextAlignment(.leading)
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(o.label).foregroundStyle(pal.text).multilineTextAlignment(.leading)
+                                        if let why = o.note, !why.isEmpty {   // what the table has and lacks
+                                            Text(why).font(.caption).foregroundStyle(pal.text3).multilineTextAlignment(.leading)
+                                        }
+                                    }
                                     Spacer()
                                     Text(o.tableId).font(.caption.monospaced()).foregroundStyle(pal.text3)
                                     Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(pal.text3)

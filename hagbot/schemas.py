@@ -93,6 +93,7 @@ class AnswerPart(BaseModel):
 class ClarifyOption(BaseModel):
     label: str
     table_id: str
+    note: str = ""   # why the table was turned down: what it has and what it lacks for the question
 
 
 class Clarification(BaseModel):

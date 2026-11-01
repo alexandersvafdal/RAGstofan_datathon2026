@@ -33,10 +33,13 @@ _PERCENT = re.compile(r"(?<![\d.])%|\bpercent|prosent|hlutfall|volume change|cha
                       r"arleg fjolgun|atvinnuleysi")
 _RELATIVE = r"\blast (year|month|quarter)\b|\bprevious year\b|\bsidasta (ar|manud|arsfjord)|\bi fyrra\b|\bfyrra ar"
 
-# shown when no method's table was confirmed: the user picks from each method's best three
+# shown when no method's table was confirmed: what was looked for, then the user picks from each method's best three,
+# each with the reason it was turned down
 CLARIFY = {
-    "en": "I could not find a table that clearly answers this. Is it one of these?",
-    "is": "Ég fann ekki töflu sem svarar þessu með vissu. Er það ein af þessum?",
+    "en": "No table was found that answers “{asked}”. These came closest, each with what it lacks. Pick one and I "
+          "answer from it, or ask in another way.",
+    "is": "Engin tafla fannst sem svarar „{asked}“. Þessar komust næst, hver með því sem hana vantar. Veldu eina og ég "
+          "svara úr henni, eða spyrðu á annan hátt.",
 }
 
 
@@ -242,9 +245,11 @@ class Pipeline:
                                  + (f" via {r.via}" if r.via else "") + (f" · votes {r.votes}" if r.votes else "")
                                  + (f" · concepts: {', '.join(r.concepts)}" if r.concepts else "")))
         if r.ambiguous:
-            opts = [ClarifyOption(label=e.title_en if lang == "en" else (e.title_is or e.title_en), table_id=e.id)
-                    for e in [r.table, *r.alternatives]]
-            raise NeedsClarification(Clarification(message=CLARIFY[lang], options=opts))
+            why = {c["id"]: c.get("reason", "") for c in r.ranking if c["signals"][-1:] == ["no"]}
+            opts = [ClarifyOption(label=e.title_en if lang == "en" else (e.title_is or e.title_en), table_id=e.id,
+                                  note=why.get(e.id, "")) for e in [r.table, *r.alternatives]]
+            asked = (original if alone else sq.question).strip().rstrip("?.! ")
+            raise NeedsClarification(Clarification(message=CLARIFY[lang].format(asked=asked), options=opts))
 
         t = Timer()
         meta = await self.source.meta(r.table.id)

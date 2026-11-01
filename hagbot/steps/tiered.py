@@ -94,6 +94,8 @@ breakdown the question names among its dimensions or options.
 The table's years are in brackets. When it is on the subject but its years miss the period asked, still answer true:
 the user is then told which years exist.
 Answer false when it is about another subject or another measure, or lacks a place or breakdown the question names.
+The reason says in a few words what the table has and what it lacks for this question ("totals per sector, nothing
+per inhabitant"), in the language of the question: the user reads it when no table is found.
 - "How many people live in X" means population on 1 January.
 - Prefer original figures: a seasonally adjusted, trend or forecast table answers only a question asking for one."""
 
@@ -109,10 +111,11 @@ def describe(e: CatalogEntry, question: str, options: int = 30) -> str:
     return text
 
 
-async def fits(llm: LLM, e: CatalogEntry, question: str, original: str) -> bool:
+async def fits(llm: LLM, e: CatalogEntry, question: str, original: str) -> tuple[bool, str]:
+    """Does this one table answer? The model's yes or no, and its reason (what the table has and lacks)."""
     asked = f"User asked: {original}\nThis part: {question}" if original and original != question else f"Question: {question}"
     v = await llm.complete_json(FITS, f"{asked}\n\nTable:\n{describe(e, f'{question} {original}')}", Fits)
-    return v.answers
+    return v.answers, v.reason.strip()
 
 
 # ---------- step 3: the model picks from every table ----------
@@ -197,8 +200,9 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
 
     async def confirmed(e: CatalogEntry, signal: str, score: float) -> bool:
         """The model's yes or no on one method's suggestion."""
-        ok = await fits(llm, e, question, original)
-        checked.append({"id": e.id, "title": e.title_en, "score": score, "signals": [signal, "yes" if ok else "no"]})
+        ok, reason = await fits(llm, e, question, original)
+        checked.append({"id": e.id, "title": e.title_en, "score": score, "signals": [signal, "yes" if ok else "no"],
+                        "reason": reason})
         return ok
 
     # 1. dictionary: the first table of the most specific subject named

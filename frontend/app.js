@@ -535,7 +535,8 @@ function renderAnswer(card, a) {
   if (a.status === "clarify" && a.clarification) {
     card.append(el("div", { class: "clarify" },     // the question itself is already the answer text above
       el("div", { class: "opts" }, a.clarification.options.map(o =>
-        el("button", { type: "button", onclick: () => ask(a.question, o.table_id) }, `${o.label} `, el("span", { class: "muted" }, o.table_id))))));
+        el("button", { type: "button", onclick: () => ask(a.question, o.table_id) }, `${o.label} `, el("span", { class: "muted" }, o.table_id),
+          o.note ? el("small", { class: "why" }, o.note) : null)))));
   }
 
   const figures = el("div", { class: "figures" });
