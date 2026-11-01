@@ -138,7 +138,7 @@ def sample_tables(catalog: Catalog, per_prefix: int, seed: int) -> list:
 
 async def cmd_tables(args) -> None:
     catalog = Catalog.load(Path(args.catalog))
-    if args.all:   # every table not already in gen_tables.jsonl: examples for search by example (hagbot/examples.py)
+    if args.all:   # every table not already in gen_tables.jsonl
         done = set()
         if (OUT / "gen_tables.jsonl").exists():
             done = {json.loads(l)["expected_tables"][0] for l in (OUT / "gen_tables.jsonl").read_text().splitlines() if l.strip()}

@@ -31,7 +31,6 @@ flowchart TD
         subgraph search["Search 1,857 tables, in parallel · English wording + the original"]
             S1["BM25 keywords · top 60<br/>titles EN + IS, dimension names, option labels,<br/>prefix match, synonyms, tables matching every word first"]:::code
             S2["e5 vectors · top 60<br/>meaning of each table's description:<br/>titles, dimensions IS + EN, period, options"]:::code
-            S3["Example questions · off by default (USE_EXAMPLES)<br/>e5 over questions whose table is known"]:::code
         end
         RK["Rank: dictionary tables first, then the searches<br/>fused by rank, 1 / (60 + rank) from each, × recency"]:::code
         N["Narrow by rule<br/>drop trend / seasonal / forecast / census and old index bases unless asked,<br/>keep tables with the place, month or year asked for,<br/>and with the breakdown named (by age · eftir sveitarfélögum)"]:::code
@@ -149,7 +148,6 @@ languages. It would make sense with a model that is strong in Icelandic.
 | Search | `hagbot/catalog.py` (BM25 over three fields) and `hagbot/e5.py` (e5 vectors, on by default; optional bge-m3 in `hagbot/vectors.py`), run in parallel and fused by rank | no |
 | Table finder (the only path) | `hagbot/steps/tiered.py`, keyword dictionary `data/keywords.json` | check and browse |
 | Narrow, last-resort pick (which can ask the user) | `hagbot/steps/retrieve.py` | pick only |
-| Example questions (off) | `hagbot/examples.py` | no |
 | Majority voting (`VOTES`, `VOTE_MODELS`) | `hagbot/vote.py` | repeats a call |
 | Choose and validate categories | `hagbot/steps/select.py`, category codes `hagbot/hierarchy.py` | choose only |
 | Data | `hagbot/sources.py` (local snapshot, live PX-API, fixtures) | no |

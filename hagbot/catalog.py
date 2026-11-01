@@ -18,7 +18,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from .config import ROOT, settings
+from .config import settings
 from .text import tokens
 from .vectors import Vectors
 
@@ -158,12 +158,7 @@ class Catalog:
         if settings.use_e5:
             try:
                 from .e5 import E5Search
-                e5 = E5Search(entries, settings.tables_meta_path, settings.cache_dir)
-                dense.append(e5)
-                if settings.use_examples:   # the same model, over questions whose table we know
-                    from .examples import ExampleSearch
-                    files = [ROOT / f.strip() for f in settings.example_files.split(",") if f.strip()]
-                    dense.append(ExampleSearch(e5.model, files, set(settings.example_langs.split(",")), settings.cache_dir))
+                dense.append(E5Search(entries, settings.tables_meta_path, settings.cache_dir))
             except ImportError as err:
                 log.warning("e5 search off: %s. Install requirements-e5.txt or set USE_E5=0", err)
         return cls(entries, dense)
