@@ -59,7 +59,7 @@ const POOL = [
   ["wages", "How much have wages risen in the last 12 months?", "Hve mikið hafa laun hækkað síðustu 12 mánuði?"],
   ["labour", "What is the unemployment rate?", "Hvert er atvinnuleysið?"],
   ["labour", "How many people live in Iceland, and what is the unemployment rate?", "Hve margir búa á Íslandi og hvert er atvinnuleysið?"],
-  ["tourism", "How many tourists came to Iceland in 2025?", "Hve margir ferðamenn komu til Íslands árið 2025?"],  // ambiguous on purpose: the bot asks which statistic
+  ["tourism", "How many tourists came to Iceland in 2025?", "Hve margir ferðamenn komu til Íslands árið 2025?"],
   ["tourism", "How many overnight stays were there in registered accommodation?", "Hve margar gistinætur voru á skráðum gististöðum?"],
   ["tourism", "How many overnight stays were there in 2025 per inhabitant?", "Hve margar gistinætur voru árið 2025 á hvern íbúa?"],
   ["tourism", "How many foreign passengers came through Keflavík airport in August?", "Hve margir erlendir farþegar fóru um Keflavíkurflugvöll í ágúst?"],
@@ -139,8 +139,6 @@ const pills = (() => {
     const pick = lang === "auto" ? POOL.flatMap(([, en, is], i) => (i % 3 === 2 ? [[is, "is"]] : [[en, "en"]]))
       : POOL.map(([, en, is]) => (lang === "is" ? [is, "is"] : [en, "en"]));
     pick.sort(() => Math.random() - 0.5);
-    const amb = pick.findIndex(([q]) => /tourists|ferðamenn/.test(q));   // the ambiguous example shows up early
-    if (amb > 2) pick.splice(2, 0, ...pick.splice(amb, 1));
     return pick;
   }
   const later = (fn, ms) => { const id = setTimeout(fn, ms); timers.push(id); return id; };
@@ -993,14 +991,12 @@ const FINDER = {
       ["Keyword dictionary", "Everyday words map to Statistics Iceland's terms: “verðbólga”, “inflation” → consumer price index → its tables, plus a keyword search over all 1,857 tables."],
       ["The model checks", "The language model reads the shortlist, eight tables at a time, and picks the one that answers the question — or says none of them does."],
       ["Semantic search", "Built into the shortlist: e5 vectors search every table by meaning beside the keyword search, and the rankings are merged."],
-      ["The model browses", "Last resort: the model picks one of 34 subject areas, then a table inside it."]],
-    note: "Before any of this, words that mean different statistics (“tourists”) make it ask which one you mean." },
+      ["The model browses", "Last resort: the model picks one of 34 subject areas, then a table inside it."]] },
   is: { title: "Svona finnst rétta taflan", tiers: [
       ["Orðasafn", "Hversdagsorð vísa á hugtök Hagstofunnar: „verðbólga“, „inflation“ → vísitala neysluverðs → töflur hennar, auk leitarorðaleitar í öllum 1.857 töflunum."],
       ["Líkanið staðfestir", "Mállíkanið les listann, átta töflur í senn, og velur þá sem svarar spurningunni — eða segir að engin geri það."],
       ["Merkingarleit", "Hluti af listanum: e5 vigrar leita í öllum töflum eftir merkingu samhliða leitarorðaleitinni og röðunin er sameinuð."],
-      ["Líkanið leitar sjálft", "Síðasta úrræði: líkanið velur einn af 34 efnisflokkum og svo töflu innan hans."]],
-    note: "Á undan þessu öllu spyr hún hvort þú átt við þegar orð getur átt við ólíka tölfræði („ferðamenn“)." },
+      ["Líkanið leitar sjálft", "Síðasta úrræði: líkanið velur einn af 34 efnisflokkum og svo töflu innan hans."]] },
 };
 const ABOUT = {
   en: { title: "About RAGstofan", how: "How it works", cant: "What it can't do yet",
@@ -1013,8 +1009,7 @@ const ABOUT = {
              "The data is Statistics Iceland's snapshot of 18 October 2026. Newer periods come from the live API when the snapshot lacks them.",
              "On a laptop an answer takes 30–90 seconds. On a GPU server it is several times faster.",
              "Answers in Icelandic are worded less well than in English. The numbers are checked either way.",
-             "It does not forecast, give opinions or explain causes (\u201cwhy did inflation rise?\u201d).",
-             "When a word could mean different statistics (\u201ctourists\u201d), it asks which one you mean."] },
+             "It does not forecast, give opinions or explain causes (\u201cwhy did inflation rise?\u201d)."] },
   is: { title: "Um RAGstofuna", how: "Svona virkar þetta", cant: "Það sem hún getur ekki enn",
     steps: ["Mállíkan les spurninguna og skiptir henni ef spurt er um fleira en eitt.",
             "Leitarorðaleit í öllum 1.857 töflum Hagstofunnar finnur kandídata; líkanið velur eina.",
@@ -1025,8 +1020,7 @@ const ABOUT = {
              "Gögnin eru afrit Hagstofunnar frá 18. október 2026. Nýrri tímabil koma úr lifandi vefþjónustu þegar afritið vantar þau.",
              "Á fartölvu tekur svar 30–90 sekúndur. Á GPU-þjóni er það margfalt hraðara.",
              "Svör á íslensku eru verr orðuð en á ensku. Tölurnar eru alltaf yfirfarnar.",
-             "Hún spáir ekki, hefur ekki skoðanir og útskýrir ekki orsakir („af hverju jókst verðbólgan?“).",
-             "Þegar orð getur átt við ólíka tölfræði („ferðamenn“) spyr hún hvort þú átt við."] },
+             "Hún spáir ekki, hefur ekki skoðanir og útskýrir ekki orsakir („af hverju jókst verðbólgan?“)."] },
 };
 function openAbout() {
   const a = ABOUT[ui()];
@@ -1040,7 +1034,6 @@ function openAbout() {
       el("span", { class: "tier-n" }, String(i + 1)),
       el("div", {}, el("b", {}, name), el("p", {}, text)),
       i < 3 ? el("span", { class: "tier-next", "aria-hidden": "true" }, i === 0 ? "" : ui() === "is" ? "ef engin passar" : "if none fits") : null))),
-    el("p", { class: "finder-note" }, FINDER[ui()].note),
     el("h3", {}, a.cant), el("ul", { class: "about-limits" }, a.limits.map(x => el("li", {}, x)))));
   dlg.showModal();
 }

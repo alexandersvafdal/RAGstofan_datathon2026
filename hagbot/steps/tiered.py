@@ -12,7 +12,7 @@
   3. If none fits: the model browses, first one of Statistics Iceland's subject areas, then a table inside it.
   4. If every check said "none" (the model can be too strict), it must pick from the hitlist (retrieve.retrieve).
 
-Every tier shares the code-side rules in retrieve.py: ambiguous words ask the user, table variants nobody asked for
+Every tier shares the code-side rules in retrieve.py: table variants nobody asked for
 are dropped (narrow), and the newest edition of a chosen table is used (freshest sibling). This is the only finder.
 """
 
@@ -27,8 +27,8 @@ from ..catalog import STOPWORDS, Catalog, CatalogEntry, recency_factor
 from ..config import ROOT
 from ..llm import LLM
 from ..vote import vote_json, voting_on
-from ..text import normalize, tokens
-from .retrieve import AMBIGUOUS, MONTHS, Retrieved, SYSTEM as PICK_RULES, _year_range, freshest_sibling, narrow, retrieve
+from ..text import tokens
+from .retrieve import MONTHS, Retrieved, SYSTEM as PICK_RULES, _year_range, freshest_sibling, narrow, retrieve
 
 KEYWORDS = ROOT / "data" / "keywords.json"
 BATCH = 8   # tables the model sees per check
@@ -196,11 +196,6 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
         return Retrieved(table=entry, candidates=[entry.id])
     import re
     _last_votes[0] = ""
-    q_user = normalize(original or question)
-    for pattern, settled, tables in AMBIGUOUS:
-        entries = [e for e in (catalog.get(t) for t in tables) if e]
-        if re.search(pattern, q_user) and not re.search(settled, q_user) and len(entries) > 1:
-            return Retrieved(table=entries[0], alternatives=entries[1:], ambiguous=True, candidates=[e.id for e in entries])
 
     text = f"{search_query} {question} {original}"
     found = match_concepts(text)

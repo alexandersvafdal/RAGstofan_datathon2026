@@ -46,7 +46,6 @@ struct AboutView: View {
                         ForEach([
                             t("Each part of a question is answered from one table.", "Hver hluti spurningar er svaraður úr einni töflu."),
                             t("Numbers are as new as the snapshot; the answer says when the data is older than asked.", "Tölurnar eru jafn nýjar og afritið; svarið segir ef gögnin eru eldri en spurt var um."),
-                            t("Vague words such as “tourists” get a question back: which statistic?", "Óljós orð eins og „ferðamenn“ fá spurningu til baka: hvaða tölfræði?"),
                             t("It can pick the wrong table. The source chip links to the table so you can check.", "Það getur valið ranga töflu. Heimildarhnappurinn vísar á töfluna svo þú getir athugað."),
                         ], id: \.self) { s in
                             Label(s, systemImage: "minus").font(.callout).foregroundStyle(pal.text2)

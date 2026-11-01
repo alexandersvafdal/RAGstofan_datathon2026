@@ -27,11 +27,10 @@ flowchart TD
     end
 
     subgraph find["2 · Find the table (each part in parallel)"]
-        A{"Word with no single table?<br/>tourists · ferðamenn"}:::code
         DICT["Keyword dictionary<br/>data/keywords.json: verðbólga → consumer price index → VIS01000<br/>adds the official term to the search"]:::code
         subgraph search["Search 1,857 tables, in parallel · English wording + the original"]
-            S1["BM25 keywords · top 120<br/>titles EN + IS, dimension names, option labels,<br/>prefix match, synonyms, tables matching every word first"]:::code
-            S2["e5 vectors · top 120<br/>meaning of each table's description:<br/>titles, dimensions IS + EN, period, options"]:::code
+            S1["BM25 keywords · top 60<br/>titles EN + IS, dimension names, option labels,<br/>prefix match, synonyms, tables matching every word first"]:::code
+            S2["e5 vectors · top 60<br/>meaning of each table's description:<br/>titles, dimensions IS + EN, period, options"]:::code
             S3["Example questions · off by default (USE_EXAMPLES)<br/>e5 over questions whose table is known"]:::code
         end
         RK["Rank: dictionary tables first, then the searches<br/>fused by rank, 1 / (60 + rank) from each, × recency"]:::code
@@ -78,15 +77,14 @@ flowchart TD
     SR -- "yes: read it, no division" --> C
     SR -- no --> RP --> P
     R -- no --> P
-    P --> VF --> A
-    A -- yes --> ASK
-    A -- no --> DICT --> search --> RK --> N --> DD
+    P --> VF --> DICT --> search --> RK --> N --> DD
     DD -- "yes: the dictionary decides" --> F
     DD -- "no: top 16" --> CK
     CK -- "a table, snapped to the subject's headline<br/>table unless a breakdown was asked" --> F
     CK -- none fits --> BR --> CK2
     CK2 -- a table --> F
     CK2 -- "none fits" --> T --> F
+    T -. "unsure: two tables fit equally" .-> ASK
     F --> C --> V --> SW
     SW -- yes --> SB --> D
     SW -- no --> D
@@ -150,7 +148,7 @@ languages. It would make sense with a model that is strong in Icelandic.
 | Follow-up rewrite | `hagbot/steps/followup.py` | rewrite only |
 | Search | `hagbot/catalog.py` (BM25 over three fields) and `hagbot/e5.py` (e5 vectors, on by default; optional bge-m3 in `hagbot/vectors.py`), run in parallel and fused by rank | no |
 | Table finder (the only path) | `hagbot/steps/tiered.py`, keyword dictionary `data/keywords.json` | check and browse |
-| Narrow, ambiguous words, last-resort pick | `hagbot/steps/retrieve.py` | pick only |
+| Narrow, last-resort pick (which can ask the user) | `hagbot/steps/retrieve.py` | pick only |
 | Example questions (off) | `hagbot/examples.py` | no |
 | Majority voting (`VOTES`, `VOTE_MODELS`) | `hagbot/vote.py` | repeats a call |
 | Choose and validate categories | `hagbot/steps/select.py`, category codes `hagbot/hierarchy.py` | choose only |

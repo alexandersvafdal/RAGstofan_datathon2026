@@ -30,13 +30,6 @@ class Retrieved(BaseModel):
     votes: str = ""  # voting on: how many votes the chosen table got, e.g. "3/3"
 
 
-# Words with no table of their own, that mean different statistics: ask which one instead of guessing.
-# (question pattern, words that already settle it, the tables it could mean)
-AMBIGUOUS = [
-    (r"\btourist|\bvisitor|ferdam|ferdafolk", r"passeng|airport|flug|farþeg|farthe|accommodation|stay|night|gist|hotel",
-     ["SAM02001", "SAM01601"]),
-]
-
 
 # Table variants nobody gets unless they ask: (pattern in the title, words in the question that ask for it)
 QUALIFIERS = [
@@ -222,11 +215,6 @@ async def retrieve(llm: LLM, catalog: Catalog, question: str, search_query: str,
                    forced_table: str | None = None, original: str = "") -> Retrieved:
     if forced_table and (entry := catalog.get(forced_table)):
         return Retrieved(table=entry, candidates=[entry.id])
-    q = normalize(original or question)  # the user's own words: the planner may already have guessed ("passengers")
-    for pattern, settled, tables in AMBIGUOUS:
-        entries = [e for e in (catalog.get(t) for t in tables) if e]
-        if re.search(pattern, q) and not re.search(settled, q) and len(entries) > 1:
-            return Retrieved(table=entries[0], alternatives=entries[1:], ambiguous=True, candidates=[e.id for e in entries])
     # the original wording matches Icelandic titles even when the planner mistranslates it
     hits = catalog.search(f"{search_query} {question} {original}", 2 * k)
     if not hits:
