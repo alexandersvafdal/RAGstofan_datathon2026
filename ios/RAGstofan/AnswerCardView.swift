@@ -116,10 +116,13 @@ struct AnswerCard: View {
                 }
 
                 // categories that open further: each asks for its own subcategories from the same table
-                let drills = a.parts.flatMap { $0.drill ?? [] }
+                let allDrills = a.parts.flatMap { $0.drill ?? [] }
+                ForEach(["subcategories", "alternative"], id: \.self) { kind in
+                let drills = allDrills.filter { ($0.kind ?? "subcategories") == kind }
                 if !drills.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(L == .is ? "SKOÐA UNDIRFLOKKA" : "OPEN A CATEGORY")
+                        Text(kind == "alternative" ? (L == .is ? "SAMA SPURNING FYRIR ANNAN FLOKK" : "SAME QUESTION FOR ANOTHER CATEGORY")
+                             : (L == .is ? "SKOÐA UNDIRFLOKKA" : "OPEN A CATEGORY"))
                             .font(.caption2.weight(.semibold)).tracking(0.8).foregroundStyle(pal.text3)
                         Flow(spacing: 6) {
                             ForEach(drills, id: \.self) { d in
@@ -138,6 +141,7 @@ struct AnswerCard: View {
                         }
                     }
                     .reveal(4, shown)
+                }
                 }
 
                 if fast {

@@ -26,6 +26,10 @@ _MONTH_NAMES = (
     "november|nov", "december|dec|desember|des",
 )
 _MONTHS = [re.compile(rf"\b(?:{name})\b") for name in _MONTH_NAMES]
+QUARTER_NUMBERS = {"first": 1, "1st": 1, "fyrsta": 1, "fyrsti": 1, "second": 2, "2nd": 2, "odrum": 2,
+                   "annar": 2, "annan": 2, "third": 3, "3rd": 3, "thridja": 3, "thridji": 3,
+                   "fourth": 4, "4th": 4, "fjorda": 4, "fjordi": 4}
+_ORDINAL_QUARTER = re.compile(r"\b(" + "|".join(QUARTER_NUMBERS) + r")\s+(?:quarter|arsfjordung\w*|fjordung\w*)\b")
 _RELATIVE = re.compile(r"\blast (?:year|month|quarter)\b|\bprevious year\b|\bi fyrra\b|\bfyrra ar\b|"
                        r"\bsidast[ai] (?:ar|manud\w*|arsfjord\w*)\b")
 _WINDOW = re.compile(r"\b(?:last|past|previous|sidustu|seinustu|undanfarin\w*)\s+(?:\d+|decade|aratug)")
@@ -40,7 +44,8 @@ def _time_text(question: str) -> str:
 def has_requested_period(question: str) -> bool:
     q = _time_text(question)
     return bool(_YEAR.search(q) or _PERIOD.search(q) or _RELATIVE.search(q) or _WINDOW.search(q)
-                or any(rx.search(q) for rx in _MONTHS) or re.search(r"\bq[1-4]\b|\b[1-4]\.\s*arsfjord", q))
+                or any(rx.search(q) for rx in _MONTHS) or _ORDINAL_QUARTER.search(q)
+                or re.search(r"\bq[1-4]\b|\b[1-4]\.\s*arsfjord", q))
 
 
 def period_requirements(meta: TableMeta, var: Variable, question: str) -> list[set[str]]:
@@ -57,6 +62,12 @@ def period_requirements(meta: TableMeta, var: Variable, question: str) -> list[s
     years = set(_YEAR.findall(q)) | {m[1] for m in _PERIOD.finditer(q)}
     months = {i for i, rx in enumerate(_MONTHS, 1) if rx.search(q)}
     quarters = set(re.findall(r"\bq([1-4])\b", q)) | set(re.findall(r"\b([1-4])\.\s*arsfjord", q))
+    for mention in _ORDINAL_QUARTER.finditer(q):
+        number = QUARTER_NUMBERS[mention[1]]
+        quarters.add(str(number))
+        after = re.match(rf"\s+(?:of\s+|arsins\s+)?({_YEAR_NUMBER})\b", q[mention.end():])
+        if after:
+            groups.append({f"{after[1]}Q{number}"} & set(var.values))
     today = date.today()
     if re.search(r"\blast year\b|\bprevious year\b|\bi fyrra\b|\bfyrra ar\b|\bsidasta ar\b", q):
         years.add(str(today.year - 1))

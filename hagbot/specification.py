@@ -19,7 +19,7 @@ class QuestionSpec(BaseModel):
     requirements: list[Requirement] = Field(min_length=1, description=(
         "Exactly one measure, then every required statistical definition and filter. "
         "Keep income/wealth, mean/median, gross/net, current/constant prices distinct."))
-    operation: Literal["value", "series", "difference", "pct_change", "share", "max", "min", "rank"]
+    operation: Literal["value", "series", "difference", "pct_change", "share", "sum", "max", "min", "rank"]
     ambiguities: list[str] = Field(default_factory=list, description="Unresolved interpretations; never guess one")
 
 

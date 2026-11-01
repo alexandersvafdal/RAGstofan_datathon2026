@@ -202,11 +202,13 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_existing_dictionary_still_expands_and_ranks(self):
         catalog = CatalogStub(entry("VIS01000"))
+        llm = ScriptedLLM()
         with patch("hagbot.steps.tiered.voting_on", return_value=False):
-            result = await retrieve_tiered(ScriptedLLM(Verdict(table_id="VIS01000")), catalog,
+            result = await retrieve_tiered(llm, catalog,
                                           "Hver er verðbólgan?", "inflation", 15)
         self.assertTrue(result.concepts)
-        self.assertEqual(result.via, "keywords")
+        self.assertEqual(result.via, "dictionary")
+        self.assertEqual(llm.calls, 0)
         self.assertIn("dictionary", result.ranking[0]["signals"])
 
 
@@ -320,9 +322,10 @@ class SelectionTests(FailureAssertions, unittest.TestCase):
                                     selection(selections={"Year": ["2025"]}, operation=operation))
 
     def test_original_period_survives_a_bad_planner_rewrite(self):
-        self.assert_failure("requested_period_changed", resolve, meta(), selection(selections={}, operation="value"),
-                            "Population in 2024? Current population?", part="Current population?",
-                            filter_question="Population in 2024? Current population?")
+        result = resolve(meta(), selection(selections={}, operation="value"),
+                         "Population in 2024? Current population?", part="Current population?",
+                         filter_question="Population in 2024? Current population?")
+        self.assertEqual(result.selections["Year"], ["2024"])
 
     def test_relative_year_is_not_overridden_by_latest_default(self):
         with patch("hagbot.steps.constraints.date") as clock:
@@ -457,7 +460,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
         from hagbot.sources import FixtureSource
         planned = Plan(sub_questions=[SubQuestion(question="Population in 2026?", search_query="population",
                                                  specification=specification(quote="mannfjöldinn"))])
-        llm = ScriptedLLM(planned, Pick(table_id="MAN00101", confidence="high"),
+        llm = ScriptedLLM(planned,
                           selection(selections={"Ár": ["2026"], "Kyn": ["0"]}, operation="value"),
                           Written(text="Population in 2026: 394,324 people."))
         pipeline = Pipeline(llm=llm, catalog=CatalogStub(entry("MAN00101", "2026")), source=FixtureSource())
@@ -466,7 +469,7 @@ class PipelineTests(unittest.IsolatedAsyncioTestCase):
             answer = await pipeline.answer(AskRequest(question="Hver var mannfjöldinn árið 2026?", language="en"))
         self.assertEqual(answer.status, "answered")
         self.assertEqual(answer.parts[0].facts[0].value, 394324)
-        self.assertEqual(llm.calls, 4)
+        self.assertEqual(llm.calls, 3)
 
     async def test_ratio_cannot_return_only_its_operands(self):
         planned = Plan(sub_questions=[SubQuestion(question="Births in 2025?", search_query="births")])

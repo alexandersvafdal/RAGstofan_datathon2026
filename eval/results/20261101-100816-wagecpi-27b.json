@@ -1,0 +1,101 @@
+{
+ "label": "wagecpi-27b",
+ "results": [
+  {
+   "id": "wage-vs-cpi-is",
+   "level": "hard",
+   "language": "is",
+   "question": "hver er launavísitala borin saman við vísitölu neysluverðs",
+   "expected_tables": [
+    "LAU04000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [],
+   "table_ok": false,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 32.71,
+   "llm_calls": 11,
+   "tables": [
+    "LAU04001"
+   ],
+   "text": "Launavísitalan var 171,4 í ágúst 2026 samkvæmt Hagstofu Íslands (tafla LAU04001). Engar upplýsingar um vísitölu neysluverðs eru til staðar í gefnum gögnunum.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2469,
+     "detail": "What is the wage index and the consumer price index for the same period?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 23306,
+     "detail": "LAU04001 from [VIS01000, LAU04000, VIN02001, LAU04101, LAU04201, LAU04001, LAU04105, LAU04800, LAU04107, LAU04103, LAU04003, LAU04207, LAU04205, LAU04203, LAU04007, LAU04005, LAU04200, VIS02201, VIS02508, LAU04109, VIS01303, VIS02506, LAU04209, VIS02502, VIS01104, LAU04802, VIS02002, VIS02200, LAU09917, VIS02001, LAU09927, VIS02202, LAU09923, VIS08000b, LAU09925, VIS01503, VIS08010b, VIS02400, VIS02301, LAU09901, LAU09903, LAU09902, LAU09915, VIS02500, VIS01301, VIS02000, VIS02300, VIN02092, VIS01101, VIS01304, VIS01102, VIN02091, VIS01004, VIS01103, VIS01305, VIN02002, THJ05813, VIS01106, VIS01306, VIN02003, LIF01151, VIN02100, VIS01300, VIS08003b, SJA01106, LIF01121, VIN02500, VIN02011, VIN02012, LIF01126, VIN02014, VIN02015, VIS08011] via best keyword hit · concepts: consumer price index, wage index, wages"
+    },
+    {
+     "name": "select",
+     "ms": 3002,
+     "detail": "value {'Month': ['2026M08'], 'Index': ['Wage index'], 'Unit': ['Value of index']} notes: ['Month: no period asked, using latest 2026M08']"
+    },
+    {
+     "name": "fetch",
+     "ms": 6,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 3919,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wage-vs-cpi-en",
+   "level": "hard",
+   "language": "en",
+   "question": "how does the wage index compare with the consumer price index",
+   "expected_tables": [
+    "LAU04000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [],
+   "table_ok": false,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 33.19,
+   "llm_calls": 11,
+   "tables": [
+    "LAU04001"
+   ],
+   "text": "The provided facts from Statistics Iceland (Hagstofa Íslands), table LAU04001, contain only wage index data and do not include consumer price index figures, so a comparison cannot be made.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2089,
+     "detail": "What is the wage index and the consumer price index over time?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 20784,
+     "detail": "LAU04001 from [VIS01000, LAU04000, VIS01004, LAU04201, LAU04101, LAU04800, LAU04203, LAU04003, LAU04001, VIS01104, LAU04103, LAU04200, VIS02508, VIS01102, VIS01101, VIS01301, LAU04207, LAU04107, LAU04007, VIS01305, VIS02500, VIS01304, LAU04005, VIS02000, LAU04205, LAU04109, VIS02502, LAU04105, VIS01303, LAU04209, LAU04802, VIS08000b, VIS02001, VIN02091, LAU09923, VIS08010b, VIS01503, VIS02201, VIS02202, THJ05813, VIS02506, VIS02301, VIS02002, LAU09901, VIS01300, LAU09903, LAU09902, VIS02200, VIS01103, VIS01306, VIN02092, VIS01106, THJ01000, PEN01105, THJ02105, THJ01104, VIN02100, SJA06100b, LAU09927, VIS06140, VIS08003b, UTA07001, VIS06123, LAU09925, SJA01106, VIS02400, LAU09917, VIS06126, VIS06128, VIS02300, SKU01002, LAU09915] via best keyword hit · concepts: consumer price index, wage index, comparison, trend"
+    },
+    {
+     "name": "select",
+     "ms": 6632,
+     "detail": "series {'Month': ['2021M09', '2021M10', '2021M11', '2021M12', '2022M01', '2022M02', '2022M03', '2022M04', '2022M05', '2022M06', '2022M07', '2022M08', '2022M09', '2022M10', '2022M11', '2022M12', '2023M01', '2023M02', '2023M03', '2023M04', '2023M05', '2023M06', '2023M07', '2023M08', '2023M09', '2023M10', '2023M11', '2023M12', '2024M01', '2024M02', '2024M03', '2024M04', '2024M05', '2024M06', '2024M07', '2024M08', '2024M09', '2024M10', '2024M11', '2024M12', '2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06', '2025M07', '2025M08', '2025M09', '2025M10', '2025M11', '2025M12', '2026M01', '2026M02', '2026M03', '2026M04', '2026M05', '2026M06', '2026M07', '2026M08'], 'Index': ['Wage index'], 'Unit': ['Value of index']} notes: ['Month: a trend, 2021M09 to 2026M08']"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "60 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 3680,
+     "detail": "model"
+    }
+   ]
+  }
+ ]
+}

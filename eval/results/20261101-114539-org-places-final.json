@@ -1,0 +1,650 @@
+{
+ "label": "org-places-final",
+ "results": [
+  {
+   "id": "population-reykjavik-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many people lived in Reykjavík on 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    139804.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 8.89,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN02005, the population of Reykjavík on 1 January 2026 was 139,804.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1081,
+     "detail": "What was the population of Reykjavík on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4913,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN12104, MAN04208, MAN04203, MAN43005, MAN43007, MAN03270, MAN030101, MAN030102, MAN07108, MAN03200, MAN43006, MAN07109, VIN10012, SJA01101] via keywords · concepts: population, smoking, region"
+    },
+    {
+     "name": "select",
+     "ms": 1881,
+     "detail": "value {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 14,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 996,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "population-reykjavik-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve margir bjuggu í Reykjavík 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    139804.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 9.31,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu MAN02005 bjuggu 139.804 manns í Reykjavíkurborg 1. janúar 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1066,
+     "detail": "What was the population of Reykjavík on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 5329,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN04203, MAN12104, MAN04208, MAN03270, MAN43005, MAN43007, MAN03200, MAN030101, MAN43006, MAN07108, MAN030102, VIN10012, SJA01101, MAN07109, TEK02003, TEK02004, TEK02014] via keywords · concepts: population, smoking"
+    },
+    {
+     "name": "select",
+     "ms": 1829,
+     "detail": "value {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1077,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "vigdis-1980-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many valid votes did Vigdís Finnbogadóttir get in Reykjavík in the 1980 presidential election?",
+   "expected_tables": [
+    "KOS07112"
+   ],
+   "expected_values": [
+    15594.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.66,
+   "llm_calls": 5,
+   "tables": [
+    "KOS07112"
+   ],
+   "text": "In the 1980 presidential election, Vigdís Finnbogadóttir received 15,594 valid votes in Reykjavík. This data is from Statistics Iceland (Hagstofa Íslands), table KOS07112.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1211,
+     "detail": "How many valid votes did Vigdís Finnbogadóttir receive in Reykjavík during the 1980 Icelandic presidential election?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 2984,
+     "detail": "KOS07112 from [KOS03107, KOS07112, KOS02006, KOS07104, KOS03103, UMH13120, KOS02124] via keyword search · concepts: smoking, presidential elections, region"
+    },
+    {
+     "name": "select",
+     "ms": 1382,
+     "detail": "value {'Candidate and year of election': ['Vigdís Finnbogadóttir 1980'], 'Unit': ['Number valid votes'], 'Constituency': ['Reykjavík']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1072,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "vigdis-1980-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve mörg gild atkvæði fékk Vigdís Finnbogadóttir í Reykjavík í forsetakjörinu 1980?",
+   "expected_tables": [
+    "KOS07112"
+   ],
+   "expected_values": [
+    15594.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.96,
+   "llm_calls": 5,
+   "tables": [
+    "KOS07112"
+   ],
+   "text": "Samkvæmt töflu KOS07112 frá Hagstofu Íslands fékk Vigdís Finnbogadóttir 15.594 gild atkvæði í Reykjavík í forsetakjörinu 1980.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1241,
+     "detail": "How many valid votes did Vigdís Finnbogadóttir receive in Reykjavík in the 1980 presidential election?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3129,
+     "detail": "KOS07112 from [KOS03107, KOS07112, KOS02006, KOS07104, KOS03103, KOS02124] via keyword search · concepts: smoking, presidential elections, region"
+    },
+    {
+     "name": "select",
+     "ms": 1467,
+     "detail": "value {'Candidate and year of election': ['Vigdís Finnbogadóttir 1980'], 'Unit': ['Number valid votes'], 'Constituency': ['Reykjavík']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1120,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-growth-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By how many people did the population of Reykjavík grow from 1 January 2025 to 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    1032.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.74,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN02005, the population of Reykjavík grew by 1,032 people from 1 January 2025 to 1 January 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1503,
+     "detail": "What was the population of Reykjavík from 1 January 2025 to 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3353,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN03270, MAN04203, MAN04208, MAN12104, MAN43005, MAN43007, MAN03200, MAN43006, MAN03301, MAN030102, MAN03106, MAN030101, TEK01002, MAN05221, MAN05110, MAN030106, MAN030104, MAN10289, SJA01101, MAN10290, MAN10291, MAN10292, MAN07108, KOS03200a, MAN07109, MAN01201, MAN03105, MAN09000, SKO01000, MAN10294] via keywords · concepts: population, smoking, change"
+    },
+    {
+     "name": "select",
+     "ms": 1801,
+     "detail": "difference {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1083,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-growth-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve marga fjölgaði íbúum Reykjavíkur frá 1. janúar 2025 til 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    1032.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.49,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Íbúafjöldi Reykjavíkur fjölgaði um 1.032 frá 1. janúar 2025 til 1. janúar 2026, samkvæmt töflu MAN02005 hjá Hagstofu Íslands.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1518,
+     "detail": "What was the population of Reykjavík on January 1, from 2025 to 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3018,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN04203, MAN12104, MAN04208, MAN43007, MAN43005, MAN03200, MAN030101, TEK01002, MAN10289, MAN10292, MAN10290, MAN07109, MAN10291, MAN09000, MAN03301, MAN03106, MAN030102, MAN05110, SJA01101, MAN05221, VIN10012, MAN030106, MAN030104, MAN01201, SAM01603, TEK02003, TEK02004, TEK02014, MAN03105, MAN07108, KOS03208a, SKO01000, UMH11140, UMH11120, UMH11130, UMH11150, MAN07300, SKO04201, SKO03202, KOS03200a, UMH11165, MAN10294, MAN10293, KOS03208] via keywords · concepts: population, smoking, change"
+    },
+    {
+     "name": "select",
+     "ms": 1788,
+     "detail": "difference {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2025', '2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1158,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-share-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What percentage of Iceland's population lived in Reykjavík on 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN00000|MAN00101|MAN00110|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    35.454093588
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 10.43,
+   "llm_calls": 8,
+   "tables": [
+    "MAN00101",
+    "MAN02005"
+   ],
+   "text": "On 1 January 2026, 35.5% of Iceland's population lived in Reykjavík, according to Statistics Iceland (Hagstofa Íslands) table MAN02005. The total population was 394,324 as recorded in tables MAN00101 and MAN02005.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1562,
+     "detail": "What was the total population of Iceland on 1 January 2026? | What was the population of Reykjavík municipality on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3790,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN04203, MAN04208, MAN12104, MAN04103, MAN030101, MAN03280, MAN12103, MAN00000, MAN43000, MAN03250, MAN00102, MAN43007, MAN43005, MAN03270, MAN43002, MAN03200, MAN00110, MAN43004, SJA01101, MAN04001, MAN00115, MAN030103, MAN43006, VIN00001, VIN10012, VIN00900, SJA02201, SJA01102, SJA02202, UTA03803, MAN07108, VIN00930, UTA02801, UTA03801, MAN07209, VIN00910, MAN07109, UTA06002, UTA06003] via keywords · concepts: population"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4540,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN12104, MAN04208, MAN04203, MAN43005, MAN03270, MAN43007, MAN030101, MAN030102, MAN03200, MAN07108, MAN07109, VIN10012, MAN43006, SJA01101] via keywords · concepts: population, smoking, region"
+    },
+    {
+     "name": "select",
+     "ms": 2117,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2026']} notes: ['operation value -> share (question wording)', 'share needs a part and a whole; reporting values instead']"
+    },
+    {
+     "name": "fetch",
+     "ms": 3,
+     "detail": "1 rows"
+    },
+    {
+     "name": "select",
+     "ms": 3012,
+     "detail": "share {'Municipality': ['Total', 'Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1180,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-share-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve stórt hlutfall landsmanna bjó í Reykjavík 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN00000|MAN00101|MAN00110|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    35.454093588
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 7.34,
+   "llm_calls": 2,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: HTTPStatusError Server error '500 Internal Server Error' for url 'http://localhost:11435/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1213,
+     "detail": "What was the population of Iceland and Reykjavík on January 1, 2026?"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: HTTPStatusError Server error '500 Internal Server Error' for url 'http://localhost:11435/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-kopavogur-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How many people lived in Reykjavík and Kópavogur together on 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN04203|MAN04208|MAN12104"
+   ],
+   "expected_values": [
+    180090.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 12.89,
+   "llm_calls": 8,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "On 1 January 2026, the combined population of Reykjavík and Kópavogur was 180,090 people. This figure is from Statistics Iceland (Hagstofa Íslands), table MAN02005.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1498,
+     "detail": "What was the population of Reykjavík on 1 January 2026? | What was the population of Kópavogur on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 5676,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN04208, MAN12104, MAN04203, MAN43005, MAN03270, MAN43007, MAN030101, MAN030102, MAN07108, MAN03200, MAN07109, MAN43006, VIN10012, SJA01101] via keywords · concepts: population, smoking, region"
+    },
+    {
+     "name": "retrieve",
+     "ms": 6265,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN04208, MAN12104, MAN04203, MAN43005, MAN43007, MAN030101, MAN07108, MAN07109, MAN03200, SJA01101] via keywords · concepts: population, region"
+    },
+    {
+     "name": "select",
+     "ms": 2919,
+     "detail": "sum {'Municipality': ['Reykjavikurborg', 'Kopavogsbaer'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']} notes: ['operation value -> sum over Municipality (question wording)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "select",
+     "ms": 3453,
+     "detail": "sum {'Municipality': ['Reykjavikurborg', 'Kopavogsbaer'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']} notes: ['operation value -> sum over Municipality (question wording)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1206,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-kopavogur-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve margir bjuggu samtals í Reykjavík og Kópavogi 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN04203|MAN04208|MAN12104"
+   ],
+   "expected_values": [
+    180090.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.18,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Samtals bjuggu 180.090 manns í Reykjavík og Kópavogi 1. janúar 2026 (Hagstofa Íslands, töflunúmer MAN02005).",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1100,
+     "detail": "What was the total population in Reykjavík and Kópavogur on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3123,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN04203, MAN12104, MAN04208, MAN43005, MAN43007, MAN03200, MAN07108, MAN07109, MAN030101, SJA01101, VIN10012, TEK02003, TEK02004] via keywords · concepts: population, smoking, region"
+    },
+    {
+     "name": "select",
+     "ms": 1891,
+     "detail": "sum {'Municipality': ['Reykjavikurborg', 'Kopavogsbaer'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']} notes: ['operation value -> sum over Municipality (question wording)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1060,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "stays-and-population-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many overnight stays were there in registered accommodation in Iceland in 2025, and how many people lived in Iceland on 1 January 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    9850428.0,
+    389444.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.85,
+   "llm_calls": 6,
+   "tables": [
+    "SAM01601",
+    "MAN00101"
+   ],
+   "text": "2025, Overnight stays: 9,850,428. Source: Statistics Iceland, SAM01601. 2025: 389,444. Source: Statistics Iceland, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1366,
+     "detail": "What was the number of overnight stays in registered accommodation in Iceland in 2025? | What was the population of Iceland on 1 January 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 131,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM01502, SAM08007, SAM01501, SAM01102, SAM01103, SAM01602, SAM08000, SAM03105, VIS02202, VIS02201, SAM08001, SAM08011, FYR06103, UMH31118, VIN01105, MAN43007, VIN01107, VIN10012, VIN01110, VIN01113, VIN01112, VIN10032, SAM08006, FYR06101, FYR06102, VIN10022, THJ11011, THJ02103, THJ03204, STI03267, VIS01104, THJ08401, THJ03105, VIS02504, STI03266, THJ11002, THJ08420, SAM08008, STI03265, THJ02105, STI03264, SAM08050, SAM08002, SAM08003, SAM08004, VIS01301, THJ08421] via dictionary · concepts: overnight stays"
+    },
+    {
+     "name": "select",
+     "ms": 1661,
+     "detail": "value {'Citizenship': ['Total'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 23,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3961,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN08000, MAN04203, VIN00901, MAN12104, MAN04208, VIN00931, MAN04103, MAN12103, MAN030106, MAN05401, MAN00000, MAN03250, MAN030101, MAN03280, MAN43000, MAN03270, VIS02201, MAN05202, MAN04120, TEK01002, VIS01102, MAN00110, MAN05110, THJ01000, MAN00102, MAN030104, VIS01301, UMH31118, MAN08213, MAN04119, SJA02204, SJA02203, THJ06029, MAN04001, THJ05611, VIN00921, THJ05616, THJ05614, THJ05615, THJ05211, THJ05311, THJ05111, THJ05633, SKO00012, THJ05631, SJA07001, SKO03200, VIS02202, MAN43005, TEK01006, THJ05521, MAN05201, THJ05331, MAN43007, THJ05511, THJ05532, SKO03203, SKO03207, VIN00971] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 1224,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1161,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "stays-and-population-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve margar gistinætur voru á skráðum gististöðum á Íslandi árið 2025 og hve margir bjuggu á Íslandi 1. janúar 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    9850428.0,
+    389444.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 17.43,
+   "llm_calls": 6,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "2025: 389.444. Heimild: Hagstofa Íslands, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1570,
+     "detail": "What was the number of overnight stays at registered guesthouses in Iceland in 2025? | What was the population of Iceland on January 1, 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 12977,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN08000, MAN12104, VIN00901, MAN04203, MAN04208, MAN04103, MAN030106, VIN00931, MAN12103, THJ05211, MAN05401, THJ05111, MAN00000, MAN03250, MAN030101, MAN03280, MAN03270, MAN43000, VIS02201, MAN05202, MAN04120, TEK01002, VIS01102, MAN00110, THJ06029, THJ01000, MAN00102, UMH31118, MAN030104, MAN05110, VIS01301, MAN08213, MAN04119, SJA02204, SJA02203, MAN04001, VIN00921, SJA07001, SKO00012, THJ05611, THJ05616, THJ05614, THJ05615, STI03267, THJ05311, THJ05633, MAN05201, THJ05631, VIS02202, SAM08004, SKO03200, MAN43005, TEK01006, MAN05303, THJ05521, THJ05331, MAN43007, THJ05511, THJ05532, SKO03203, SKO03207, MAN01401, VIN00971] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 1262,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "1 rows"
+    },
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: HTTPStatusError Server error '500 Internal Server Error' for url 'http://localhost:11435/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500"
+    },
+    {
+     "name": "compose",
+     "ms": 1466,
+     "detail": "template"
+    }
+   ]
+  }
+ ]
+}

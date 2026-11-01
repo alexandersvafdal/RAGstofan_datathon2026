@@ -20,11 +20,11 @@ from .steps.compose import compose
 from .steps.compute import compute, validate_rows
 from .steps.constraints import has_requested_period
 from .steps.followup import looks_like_followup, rewrite
-from .steps.plan import Plan, SubQuestion, plan
-from .steps.ratio import POPULATION_TABLE, detect_ratio, ratio_parts
-from .steps.retrieve import _INDEXATION_TABLE, period_end, retrieve
+from .steps.plan import Plan, SubQuestion, merge_period_parts, plan
+from .steps.ratio import POPULATION_TABLE, detect_ratio, difference_parts, ratio_parts, share_parts, stored_rate
+from .steps.retrieve import _INDEXATION_TABLE, period_end
 from .steps.tiered import retrieve_tiered
-from .steps.select import select
+from .steps.select import guess_op, select
 from .steps.suggest import suggest
 from .text import detect_language, normalize
 
@@ -86,6 +86,10 @@ class Pipeline:
 
     async def _answer(self, req: AskRequest, on_step: Callable[[Step], None] | None = None) -> Answer:
         lang = req.language or detect_language(req.question)
+        if lang == "en" and detect_language(req.question) == "is":
+            # unmistakably Icelandic (ð, þ, æ … or Icelandic question words) under an English setting: the question's
+            # own language wins, so a spoken Icelandic question is not answered, and read aloud, in English
+            lang = "is"
         total, steps = Timer(), StepLog(on_step)
         calls_before = self.llm.calls
         ans = Answer(question=req.question, language=lang, status="error", text="", model=self.llm.model)
@@ -98,17 +102,22 @@ class Pipeline:
                 steps.append(Step(name="context", ms=t.ms(), detail=full))
                 req = req.model_copy(update={"question": full})
             ratio = None if req.table_id else detect_ratio(req.question)
+            # "GDP per capita": many tables publish the rate itself, so read it rather than divide
+            stored = stored_rate(self.catalog, ratio, req.question) if ratio else None
             forced: list[str | None]
-            if req.table_id:
-                entry = self.catalog.get(req.table_id)
+            target = req.table_id or (stored.id if stored else None)
+            if target:
+                entry = self.catalog.get(target)
                 if entry is None:
-                    raise AnswerFailure("unavailable", "unknown_table", req.table_id)
+                    raise AnswerFailure("unavailable", "unknown_table", target)
                 # Choosing a table narrows retrieval; it does not waive interpreting or validating the question.
                 t = Timer()
                 context = f"Selected table {entry.id}: {entry.title_en}"
                 p = await plan(self.llm, req.question, context=context)
                 _check_plan(p, req.question, context)
-                forced = [req.table_id] * len(p.sub_questions)
+                forced = [target] * len(p.sub_questions)
+                if stored:
+                    ratio = None  # read the published rate, after the same specification/evidence checks
                 steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(s.question for s in p.sub_questions)))
             elif ratio:  # "X per inhabitant": X from its own table, divided by the population in code
                 t = Timer()
@@ -117,18 +126,21 @@ class Pipeline:
                 if len(numerator_plan.sub_questions) != 1:
                     raise AnswerFailure("out_of_scope", "multiple_ratio_numerators")
                 num = numerator_plan.sub_questions[0]
+                place = ratio.place or "Iceland"
                 requirements = [Requirement(facet="measure", value="population", origin="context", quote="people"),
-                                Requirement(facet="geography", value="Iceland", origin="context", quote="Iceland")]
+                                Requirement(facet="geography", value=place, origin="context", quote=place)]
                 requirements.append(Requirement(facet="period", value=ratio.year or "latest",
                                                 origin="context" if ratio.year else "default", quote=ratio.year or ""))
-                pop = SubQuestion(question=ratio.population_question(lang), search_query="population 1 January",
+                pop = SubQuestion(question=ratio.population_question(lang), search_query=ratio.population_search(),
                                   specification=QuestionSpec(requirements=requirements, operation="value"))
                 p = Plan(sub_questions=[num, pop])
-                forced = [None, POPULATION_TABLE]
+                forced = [None, None if ratio.place else POPULATION_TABLE]  # a named place: find its population table
                 steps.append(Step(name="plan", ms=t.ms(), detail=f"{num.question} | {pop.question}"))
             else:
                 t = Timer()
                 p = await plan(self.llm, req.question)
+                _check_plan(p, req.question)
+                p = merge_period_parts(p, req.question)
                 _check_plan(p, req.question)
                 forced = [None] * len(p.sub_questions)
                 steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(s.question for s in p.sub_questions)))
@@ -156,6 +168,19 @@ class Pipeline:
                     raise AnswerFailure("unavailable", "incomplete_ratio")
                 parts = list(rp)
                 steps.append(Step(name="compute", ms=0, detail=rp[0].computation.expression))
+            elif len(parts) == 2:
+                operation = guess_op(req.question)
+                if p.combination:
+                    combo = p.combination
+                    first, second = parts[combo.first], parts[combo.second]
+                    combined = (share_parts(first, second, lang, ordered=True) if combo.operation == "share" else
+                                difference_parts(first, second, lang, operation=combo.operation, ordered=True))
+                    if combined is None:
+                        raise AnswerFailure("unavailable", "incomplete_calculation", combo.operation)
+                    parts = list(combined)
+                    steps.append(Step(name="compute", ms=0, detail=parts[0].computation.expression))
+                elif operation in ("share", "difference", "pct_change") and all(len(part.facts) == 1 and not part.computation for part in parts):
+                    raise AnswerFailure("unverified", "missing_combination_roles")
             parts = await self._merge_series(parts)
 
             t = Timer()
@@ -203,12 +228,8 @@ class Pipeline:
                            alone: bool = True) -> AnswerPart:
         t = Timer()
         # a multi-part question's full wording would pull every part toward the same tables
-        if settings.retrieval == "tiered":
-            r = await retrieve_tiered(self.llm, self.catalog, sq.question, sq.search_query,
-                                      settings.retrieve_top_k, forced_table, original if alone else "")
-        else:
-            r = await retrieve(self.llm, self.catalog, sq.question, sq.search_query, settings.retrieve_top_k, forced_table,
-                               original if alone else "")
+        r = await retrieve_tiered(self.llm, self.catalog, sq.question, sq.search_query,
+                                  settings.retrieve_top_k, forced_table, original if alone else "")
         steps.append(Step(name="retrieve", ms=t.ms(),
                           detail=f"{r.table.id} from [{', '.join(r.candidates)}]" + (" (ambiguous)" if r.ambiguous else "")
                                  + (f" via {r.via}" if r.via else "") + (f" · votes {r.votes}" if r.votes else "")
@@ -267,6 +288,8 @@ class Pipeline:
         note = self._freshness_note(meta, res.selections, r.candidates, f"{sq.question} {original}", lang)
         if res.window_note:   # "the last 50 years" in a table that starts in 2003
             note = " ".join(x for x in (res.window_note[lang], note) if x)
+        if res.place_note:    # "Egilsstaðir" in a table of the 2008 municipalities
+            note = " ".join(x for x in (res.place_note[lang], note) if x)
         # the table named in the answer's language: chart titles, legends and the source card read it
         entry = self.catalog.get(meta.id)
         title = entry.title_is if lang == "is" and entry and entry.title_is else meta.title
@@ -287,24 +310,48 @@ class Pipeline:
             chart=chart.model_copy(update={"title": title}) if chart else None,
             note=note,
             ranking=r.ranking,
-            drill=self._drill(meta, res, rows, lang),
+            drill=self._drill(meta, res, rows, lang, original if alone else sq.question),
         )
 
     @staticmethod
-    def _drill(meta, res, rows, lang: str) -> list[dict]:
-        """Categories listed that open further: each with the question that lists its own subcategories from this
-        table. Read from the classification codes, so any coded table gets it."""
-        if not res.breakdown:
-            return []
-        var = meta.var(res.breakdown)
+    def _drill(meta, res, rows, lang: str, asked: str) -> list[dict]:
+        """Chips under the answer that ask this table again. Two kinds: categories listed that open further (each
+        with the question that lists its own subcategories, read from the classification codes, so any coded table
+        gets it), and categories the model chose that the question did not name, answered with the default instead
+        ("Whole country" for a housing index): each chip asks the same question for that category."""
         out = []
-        for r in rows:
-            code = r.key.get(var.code)
-            if code and children(var, code):
-                label = r.labels[var.text]
-                out.append({"label": label, "table_id": meta.id,
-                            "question": f"Hverjir eru undirflokkar {label}?" if lang == "is" else f"What are the subcategories of {label}?"})
+        if res.breakdown:
+            var = meta.var(res.breakdown)
+            for r in rows:
+                code = r.key.get(var.code)
+                if code and children(var, code):
+                    label = r.labels[var.text]
+                    out.append({"label": label, "table_id": meta.id, "kind": "subcategories",
+                                "question": f"Hverjir eru undirflokkar {label}?" if lang == "is" else f"What are the subcategories of {label}?"})
+        for code, codes in res.alternatives.items():
+            var = meta.var(code)
+            for c in codes:
+                label = var.label_of(c)
+                out.append({"label": label, "table_id": meta.id, "kind": "alternative", "language": lang,
+                            "question": f"{asked.rstrip('?. ')} — {label}"})
         return out
+
+    async def _sibling_with(self, meta, candidates: list[str], period: str):
+        """A table in the same folder, among the candidates, whose figures reach the period asked for: the one
+        sharing the most options with the chosen table first. None when no neighbour has it."""
+        own = self.catalog.get(meta.id)
+        if not own:
+            return None
+        siblings = [e for cid in candidates if (e := self.catalog.get(cid)) and e.id != meta.id and e.path == own.path]
+        siblings.sort(key=lambda e: -len(set(own.values) & set(e.values)))
+        for e in siblings[:3]:
+            try:
+                m = await self.source.meta(e.id)
+            except Exception:
+                continue
+            if any(v.time and period in v.values for v in m.variables):
+                return m
+        return None
 
     def _freshness_note(self, meta, selections: dict[str, list[str]], candidates: list[str], question: str, lang: str) -> str:
         """When nobody asked for a period and the newest one here is from an earlier year, say so, and name a table

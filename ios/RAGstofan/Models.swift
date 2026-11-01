@@ -41,7 +41,10 @@ struct AnswerPart: Codable, Hashable {
     var drill: [Drill]? = nil   // categories that open further, each with the question that lists its subcategories
 }
 
-struct Drill: Codable, Hashable { let label: String; let question: String; let tableId: String }
+struct Drill: Codable, Hashable {
+    let label: String; let question: String; let tableId: String
+    var kind: String? = nil   // "subcategories" (default) or "alternative": a category the question did not name
+}
 
 struct ClarifyOption: Codable, Hashable { let label: String; let tableId: String }
 struct Clarification: Codable, Hashable { let message: String; let options: [ClarifyOption] }

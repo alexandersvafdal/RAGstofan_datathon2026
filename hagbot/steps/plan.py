@@ -1,5 +1,6 @@
 """Step 1: split the question into lookups that each need one table."""
 
+import re
 from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
@@ -14,14 +15,24 @@ class SubQuestion(BaseModel):
     specification: QuestionSpec
 
 
+class Combination(BaseModel):
+    operation: Literal["difference", "pct_change", "share"]
+    first: int = Field(ge=0, description="Index of the part/numerator or minuend (the value being compared)")
+    second: int = Field(ge=0, description="Index of the whole/denominator or subtrahend (the comparison base)")
+
+
 class Plan(BaseModel):
     outcome: Literal["lookup", "clarify", "out_of_scope"] = "lookup"
     sub_questions: list[SubQuestion] = Field(default_factory=list, max_length=3)
+    combination: Combination | None = None
 
     @model_validator(mode="after")
     def valid_outcome(self):
         if (self.outcome == "lookup") != bool(self.sub_questions):
             raise ValueError("lookup requires sub-questions; clarify/out_of_scope require an empty list")
+        if self.combination and (len(self.sub_questions) != 2 or self.combination.first == self.combination.second
+                                 or {self.combination.first, self.combination.second} != {0, 1}):
+            raise ValueError("a combination requires exactly two distinct sub-question indices, 0 and 1")
         return self
 
 
@@ -38,8 +49,15 @@ than three distinct lookups, use out_of_scope for the whole request.
 Split the user's question into the smallest number of sub-questions (1 to 3) where each can be answered from ONE table.
 Most questions need exactly one. Only split when the question asks about clearly different topics
 (for example population AND unemployment).
+If two lookups are operands of one requested calculation, set combination with their explicit indices: first is
+the part/minuend, second the whole/base. Difference is first minus second, pct_change is (first-second)/second*100,
+share is first/second*100. Never infer operand roles from which number is smaller. Otherwise combination is null.
 Never split a comparison within one measure: "how many more men than women", "Reykjavík vs Kópavogur",
-"share of foreigners", "change from 2025 to 2026" are each ONE sub-question, because one table holds both sides.
+"share of foreigners", "share of the population living in Reykjavík", "change from 2025 to 2026" are each ONE
+sub-question, because one table holds both sides (a municipality table also has the whole country as a total).
+A comparison of two different measures ("the wage index compared with the consumer price index", "launavísitala
+borin saman við vísitölu neysluverðs", "exports and imports") is TWO sub-questions, one per measure, over the same
+period; without a period, each asks for the development over the last years.
 Write sub-questions and search queries in English even if the user wrote Icelandic.
 Keep place names in their Icelandic spelling (Reykjavík, Kópavogur, Akureyri).
 For each part, write its structured specification BEFORE considering any candidate table. Include exactly one
@@ -51,10 +69,13 @@ Allowed policy defaults only: geography=Iceland, period=latest, adjustment=unadj
 Defaults have origin=default and quote="". A mean, median, income measure, wealth measure or age threshold is never
 a default: clarify if the wording does not determine it. Record any unresolved ambiguities instead of guessing.
 Use operation=value for a published annual rate such as inflation or GDP growth; difference/pct_change are for
-explicit comparisons, series for trends, rank for category listings. Do not omit a requirement when translating.
+explicit comparisons, sum for adding named categories, series for trends, rank for category listings.
+Do not omit a requirement when translating.
 Icelandic words that are easy to mistranslate:
 - búa, íbúar, mannfjöldi, hvað búa margir: population (people living somewhere)
 - fjölga, fjölgaði, fjölgun: population increase; fækka, fækkaði: population decrease
+- innflytjendur: immigrants (immigrant background, the population-by-origin table), NOT foreign citizens or foreign-born;
+  erlendir ríkisborgarar: foreign citizens
 - atvinnuleysi, atvinnuleysið: unemployment rate (not employment)
 - atvinnuþátttaka: activity rate; starfandi: employed
 - verðbólga: inflation (annual % change of the consumer price index); vísitala neysluverðs: consumer price index
@@ -69,3 +90,38 @@ Do not answer the question."""
 async def plan(llm: LLM, question: str, *, context: str = "") -> Plan:
     user = f"Question: {question}" + (f"\nContext supplied by the user: {context}" if context else "")
     return await llm.complete_json(SYSTEM, user, Plan)
+
+
+_PERIOD = (r"\b(?:\d{1,2}\.?\s+)?(?:(?:january|february|march|april|may|june|july|august|september|october|november|december|"
+           r"q[1-4]|first quarter|second quarter|third quarter|fourth quarter)\s+)?(?:18|19|20)\d\d\b")
+
+
+def merge_period_parts(p: Plan, question: str = "") -> Plan:
+    """One measure at two periods planned as two parts ("the CPI in September 2025" | "the CPI in September 2026",
+    from "um hve mörg stig hækkaði vísitalan frá september 2025 til september 2026") becomes one part asking for
+    both, so the change is computed from one table. Parts that differ in anything but the period stay apart."""
+    if len(p.sub_questions) != 2 or p.combination is not None:
+        return p
+    a, b = p.sub_questions
+    def definitions(part):
+        return sorted((r.facet, r.value.lower(), r.origin) for r in part.specification.requirements if r.facet != "period")
+    if definitions(a) != definitions(b) or a.specification.operation != b.specification.operation:
+        return p
+    pa, pb = re.findall(_PERIOD, a.question, re.I), re.findall(_PERIOD, b.question, re.I)
+    if len(pa) != 1 or len(pb) != 1 or pa[0].lower() == pb[0].lower():
+        return p
+    strip = lambda s: re.sub(r"\s+", " ", re.sub(_PERIOD, "", s, flags=re.I)).strip(" ?.").lower()
+    if strip(a.question) != strip(b.question):
+        return p
+    first, second = (pa[0], pb[0]) if pa[0][-4:] <= pb[0][-4:] else (pb[0], pa[0])
+    merged = re.sub(r"\b(?:in|on|for|at)\s+" + re.escape(pa[0]), f"from {first} to {second}", a.question, flags=re.I)
+    if merged == a.question:
+        merged = re.sub(re.escape(pa[0]), f"from {first} to {second}", a.question, flags=re.I)
+    from .select import guess_op
+    operation = guess_op(question) if question else None
+    operation = operation if operation in ("difference", "pct_change") else a.specification.operation
+    requirements = {}
+    for requirement in [*a.specification.requirements, *b.specification.requirements]:
+        requirements.setdefault((requirement.facet, requirement.value.lower(), requirement.origin), requirement)
+    specification = a.specification.model_copy(update={"requirements": list(requirements.values()), "operation": operation})
+    return Plan(sub_questions=[SubQuestion(question=merged, search_query=a.search_query, specification=specification)])

@@ -158,9 +158,12 @@ class PxApiSource:
 def _meta_from_api(table_id: str, d: dict, catalog: Catalog) -> TableMeta:
     """TableMeta from the API's GET answer (the snapshot's metadata.json is the same document)."""
     entry = catalog.get(table_id)
+    # some tables leave the time flag off their Month or Year dimension (VIN00001, LAU04000); values that all read
+    # as periods (2026M08, 2026Q2, 2025) are a time dimension whatever the flag says
+    looks_like_time = lambda vals: bool(vals) and all(re.fullmatch(r"(?:18|19|20)\d\d(?:[MQ]\d{1,2})?", x) for x in vals)
     variables = [
         Variable(code=v["code"], text=v["text"], values=v["values"], value_texts=v["valueTexts"],
-                 time=v.get("time", False), elimination=v.get("elimination", False))
+                 time=v.get("time", False) or looks_like_time(v["values"]), elimination=v.get("elimination", False))
         for v in d["variables"]
     ]
     unit = d.get("unit") if isinstance(d.get("unit"), str) else ""

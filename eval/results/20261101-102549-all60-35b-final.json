@@ -1,0 +1,1851 @@
+{
+ "label": "all60-35b-final",
+ "results": [
+  {
+   "id": "population-iceland-2026-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many people lived in Iceland on 1 January 2026?",
+   "expected_tables": [
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    394324.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 13.35,
+   "llm_calls": 5,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "2026: 394,324. Source: Statistics Iceland, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1732,
+     "detail": "What was the population of Iceland on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 7136,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN12104, MAN04203, MAN12103, MAN04208, MAN030101, MAN04103, MAN03250, MAN43000, MAN03280, MAN43007, MAN00102, MAN03270, MAN43005, MAN43002, MAN03200, SJA01101, MAN00000, MAN04001, MAN43004, MAN00110, VIN10012, UTA02801, UTA03801, MAN00115, UTA06102, MAN030103, MAN43006, VIN00001, UTA06107, UTA06201, VIN00900, SJA02201, SJA01102, SJA02202, UTA03803, MAN07108, VIN00930] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 2371,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2026']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 7,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2099,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "population-iceland-2026-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve margir bjuggu á Íslandi 1. janúar 2026?",
+   "expected_tables": [
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    394324.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 10.38,
+   "llm_calls": 5,
+   "tables": [
+    "MAN00101"
+   ],
+   "text": "2026: 394.324. Heimild: Hagstofa Íslands, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1977,
+     "detail": "What was the population of Iceland on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 4734,
+     "detail": "MAN00101 from [MAN02005, MAN10001, MAN00101, MAN04103, MAN04203, MAN030101, MAN03280, MAN030102, MAN12103, MAN12104, MAN04208, MAN03250, MAN43007, MAN43005, MAN03270, MAN43000, MAN43002, MAN00102, MAN03200, MAN43006, MAN04001, MAN00000, VIN10012, MAN43004, SJA01101, SJA02201, SJA01102, MAN00110, SJA02202, MAN00115, MAN030103, VIN00001, SAM01601] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 2686,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2026']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 982,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "population-reykjavik-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many people lived in Reykjavík on 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    139804.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 13.44,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN02005, the population of Reykjavík on 1 January 2026 was 139,804.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3459,
+     "detail": "What was the population of Reykjavík on 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 7532,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN12104, MAN04208, MAN04203, MAN43005, MAN43007, MAN03270, MAN030101, MAN030102, MAN07108, MAN03200, MAN43006, MAN07109, VIN10012, SJA01101] via keywords · concepts: population, smoking, region"
+    },
+    {
+     "name": "select",
+     "ms": 1574,
+     "detail": "value {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 34,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 838,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "population-reykjavik-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve margir bjuggu í Reykjavík 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    139804.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 11.89,
+   "llm_calls": 5,
+   "tables": [
+    "MAN02005"
+   ],
+   "text": "Samkvæmt Hagstofu Íslands (Hagstofa Íslands) og töflu MAN02005 bjuggu 139.804 manns í Reykjavíkurborg 1. janúar 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1066,
+     "detail": "What was the population of Reykjavík on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 7210,
+     "detail": "MAN02005 from [MAN02005, MAN10001, MAN04203, MAN12104, MAN04208, MAN03270, MAN43005, MAN43007, MAN03200, MAN030101, MAN43006, MAN07108, MAN030102, VIN10012, SJA01101, MAN07109, TEK02003, TEK02004, TEK02014] via keywords · concepts: population, smoking"
+    },
+    {
+     "name": "select",
+     "ms": 1560,
+     "detail": "value {'Municipality': ['Reykjavikurborg'], 'Age': ['Total'], 'Year': ['2026'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2054,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "births-2024-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many children were born in Iceland in 2024?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321"
+   ],
+   "expected_values": [
+    4311.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 6.11,
+   "llm_calls": 3,
+   "tables": [
+    "MAN05101"
+   ],
+   "text": "According to Statistics Iceland (Hagstofa Íslands) table MAN05101, there were 4,311 live births in Iceland in 2024.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 937,
+     "detail": "How many children were born in Iceland in 2024?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1350,
+     "detail": "MAN05101 from [MAN05101, MAN05100, MAN43002, MAN05102, SKO01000, SKO01109, MAN43000, MAN12103, SKO01106, SKO01001, SKO00012, MAN05204, SKO01305, MAN43004, MAN07109, SKO01103, SKO01108, SKO01201, MAN04120, KOS06001, MAN05110, SKO01101, SKO01104, SKO01102, MAN05401, MAN08000, SKO01105, KOS02101c, MAN05201, MAN00110, KOS01892, VIN10040, SKO04201a, VIN00931, KOS02108, MAN05103, UMH31108, MAN05104, UMH31230, MAN04208, SAM09121, VIN01207, MAN05321, MAN03200, MAN05111, MAN12104, SJA09005, MAN08801, KOS02051, SKO01304, UMH31220, KOS02054, SKO01322, KOS02053, KOS01890, UMH31101] via dictionary · concepts: live births, children"
+    },
+    {
+     "name": "select",
+     "ms": 1977,
+     "detail": "value {'Unit': ['All children'], 'Age': ['Total'], 'Year': ['2024']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 10,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1828,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "births-2024-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve mörg börn fæddust á Íslandi árið 2024?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321"
+   ],
+   "expected_values": [
+    4311.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 11.93,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: RemoteProtocolError Server disconnected without sending a response.",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: RemoteProtocolError Server disconnected without sending a response."
+    }
+   ]
+  },
+  {
+   "id": "cpi-2026-09-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was the consumer price index in September 2026?",
+   "expected_tables": [
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    697.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.13,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "cpi-2026-09-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hver var vísitala neysluverðs í september 2026?",
+   "expected_tables": [
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    697.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "wage-index-2026-08-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was the wage index in August 2026?",
+   "expected_tables": [
+    "LAU04000"
+   ],
+   "expected_values": [
+    1149.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "wage-index-2026-08-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hver var launavísitalan í ágúst 2026?",
+   "expected_tables": [
+    "LAU04000"
+   ],
+   "expected_values": [
+    1149.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "unemployment-2026q2-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was the unemployment rate in Iceland in the second quarter of 2026?",
+   "expected_tables": [
+    "VIN00920|VIN00910"
+   ],
+   "expected_values": [
+    6.5
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "unemployment-2026q2-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hvert var atvinnuleysi á Íslandi á öðrum ársfjórðungi 2026?",
+   "expected_tables": [
+    "VIN00920|VIN00910"
+   ],
+   "expected_values": [
+    6.5
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "gdp-2025-en",
+   "level": "easy",
+   "language": "en",
+   "question": "What was Iceland's gross domestic product in 2025?",
+   "expected_tables": [
+    "THJ01102|THJ05111|THJ05211|THJ05311|THJ05531|THJ05631"
+   ],
+   "expected_values": [
+    4941210.91673494
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "gdp-2025-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hver var verg landsframleiðsla á Íslandi árið 2025?",
+   "expected_tables": [
+    "THJ01102|THJ05111|THJ05211|THJ05311|THJ05531|THJ05631"
+   ],
+   "expected_values": [
+    4941210.91673494
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "overnight-stays-2025-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many overnight stays were there in registered accommodation in Iceland in 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    9850428.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "overnight-stays-2025-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve margar gistinætur voru á skráðum gististöðum á Íslandi árið 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    9850428.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "immigrants-2026-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many immigrants lived in Iceland on 1 January 2026?",
+   "expected_tables": [
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    77226.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "immigrants-2026-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve margir innflytjendur bjuggu á Íslandi 1. janúar 2026?",
+   "expected_tables": [
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    77226.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "vigdis-1980-en",
+   "level": "easy",
+   "language": "en",
+   "question": "How many valid votes did Vigdís Finnbogadóttir get in Reykjavík in the 1980 presidential election?",
+   "expected_tables": [
+    "KOS07112"
+   ],
+   "expected_values": [
+    15594.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "vigdis-1980-is",
+   "level": "easy",
+   "language": "is",
+   "question": "Hve mörg gild atkvæði fékk Vigdís Finnbogadóttir í Reykjavík í forsetakjörinu 1980?",
+   "expected_tables": [
+    "KOS07112"
+   ],
+   "expected_values": [
+    15594.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-growth-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By how many people did the population of Reykjavík grow from 1 January 2025 to 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    1032.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-growth-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve marga fjölgaði íbúum Reykjavíkur frá 1. janúar 2025 til 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006"
+   ],
+   "expected_values": [
+    1032.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-share-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What percentage of Iceland's population lived in Reykjavík on 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN00000|MAN00101|MAN00110|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    35.454093588
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.03,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-share-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve stórt hlutfall landsmanna bjó í Reykjavík 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN00000|MAN00101|MAN00110|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    35.454093588
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-kopavogur-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How many people lived in Reykjavík and Kópavogur together on 1 January 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN04203|MAN04208|MAN12104"
+   ],
+   "expected_values": [
+    180090.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "reykjavik-kopavogur-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve margir bjuggu samtals í Reykjavík og Kópavogi 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN04203|MAN04208|MAN12104"
+   ],
+   "expected_values": [
+    180090.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "men-minus-women-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "How many more men than women lived in Iceland on 1 January 2026?",
+   "expected_tables": [
+    "MAN00101|MAN02005|MAN02007|MAN030101|MAN030102|MAN03200|MAN03250|MAN04103|MAN04203|MAN04208|MAN12103|MAN12104|MAN43000",
+    "MAN00101|MAN02005|MAN02007|MAN030101|MAN030102|MAN03200|MAN03250|MAN04103|MAN04203|MAN04208|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    10254.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "men-minus-women-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve mörgum fleiri karlar en konur bjuggu á Íslandi 1. janúar 2026?",
+   "expected_tables": [
+    "MAN00101|MAN02005|MAN02007|MAN030101|MAN030102|MAN03200|MAN03250|MAN04103|MAN04203|MAN04208|MAN12103|MAN12104|MAN43000",
+    "MAN00101|MAN02005|MAN02007|MAN030101|MAN030102|MAN03200|MAN03250|MAN04103|MAN04203|MAN04208|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    10254.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "cpi-points-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By how many points did the consumer price index rise from September 2025 to September 2026?",
+   "expected_tables": [
+    "VIS01000|VIS01002",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    39.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "cpi-points-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve mörg stig hækkaði vísitala neysluverðs frá september 2025 til september 2026?",
+   "expected_tables": [
+    "VIS01000|VIS01002",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    39.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "overnight-stays-change-2025-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By what percentage did the number of overnight stays in registered accommodation in Iceland increase from 2024 to 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    5.774727016
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "overnight-stays-change-2025-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve mörg prósent fjölgaði gistinóttum á skráðum gististöðum á Íslandi frá 2024 til 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    5.774727016
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "women-share-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What percentage of Iceland's population on 1 January 2026 were women?",
+   "expected_tables": [
+    "MAN00101|MAN02005|MAN02007|MAN030101|MAN030102|MAN03200|MAN03250|MAN04103|MAN04203|MAN04208|MAN12103|MAN12104|MAN43000",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    48.672411519
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "women-share-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve stórt hlutfall landsmanna 1. janúar 2026 voru konur?",
+   "expected_tables": [
+    "MAN00101|MAN02005|MAN02007|MAN030101|MAN030102|MAN03200|MAN03250|MAN04103|MAN04203|MAN04208|MAN12103|MAN12104|MAN43000",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    48.672411519
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "wage-index-points-2026-08-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By how many points did the wage index rise from August 2025 to August 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "LAU04000"
+   ],
+   "expected_values": [
+    61.6
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "wage-index-points-2026-08-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve mörg stig hækkaði launavísitalan frá ágúst 2025 til ágúst 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "LAU04000"
+   ],
+   "expected_values": [
+    61.6
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "immigrants-growth-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By how many people did the number of immigrants living in Iceland grow from 1 January 2025 to 1 January 2026?",
+   "expected_tables": [
+    "MAN43000|MAN43002|MAN43004|MAN43007",
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    3430.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "immigrants-growth-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve marga fjölgaði innflytjendum á Íslandi frá 1. janúar 2025 til 1. janúar 2026?",
+   "expected_tables": [
+    "MAN43000|MAN43002|MAN43004|MAN43007",
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    3430.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "foreign-stays-share-2025-en",
+   "level": "medium",
+   "language": "en",
+   "question": "What percentage of the overnight stays in registered accommodation in Iceland in 2025 were by foreigners?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    86.83462282
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "foreign-stays-share-2025-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve stórt hlutfall gistinátta á skráðum gististöðum á Íslandi árið 2025 voru gistinætur útlendinga?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    86.83462282
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "population-and-cpi-2026-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many people lived in Iceland on 1 January 2026, and what was the consumer price index in September 2026?",
+   "expected_tables": [
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    394324.0,
+    697.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "population-and-cpi-2026-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve margir bjuggu á Íslandi 1. janúar 2026 og hver var vísitala neysluverðs í september 2026?",
+   "expected_tables": [
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    394324.0,
+    697.3
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "wages-and-prices-2026-08-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What were the wage index and the consumer price index in August 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    1149.3,
+    694.6
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "wages-and-prices-2026-08-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver var launavísitalan og hver var vísitala neysluverðs í ágúst 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    1149.3,
+    694.6
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "stays-and-population-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many overnight stays were there in registered accommodation in Iceland in 2025, and how many people lived in Iceland on 1 January 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    9850428.0,
+    389444.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "stays-and-population-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve margar gistinætur voru á skráðum gististöðum á Íslandi árið 2025 og hve margir bjuggu á Íslandi 1. janúar 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    9850428.0,
+    389444.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "gdp-and-births-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What was Iceland's gross domestic product in 2025, and how many children were born in Iceland in 2025?",
+   "expected_tables": [
+    "THJ01102|THJ05111|THJ05211|THJ05311|THJ05531|THJ05631",
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321"
+   ],
+   "expected_values": [
+    4941210.91673494,
+    4387.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "gdp-and-births-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver var verg landsframleiðsla á Íslandi árið 2025 og hve mörg börn fæddust á Íslandi árið 2025?",
+   "expected_tables": [
+    "THJ01102|THJ05111|THJ05211|THJ05311|THJ05531|THJ05631",
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321"
+   ],
+   "expected_values": [
+    4941210.91673494,
+    4387.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "stays-per-inhabitant-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many overnight stays in registered accommodation were there in Iceland in 2025 per inhabitant on 1 January 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    25.293567239
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "stays-per-inhabitant-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve margar gistinætur á skráðum gististöðum voru á Íslandi árið 2025 á hvern íbúa 1. janúar 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    25.293567239
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.1,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "births-per-1000-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many children were born in Iceland in 2025 per 1,000 inhabitants on 1 January 2025?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    11.264777478
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "births-per-1000-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve mörg börn fæddust á Íslandi árið 2025 á hverja 1.000 íbúa 1. janúar 2025?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    11.264777478
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "wages-and-unemployment-2026-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What was the wage index in August 2026, and what was the unemployment rate in Iceland in the second quarter of 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "VIN00920|VIN00910"
+   ],
+   "expected_values": [
+    1149.3,
+    6.5
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "wages-and-unemployment-2026-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver var launavísitalan í ágúst 2026 og hvert var atvinnuleysi á Íslandi á öðrum ársfjórðungi 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "VIN00920|VIN00910"
+   ],
+   "expected_values": [
+    1149.3,
+    6.5
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "gdp-and-stays-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What was Iceland's gross domestic product in 2025, and how many overnight stays were there in registered accommodation in Iceland in 2025?",
+   "expected_tables": [
+    "THJ01102|THJ05111|THJ05211|THJ05311|THJ05531|THJ05631",
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    4941210.91673494,
+    9850428.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "gdp-and-stays-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver var verg landsframleiðsla á Íslandi árið 2025 og hve margar gistinætur voru á skráðum gististöðum á Íslandi árið 2025?",
+   "expected_tables": [
+    "THJ01102|THJ05111|THJ05211|THJ05311|THJ05531|THJ05631",
+    "SAM01601|SAM01603"
+   ],
+   "expected_values": [
+    4941210.91673494,
+    9850428.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "births-and-immigrants-2026-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many children were born in Iceland in 2025, and how many immigrants lived in Iceland on 1 January 2026?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321",
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    4387.0,
+    77226.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "births-and-immigrants-2026-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve mörg börn fæddust á Íslandi árið 2025 og hve margir innflytjendur bjuggu á Íslandi 1. janúar 2026?",
+   "expected_tables": [
+    "MAN05101|MAN05100|MAN05102|MAN05104|MAN05110|MAN05111|MAN05203|MAN05204|MAN05302|MAN05321",
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    4387.0,
+    77226.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "cpi-and-unemployment-2026-en",
+   "level": "hard",
+   "language": "en",
+   "question": "What was the consumer price index in September 2026, and what was the unemployment rate in Iceland in the second quarter of 2026?",
+   "expected_tables": [
+    "VIS01000|VIS01002",
+    "VIN00920|VIN00910"
+   ],
+   "expected_values": [
+    697.3,
+    6.5
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "I could not answer this from Statistics Iceland's tables. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  },
+  {
+   "id": "cpi-and-unemployment-2026-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hver var vísitala neysluverðs í september 2026 og hvert var atvinnuleysi á Íslandi á öðrum ársfjórðungi 2026?",
+   "expected_tables": [
+    "VIS01000|VIS01002",
+    "VIN00920|VIN00910"
+   ],
+   "expected_values": [
+    697.3,
+    6.5
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": false,
+   "offered_ok": false,
+   "answer_ok": false,
+   "status": "error",
+   "seconds": 0.01,
+   "llm_calls": 1,
+   "tables": [],
+   "text": "Ég fann ekki svar við þessu í töflum Hagstofunnar. LLM request failed: ReadError",
+   "steps": [
+    {
+     "name": "error",
+     "ms": 0,
+     "detail": "LLMError: LLM request failed: ReadError"
+    }
+   ]
+  }
+ ]
+}

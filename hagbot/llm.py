@@ -62,9 +62,16 @@ class LLM:
         self.calls += 1
         try:
             r = await self.client.post(f"{self.base_url}/chat/completions", json=body)
+            if r.status_code >= 500:
+                # Ollama aborts a prediction stuck repeating itself ("token repeat limit reached"); at temperature 0
+                # the same prompt loops the same way, so the retry samples a little. Any other 500: once more as is.
+                again = {**body, "temperature": max(0.3, body["temperature"])} if "repeat limit" in r.text else body
+                r = await self.client.post(f"{self.base_url}/chat/completions", json=again)
             r.raise_for_status()
         except httpx.TimeoutException as e:  # its message is empty; say what happened
             raise LLMError(f"the language model did not answer within {settings.llm_timeout_s:.0f} s") from e
+        except httpx.HTTPStatusError as e:   # the server's own words say why (context length, a bad request)
+            raise LLMError(f"LLM request failed: {e.response.status_code} {e.response.text[:300]}".strip()) from e
         except httpx.HTTPError as e:
             raise LLMError(f"LLM request failed: {type(e).__name__} {e}".strip()) from e
         return r.json()["choices"][0]["message"]["content"]
@@ -77,10 +84,12 @@ class LLM:
             {"role": "user", "content": user},
         ]
         last_err = None
-        for _ in range(retries + 1):
-            raw = await self.chat(messages, json_mode=True, temperature=temperature)
+        for attempt in range(retries + 1):
+            # the last try samples a little: at temperature 0 a model that answered wrongly answers the same way
+            t = temperature if attempt < retries else max(0.3, self.temperature if temperature is None else temperature)
+            raw = await self.chat(messages, json_mode=True, temperature=t)
             try:
-                return schema.model_validate(_extract_json(raw))
+                return schema.model_validate(_unwrap_schema_echo(_extract_json(raw)))
             except (ValueError, ValidationError) as e:
                 last_err = e
                 messages += [
@@ -91,6 +100,20 @@ class LLM:
 
     async def aclose(self):
         await self.client.aclose()
+
+
+def _unwrap_schema_echo(data):
+    """A model now and then answers in the shape of the schema it was shown: {"properties": {"table_id": "none"}} or
+    {"properties": {"table_id": {"default": "none"}}}. Take the fields out of it; anything else passes through."""
+    if isinstance(data, dict) and isinstance(data.get("properties"), dict) and not (set(data) - {"properties", "type", "required", "title"}):
+        out = {}
+        for k, v in data["properties"].items():
+            if isinstance(v, dict) and set(v) & {"default", "const", "value"} \
+                    and set(v) <= {"default", "const", "value", "type", "description", "title", "enum"}:
+                v = next(v[key] for key in ("default", "const", "value") if key in v)
+            out[k] = v
+        return out
+    return data
 
 
 def _extract_json(raw: str) -> dict:

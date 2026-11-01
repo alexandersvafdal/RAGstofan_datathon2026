@@ -6,16 +6,18 @@
      and whichever vector searches are switched on (e5 from hagbot/e5.py, bge-m3 from hagbot/vectors.py), all run on
      the question plus the official term. Dictionary tables lead; the rest are ordered by reciprocal-rank fusion of
      the searches times a recency factor; code-side rules (narrow) then drop variants nobody asked for.
-  2. The model checks the hitlist from the top, 8 tables at a time: it picks one, or says none of them answers.
+     When the question has one subject, its headline table is on top and nothing beyond the subject is asked,
+     the dictionary decides and no model is called.
+  2. Otherwise the model checks the hitlist from the top, 8 tables at a time: it picks one, or says none answers.
   3. If none fits: the model browses, first one of Statistics Iceland's subject areas, then a table inside it.
   4. If every check said "none", return an unverified outcome.
 
-Every tier shares the code-side rules the classic finder uses: ambiguous words ask the user, table variants nobody
-asked for are dropped (narrow), and the newest edition of a chosen table is used (freshest sibling).
-Set RETRIEVAL=tiered to use it; the classic finder stays the default until this one is measured.
+Every tier shares the code-side rules in retrieve.py: ambiguous words ask the user, table variants nobody asked for
+are dropped (narrow), and the newest edition of a chosen table is used (freshest sibling). This is the only finder.
 """
 
 import json
+import re
 from functools import lru_cache
 from pathlib import Path
 
@@ -27,7 +29,7 @@ from ..llm import LLM
 from ..outcomes import AnswerFailure
 from ..vote import vote_json, voting_on
 from ..text import normalize, tokens
-from .retrieve import AMBIGUOUS, Retrieved, SYSTEM as PICK_RULES, freshest_sibling, narrow
+from .retrieve import AMBIGUOUS, MONTHS, Retrieved, SYSTEM as PICK_RULES, freshest_sibling, narrow
 
 KEYWORDS = ROOT / "data" / "keywords.json"
 BATCH = 8   # tables the model sees per check
@@ -83,6 +85,15 @@ _GENERIC = ("current", "latest", "newest", "recent", "now", "today", "value", "l
             "mer", "hun", "hann", "thad", "thess", "mig", "okkur", "its", "it", "me", "us", "this", "that")
 
 
+def beyond_concept(concept: dict, text: str) -> list[str]:
+    """The question's words that are neither the concept's own, generic, a month nor a number: a breakdown or
+    another subject. Empty: the question asks for the concept itself and nothing more."""
+    own = {t for term in concept["_terms"] for t in term.split() if len(t) >= 3}
+    return [w for w in tokens(text) if w not in STOPWORDS and not w.isdigit() and len(w) >= 3
+            and not w.startswith(_GENERIC) and not re.fullmatch(MONTHS, w)
+            and not any(w.startswith(t) or t.startswith(w) for t in own)]
+
+
 def headline(hit: CatalogEntry, found: list[dict], catalog: Catalog, text: str) -> CatalogEntry:
     """A concept's first dictionary table (its headline: the CPI, the wage index …) over a neighbour in the same folder
     that the model chose (by sector, for indexation), when the question asks for nothing more than the concept itself.
@@ -92,11 +103,7 @@ def headline(hit: CatalogEntry, found: list[dict], catalog: Catalog, text: str) 
         head = catalog.get(c["tables"][0]) if c["tables"] else None
         if not head or head.id == hit.id or head.path != hit.path:
             continue
-        concept = {t for term in c["_terms"] for t in term.split() if len(t) >= 3}
-        extra = [w for w in tokens(text) if w not in STOPWORDS and not w.isdigit() and len(w) >= 3
-                 and not w.startswith(_GENERIC)
-                 and not any(w.startswith(t) or t.startswith(w) for t in concept)]
-        if not extra:
+        if not beyond_concept(c, text):
             return head
     return hit
 
@@ -123,21 +130,29 @@ def rank(preferred: list[CatalogEntry], searches: dict[str, list[CatalogEntry]])
 
 class Verdict(BaseModel):
     table_id: str = Field(description='ID of the table that answers the question, copied exactly, or "none"')
+    # kept: without it the 35B model's one-field answers failed validation on two of the organisers' questions
     reason: str = Field(default="", description="a few words on why, or why none fits")
 
 
 CHECK = PICK_RULES.replace("You choose which Statistics Iceland table answers a question.",
                            "You check whether one of these Statistics Iceland tables can answer the question.") + """
 The tables are numbered in search order; the number is not a vote, the rules above decide.
+A table marked "headline table for X" is the standard table for that subject: choose it for a plain question about X,
+and a neighbour only when the question asks for a breakdown or a measure it lacks (constant prices, an index, quarters).
 If none of the listed tables can answer it (wrong topic, wrong place or period, wrong measure), answer "none"."""
 
 
-async def _check(llm: LLM, entries: list[CatalogEntry], question: str, original: str, start: int = 0) -> CatalogEntry | None:
-    """The model picks from these tables, or rejects them all. They come in hitlist order, numbered."""
+async def _check(llm: LLM, entries: list[CatalogEntry], question: str, original: str, start: int = 0,
+                 heads: dict[str, str] | None = None) -> CatalogEntry | None:
+    """The model picks from these tables, or rejects them all. They come in hitlist order, numbered; a concept's
+    headline table says so on its card."""
     if not entries:
         return None
     by_id = {e.id: e for e in entries}
-    cards = "\n".join(f"#{start + n}. {e.card(f'{question} {original}')}" for n, e in enumerate(entries, 1))
+    heads = heads or {}
+    cards = "\n".join(f"#{start + n}. {e.card(f'{question} {original}')}"
+                      + (f" — headline table for {heads[e.id]}" if e.id in heads else "")
+                      for n, e in enumerate(entries, 1))
     asked = f"User asked: {original}\nThis part: {question}" if original and original != question else f"Question: {question}"
     user = f"{asked}\n\nTables:\n{cards}"
     if voting_on():  # several votes; "none" is a vote too
@@ -209,16 +224,25 @@ async def retrieve_tiered(llm: LLM, catalog: Catalog, question: str, search_quer
 
     async def done(table: CatalogEntry, pool: list[CatalogEntry], tier: str) -> Retrieved:
         # Ranking rules may suggest a newer/headline table, but only a checked table can be returned.
-        replacement = freshest_sibling(headline(table, found, catalog, f"{question} {original}"),
+        replacement = freshest_sibling(headline(table, found, catalog, question),
                                         pool, f"{question} {original}")
         if replacement.id != table.id and await _check(llm, [replacement], question, original):
             table = replacement
         return Retrieved(table=table, candidates=[e.id for e in pool], via=tier,
                          concepts=[c["concept"] for c in found], ranking=hitlist, votes=_last_votes[0] if voting_on() else "")
 
+    # 1b. one subject in the question, its headline table on top, and nothing asked beyond the subject itself
+    # ("what is the wage index", "hver var verðbólgan í ágúst"): the dictionary decides, no model call. The headline
+    # snap after a model check would give the same table anyway.
+    topics = [c for c in found if c.get("role", "topic") == "topic"]
+    if (len(with_tables) == 1 and topics == with_tables and shortlist and shortlist[0].id == with_tables[0]["tables"][0]
+            and not beyond_concept(with_tables[0], question)):
+        return await done(shortlist[0], shortlist, "dictionary")
+
     # 2. the model checks the hitlist from the top
+    heads = {c["tables"][0]: c["concept"] for c in with_tables if catalog.get(c["tables"][0])}
     for i in range(0, min(len(shortlist), BATCHES * BATCH), BATCH):
-        if (hit := await _check(llm, shortlist[i:i + BATCH], question, original, start=i)):
+        if (hit := await _check(llm, shortlist[i:i + BATCH], question, original, start=i, heads=heads)):
             signals = order.get(hit.id, (0, []))[1]
             tier = ("keywords" if any(x == "dictionary" for x in signals) else
                     "keyword search" if any(x.startswith("bm25") for x in signals) else "semantic search")

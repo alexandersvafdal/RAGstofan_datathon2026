@@ -1,0 +1,209 @@
+{
+ "label": "rerun-35b",
+ "results": [
+  {
+   "id": "cpi-points-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve mörg stig hækkaði vísitala neysluverðs frá september 2025 til september 2026?",
+   "expected_tables": [
+    "VIS01000|VIS01002",
+    "VIS01000|VIS01002"
+   ],
+   "expected_values": [
+    39.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 6.71,
+   "llm_calls": 3,
+   "tables": [
+    "VIS01000"
+   ],
+   "text": "Samkvæmt töflu VIS01000 frá Hagstofu Íslands hækkaði vísitala neysluverðs um 1,8 stig frá september 2025 til september 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1711,
+     "detail": "What was the consumer price index (vísitala neysluverðs) from September 2025 to September 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 941,
+     "detail": "VIS01000 from [VIS01000, VIS02002, VIS02202, VIS02000, VIS01301, VIS01102, VIS02500, VIS02502, VIS01104, VIS01101, VIS01304, VIS01103, VIS02506, VIS01106, VIS01004, VIS01305, VIS01306, VIS01300, VIS08000, VIS08003, VIS13301, VIS13302, LAU04001, VIS13303, LAU04800, VIS13000, VIS02504, THJ05813, SJA01101, SJA01102, THJ01602, LAU04109, UTA07001, KOS02120] via dictionary · concepts: consumer price index, change"
+    },
+    {
+     "name": "select",
+     "ms": 1643,
+     "detail": "difference {'Month': ['2025M09', '2026M09'], 'Index': ['Consumer price index'], 'Item': ['Annual change, %']} notes: ['operation value -> difference (question wording)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 2,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2406,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "wage-index-points-2026-08-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve mörg stig hækkaði launavísitalan frá ágúst 2025 til ágúst 2026?",
+   "expected_tables": [
+    "LAU04000",
+    "LAU04000"
+   ],
+   "expected_values": [
+    61.6
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": false,
+   "status": "answered",
+   "seconds": 12.8,
+   "llm_calls": 5,
+   "tables": [
+    "LAU04000"
+   ],
+   "text": "2025M08, Annual change, %: 7,7%; 2026M08, Annual change, %: 5,7%; Breyting 2025M08 → 2026M08: -2,0%. Heimild: Hagstofa Íslands, LAU04000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 3070,
+     "detail": "What was the wage index (launavísitala) from August 2025 to August 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 6974,
+     "detail": "LAU04000 from [LAU04000, LAU04001, LAU04003, LAU04800, LAU04005, LAU04007, LAU04802, VIS01103, VIS01306, VIS02000, VIS01301, VIS01104, VIS01304, VIS02202, VIS13302, VIS01300, TEK02001, VIS13301, VIS02002, LAU04101, LAU04103, LAU04107, LAU04105, LAU04109, VIN02091, JVS00001] via keywords · concepts: wage index, wages, change"
+    },
+    {
+     "name": "select",
+     "ms": 1473,
+     "detail": "difference {'Month': ['2025M08', '2026M08'], 'Unit': ['Annual change, %']} notes: ['operation value -> difference (question wording)']"
+    },
+    {
+     "name": "fetch",
+     "ms": 3,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1274,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "immigrants-growth-2026-en",
+   "level": "medium",
+   "language": "en",
+   "question": "By how many people did the number of immigrants living in Iceland grow from 1 January 2025 to 1 January 2026?",
+   "expected_tables": [
+    "MAN43000|MAN43002|MAN43004|MAN43007",
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    3430.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 9.96,
+   "llm_calls": 5,
+   "tables": [
+    "MAN43000"
+   ],
+   "text": "2025, Immigrant: 73,796; 2026, Immigrant: 77,226; Change 2025 → 2026: +3,430. Source: Statistics Iceland, MAN43000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1712,
+     "detail": "What was the population of immigrants (by origin) living in Iceland from 1 January 2025 to 1 January 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3527,
+     "detail": "MAN43000 from [MAN43000, MAN43002, VIN10012, VIN10001, KOS02101c, KOS02050, KOS03320, KOS06001, VIN10040, VIN10052, VIN10032, VIN10022, CEN05080] via keywords · concepts: immigrant population, immigrants, change"
+    },
+    {
+     "name": "select",
+     "ms": 2624,
+     "detail": "difference {'Year': ['2025', '2026'], 'Age': ['Total'], 'Origin': ['Immigrant'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 5,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2088,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "immigrants-growth-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Um hve marga fjölgaði innflytjendum á Íslandi frá 1. janúar 2025 til 1. janúar 2026?",
+   "expected_tables": [
+    "MAN43000|MAN43002|MAN43004|MAN43007",
+    "MAN43000|MAN43002|MAN43004|MAN43007"
+   ],
+   "expected_values": [
+    3430.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 15.0,
+   "llm_calls": 5,
+   "tables": [
+    "MAN43000"
+   ],
+   "text": "2025, Immigrant: 73.796; 2026, Immigrant: 77.226; Breyting 2025 → 2026: +3.430. Heimild: Hagstofa Íslands, MAN43000.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 2154,
+     "detail": "What was the population increase of immigrants (innflytjendur) in Iceland from January 1, 2025 to January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 7158,
+     "detail": "MAN43000 from [MAN43000, MAN02005, MAN00101, MAN10001, MAN43007, MAN43002, MAN43005, MAN43006, MAN43004, VIN10012, MAN00000, MAN04001, MAN030102, MAN03250, MAN030101, MAN03280, MAN03270, MAN04203, MAN04103, MAN04208, MAN12103, MAN04120, MAN12104, TEK01002, TEK02012, MAN00110, SKO04201a, MEN01207, VIN10001, SKO02108b, MAN04119, KOS03216, VIN10052, MAN01406, VIN10032, VIN10022, MAN05303, SAM08006, KOS02101c, VIS01102, MAN01401, SJA01101, VIS02504, SKO03202a, SKO03135, SJA04001, SJA02204, MAN01404, SKO04145, MAN03260, SJA02201, UMH34095, SJA01102, SJA02203, SKO04144, VIS01301, SKO03134, SJA02202, SKO01114, SKO00013, MAN01400, MAN11350, SKO03226, SKO00012, MAN01405, THJ05211, FEL04011, VIN07210, MAN11351, SKO03133, VIN01401, SKO01113, SKO01109, SKO04143, SKO01305, FEL04012, FYR01202, MAN03105, FEL04010, MAN03106, FEL04013, FEL04014, SKO01112, SKO03132, SKO04142, CEN05080] via keywords · concepts: population, immigrants, change"
+    },
+    {
+     "name": "select",
+     "ms": 3178,
+     "detail": "difference {'Year': ['2025', '2026'], 'Age': ['Total'], 'Origin': ['Immigrant'], 'Sex': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 1,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 2505,
+     "detail": "template"
+    }
+   ]
+  }
+ ]
+}

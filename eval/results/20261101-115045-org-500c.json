@@ -1,0 +1,192 @@
+{
+ "label": "org-500c",
+ "results": [
+  {
+   "id": "reykjavik-share-2026-is",
+   "level": "medium",
+   "language": "is",
+   "question": "Hve stórt hlutfall landsmanna bjó í Reykjavík 1. janúar 2026?",
+   "expected_tables": [
+    "MAN02005|MAN03270|MAN04203|MAN04208|MAN12104|MAN43006",
+    "MAN02005|MAN00000|MAN00101|MAN00110|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    35.454093588
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 13.89,
+   "llm_calls": 4,
+   "tables": [
+    "MAN04203"
+   ],
+   "text": "Samkvæmt töflu MAN04203 frá Hagstofu Íslands bjó 35,5% landsmanna í Reykjavíkurborg 1. janúar 2026.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1184,
+     "detail": "What was the population of Iceland and Reykjavík on January 1, 2026?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 9753,
+     "detail": "MAN04203 from [MAN02005, MAN10001, MAN04203, MAN12104, MAN04208, MAN43005, MAN43007, MAN03270, MAN030101, MAN030102, MAN07108, MAN07109, MAN43006, MAN03200, VIN10012, SJA01101, TEK02003, TEK02004, TEK02014] via keyword search · concepts: population, smoking, region, share"
+    },
+    {
+     "name": "select",
+     "ms": 1914,
+     "detail": "share {'Municipality': ['Total', 'Reykjavikurborg'], 'Citizenship': ['Total'], 'Sex': ['Total'], 'Year': ['2026']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 24,
+     "detail": "2 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1016,
+     "detail": "model"
+    }
+   ]
+  },
+  {
+   "id": "stays-and-population-2025-en",
+   "level": "hard",
+   "language": "en",
+   "question": "How many overnight stays were there in registered accommodation in Iceland in 2025, and how many people lived in Iceland on 1 January 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    9850428.0,
+    389444.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 7.23,
+   "llm_calls": 5,
+   "tables": [
+    "SAM01601",
+    "MAN00101"
+   ],
+   "text": "2025, Overnight stays: 9,850,428. Source: Statistics Iceland, SAM01601. 2025: 389,444. Source: Statistics Iceland, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1425,
+     "detail": "What was the number of overnight stays in registered accommodation in Iceland in 2025? | What was the population of Iceland on 1 January 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 127,
+     "detail": "SAM01601 from [SAM01601, SAM01201, SAM01603, SAM01502, SAM08007, SAM01501, SAM01102, SAM01103, SAM01602, SAM08000, SAM03105, VIS02202, VIS02201, SAM08001, SAM08011, FYR06103, UMH31118, VIN01105, MAN43007, VIN01107, VIN10012, VIN01110, VIN01113, VIN01112, VIN10032, SAM08006, FYR06101, FYR06102, VIN10022, THJ11011, THJ02103, THJ03204, STI03267, VIS01104, THJ08401, THJ03105, VIS02504, STI03266, THJ11002, THJ08420, SAM08008, STI03265, THJ02105, STI03264, SAM08050, SAM08002, SAM08003, SAM08004, VIS01301, THJ08421] via dictionary · concepts: overnight stays"
+    },
+    {
+     "name": "select",
+     "ms": 1701,
+     "detail": "value {'Citizenship': ['Total'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 12,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 3399,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN08000, MAN04203, VIN00901, MAN12104, MAN04208, VIN00931, MAN04103, MAN12103, MAN030106, MAN05401, MAN00000, MAN03250, MAN030101, MAN03280, MAN43000, MAN03270, VIS02201, MAN05202, MAN04120, TEK01002, VIS01102, MAN00110, MAN05110, THJ01000, MAN00102, MAN030104, VIS01301, UMH31118, MAN08213, MAN04119, SJA02204, SJA02203, THJ06029, MAN04001, THJ05611, VIN00921, THJ05616, THJ05614, THJ05615, THJ05211, THJ05311, THJ05111, THJ05633, SKO00012, THJ05631, SJA07001, SKO03200, VIS02202, MAN43005, TEK01006, THJ05521, MAN05201, THJ05331, MAN43007, THJ05511, THJ05532, SKO03203, SKO03207, VIN00971] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 1245,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 9,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1018,
+     "detail": "template"
+    }
+   ]
+  },
+  {
+   "id": "stays-and-population-2025-is",
+   "level": "hard",
+   "language": "is",
+   "question": "Hve margar gistinætur voru á skráðum gististöðum á Íslandi árið 2025 og hve margir bjuggu á Íslandi 1. janúar 2025?",
+   "expected_tables": [
+    "SAM01601|SAM01603",
+    "MAN00101|MAN00000|MAN00110|MAN02005|MAN02007|MAN030101|MAN030102|MAN030103|MAN03200|MAN03250|MAN03280|MAN04103|MAN04203|MAN04208|MAN10001|MAN12103|MAN12104|MAN43000"
+   ],
+   "expected_values": [
+    9850428.0,
+    389444.0
+   ],
+   "note": "from gagnvist-starter questions/examples.jsonl (data release 18 Oct 2026)",
+   "table_ok": true,
+   "offered_ok": true,
+   "answer_ok": true,
+   "status": "answered",
+   "seconds": 52.99,
+   "llm_calls": 6,
+   "tables": [
+    "SAM01601",
+    "MAN00101"
+   ],
+   "text": "2025, Overnight stays: 9.850.428. Heimild: Hagstofa Íslands, SAM01601. 2025: 389.444. Heimild: Hagstofa Íslands, MAN00101.",
+   "steps": [
+    {
+     "name": "plan",
+     "ms": 1516,
+     "detail": "What was the number of overnight stays at registered guesthouses in Iceland in 2025? | What was the population of Iceland on January 1, 2025?"
+    },
+    {
+     "name": "retrieve",
+     "ms": 1318,
+     "detail": "MAN00101 from [MAN02005, MAN00101, MAN10001, MAN030102, MAN08000, MAN12104, VIN00901, MAN04203, MAN04208, MAN04103, MAN030106, VIN00931, MAN12103, THJ05211, MAN05401, THJ05111, MAN00000, MAN03250, MAN030101, MAN03280, MAN03270, MAN43000, VIS02201, MAN05202, MAN04120, TEK01002, VIS01102, MAN00110, THJ06029, THJ01000, MAN00102, UMH31118, MAN030104, MAN05110, VIS01301, MAN08213, MAN04119, SJA02204, SJA02203, MAN04001, VIN00921, SJA07001, SKO00012, THJ05611, THJ05616, THJ05614, THJ05615, STI03267, THJ05311, THJ05633, MAN05201, THJ05631, VIS02202, SAM08004, SKO03200, MAN43005, TEK01006, MAN05303, THJ05521, THJ05331, MAN43007, THJ05511, THJ05532, SKO03203, SKO03207, MAN01401, VIN00971] via keywords · concepts: population"
+    },
+    {
+     "name": "select",
+     "ms": 12522,
+     "detail": "value {'Sex': ['Total'], 'Age': ['Total'], 'Year': ['2025']}"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "retrieve",
+     "ms": 48536,
+     "detail": "SAM01601 from [SAM01201, SAM01601, SAM01102, SAM01603, SAM01103, SAM01502, SAM01501, SAM01602, SAM08000, VIS02202, VIS02201, SAM01202, SAM08007, UMH31118, SAM03105, SKO03208b, SKO03208a, SAM08001, SKO04205b, MAN43007, THJ02103, VIS01104, FYR06101, THJ02105, FYR06102, VIN10012, FYR06103, VIS01301, VIN02001, SAM08011, SAM08006, SKO03106, SAM08008, SKO04105, SAM08004, TEK01001, SAM31002, UMH31109, TEK01008, MAN01002, MAN04119, THJ05551, MAN04120, SAM08002, THJ11002, SAM08050, SAM01104] via keywords · concepts: overnight stays, hotels"
+    },
+    {
+     "name": "select",
+     "ms": 1540,
+     "detail": "value {'Citizenship': ['Total'], 'Year': ['2025'], 'Region': ['Total'], 'Unity': ['Overnight stays'], 'Month': ['Total']} notes: [\"Month: defaulted to ['Total']\"]"
+    },
+    {
+     "name": "fetch",
+     "ms": 0,
+     "detail": "1 rows"
+    },
+    {
+     "name": "compose",
+     "ms": 1399,
+     "detail": "template"
+    }
+   ]
+  }
+ ]
+}
