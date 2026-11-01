@@ -18,8 +18,8 @@ const I18N = {
             picked: "picked", numbers: n => `${n} ${n === 1 ? "number" : "numbers"} read`, checked: "Numbers checked against the table",
             template: "Written from the numbers directly", error: "Hit a problem", followup: q => `Follow-up, read as: ${q}`,
             votes: v => `Votes: ${v}`,
-            via: t => ({ "keywords": "found through the keyword dictionary", "keyword search": "found by keyword search",
-                         "semantic search": "found by semantic search", "model browse": "found by the model browsing subjects" }[t] || t) },
+            via: t => ({ "keywords": "found through the keyword dictionary", "search": "found by keyword and semantic search",
+                         "all tables": "picked by the model from every table", "best search hit": "the best search hit" }[t] || t) },
   },
   is: {
     eyebrow: "Hagstofa Íslands · Gagnaþon 2026", hello: "Ísland í tölum.",
@@ -38,8 +38,8 @@ const I18N = {
             picked: "valdi", numbers: n => `${n} ${n === 1 ? "tala lesin" : "tölur lesnar"}`, checked: "Tölur bornar saman við töfluna",
             template: "Skrifað beint upp úr tölunum", error: "Vandamál kom upp", followup: q => `Framhaldsspurning, skilin sem: ${q}`,
             votes: v => `Atkvæði: ${v}`,
-            via: t => ({ "keywords": "fundin með orðasafninu", "keyword search": "fundin með leitarorðaleit",
-                         "semantic search": "fundin með merkingarleit", "model browse": "fundin af líkaninu eftir efnisflokkum" }[t] || t) },
+            via: t => ({ "keywords": "fundin með orðasafninu", "search": "fundin með leitarorða- og merkingarleit",
+                         "all tables": "valin af líkaninu úr öllum töflum", "best search hit": "efsta leitarniðurstaðan" }[t] || t) },
   },
 };
 
@@ -988,15 +988,13 @@ $("#ask").addEventListener("submit", e => {
 /* about: how it works and what it can't do yet */
 const FINDER = {
   en: { title: "How a table is found", tiers: [
-      ["Keyword dictionary", "Everyday words map to Statistics Iceland's terms: “verðbólga”, “inflation” → consumer price index → its tables, plus a keyword search over all 1,857 tables."],
-      ["The model checks", "The language model reads the shortlist, eight tables at a time, and picks the one that answers the question — or says none of them does."],
-      ["Semantic search", "Built into the shortlist: e5 vectors search every table by meaning beside the keyword search, and the rankings are merged."],
-      ["The model browses", "Last resort: the model picks one of 34 subject areas, then a table inside it."]] },
+      ["Keyword dictionary", "Everyday words map to Statistics Iceland's subjects: “verðbólga”, “inflation” → consumer price index → its main table. The language model checks it: does it hold the figures asked for?"],
+      ["Search", "Keyword search and e5 vectors (meaning) search all 1,857 tables together. The model checks the top three, one at a time."],
+      ["Every table", "Last resort: the model picks from a list of every table, as much of each as fits in what it can read at once; or a subject area first, then a table in it."]] },
   is: { title: "Svona finnst rétta taflan", tiers: [
-      ["Orðasafn", "Hversdagsorð vísa á hugtök Hagstofunnar: „verðbólga“, „inflation“ → vísitala neysluverðs → töflur hennar, auk leitarorðaleitar í öllum 1.857 töflunum."],
-      ["Líkanið staðfestir", "Mállíkanið les listann, átta töflur í senn, og velur þá sem svarar spurningunni — eða segir að engin geri það."],
-      ["Merkingarleit", "Hluti af listanum: e5 vigrar leita í öllum töflum eftir merkingu samhliða leitarorðaleitinni og röðunin er sameinuð."],
-      ["Líkanið leitar sjálft", "Síðasta úrræði: líkanið velur einn af 34 efnisflokkum og svo töflu innan hans."]] },
+      ["Orðasafn", "Hversdagsorð vísa á efnisflokka Hagstofunnar: „verðbólga“, „inflation“ → vísitala neysluverðs → aðaltafla hennar. Mállíkanið staðfestir: eru tölurnar sem spurt er um í henni?"],
+      ["Leit", "Leitarorðaleit og e5 vigrar (merking) leita saman í öllum 1.857 töflunum. Líkanið skoðar efstu þrjár, eina í einu."],
+      ["Allar töflur", "Síðasta úrræði: líkanið velur úr lista yfir allar töflur, eins mikið um hverja og það getur lesið í einu; eða fyrst efnisflokk og svo töflu í honum."]] },
 };
 const ABOUT = {
   en: { title: "About RAGstofan", how: "How it works", cant: "What it can't do yet",
@@ -1033,7 +1031,7 @@ function openAbout() {
     el("div", { class: "finder" }, FINDER[ui()].tiers.map(([name, text], i) => el("div", { class: "tier" },
       el("span", { class: "tier-n" }, String(i + 1)),
       el("div", {}, el("b", {}, name), el("p", {}, text)),
-      i < 3 ? el("span", { class: "tier-next", "aria-hidden": "true" }, i === 0 ? "" : ui() === "is" ? "ef engin passar" : "if none fits") : null))),
+      i < 2 ? el("span", { class: "tier-next", "aria-hidden": "true" }, i === 0 ? "" : ui() === "is" ? "ef engin passar" : "if none fits") : null))),
     el("h3", {}, a.cant), el("ul", { class: "about-limits" }, a.limits.map(x => el("li", {}, x)))));
   dlg.showModal();
 }

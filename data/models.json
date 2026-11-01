@@ -1,0 +1,15 @@
+{
+  "about": "Context per model from the server (python -m hagbot.models). server_context: the context the server runs each request with (Ollama OLLAMA_CONTEXT_LENGTH), read from the models loaded at the time. LLM_CONTEXT in .env overrides it.",
+  "server_context": 16384,
+  "models": {
+    "qwen3.5:0.8b": {"context": 262144},
+    "qwen3.5:4b": {"context": 262144},
+    "qwen3.5:9b": {"context": 262144},
+    "qwen3.6:35b-a3b-par": {"context": 262144},
+    "qwen3.6:35b-a3b-text": {"context": 262144},
+    "qwen3:14b": {"context": 40960},
+    "qwen3.6:35b-a3b": {"context": 262144},
+    "qwen3.8:27b": {"context": 262144},
+    "gpt-oss:20b": {"context": 131072}
+  }
+}

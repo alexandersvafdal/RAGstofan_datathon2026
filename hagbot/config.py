@@ -26,6 +26,8 @@ class Settings:
     fast_model: str = os.getenv("FAST_MODEL", "gpt-oss:20b")
     # The models the picker offers, in order ("qwen3.6:35b-a3b,qwen3.8:27b,..."). Empty: every model the endpoint serves.
     models: str = os.getenv("MODELS", "")
+    # Tokens the server gives one request (Ollama: OLLAMA_CONTEXT_LENGTH). 0: data/models.json says (hagbot/models.py)
+    llm_context: int = int(os.getenv("LLM_CONTEXT", "0"))
 
     data_source: str = os.getenv("DATA_SOURCE", "fixtures")
     px_base_url: str = os.getenv("PX_BASE_URL", "https://px.hagstofa.is")

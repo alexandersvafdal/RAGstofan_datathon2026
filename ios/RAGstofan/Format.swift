@@ -126,12 +126,10 @@ struct Words {
     var template: String { t("Written from the numbers directly", "Skrifað beint upp úr tölunum") }
     func votes(_ v: String) -> String { t("Votes: \(v)", "Atkvæði: \(v)") }
     func via(_ tier: String) -> String {
-        let en = ["keywords": "found through the keyword dictionary", "keyword search": "found by keyword search",
-                  "semantic search": "found by semantic search", "model browse": "found by the model browsing subjects",
-                  "best keyword hit": "picked from the keyword hits"]
-        let is_ = ["keywords": "fundin með orðasafninu", "keyword search": "fundin með leitarorðaleit",
-                   "semantic search": "fundin með merkingarleit", "model browse": "fundin af líkaninu eftir efnisflokkum",
-                   "best keyword hit": "valin úr leitarorðaniðurstöðum"]
+        let en = ["keywords": "found through the keyword dictionary", "search": "found by keyword and semantic search",
+                  "all tables": "picked by the model from every table", "best search hit": "the best search hit"]
+        let is_ = ["keywords": "fundin með orðasafninu", "search": "fundin með leitarorða- og merkingarleit",
+                   "all tables": "valin af líkaninu úr öllum töflum", "best search hit": "efsta leitarniðurstaðan"]
         return (lang == .is ? is_ : en)[tier] ?? tier
     }
     func signal(_ s: String) -> String {

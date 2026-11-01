@@ -30,12 +30,10 @@ struct AboutView: View {
                 Card {
                     VStack(alignment: .leading, spacing: 14) {
                         Text(t("The table finder", "Töfluleitin")).font(.headline).foregroundStyle(pal.text)
-                        tier("1", t("Keyword dictionary", "Orðasafn"), t("Words like “inflation” or “verðbólga” point straight at known tables.", "Orð eins og „verðbólga“ benda beint á þekktar töflur."))
-                        tier("2", t("Ranked hitlist", "Röðuð niðurstöðuskrá"), t("Keyword search (BM25) and meaning search (e5) each rank the tables; the two lists are merged.", "Leitarorðaleit (BM25) og merkingarleit (e5) raða töflunum hvor um sig; listarnir eru sameinaðir."))
-                        tier("3", t("Model check", "Líkanið metur"), t("The model looks at the list eight tables at a time and picks one, or says none fits. Several votes can be taken.", "Líkanið skoðar listann átta töflur í einu og velur eina, eða segir að engin passi. Hægt er að kjósa oftar en einu sinni."))
-                        tier("4", t("Browse subjects", "Efnisflokkar"), t("If nothing fits, the model browses Statistics Iceland's subject tree.", "Ef ekkert passar flettir líkanið í efnisflokkum Hagstofunnar."))
-                        tier("5", t("Safety net", "Öryggisnet"), t("As a last resort, the best keyword hit is used.", "Í síðasta lagi er besta leitarorðaniðurstaðan notuð."))
-                        Text(t("Open “Shortlist” under an answer to see the ranked list it chose from.", "Opnaðu „Stuttlisti“ undir svari til að sjá listann sem valið var úr."))
+                        tier("1", t("Keyword dictionary", "Orðasafn"), t("Words like “inflation” or “verðbólga” point at a subject's main table. The model checks: does it hold the figures asked for?", "Orð eins og „verðbólga“ benda á aðaltöflu efnisins. Líkanið staðfestir: eru tölurnar sem spurt er um í henni?"))
+                        tier("2", t("Search", "Leit"), t("Keyword search (BM25) and meaning search (e5) rank every table together. The model checks the top three, one at a time.", "Leitarorðaleit (BM25) og merkingarleit (e5) raða öllum töflum saman. Líkanið skoðar efstu þrjár, eina í einu."))
+                        tier("3", t("Every table", "Allar töflur"), t("If none fits, the model picks from a list of every table, or a subject area first and then a table in it.", "Ef engin passar velur líkanið úr lista yfir allar töflur, eða fyrst efnisflokk og svo töflu í honum."))
+                        Text(t("Open “Shortlist” under an answer to see the tables it checked.", "Opnaðu „Stuttlisti“ undir svari til að sjá töflurnar sem voru skoðaðar."))
                             .font(.caption).foregroundStyle(pal.text3)
                     }
                 }

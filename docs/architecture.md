@@ -27,18 +27,19 @@ flowchart TD
     end
 
     subgraph find["2 · Find the table (each part in parallel)"]
-        DICT["Keyword dictionary<br/>data/keywords.json: verðbólga → consumer price index → VIS01000<br/>adds the official term to the search"]:::code
+        DICT["Keyword dictionary · data/keywords.json<br/>the most specific subject named (longest matching word)<br/>→ its first table: verðbólga → consumer price index → VIS01000"]:::code
+        Y1[["LLM ③ Does this table hold the figures asked for?<br/>yes / no"]]:::llm
         subgraph search["Search 1,857 tables, in parallel · English wording + the original"]
             S1["BM25 keywords · top 60<br/>titles EN + IS, dimension names, option labels,<br/>prefix match, synonyms, tables matching every word first"]:::code
             S2["e5 vectors · top 60<br/>meaning of each table's description:<br/>titles, dimensions IS + EN, period, options"]:::code
         end
-        RK["Rank: dictionary tables first, then the searches<br/>fused by rank, 1 / (60 + rank) from each, × recency"]:::code
+        RK["Fuse the two rankings: 1 / (60 + rank) from each, × recency"]:::code
         N["Narrow by rule<br/>drop trend / seasonal / forecast / census and old index bases unless asked,<br/>keep tables with the place, month or year asked for,<br/>and with the breakdown named (by age · eftir sveitarfélögum)"]:::code
-        DD{"One subject, its headline table on top,<br/>nothing asked beyond it?"}:::code
-        T[["LLM ③ Last resort: must pick one table<br/>from the hitlist"]]:::llm
-        CK[["LLM ③ Check the hitlist, 8 tables at a time, ≤ 2 rounds<br/>pick one, or say none fits · votes<br/>a round-2 pick is re-checked head to head with the top 4 of round 1<br/>the subject's table stays listed when only its years miss the one asked,<br/>and beats a pick from another folder"]]:::llm
-        BR[["LLM ③ Browse: choose ≤ 2 subject areas"]]:::llm
-        CK2[["LLM ③ Check tables in those areas,<br/>8 at a time, ≤ 4 rounds · votes"]]:::llm
+        Y2[["LLM ③ The top 3, one at a time:<br/>does this table hold the figures asked for? yes / no"]]:::llm
+        FIT{"Does a list of every table fit<br/>the model's context? (data/models.json)"}:::code
+        ALL[["LLM ③ Pick one from every table<br/>titles EN + IS, years, and dimensions when they fit"]]:::llm
+        AR[["LLM ③ Pick ≤ 2 subject areas of 34"]]:::llm
+        AT[["LLM ③ Pick one from every table in those areas"]]:::llm
         F["Freshest sibling<br/>same table, newer edition"]:::code
     end
 
@@ -65,7 +66,6 @@ flowchart TD
 
     OUT(["Answer: number, unit, source table, chart, drill-down chips,<br/>and every step with its time"])
     SG[["LLM ⑦ Follow-up suggestions, after the answer is shown<br/>compare · related · dig deeper · bigger picture"]]:::llm
-    ASK(["Ask the user which table they mean"])
 
     Q --> FU
     FU -- yes --> RW --> TB
@@ -76,14 +76,16 @@ flowchart TD
     SR -- "yes: read it, no division" --> C
     SR -- no --> RP --> P
     R -- no --> P
-    P --> VF --> DICT --> search --> RK --> N --> DD
-    DD -- "yes: the dictionary decides" --> F
-    DD -- "no: top 16" --> CK
-    CK -- "a table, snapped to the subject's headline<br/>table unless a breakdown was asked" --> F
-    CK -- none fits --> BR --> CK2
-    CK2 -- a table --> F
-    CK2 -- "none fits" --> T --> F
-    T -. "unsure: two tables fit equally" .-> ASK
+    P --> VF --> DICT
+    DICT -- "a subject named" --> Y1
+    DICT -- "none named" --> search
+    Y1 -- yes --> F
+    Y1 -- no --> search
+    search --> RK --> N --> Y2
+    Y2 -- "yes" --> F
+    Y2 -- "no to all 3" --> FIT
+    FIT -- "yes (64k+ today: no)" --> ALL --> F
+    FIT -- "no (16k on the Spark)" --> AR --> AT --> F
     F --> C --> V --> SW
     SW -- yes --> SB --> D
     SW -- no --> D
@@ -110,13 +112,13 @@ browser the moment it finishes.</sub>
 |---|---|---|---|
 | ① | Rewrite a follow-up | the wording leans on the previous turn | 0–1 |
 | ② | Plan, with each part's places, period and breakdown | always, unless the user clicked a table or a published per-inhabitant rate answers it | 0–1 |
-| ③ | Find the table | per part: none when the table is fixed (clicked, or population for a ratio) or the dictionary decides alone; otherwise check 1–2 rounds; if none fits, browse 1 + check 1–4 rounds; if still none, a forced pick 1; a round-2 pick adds a head-to-head re-check 1; a year or month the table lacks adds a neighbour pick 1 | 0–10 per part |
+| ③ | Find the table | per part: none when the table is fixed (clicked, or population for a ratio); yes/no on the dictionary's table 0–1; yes/no on up to 3 search hits; if all say no, a pick from every table 1, or subject areas + a pick 2; a year or month the table lacks adds a neighbour pick 1 | 0–7 per part |
 | ④ | Choose categories | per part; again if it switches to a neighbouring table | 1–2 per part |
 | ⑤ | Write the answer | when at least one part has numbers | 0–1 |
 | ⑥ | Check the answer against the question: answers, uncertain or wrong | after every written answer; uncertain is qualified up front, wrong is said to be no answer with the figures kept as connected | 0–1 |
 | ⑦ | Follow-up suggestions | after the answer is on screen (`/api/suggest`), so it adds no answer time | 0–1 |
 
-A one-part question makes 4–5 calls before the answer (plan, find 0–1, categories, write, check), and one more for suggestions. Voting multiplies the
+A one-part question makes 5–8 calls before the answer (plan, find 1–4, categories, write, check), and one more for suggestions. Voting multiplies the
 calls marked "votes" by the number of votes; they run in parallel, so it costs compute more than time.
 
 ## Why Icelandic questions are reworded in English
@@ -146,8 +148,9 @@ languages. It would make sense with a model that is strong in Icelandic.
 | Ratio to population | `hagbot/steps/ratio.py` | no |
 | Follow-up rewrite | `hagbot/steps/followup.py` | rewrite only |
 | Search | `hagbot/catalog.py` (BM25 over three fields) and `hagbot/e5.py` (e5 vectors, on by default; optional bge-m3 in `hagbot/vectors.py`), run in parallel and fused by rank | no |
-| Table finder (the only path) | `hagbot/steps/tiered.py`, keyword dictionary `data/keywords.json` | check and browse |
-| Narrow, last-resort pick (which can ask the user) | `hagbot/steps/retrieve.py` | pick only |
+| Table finder: dictionary, search, every table | `hagbot/steps/tiered.py`, keyword dictionary `data/keywords.json` | yes/no checks and the last pick |
+| Context each model gets | `hagbot/models.py`, `data/models.json` (`python -m hagbot.models` refreshes it) | no |
+| Narrow by rule, freshest sibling | `hagbot/steps/retrieve.py` | no |
 | Majority voting (`VOTES`, `VOTE_MODELS`) | `hagbot/vote.py` | repeats a call |
 | Choose and validate categories | `hagbot/steps/select.py`, category codes `hagbot/hierarchy.py` | choose only |
 | Data | `hagbot/sources.py` (local snapshot, live PX-API, fixtures) | no |
