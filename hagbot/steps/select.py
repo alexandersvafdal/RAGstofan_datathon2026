@@ -362,7 +362,10 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
             if not any(v.startswith(y) or t.startswith(y) for v, t in zip(var.values, var.value_texts)):
                 missing_period = y
                 notes.append(f"{var.text}: {y} is not in the table ({var.value_texts[0]}–{var.value_texts[-1]})")
-        if not codes and _partition(var) and var.code != sel.compare_dimension:
+        # no total and none named, or every option chosen while no breakdown was asked (the model listing all 13 age
+        # groups for "female students"): the whole is their sum, one figure, not one per option
+        every = bool(codes) and set(codes) == set(var.values) and not _asks_breakdown(question)
+        if (not codes or every) and _partition(var) and var.code != sel.compare_dimension:
             codes = list(var.values)
             aggregate_over.append(var.code)
             notes.append(f"{var.text}: no total in the table; summed over all {len(codes)} options")
