@@ -17,9 +17,9 @@ from .steps.compose import compose
 from .steps.check import check_answer
 from .steps.compute import aggregate_rows, compute
 from .steps.followup import looks_like_followup, rewrite
-from .steps.plan import Plan, SubQuestion, merge_period_parts, plan
+from .steps.plan import MAX_PARTS, Plan, SubQuestion, merge_period_parts, plan
 from .steps.ratio import difference_parts, divide_parts, share_parts
-from .steps.retrieve import _INDEXATION_TABLE, period_end
+from .steps.retrieve import _INDEXATION_TABLE, Retrieved, period_end
 from .steps.tiered import _check, retrieve_tiered
 from .steps.select import guess_op, select
 from .steps.suggest import suggest
@@ -62,6 +62,10 @@ def _say_period(p: str, lang: str) -> str:
     if kind == "Q":
         return f"{n}. ársfjórðungur {year}" if lang == "is" else f"Q{n} {year}"
     return year
+
+
+async def _raise(e: Exception):
+    raise e
 
 
 class NeedsClarification(Exception):
@@ -123,22 +127,16 @@ class Pipeline:
                 full = await rewrite(self.llm, req.question, req.history)
                 steps.append(Step(name="context", ms=t.ms(), detail=full))
                 req = req.model_copy(update={"question": full})
-            forced: list[str | None]
             if req.table_id:  # the user already chose a table: skip planning
                 p = Plan(sub_questions=[SubQuestion(question=req.question, search_query=req.question)])
-                forced = [req.table_id]
+                found = [await self._find(p.sub_questions[0], req.question, req.table_id, steps, alone=True)]
             else:
-                t = Timer()
-                p = merge_period_parts(await plan(self.llm, req.question))
-                forced = [None] * len(p.sub_questions)
-                steps.append(Step(name="plan", ms=t.ms(), detail=" | ".join(
-                    s.question + (f" [places {s.places}, period {s.period_kind} {s.period!r}, breakdown {s.breakdown}{' by ' + s.breakdown_by if s.breakdown_by else ''}]"
-                                  if s.places or s.period_kind != "none" or s.breakdown else " [no facts]")
-                    for s in p.sub_questions) + (f" · per {p.per_inhabitant} inhabitant(s): part 1 ÷ part 2" if p.per_inhabitant else "")))
+                p, found = await self._plan_and_find(req.question, steps)
 
+            alone = len(p.sub_questions) == 1
             results = await asyncio.gather(
-                *(self._answer_part(sq, req.question, lang, f, steps, alone=len(p.sub_questions) == 1)
-                  for i, (sq, f) in enumerate(zip(p.sub_questions, forced))),
+                *(self._answer_part(sq, req.question, lang, r, steps, alone=alone) if isinstance(r, Retrieved) else _raise(r)
+                  for sq, r in zip(p.sub_questions, found)),
                 return_exceptions=True,
             )
             clar = next((r for r in results if isinstance(r, NeedsClarification)), None)
@@ -220,8 +218,40 @@ class Pipeline:
             }))
         return out
 
-    async def _answer_part(self, sq: SubQuestion, original: str, lang: str, forced_table: str | None, steps: list[Step],
-                           alone: bool = True) -> AnswerPart:
+    async def _plan_and_find(self, question: str, steps: list[Step]) -> tuple[Plan, list]:
+        """The question as one part first, its table found and confirmed; while some part has no confirmed table,
+        planned again as 2, 3 and then 4 parts. A part asked again in the same words reuses its search. When the
+        model splits no further, or 4 parts still leave one unconfirmed, the last plan stands: the user then picks
+        that part's table."""
+        cache: dict[tuple, Retrieved | Exception] = {}
+        last: tuple[Plan, list] | None = None
+        for n in range(1, MAX_PARTS + 1):
+            t = Timer()
+            p = merge_period_parts(await plan(self.llm, question, parts=n))
+            if last and len(p.sub_questions) <= len(last[0].sub_questions):
+                steps.append(Step(name="plan", ms=t.ms(), detail=f"{n} parts asked, {len(p.sub_questions)} given: no further split"))
+                break
+            steps.append(Step(name="plan", ms=t.ms(), detail=f"{n} part{'s' if n > 1 else ''}: " + " | ".join(
+                s.question + (f" [places {s.places}, period {s.period_kind} {s.period!r}, breakdown {s.breakdown}{' by ' + s.breakdown_by if s.breakdown_by else ''}]"
+                              if s.places or s.period_kind != "none" or s.breakdown else " [no facts]")
+                for s in p.sub_questions) + (f" · per {p.per_inhabitant} inhabitant(s): part 1 ÷ part 2" if p.per_inhabitant else "")))
+            alone = len(p.sub_questions) == 1
+            keys = [(sq.question, sq.search_query, sq.breakdown_by, alone) for sq in p.sub_questions]
+            new = [(k, sq) for k, sq in zip(keys, p.sub_questions) if k not in cache]
+            got = await asyncio.gather(*(self._find(sq, question, None, steps, alone=alone) for _, sq in new),
+                                       return_exceptions=True)
+            cache.update({k: r for (k, _), r in zip(new, got)})
+            found = [cache[k] for k in keys]
+            last = (p, found)
+            if all(isinstance(r, Retrieved) and not r.ambiguous for r in found):
+                return last
+            if n < MAX_PARTS:
+                missing = [sq.question for sq, r in zip(p.sub_questions, found) if not isinstance(r, Retrieved) or r.ambiguous]
+                steps.append(Step(name="plan", ms=0, detail=f"no table confirmed for: {' | '.join(missing)}; splitting into {n + 1} parts"))
+        return last
+
+    async def _find(self, sq: SubQuestion, original: str, forced_table: str | None, steps: list[Step],
+                    alone: bool = True) -> Retrieved:
         t = Timer()
         # a multi-part question's full wording would pull every part toward the same tables
         r = await retrieve_tiered(self.llm, self.catalog, sq.question, sq.search_query,
@@ -230,6 +260,10 @@ class Pipeline:
                           detail=f"{r.table.id} from [{', '.join(r.candidates)}]" + (" (ambiguous)" if r.ambiguous else "")
                                  + (f" via {r.via}" if r.via else "") + (f" · votes {r.votes}" if r.votes else "")
                                  + (f" · concepts: {', '.join(r.concepts)}" if r.concepts else "")))
+        return r
+
+    async def _answer_part(self, sq: SubQuestion, original: str, lang: str, r: Retrieved, steps: list[Step],
+                           alone: bool = True) -> AnswerPart:
         if r.ambiguous:
             why = {c["id"]: c.get("reason", "") for c in r.ranking if c["signals"][-1:] == ["no"]}
             opts = [ClarifyOption(label=e.title_en if lang == "en" else (e.title_is or e.title_en), table_id=e.id,

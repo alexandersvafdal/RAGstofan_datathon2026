@@ -19,7 +19,7 @@ flowchart TD
         FU{"Follow-up?<br/>what about last year · hvað með árið áður · the highest category"}:::code
         RW[["LLM ① Rewrite as a question that stands alone,<br/>from the previous question and answer;<br/>'that category' becomes the name the answer gave"]]:::llm
         TB{"Table already chosen?<br/>the user clicked a chip: another category, a drill-down"}:::code
-        P[["LLM ② Plan<br/>split into 1–6 parts, reword in English, English search words;<br/>per inhabitant: one part when a table publishes the rate (GDP per capita),<br/>else the figure + the population on 1 January, divided in code;<br/>and per part the facts: places · period and its kind · breakdown wanted"]]:::llm
+        P[["LLM ② Plan n parts: first n = 1, the whole question for one table;<br/>then 2, 3, 4 while a part has no confirmed table · reword in English, English search words;<br/>per inhabitant at n ≥ 2: the figure + the population on 1 January, divided in code;<br/>and per part the facts: places · period and its kind · breakdown wanted"]]:::llm
         VF["Check the facts in code<br/>a place, period or breakdown word not in the question's own words is dropped ·<br/>one measure at two periods becomes one part"]:::code
     end
 
@@ -40,6 +40,7 @@ flowchart TD
         Y3[["LLM ③ Does the first of those hold<br/>the figures asked for? yes / no"]]:::llm
         F["Freshest sibling<br/>same table, newer edition"]:::code
     end
+    MORE{"Fewer than 4 parts, and the model<br/>split further than last time?"}:::code
     ASK(["The user picks from each method's top 3:<br/>dictionary · search · the model's best 3"])
 
     subgraph read["3 · Read the numbers (each part)"]
@@ -82,7 +83,9 @@ flowchart TD
     FIT -- "yes: 54k+ context" --> ALL --> Y3
     FIT -- "no: the Spark today, 16k" --> AR --> AT --> Y3
     Y3 -- yes --> F
-    Y3 -- no --> ASK
+    Y3 -- no --> MORE
+    MORE -- "yes: plan n + 1 parts<br/>(parts already found are reused)" --> P
+    MORE -- no --> ASK
     ASK -. "a click asks again, table fixed" .-> TB
     F --> C --> V --> SW
     SW -- yes --> SB --> D
@@ -109,14 +112,14 @@ browser the moment it finishes.</sub>
 | # | Call | When | Calls |
 |---|---|---|---|
 | ① | Rewrite a follow-up | the wording leans on the previous turn | 0–1 |
-| ② | Plan: 1–6 parts, each with its places, period and breakdown, and whether to divide per inhabitant | always, unless the user clicked a table | 0–1 |
+| ② | Plan: 1 part first, then 2, 3, 4 while some part has no confirmed table; each with its places, period and breakdown, and whether to divide per inhabitant | always, unless the user clicked a table | 1–4 |
 | ③ | Find the table | per part: none when the table is fixed (clicked); yes/no on the dictionary's table 0–1; yes/no on the search's table 0–1; if both say no, the best 3 from every table 1 (or subject areas + best 3: 2) and a yes/no on the first 1; a year or month the table lacks adds a neighbour pick 1 | 0–6 per part |
 | ④ | Choose categories | per part; again if it switches to a neighbouring table | 1–2 per part |
 | ⑤ | Write the answer | when at least one part has numbers | 0–1 |
 | ⑥ | Check the answer against the question: answers, uncertain or wrong | after every written answer; uncertain is qualified up front, wrong is said to be no answer with the figures kept as connected | 0–1 |
 | ⑦ | Follow-up suggestions | after the answer is on screen (`/api/suggest`), so it adds no answer time | 0–1 |
 
-A one-part question makes 5–9 calls before the answer (plan, find 1–5, categories, write, check), and one more for suggestions. Voting multiplies the
+A question one table answers makes 5–9 calls before the answer (plan, find 1–5, categories, write, check), and one more for suggestions. Each further split adds a plan call and the find calls of its new parts. Voting multiplies the
 calls marked "votes" by the number of votes; they run in parallel, so it costs compute more than time.
 
 ## Why Icelandic questions are reworded in English
