@@ -28,6 +28,9 @@ class Settings:
     models: str = os.getenv("MODELS", "")
     # Tokens the server gives one request (Ollama: OLLAMA_CONTEXT_LENGTH). 0: data/models.json says (hagbot/models.py)
     llm_context: int = int(os.getenv("LLM_CONTEXT", "0"))
+    # The answer writer may do a final calculation on the facts ("how many times Seyðisfjörður fits in Reykjavík":
+    # 138,753 ÷ 648), shown under the answer and worked out in code (hagbot/steps/compose.py). 0: off
+    llm_calc: bool = os.getenv("LLM_CALC", "1") == "1"
 
     data_source: str = os.getenv("DATA_SOURCE", "fixtures")
     px_base_url: str = os.getenv("PX_BASE_URL", "https://px.hagstofa.is")

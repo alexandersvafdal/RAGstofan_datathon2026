@@ -173,8 +173,8 @@ class Pipeline:
                 return ans
 
             t = Timer()
-            ans.text, ans.text_source = await compose(self.llm, req.question, parts, lang)
-            steps.append(Step(name="compose", ms=t.ms(), detail=ans.text_source))
+            ans.text, ans.text_source, calc = await compose(self.llm, req.question, parts, lang)
+            steps.append(Step(name="compose", ms=t.ms(), detail=ans.text_source + (f"; calculation {calc}" if calc else "")))
             # the finished answer read back against the question: wrong subject or a miss on the measure, place or
             # period asked, and the user is told so up front, the figures kept as the closest found
             t = Timer()
