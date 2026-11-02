@@ -16,6 +16,7 @@ The chosen table is swapped for a newer edition of itself when one exists (fresh
 """
 
 import json
+import re
 from functools import lru_cache
 
 from pydantic import BaseModel, Field
@@ -94,6 +95,14 @@ breakdown the question names among its dimensions or options.
 The table's years are in brackets. When it is on the subject but its years miss the period asked, still answer true:
 the user is then told which years exist.
 Answer false when it is about another subject or another measure, or lacks a place or breakdown the question names.
+Answer false when the question asks for a whole (all greenhouse gases, total exports, everyone) and the table only
+splits it into parts with no total among its options (one gas at a time, one sector at a time): adding up parts in
+different units, or parts that overlap, is not the whole.
+When the question asks for two or more different measures (inflation and wage growth, exports and imports), a table
+holding only one of them answers false.
+A figure per inhabitant, per capita or per 1,000 inhabitants needs a table that publishes that rate (an option or
+title saying "per inhabitant", "per capita", "per 1,000"); a table of totals answers false, since the division by the
+population is done elsewhere.
 The reason says in a few words what the table has and what it lacks for this question ("totals per sector, nothing
 per inhabitant"), in the language of the question: the user reads it when no table is found.
 - "How many people live in X" means population on 1 January.
@@ -113,7 +122,9 @@ def describe(e: CatalogEntry, question: str, options: int = 30) -> str:
 
 async def fits(llm: LLM, e: CatalogEntry, question: str, original: str) -> tuple[bool, str]:
     """Does this one table answer? The model's yes or no, and its reason (what the table has and lacks)."""
-    asked = f"User asked: {original}\nThis part: {question}" if original and original != question else f"Question: {question}"
+    # `original` comes only with a one-part plan: then the table must answer the user's whole question, and the
+    # planner's rewording (which may have dropped a measure: "inflation and wage growth" -> "inflation") only helps read it
+    asked = (f"Question: {original}\n(Read as: {question})" if original and original != question else f"Question: {question}")
     v = await llm.complete_json(FITS, f"{asked}\n\nTable:\n{describe(e, f'{question} {original}')}", Fits)
     return v.answers, v.reason.strip()
 
@@ -262,4 +273,7 @@ async def _check(llm: LLM, entries: list[CatalogEntry], question: str, original:
         v, _ = await vote_json(llm, CHECK, user, Verdict, key=lambda x: x.table_id.strip().upper())
     else:
         v = await llm.complete_json(CHECK, user, Verdict)
-    return by_id.get(v.table_id.strip())
+    pick = v.table_id.strip().strip(".")
+    if (m := re.fullmatch(r"#?\s*(\d{1,2})", pick)) and 0 < int(m.group(1)) - start <= len(entries):
+        return entries[int(m.group(1)) - start - 1]   # the model gave the list number ("#1") instead of the ID
+    return by_id.get(pick.removeprefix("#").strip())

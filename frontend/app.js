@@ -999,7 +999,7 @@ const FINDER = {
 };
 const ABOUT = {
   en: { title: "About RAGstofan", how: "How it works", cant: "What it can't do yet",
-    steps: ["A language model reads your question and splits it if it asks for several things.",
+    steps: ["A language model reads your question and first looks for one table that answers all of it; only if none is found does it split the question, into up to four parts.",
             "Keyword search over all 1,857 Statistics Iceland tables finds candidates; the model picks one.",
             "The model chooses the categories (year, place, total…); code checks every choice against the table.",
             "The numbers are read straight from the table. Any calculation is done in code, never by the model.",
@@ -1010,7 +1010,7 @@ const ABOUT = {
              "Answers in Icelandic are worded less well than in English. The numbers are checked either way.",
              "It does not forecast, give opinions or explain causes (\u201cwhy did inflation rise?\u201d)."] },
   is: { title: "Um RAGstofuna", how: "Svona virkar þetta", cant: "Það sem hún getur ekki enn",
-    steps: ["Mállíkan les spurninguna og skiptir henni ef spurt er um fleira en eitt.",
+    steps: ["Mállíkan les spurninguna og leitar fyrst að einni töflu sem svarar henni allri; aðeins ef engin finnst skiptir það henni, í allt að fjóra hluta.",
             "Leitarorðaleit í öllum 1.857 töflum Hagstofunnar finnur kandídata; líkanið velur eina.",
             "Líkanið velur flokkana (ár, staður, alls…); kóði staðfestir hvert val gegn töflunni.",
             "Tölurnar eru lesnar beint úr töflunni. Útreikningar eru gerðir í kóða, aldrei af líkaninu.",

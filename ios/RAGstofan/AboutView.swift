@@ -19,7 +19,7 @@ struct AboutView: View {
                 }
 
                 section(t("How an answer is made", "Hvernig svar verður til"), steps: [
-                    ("text.magnifyingglass", t("Understand", "Skilja"), t("The question is read and, if it asks two things, split in two. A follow-up such as “and last year?” is rewritten from the conversation.", "Spurningin er lesin og skipt í tvennt ef hún spyr um tvennt. Framhaldsspurning eins og „en í fyrra?“ er umorðuð út frá samtalinu.")),
+                    ("text.magnifyingglass", t("Understand", "Skilja"), t("The question is read and answered from one table if one fits; if not, it is split, into up to four parts. A follow-up such as “and last year?” is rewritten from the conversation.", "Spurningin er lesin og svarað úr einni töflu ef ein passar; annars er henni skipt, í allt að fjóra hluta. Framhaldsspurning eins og „en í fyrra?“ er umorðuð út frá samtalinu.")),
                     ("tablecells", t("Find the table", "Finna töfluna"), t("See the finder below.", "Sjá leitina hér fyrir neðan.")),
                     ("checklist", t("Choose categories", "Velja flokka"), t("The model picks the time, place and breakdown from the table's own lists, so it can only choose values that exist.", "Líkanið velur tíma, stað og sundurliðun úr listum töflunnar sjálfrar og getur því aðeins valið gildi sem eru til.")),
                     ("arrow.down.doc", t("Read the numbers", "Lesa tölurnar"), t("Numbers come from the organisers' snapshot of the tables, with the live PX-API as a fallback. If the newest period is empty it steps back to the last one with data.", "Tölurnar koma úr afriti skipuleggjenda af töflunum, með PX-API í beinni til vara. Ef nýjasta tímabilið er tómt er farið aftur í það síðasta með gögnum.")),

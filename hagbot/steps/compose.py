@@ -1,17 +1,26 @@
 """Step 7: write the answer from the facts, then check it did not invent numbers."""
 
+import ast
+import operator
 import re
 from datetime import date
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
+from ..config import settings
 from ..llm import LLM
 from ..schemas import AnswerPart
-from ..text import numbers_in
+from ..text import fmt_number, numbers_in
 
 
 class Written(BaseModel):
     text: str
+
+
+class WrittenCalc(Written):
+    calculations: list[str] = Field(default_factory=list, description="the arithmetic behind every number in the text "
+                                    "that is not in the facts, one per number, written plainly: [\"138753 / 648\"]; "
+                                    "empty when none")
 
 
 SYSTEM = {
@@ -22,6 +31,50 @@ RULES = """Use ONLY the facts given, with numbers written exactly as formatted, 
 Say which period the numbers are for. Name the source as Statistics Iceland (Hagstofa Íslands) and the table ID.
 If facts come from different tables or dates, say so. Do not add numbers that are not in the facts.
 Do not call a figure a projection, forecast or estimate unless the table title says so: these are recorded statistics."""
+CALC = """If the question asks for a number the facts do not give directly but that follows from them (how many times one
+fits in another, a ratio, a sum, a difference, a figure per inhabitant), write the arithmetic in `calculations`,
+one per number you give (138753 / 648; a gap in two years is two: 3834 - 2359 and 8227 - 6061), and give the
+results in the text, rounded sensibly. The working is shown under the answer. Otherwise leave `calculations` empty."""
+
+_OPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.Div: operator.truediv}
+
+
+def _evaluate(expr: str) -> float | None:
+    """The model's arithmetic worked out in code: + − × ÷ and brackets on plain numbers."""
+    def ev(n):
+        if isinstance(n, ast.BinOp) and type(n.op) in _OPS:
+            return _OPS[type(n.op)](ev(n.left), ev(n.right))
+        if isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.USub):
+            return -ev(n.operand)
+        if isinstance(n, ast.Constant) and isinstance(n.value, (int, float)):
+            return float(n.value)
+        raise ValueError("not arithmetic")
+    try:
+        return ev(ast.parse(_plain(expr), mode="eval").body)
+    except Exception:
+        return None
+
+
+def _plain(expr: str) -> str:
+    return expr.replace("×", "*").replace("÷", "/").replace("−", "-").replace(",", "")
+
+
+def _working(expr: str, result: float, lang: str) -> str:
+    """"138.753 ÷ 648 = 214,1", the numbers in the answer's own format."""
+    shown = re.sub(r"\d+(?:\.\d+)?", lambda m: fmt_number(float(m.group(0)), lang), _plain(expr))
+    shown = re.sub(r"(?<=[\d)])\s*([*/+-])\s*", r" \1 ", shown)   # "138753/648": spaced like 138,753 ÷ 648
+    shown = shown.replace("*", "×").replace("/", "÷").replace("-", "−")
+    return f"{shown} = {fmt_number(result, lang, None if abs(result) >= 100 else 2)}"
+
+
+def _result_numbers(x: float) -> set[float]:
+    """The ways the result may be written: 214.12…, 214.1, 214, in either locale."""
+    out = {x, abs(x)}
+    for d in (0, 1, 2):
+        out.add(round(x, d))
+        for lang in ("en", "is"):
+            out.update(numbers_in(fmt_number(x, lang, d)))
+    return out
 
 
 def _facts_block(parts: list[AnswerPart]) -> str:
@@ -47,13 +100,21 @@ def _allowed_numbers(parts: list[AnswerPart]) -> set[float]:
 _SCALE = re.compile(r"\b(thousand|million|billion|trillion|þúsund|milljón|milljónir|milljarð|milljarðar|bn|mn)\w*", re.I)
 
 
-def verify(text: str, parts: list[AnswerPart]) -> bool:
-    """Every number in the text is in the facts, and no scale word ("10.254 milljónir") turns a right number wrong."""
-    allowed = _allowed_numbers(parts)
-    if not all(any(abs(n - a) < 0.051 for a in allowed) for n in numbers_in(text)):
-        return False
+def unverified(text: str, parts: list[AnswerPart], extra: set[float] = frozenset()) -> list[str]:
+    """What fails the number check: numbers in the text that are not in the facts (or `extra`, the calculations'
+    numbers and results), or a scale word ("10.254 milljónir") the facts do not have, which turns a right number
+    wrong. Empty: the text passes."""
+    allowed = _allowed_numbers(parts) | set(extra)
+    bad = [m for m in re.findall(r"[-−]?\d[\d.,]*", text)
+           if not all(any(abs(n - a) < 0.051 for a in allowed) for n in numbers_in(m))]
     facts_text = " ".join(f"{p.table.title} {p.unit} {f.label} {f.unit}" for p in parts for f in p.facts)
-    return not (_SCALE.search(text) and not _SCALE.search(facts_text))
+    if (m := _SCALE.search(text)) and not _SCALE.search(facts_text):
+        bad.append(m.group(0))
+    return bad
+
+
+def verify(text: str, parts: list[AnswerPart], extra: set[float] = frozenset()) -> bool:
+    return not unverified(text, parts, extra)
 
 
 _PERIOD = re.compile(r"\b(?:18|19|20)\d\d(?:M\d\d|Q\d)?\b")
@@ -95,8 +156,10 @@ def template(parts: list[AnswerPart], lang: str) -> str:
     return " ".join(out)
 
 
-async def compose(llm: LLM, question: str, parts: list[AnswerPart], lang: str) -> tuple[str, str]:
-    """Returns (text, "model" | "template"). The template only restates facts, so both are number-checked."""
+async def compose(llm: LLM, question: str, parts: list[AnswerPart], lang: str) -> tuple[str, str, str]:
+    """Returns (text, "model" | "template", a note: the calculations done, or why the model's text was not used). The
+    template only restates facts, so both are number-checked; the numbers of each calculation and its result (worked
+    out in code) are allowed, and the working is added to the text."""
     # a long series: hand the model its endpoints and peak, or it tends to describe only part of the period
     summary = [x for x in (_series_sentence(p, lang) for p in parts) if x]
     user = f"Question: {question}\n\nFacts:\n{_facts_block(parts)}" + \
@@ -104,11 +167,28 @@ async def compose(llm: LLM, question: str, parts: list[AnswerPart], lang: str) -
     try:
         # the model's training ends before the data does, so 2026 looks like the future to it ("projected to reach")
         today = f"Today is {date.today().isoformat()}. Every period up to today is in the past: the figures are recorded, not forecast."
-        written = await llm.complete_json(SYSTEM[lang] + "\n" + RULES + "\n" + today, user, Written, retries=1)
+        rules = RULES + ("\n" + CALC if settings.llm_calc else "")
+        written = await llm.complete_json(SYSTEM[lang] + "\n" + rules + "\n" + today, user,
+                                          WrittenCalc if settings.llm_calc else Written, retries=1)
         text = re.sub(r"\s+", " ", written.text).strip()
+        extra, done, workings = set(), [], []
+        for calc in (c.strip() for c in getattr(written, "calculations", []) if c.strip()):
+            if (result := _evaluate(calc)) is None:
+                done.append(f"{calc} (not arithmetic)")
+                continue
+            extra |= _result_numbers(result) | {n for t in numbers_in(_plain(calc)) for n in _result_numbers(t)}
+            workings.append(_working(calc, result, lang))
+            done.append(f"{calc} = {fmt_number(result, lang, 2)}")
+        if workings:
+            text = f"{text} {'Útreikningur' if lang == 'is' else 'Calculation'}: {'; '.join(workings)}."
+        note = "calculations " + "; ".join(done) if done else ""
+        bad = unverified(text, parts, extra)
         # the model sometimes drifts into another script mid-sentence (seen: Chinese inside Icelandic)
-        if verify(text, parts) and not re.search(r"[\u0400-\u04ff\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]", text):
-            return text, "model"
-    except Exception:
-        pass
-    return template(parts, lang), "template"
+        script = re.search(r"[\u0400-\u04ff\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]", text)
+        if not bad and not script:
+            return text, "model", note
+        why = f"numbers not in the facts {bad}" if bad else "another script"
+        note = "; ".join(x for x in (note, f"model text not used ({why}): {text}") if x)
+    except Exception as e:
+        note = f"model text not used ({type(e).__name__}: {e})"
+    return template(parts, lang), "template", note

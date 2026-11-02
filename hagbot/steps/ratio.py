@@ -8,7 +8,7 @@ table is likely to publish the rate itself ("GDP per capita"), or asks for the f
 import re
 
 from ..schemas import AnswerPart, Computation, Fact
-from ..text import fmt_number, fmt_value
+from ..text import fmt_number, fmt_value, unscale
 
 
 def divide_parts(num: AnswerPart, den: AnswerPart, scale: int, lang: str) -> tuple[AnswerPart, AnswerPart] | None:
@@ -17,15 +17,25 @@ def divide_parts(num: AnswerPart, den: AnswerPart, scale: int, lang: str) -> tup
     if len(num.facts) != 1 or len(den.facts) != 1 or not den.facts[0].value:
         return None
     a, b = num.facts[0], den.facts[0]
+    if a.unit == "%" or b.unit == "%":   # a percentage per inhabitant means nothing: the parts stay as they are
+        return None
     scale = scale if scale > 0 else 1
     result = a.value / b.value * scale
+    # the figure keeps its unit, per inhabitant; a scaled unit is unscaled when the result would be below 1
+    # (0.0041 kilotonnes per inhabitant is 4.1 tonnes per inhabitant)
+    raw = result
+    result, unit = unscale(result, a.unit or num.unit)
+    factor = result / raw if raw else 1   # 1000 when kilotonnes became tonnes: the expression shows the figure in tonnes
     per = (f"per {fmt_number(scale, lang)} inhabitants" if scale > 1 else "per inhabitant") if lang == "en" else \
           (f"á hverja {fmt_number(scale, lang)} íbúa" if scale > 1 else "á hvern íbúa")
+    per_unit = f"{unit} {per}".strip()
     times = f" × {fmt_number(scale, lang)}" if scale > 1 else ""
-    fact = Fact(label=f"{a.label}, {per}", value=result, unit="", formatted=fmt_number(result, lang, 1 if result < 1000 else 0))
+    fact = Fact(label=f"{a.label}, {per}", value=result, unit=per_unit, formatted=fmt_number(result, lang))
     return num.model_copy(update={
-        "computation": Computation(op="ratio", expression=f"{a.formatted} / {b.formatted}{times}", result=result, unit=""),
+        "computation": Computation(op="ratio", expression=f"{fmt_number(a.value * factor, lang)}{' ' + unit if unit else ''} / {b.formatted}{times}",
+                                   result=result, unit=per_unit),
         "facts": [a, b, fact],
+        "unit": per_unit,
         "chart": None,
     }), den
 
@@ -55,6 +65,8 @@ def difference_parts(first: AnswerPart, second: AnswerPart, lang: str) -> tuple[
     """A change the planner split in two (the same measure at two years, each a plain number): later minus earlier,
     on the later part. None unless both sides are one number with a year in the label."""
     if any(len(p.facts) != 1 or p.computation for p in (first, second)):
+        return None
+    if first.table.id != second.table.id:   # two measures (inflation, wage growth) are not one measure at two times
         return None
     ya, yb = (re.search(r"\b(?:18|19|20)\d\d(?:M\d\d|Q\d)?\b", p.facts[0].label) for p in (first, second))
     if not ya or not yb or ya.group(0) == yb.group(0):
