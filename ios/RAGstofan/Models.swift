@@ -8,7 +8,10 @@ struct Fact: Codable, Hashable { let label: String; let value: Double; let unit:
 
 struct Computation: Codable, Hashable { let op: String; let expression: String; let result: Double; let unit: String }
 
-struct ChartPoint: Codable, Hashable { let x: String; let y: Double; let series: String? }
+struct ChartPoint: Codable, Hashable {
+    let x: String; let y: Double; let series: String?
+    var code: String? = nil   // a municipality's official number: where the point goes on the map
+}
 
 struct ChartSpec: Codable, Hashable {
     let type: String          // "kpi", "line" or "bar"
@@ -17,6 +20,8 @@ struct ChartSpec: Codable, Hashable {
     let yLabel: String
     let unit: String
     let data: [ChartPoint]
+    var view: String? = nil     // the view the server chose to open on (line, bars, map, …); nil: decided here
+    var views: [String]? = nil  // further views the data supports
 }
 
 struct Row: Codable, Hashable {
@@ -46,7 +51,10 @@ struct Drill: Codable, Hashable {
     var kind: String? = nil   // "subcategories" (default) or "alternative": a category the question did not name
 }
 
-struct ClarifyOption: Codable, Hashable { let label: String; let tableId: String; let note: String? }
+struct ClarifyOption: Codable, Hashable {
+    let label: String; let tableId: String; let note: String?
+    var display: String? = nil   // "how should I show this?": the view to answer with
+}
 struct Clarification: Codable, Hashable { let message: String; let options: [ClarifyOption] }
 
 struct Step: Codable, Hashable { let name: String; let ms: Int; let detail: String }
@@ -79,12 +87,13 @@ struct AskRequest: Encodable {
     let model: String?        // nil: the server's default, the best one measured
     let fast: Bool            // "Answer now": the fast model
     let requestId: String     // the server finishes and keeps the answer under this if the phone drops the line
+    var display: String? = nil  // a "how should I show this?" choice: number, line, bars, map, …
 }
 
 extension AskRequest {
     func with(requestId: String) -> AskRequest {
         AskRequest(question: question, language: language, tableId: tableId, history: history, model: model,
-                   fast: fast, requestId: requestId)
+                   fast: fast, requestId: requestId, display: display)
     }
 }
 

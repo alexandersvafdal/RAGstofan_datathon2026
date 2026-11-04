@@ -10,6 +10,12 @@ func isTotal(_ x: String) -> Bool {
 /// Which views suit this answer, best first. The server says line or bar; the data and the calculation decide the rest.
 func viewsFor(_ c: ChartSpec, _ comp: Computation?, compare: Bool = false) -> [String] {
     if compare { return ["line"] }   // rebased series: stacking or summing them means nothing
+    // the server read the question and chose a view: that first, then the others the data supports
+    let own = ([c.view ?? ""] + (c.views ?? [])).filter { !$0.isEmpty }
+    if !own.isEmpty {
+        let lines = c.type == "line" && Set(c.data.compactMap(\.series)).count > 1
+        return Array(NSOrderedSet(array: own + (lines && c.unit != "%" ? ["index"] : []))) as? [String] ?? own
+    }
     let multi = Set(c.data.compactMap(\.series)).count > 1
     let isTime = c.data.allSatisfy { isPeriod($0.x) }
     let monthly = isTime && c.data.allSatisfy { $0.x.range(of: #"M\d\d$"#, options: .regularExpression) != nil }
@@ -51,7 +57,15 @@ struct ChartBlock: View {
             Text(chart.title).font(.subheadline.weight(.semibold)).foregroundStyle(pal.text2)
                 .fixedSize(horizontal: false, vertical: true)
             if views.count > 1 { Switcher(views: views, selection: $view, lang: lang) }
-            ChartCanvas(chart: chart, comp: comp, lang: lang, view: view, compare: compare)
+            Group {
+                if view == "map" {
+                    MunicipalityMap(chart: chart, lang: lang)
+                } else if view == "index" {   // each line set to 100 at the first period they share: growth, side by side
+                    ChartCanvas(chart: rebased(chart), comp: nil, lang: lang, view: "line", compare: true)
+                } else {
+                    ChartCanvas(chart: chart, comp: comp, lang: lang, view: view, compare: compare)
+                }
+            }
                 .id(view)
                 .transition(.asymmetric(insertion: .opacity.combined(with: .scale(scale: 0.98, anchor: .bottom)),
                                         removal: .opacity))
@@ -562,5 +576,125 @@ struct MiniChart: View {
         .chartYAxis(.hidden)
         .chartYScale(domain: (lo - pad)...(hi + pad))
         .chartXScale(domain: 0...max(series.count - 1, 1))
+    }
+}
+
+
+// MARK: - the server's choices: a display question's pictures, growth from 100, and the map
+
+/// The picture beside a "how should I show this?" option.
+func displayIcon(_ display: String) -> String {
+    ["bars": "chart.bar.fill", "line": "chart.xyaxis.line", "map": "map.fill", "ranking": "list.number",
+     "stacked": "square.stack.3d.up.fill", "heatmap": "square.grid.3x3.fill", "number": "number"][display] ?? "chart.bar"
+}
+
+/// Each series set to 100 at the first period all of them have, so a town of 20,000 and a city of 140,000 compare.
+func rebased(_ c: ChartSpec) -> ChartSpec {
+    var by: [String: [String: Double]] = [:]
+    for p in c.data { by[p.series ?? "", default: [:]][p.x] = p.y }
+    let keySets = by.values.map { Set($0.keys) }
+    let shared = keySets.dropFirst().reduce(keySets.first ?? []) { acc, keys in acc.intersection(keys) }
+    guard let base = shared.sorted().first else { return c }
+    let data = c.data.compactMap { p -> ChartPoint? in
+        guard p.x >= base, let b = by[p.series ?? ""]?[base], b != 0 else { return nil }
+        return ChartPoint(x: p.x, y: (p.y / b * 1000).rounded() / 10, series: p.series)
+    }
+    return ChartSpec(type: "line", title: c.title, xLabel: c.xLabel, yLabel: c.yLabel, unit: "", data: data)
+}
+
+/// Iceland's municipalities, as the server serves them (frontend/municipalities.geo.json: the official IS 50V
+/// outlines from gis.lmi.is, Náttúrufræðistofnun / Landmælingar Íslands, CC BY 4.0), loaded once per launch.
+actor MunicipalityShapes {
+    static let shared = MunicipalityShapes()
+    struct Shape { let number: String; let name: String; let rings: [[CGPoint]] }   // x: longitude, y: Mercator latitude
+    private var cache: [Shape]?
+
+    func load() async -> [Shape] {
+        if let cache { return cache }
+        let server = UserDefaults.standard.string(forKey: "server") ?? ""
+        guard let url = URL(string: server)?.appendingPathComponent("municipalities.geo.json"),
+              let (data, _) = try? await URLSession.shared.data(from: url),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let features = json["features"] as? [[String: Any]] else { return [] }
+        let merc = { (lat: Double) in log(tan(.pi / 4 + lat * .pi / 360)) * 180 / .pi }
+        let shapes: [Shape] = features.compactMap { f in
+            guard let number = f["id"] as? String, let props = f["properties"] as? [String: Any],
+                  let geom = f["geometry"] as? [String: Any], let polys = geom["coordinates"] as? [[[[Double]]]] else { return nil }
+            let rings = polys.flatMap { $0 }.map { ring in ring.map { CGPoint(x: $0[0], y: merc($0[1])) } }
+            return Shape(number: number, name: props["name"] as? String ?? number, rings: rings)
+        }
+        cache = shapes
+        return shapes
+    }
+}
+
+/// One shade per municipality, darker for more, on a log scale when the largest is many times the smallest
+/// (Reykjavík against a village); municipalities without a figure stay pale. Tap one to see its figure.
+struct MunicipalityMap: View {
+    @Environment(\.pal) private var pal
+    let chart: ChartSpec
+    let lang: Lang
+    @State private var shapes: [MunicipalityShapes.Shape] = []
+    @State private var picked: String?
+
+    private var values: [String: (String, Double)] {
+        Dictionary(chart.data.compactMap { p in p.code.map { ($0, (p.x, p.y)) } }, uniquingKeysWith: { a, _ in a })
+    }
+
+    var body: some View {
+        let vals = values
+        let ys = vals.values.map(\.1).filter { $0 > 0 }
+        let lo = ys.min() ?? 1, hi = ys.max() ?? 1
+        let useLog = lo > 0 && hi / lo > 50
+        let strength = { (y: Double) -> Double in
+            guard hi > lo else { return 1 }
+            return useLog ? (log(max(y, lo)) - log(lo)) / (log(hi) - log(lo)) : (y - lo) / (hi - lo)
+        }
+        VStack(alignment: .leading, spacing: 8) {
+            GeometryReader { geo in
+                let all = shapes.flatMap { $0.rings.flatMap { $0 } }
+                let minX = all.map(\.x).min() ?? 0, maxX = all.map(\.x).max() ?? 1
+                let minY = all.map(\.y).min() ?? 0, maxY = all.map(\.y).max() ?? 1
+                let scale = min(geo.size.width / max(maxX - minX, 0.001), geo.size.height / max(maxY - minY, 0.001))
+                let offX = (geo.size.width - (maxX - minX) * scale) / 2, offY = (geo.size.height - (maxY - minY) * scale) / 2
+                let place = { (p: CGPoint) in CGPoint(x: offX + (p.x - minX) * scale, y: offY + (maxY - p.y) * scale) }
+                Canvas { ctx, _ in
+                    for s in shapes {
+                        var path = Path()
+                        for ring in s.rings where ring.count > 2 {
+                            path.move(to: place(ring[0]))
+                            for p in ring.dropFirst() { path.addLine(to: place(p)) }
+                            path.closeSubpath()
+                        }
+                        let fill: Color = vals[s.number].map { pal.series1.opacity(0.18 + 0.82 * strength($0.1)) } ?? pal.text.opacity(0.06)
+                        ctx.fill(path, with: .color(fill))
+                        ctx.stroke(path, with: .color(s.number == picked ? pal.text : pal.bg.opacity(0.9)), lineWidth: s.number == picked ? 1.5 : 0.5)
+                    }
+                }
+                .contentShape(Rectangle())
+                .onTapGesture { at in
+                    // the municipality under the finger: the one whose outline holds the point
+                    picked = shapes.first { s in s.rings.contains { ring in
+                        var path = Path(); if let f = ring.first { path.move(to: place(f)); ring.dropFirst().forEach { path.addLine(to: place($0)) } }
+                        return path.contains(at) } }?.number
+                }
+            }
+            .frame(height: 240)
+            if let n = picked, let s = shapes.first(where: { $0.number == n }) {
+                let v = vals[n]
+                Text("\(v?.0 ?? s.name): \(v.map { fmtNum($0.1, percent: false, lang) + (chart.unit.isEmpty ? "" : " \(chart.unit)") } ?? "–")")
+                    .font(.subheadline.weight(.semibold)).foregroundStyle(pal.text)
+            }
+            HStack(spacing: 6) {
+                Text(fmtNum(lo, percent: false, lang)).font(.caption2).foregroundStyle(pal.text3)
+                LinearGradient(colors: [pal.series1.opacity(0.18), pal.series1], startPoint: .leading, endPoint: .trailing)
+                    .frame(width: 120, height: 6).clipShape(Capsule())
+                Text(fmtNum(hi, percent: false, lang)).font(.caption2).foregroundStyle(pal.text3)
+                if useLog { Text(lang == .is ? "lograkvarði" : "log scale").font(.caption2).foregroundStyle(pal.text3) }
+            }
+        }
+        .task { shapes = await MunicipalityShapes.shared.load() }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(lang == .is ? "Kort af sveitarfélögum" : "Map of municipalities")
     }
 }

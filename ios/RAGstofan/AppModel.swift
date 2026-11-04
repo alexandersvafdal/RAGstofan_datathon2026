@@ -183,9 +183,11 @@ final class AppModel {
         let q = question.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty, let api else { return }
         let lang: Lang = langChoice == .auto ? guessLang(q) : (langChoice == .is ? .is : .en)
+        // a "how should I show this?" pick comes as "display:map": the same question again, answered that way
+        let display = tableId?.hasPrefix("display:") == true ? String(tableId!.dropFirst(8)) : nil
         let request = AskRequest(question: q, language: langChoice == .auto ? nil : langChoice.rawValue,
-                                 tableId: tableId, history: history, model: modelChoice, fast: fast,
-                                 requestId: "")
+                                 tableId: display == nil ? tableId : nil, history: history, model: modelChoice, fast: fast,
+                                 requestId: "", display: display)
         let ex = Exchange(question: q, tableId: tableId, lang: lang, fast: fast)
         ex.spoken = spoken
         withAnimation(.smooth) { exchanges.append(ex) }

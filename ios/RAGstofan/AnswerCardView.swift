@@ -78,8 +78,12 @@ struct AnswerCard: View {
                 if a.status == "clarify", let c = a.clarification {
                     VStack(spacing: 8) {
                         ForEach(Array(c.options.enumerated()), id: \.offset) { i, o in
-                            Button { ask(a.question, o.tableId) } label: {
+                            Button { ask(a.question, (o.display ?? "").isEmpty ? o.tableId : "display:\(o.display!)") } label: {
                                 HStack(spacing: 10) {
+                                    if let d = o.display, !d.isEmpty {   // a way to show the answer, with its picture
+                                        Image(systemName: displayIcon(d)).font(.body.weight(.semibold)).foregroundStyle(pal.series1)
+                                            .frame(width: 24)
+                                    }
                                     VStack(alignment: .leading, spacing: 3) {
                                         Text(o.label).foregroundStyle(pal.text).multilineTextAlignment(.leading)
                                         if let why = o.note, !why.isEmpty {   // what the table has and lacks
@@ -87,7 +91,9 @@ struct AnswerCard: View {
                                         }
                                     }
                                     Spacer()
-                                    Text(o.tableId).font(.caption.monospaced()).foregroundStyle(pal.text3)
+                                    if (o.display ?? "").isEmpty {
+                                        Text(o.tableId).font(.caption.monospaced()).foregroundStyle(pal.text3)
+                                    }
                                     Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(pal.text3)
                                 }
                                 .padding(14)

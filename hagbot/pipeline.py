@@ -135,7 +135,8 @@ class Pipeline:
                     got.model = ans.model
                     ans = got
                     return ans
-                steps.append(Step(name="fallback", ms=0, detail="no table read as fitting; step by step"))
+                # no table read as fitting: the step-by-step pipeline below answers (an unknown step name would
+                # show as a failure in the apps' progress lists, so none is added)
             if req.table_id:  # the user already chose a table: skip planning
                 p = Plan(sub_questions=[SubQuestion(question=req.question, search_query=req.question)])
                 found = [await self._find(p.sub_questions[0], req.question, req.table_id, steps, alone=True)]

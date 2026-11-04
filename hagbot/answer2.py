@@ -136,18 +136,21 @@ def _fmt(x: float, unit: str, lang: str) -> str:
 async def answer(llm: LLM, catalog: Catalog, source, req: AskRequest, lang: str, steps: list[Step]) -> Answer | None:
     """The answer from one reading, or None when no candidate table has the figure (the old pipeline then answers)."""
     question = req.question
+    # the steps carry the names both apps' progress lists know (plan, retrieve, select, fetch, compose)
     t = Timer()
     fams = await candidates(catalog, source, question)
-    steps.append(Step(name="find", ms=t.ms(), detail=" · ".join(f"{f.key} {f.meta.id}" for f in fams)))
+    find_ms = t.ms()
     if not fams:
         return None
     t = Timer()
     reading = await read(llm, fams, question, req.display)
-    steps.append(Step(name="read", ms=t.ms(), detail=reading.model_dump_json(exclude_defaults=True)))
     by_key = {f.key: f for f in fams} | {f.meta.id: f for f in fams}
     picks = [(by_key[p.table.strip()], p) for p in reading.picks if p.table.strip() in by_key]
+    steps.append(Step(name="plan", ms=t.ms(), detail=f"1 part: {question} · read as {reading.model_dump_json(exclude_defaults=True)}"))
     if reading.none_fit or not picks:
         return None
+    steps.append(Step(name="retrieve", ms=find_ms, detail=f"{', '.join(dict.fromkeys(f.meta.id for f, _ in picks))} from "
+                      f"[{', '.join(f.meta.id for f in fams)}] via one reading"))
 
     t = Timer()
     figures, notes = [], []
@@ -156,8 +159,10 @@ async def answer(llm: LLM, catalog: Catalog, source, req: AskRequest, lang: str,
         notes += n
         rows = await source.query(fam.meta.id, sel)
         figures.append(Figure(fam, sel, rows, pick.label, lang))
-    steps.append(Step(name="fetch", ms=t.ms(), detail="; ".join(f"{f.meta.id}: {len(f.rows)} numbers" for f in figures)
-                      + (f" · notes: {notes}" if notes else "")))
+    steps.append(Step(name="select", ms=0, detail=f"{reading.operation} " + "; ".join(
+        f"{f.meta.id} {{" + ", ".join(f"{v.text}: {len(f.selections.get(v.code, []))}" for v in f.meta.variables) + "}" for f in figures)
+        + (f" notes: {notes}" if notes else "")))
+    steps.append(Step(name="fetch", ms=t.ms(), detail=f"{sum(len(f.rows) for f in figures)} rows"))
     figures = [f for f in figures if f.series]
     if not figures:
         return None
@@ -229,7 +234,7 @@ async def answer(llm: LLM, catalog: Catalog, source, req: AskRequest, lang: str,
         note = ("Kort: IS 50V Sveitarfélög, Náttúrufræðistofnun / Landmælingar Íslands, CC BY 4.0" if not en else
                 "Map: IS 50V Sveitarfélög, Náttúrufræðistofnun / Landmælingar Íslands, CC BY 4.0")
         parts[0].note = note
-    steps.append(Step(name="compute", ms=t.ms(), detail=f"{op}, shown as {shape}"
+    steps.append(Step(name="compose", ms=t.ms(), detail=f"template; {op}, shown as {shape}"
                       + (f"; {computation.expression} = {fmt_value(computation.result, computation.unit, lang)}" if computation else "")))
     lead = "Samkvæmt Hagstofu Íslands" if not en else "According to Statistics Iceland"
     text = f"{lead} ({', '.join(f.meta.id for f in figures)}): " + " ".join(sentences)

@@ -141,9 +141,9 @@ struct Words {
     }
     func viewName(_ v: String) -> String {
         let en = ["line": "Line", "stacked": "Stacked", "heatmap": "Heatmap", "bars": "Bars", "lollipop": "Lollipop",
-                  "donut": "Donut", "waffle": "Waffle", "slope": "Slope"]
+                  "donut": "Donut", "waffle": "Waffle", "slope": "Slope", "map": "Map", "index": "Start = 100"]
         let is_ = ["line": "Lína", "stacked": "Staflað", "heatmap": "Hitakort", "bars": "Súlur", "lollipop": "Sleikjó",
-                   "donut": "Kleinuhringur", "waffle": "Vaffla", "slope": "Halli"]
+                   "donut": "Kleinuhringur", "waffle": "Vaffla", "slope": "Halli", "map": "Kort", "index": "Upphaf = 100"]
         return (lang == .is ? is_ : en)[v] ?? v
     }
 }
