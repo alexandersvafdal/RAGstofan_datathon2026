@@ -1,14 +1,46 @@
 """Step 6: pick a chart from the shape of the data. Rules, not the model."""
 
 import re
+from collections import defaultdict
 
 from ..schemas import AnswerPart, ChartPoint, ChartSpec, Computation, Row
 from ..sources import TableMeta
 from ..text import fmt_period
 
 
+# More lines than this and nobody can tell them apart: colours repeat and the legend runs out (both apps show 7)
+MAX_SERIES = 6
+
+
+def _tidy(data: list[ChartPoint], additive: bool, lang: str) -> list[ChartPoint]:
+    """A line chart a reader can follow. 1. A series that starts at exactly 0 and later has values did not exist yet
+    (a postcode created in 2019 is not 0 people in 2000): those first points are left out, so its line and its "from"
+    start when it does. 2. More than MAX_SERIES lines: the largest by their latest value stay; the rest become one line,
+    "Other", when the figures add up (counts, amounts), or are left out when they do not (rates, indices, averages)."""
+    by: dict[str, list[ChartPoint]] = defaultdict(list)
+    for d in data:
+        by[d.series or ""].append(d)
+    for name, pts in by.items():
+        first = next((i for i, d in enumerate(pts) if d.y != 0), None)
+        if first:   # None: all zero, kept as it is; 0: starts with a value
+            by[name] = pts[first:]
+    if len(by) > MAX_SERIES:
+        latest = lambda pts: abs(max(pts, key=lambda d: d.x).y)
+        ranked = sorted(by, key=lambda n: latest(by[n]), reverse=True)
+        keep, rest = ranked[:MAX_SERIES - 1] if additive else ranked[:MAX_SERIES], ranked[MAX_SERIES - 1:] if additive else []
+        other: dict[str, float] = defaultdict(float)
+        for n in rest:
+            for d in by[n]:
+                other[d.x] += d.y
+        name = f"{'Annað' if lang == 'is' else 'Other'} ({len(rest)})"
+        by = {n: by[n] for n in keep}
+        if other:
+            by[name] = [ChartPoint(x=x, y=round(y, 6), series=name) for x, y in sorted(other.items())]
+    return [d for pts in by.values() for d in pts]
+
+
 def choose_chart(meta: TableMeta, rows: list[Row], selections: dict[str, list[str]],
-                 computation: Computation | None) -> ChartSpec | None:
+                 computation: Computation | None, lang: str = "en") -> ChartSpec | None:
     rows = [r for r in rows if r.value is not None]
     if not rows:
         return None
@@ -32,6 +64,9 @@ def choose_chart(meta: TableMeta, rows: list[Row], selections: dict[str, list[st
     for r in rows:
         series = " · ".join(r.labels[v.text] for v in series_vars) or None
         data.append(ChartPoint(x=r.labels[x_var.text], y=r.value, series=series))
+    if kind == "line" and series_vars:
+        from .select import ratio_measure   # here, not at the top: select imports this module's neighbours
+        data = _tidy(data, additive=not ratio_measure(meta, selections), lang=lang)
     return ChartSpec(type=kind, title=meta.title, x_label=x_var.text, y_label=meta.unit, unit=meta.unit, data=data)
 
 

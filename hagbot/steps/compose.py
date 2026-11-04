@@ -131,6 +131,9 @@ def _series_sentence(p: AnswerPart, lang: str) -> str | None:
         lines.setdefault(re.sub(r"(\s*,)+", ",", _PERIOD.sub("", f.label)).strip(" ,"), []).append((m.group(0), f))
     out = []
     for measure, pts in lines.items():
+        # a line that starts at exactly 0 and has values later did not exist yet: it starts where its values do
+        start = next((i for i, (_, f) in enumerate(pts) if f.value), 0)
+        pts = pts[start:]
         (p0, first), (p1, last) = pts[0], pts[-1]
         pk, peak = max(pts, key=lambda x: x[1].value)
         if lang == "is":

@@ -468,7 +468,10 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     places = places_part
     def has_place(label: str, place: str) -> bool:
         return any(_same_word(t, place) for t in tokens(label))
-    missing = [p for p in places if not any(has_place(label, p) for label in texts)]
+    # the country itself is never missing: every table here is about Iceland, as a whole or by its parts, so "in
+    # Iceland" asks for the whole (the total, or a table without places), not for an option named Iceland
+    country = lambda p: any(_same_word(t, c) for t in tokens(p) for c in ("iceland", "island"))
+    missing = [p for p in places if not country(p) and not any(has_place(label, p) for label in texts)]
     # the whole question's places, not this part's alone: "Reykjavík and Kópavogur together" is planned as one part
     # per town, yet both towns are selected in each and summed
     places = places_all
@@ -778,6 +781,17 @@ def resolve(meta: TableMeta, sel: Selection, question: str = "", part: str | Non
     if ratio and aggregate_over:
         notes.append(f"{ratio!r} is a ratio and cannot be summed over {', '.join(meta.var(c).text for c in aggregate_over)}")
         aggregate_over = []
+    # many options of a dimension that has no total, none of them named and no breakdown asked, in a measure that
+    # cannot be added up (mean earnings in each of 269 occupations, for "how have wages developed"): no figure here
+    # is the whole asked, so the part is partial, and a table next door that has the whole (the wage index) answers
+    if ratio and not partial and not breakdown and not _asks_breakdown(question):
+        for v in meta.variables:
+            picked = out.get(v.code, [])
+            if (not v.time and v.code != compare and len(picked) > 6 and _total_of(v) is None
+                    and not any(mentioned(v.label_of(c)) for c in picked)):
+                partial = v.text
+                notes.append(f"{v.text}: {len(picked)} options, no total, none named; {ratio!r} cannot be added up")
+                break
     return Resolved(selections=out, operation=op, compare_dimension=compare, part=part, whole=whole, order=order, notes=notes,
                     window_note=window_note, breakdown=breakdown, top=top, beyond=beyond, place_note=place_note,
                     alternatives=alternatives, aggregate_over=aggregate_over, missing_period=missing_period, partial=partial)

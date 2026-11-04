@@ -144,7 +144,7 @@ class Pipeline:
                 ans.status, ans.clarification, ans.text = "clarify", clar.clarification, clar.clarification.message
                 return ans
             errors = [r for r in results if isinstance(r, Exception)]
-            parts = await self._merge_series([r for r in results if isinstance(r, AnswerPart)])
+            parts = await self._merge_series([r for r in results if isinstance(r, AnswerPart)], lang)
             # per inhabitant, as the planner split it: the figure divided by the population
             ratio = p.per_inhabitant > 0 and len(p.sub_questions) == 2
             if ratio and len(parts) == 2 and parts[0].rows and any(
@@ -200,7 +200,7 @@ class Pipeline:
         finally:
             ans.steps, ans.total_ms, ans.llm_calls = list(steps), total.ms(), self.llm.calls - calls_before
 
-    async def _merge_series(self, parts: list[AnswerPart]) -> list[AnswerPart]:
+    async def _merge_series(self, parts: list[AnswerPart], lang: str = "en") -> list[AnswerPart]:
         """"How have stays by Icelanders and foreigners developed" is planned as two questions on the same table. Two
         line charts of one table side by side say less than one chart with a line each, so such parts become one."""
         out, by_table = [], {}
@@ -222,7 +222,7 @@ class Pipeline:
                 "rows": rows,
                 "facts": [f for p in group for f in p.facts],
                 "selection": {k: list(dict.fromkeys(v for p in group for v in p.selection.get(k, []))) for k in first.selection},
-                "chart": (c := choose_chart(meta, rows, selections, None)) and c.model_copy(update={"title": first.table.title}),
+                "chart": (c := choose_chart(meta, rows, selections, None, lang)) and c.model_copy(update={"title": first.table.title}),
             }))
         return out
 
@@ -398,7 +398,7 @@ class Pipeline:
         # the table named in the answer's language: chart titles, legends and the source card read it
         entry = self.catalog.get(meta.id)
         title = entry.title_is if lang == "is" and entry and entry.title_is else meta.title
-        chart = choose_chart(meta, rows, res.selections, computation)
+        chart = choose_chart(meta, rows, res.selections, computation, lang)
         return AnswerPart(
             sub_question=sq.question,
             table=TableRef(id=meta.id, title=title, url=table_url(meta.path, meta.id),

@@ -106,7 +106,8 @@ population is done elsewhere.
 The reason says in a few words what the table has and what it lacks for this question ("totals per sector, nothing
 per inhabitant"), in the language of the question: the user reads it when no table is found.
 - "How many people live in X" means population on 1 January.
-- Prefer original figures: a seasonally adjusted, trend or forecast table answers only a question asking for one."""
+- Prefer original figures: a seasonally adjusted, trend or forecast table answers only a question asking for one.
+- Towns or municipalities named need a table of municipalities, not of postcodes or districts ("101 Reykjavík")."""
 
 
 def describe(e: CatalogEntry, question: str, options: int = 30) -> str:

@@ -244,10 +244,43 @@ def describe_table(table_id: str):
     return _table_summary(e) | {"about": e.about_en, "values": e.values[:200], "values_total": len(e.values)}
 
 
+def _lenient_answer(data: dict) -> Answer | None:
+    """The answer a client sends back, read as far as it can be. The iPhone app re-encodes the answer from its own
+    model, and a field it reshapes (a chart's or a step's) made the whole request fail (422), so no follow-ups were
+    shown. Each field that does not validate is dropped and the rest read again; None if the core cannot be read."""
+    from pydantic import ValidationError
+    for _ in range(20):
+        try:
+            return Answer.model_validate(data)
+        except ValidationError as e:
+            loc = e.errors()[0]["loc"]
+            if not loc or loc[0] in ("question", "text", "language", "status"):
+                return None
+            # drop the innermost dict key on the error's path (an optional field), or the list item holding it
+            node, parents = data, []
+            for key in loc[:-1]:
+                if not isinstance(node, (dict, list)):
+                    break
+                parents.append((node, key))
+                node = node[key]
+            last = loc[-1]
+            if isinstance(node, dict) and last in node:
+                del node[last]
+            elif isinstance(node, list) and isinstance(last, int) and last < len(node):
+                node.pop(last)
+            elif parents:
+                holder, key = parents[-1]
+                del holder[key]
+            else:
+                return None
+    return None
+
+
 @app.post("/api/suggest")
-async def suggest(ans: Answer) -> dict:
+async def suggest(data: dict) -> dict:
     """Three follow-up questions for an answer the user is already reading (the client asks once it has shown it)."""
-    return {"questions": await pipeline.suggest(ans)}
+    ans = _lenient_answer(data)
+    return {"questions": await pipeline.suggest(ans) if ans else []}
 
 
 class PromptRequest(BaseModel):
