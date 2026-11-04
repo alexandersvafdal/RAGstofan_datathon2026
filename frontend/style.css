@@ -1211,3 +1211,7 @@ td.num { text-align: right; }
   padding: 6px 11px; border-radius: 999px; cursor: pointer; transition: background .2s var(--ease), color .2s var(--ease); }
 .drill-chip:hover { background: var(--accent-soft); color: var(--text); border-color: transparent; }
 .drill-chip span { color: var(--accent); }
+
+/* "How would you like this shown?": one large button per way, with a small picture of it */
+.clarify .opts button.display-choice { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+.clarify .opts button.display-choice .dc-icon { font-size: 18px; width: 22px; text-align: center; color: var(--series-1); }

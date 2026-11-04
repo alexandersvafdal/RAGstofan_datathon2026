@@ -127,6 +127,15 @@ class Pipeline:
                 full = await rewrite(self.llm, req.question, req.history)
                 steps.append(Step(name="context", ms=t.ms(), detail=full))
                 req = req.model_copy(update={"question": full})
+            if settings.reader and not req.table_id:   # a follow-up was made a full question above
+                # one reading of the question (hagbot/reader.py), the rest in code; None: no candidate table has
+                # the figure, and the step-by-step pipeline below answers instead
+                from . import answer2
+                if got := await answer2.answer(self.llm, self.catalog, self.source, req, lang, steps):
+                    got.model = ans.model
+                    ans = got
+                    return ans
+                steps.append(Step(name="fallback", ms=0, detail="no table read as fitting; step by step"))
             if req.table_id:  # the user already chose a table: skip planning
                 p = Plan(sub_questions=[SubQuestion(question=req.question, search_query=req.question)])
                 found = [await self._find(p.sub_questions[0], req.question, req.table_id, steps, alone=True)]

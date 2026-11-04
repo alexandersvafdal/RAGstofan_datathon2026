@@ -453,25 +453,25 @@ async function askStream(body, onStep, signal) {
 const history = [];
 const HISTORY_TURNS = 3;
 
-async function ask(question, tableId = null, fast = false, spoken = false, language = null) {
+async function ask(question, tableId = null, fast = false, spoken = false, language = null, display = null) {
   showChat();
   const chat = $("#chat");
   const guess = lang === "auto" ? (/[þðæöáéíóúý]/i.test(question) ? "is" : "en") : lang;
-  if (!tableId && !fast) chat.append(el("div", { class: "msg user" }, el("div", { class: "bubble" }, question)));
+  if (!tableId && !fast && !display) chat.append(el("div", { class: "msg user" }, el("div", { class: "bubble" }, question)));
   const card = el("div", { class: "card" });
   const progress = liveView(guess);
   card.append(progress);
   // "Answer now": stop this question (the server stops with it) and ask again with the fast model, thinking off
   const stop = new AbortController();
   if (!fast) progress.prepend(el("button", { class: "pill now", type: "button", onclick: () => {
-    stop.abort(); bot.remove(); ask(question, tableId, true, spoken, language); } }, `⚡ ${t("now", guess)}`));
+    stop.abort(); bot.remove(); ask(question, tableId, true, spoken, language, display); } }, `⚡ ${t("now", guess)}`));
   const bot = el("div", { class: "msg bot" }, card);
   chat.append(bot);
   setTimeout(() => bot.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "end" }), 380);
   $("#send").disabled = true;
   try {
     const body = JSON.stringify({ question, language: language || (lang === "auto" ? null : lang), table_id: tableId, model: modelChoice,
-                                  fast,
+                                  fast, display,
                                   history: history.slice(-HISTORY_TURNS) });
     const answer = await askStream(body, st => progress.step(st), stop.signal);
     if (fast) answer.parts.forEach((p, i) => { if (!i) p.note = [t("fastNote", guess), p.note].filter(Boolean).join(" "); });
@@ -534,8 +534,10 @@ function renderAnswer(card, a) {
 
   if (a.status === "clarify" && a.clarification) {
     card.append(el("div", { class: "clarify" },     // the question itself is already the answer text above
-      el("div", { class: "opts" }, a.clarification.options.map(o =>
-        el("button", { type: "button", onclick: () => ask(a.question, o.table_id) }, `${o.label} `, el("span", { class: "muted" }, o.table_id),
+      el("div", { class: "opts" }, a.clarification.options.map(o => o.display
+        ? el("button", { type: "button", class: "display-choice", onclick: () => ask(a.question, null, false, false, a.language, o.display) },
+            el("span", { class: "dc-icon", "aria-hidden": "true" }, DISPLAY_ICON[o.display] || "▦"), o.label)
+        : el("button", { type: "button", onclick: () => ask(a.question, o.table_id) }, `${o.label} `, el("span", { class: "muted" }, o.table_id),
           o.note ? el("small", { class: "why" }, o.note) : null)))));
   }
 
@@ -718,15 +720,24 @@ function stepsView(a, L) {
 
 /* ---------- charts ---------- */
 const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+// a hex colour at a strength between 0 and 1, blended into the card behind it: the light end of a map's shading
+const mix = (hex, k) => /^#[0-9a-f]{6}$/i.test(hex) ? `${hex}${Math.round(k * 255).toString(16).padStart(2, "0")}` : hex;
 const IS_PERIOD = x => /^\d{4}([MQ]\d+)?$/.test(x);
 const IS_TOTAL = x => /^(total|alls|samtals|all)\b/i.test(x.trim());
 const VIEW_NAMES = {
-  en: { line: "Line", stacked: "Stacked", heatmap: "Heatmap", bars: "Bars", lollipop: "Lollipop", donut: "Donut", waffle: "Waffle", slope: "Slope" },
-  is: { line: "Lína", stacked: "Staflað", heatmap: "Hitakort", bars: "Súlur", lollipop: "Sleikjó", donut: "Kleinuhringur", waffle: "Vaffla", slope: "Halli" },
+  en: { line: "Line", stacked: "Stacked", heatmap: "Heatmap", bars: "Bars", lollipop: "Lollipop", donut: "Donut", waffle: "Waffle", slope: "Slope", map: "Map", index: "Start = 100" },
+  is: { line: "Lína", stacked: "Staflað", heatmap: "Hitakort", bars: "Súlur", lollipop: "Sleikjó", donut: "Kleinuhringur", waffle: "Vaffla", slope: "Halli", map: "Kort", index: "Upphaf = 100" },
 };
+const DISPLAY_ICON = { bars: "▥", line: "⟋", map: "◪", ranking: "☰", stacked: "▤", heatmap: "▦", number: "#" };
 
 // Which views suit this answer, best first. The backend says line or bar; the shape of the data and the calculation decide the rest.
 function viewsFor(c, comp) {
+  if (c.view || c.views?.length) {
+    const own = [c.view, ...(c.views || [])].filter(Boolean);
+    const timeMulti = c.type === "line" && new Set(c.data.map(d => d.series).filter(Boolean)).size > 1;
+    // several lines of a level (not a rate): each set to 100 at the start, so growth compares across sizes
+    return [...new Set([...own, ...(timeMulti && c.unit !== "%" ? ["index"] : [])])];
+  }
   const series = new Set(c.data.map(d => d.series).filter(Boolean));
   const multi = series.size > 1;
   const isTime = c.data.every(d => IS_PERIOD(d.x));
@@ -764,8 +775,18 @@ function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", com
   holder.replaceChildren();
   delete holder.dataset.h;
   holder.classList.toggle("square", ["donut", "waffle"].includes(view));
-  const data = c.data.map(d => ({ ...d, label: fmtPeriod(d.x, L) }));
+  let data = c.data.map(d => ({ ...d, label: fmtPeriod(d.x, L) }));
   if (data.every(d => IS_PERIOD(d.x))) data.sort((a, b) => a.x.localeCompare(b.x));
+  if (view === "index") {   // each line set to 100 at the first period they all have
+    const bySeries = new Map();
+    for (const d of data) (bySeries.get(d.series) || bySeries.set(d.series, new Map()).get(d.series)).set(d.x, d.y);
+    const shared = [...bySeries.values()].map(m => new Set(m.keys())).reduce((a, b) => new Set([...a].filter(x => b.has(x))));
+    const base = [...shared].sort()[0];
+    if (base) data = data.filter(d => d.x >= base && bySeries.get(d.series).get(base))
+                         .map(d => ({ ...d, y: Math.round(d.y / bySeries.get(d.series).get(base) * 1000) / 10 }));
+    c = { ...c, unit: "", compare: true };
+    view = "line";
+  }
   const series = [...new Set(data.map(d => d.series).filter(Boolean))];
   const multi = series.length > 1;
   const accent = cssVar("--series-1"), card = cssVar("--card"), ink = cssVar("--text"), muted = cssVar("--text-3");
@@ -826,6 +847,26 @@ function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", com
           text: { field: "end" } } });
     }
     spec = { layer: layers };
+
+  } else if (view === "map") {
+    // one shade per municipality, darker for more; municipalities without a figure stay pale. Outlines: IS 50V
+    // (Náttúrufræðistofnun / Landmælingar Íslands, CC BY 4.0), simplified by scripts/build_map.py
+    height = 380;
+    const values = data.filter(d => d.code);
+    const geo = { url: "municipalities.geo.json", format: { type: "json", property: "features" } };
+    spec = { projection: { type: "mercator" }, layer: [
+      { data: geo, mark: { type: "geoshape", fill: cssVar("--grid") || "#ddd", stroke: card, strokeWidth: 0.6 } },
+      { data: geo, transform: [{ lookup: "id", from: { data: { values }, key: "code", fields: ["y", "label"] } }, { filter: "isValid(datum.y)" }],
+        params: [hover],
+        mark: { type: "geoshape", stroke: card, strokeWidth: 0.6 },
+        // a log scale when the largest is many times the smallest (Reykjavík against a village), so the rest still differ
+        encoding: { color: { field: "y", type: "quantitative", title: null,
+                             scale: { type: values.length && Math.min(...values.map(d => d.y)) > 0 && Math.max(...values.map(d => d.y)) / Math.min(...values.map(d => d.y)) > 50 ? "log" : "linear",
+                                      range: [mix(accent, 0.18), accent] },
+                             legend: { orient: "bottom", direction: "horizontal", gradientLength: 200, format: fmt } },
+                    opacity: { condition: { param: "hover", value: 1 }, value: 0.9 },
+                    tooltip: [{ field: "label", title: " " }, { field: "y", title: c.unit || " ", format: fmt }] } },
+    ] };
 
   } else if (view === "heatmap") {
     // one row per year, one column per month or quarter; the colour is the value

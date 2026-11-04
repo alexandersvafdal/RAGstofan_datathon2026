@@ -22,6 +22,9 @@ class Settings:
     # Reasoning models think before they answer. "none" turns that off for Qwen3-style models (2-3x faster here);
     # gpt-oss takes "low" / "medium" / "high". Empty: send nothing, the server's default.
     llm_reasoning_effort: str = os.getenv("LLM_REASONING_EFFORT", "none")   # off unless .env says otherwise
+    # One model call reads the question (tables, options, period, operation, how to show it) and code does the rest
+    # (hagbot/reader.py, hagbot/answer2.py). 0: the step-by-step pipeline for every question
+    reader: bool = os.getenv("READER", "1") == "1"
     # "Answer now": a quick model with thinking off, for when the default is taking too long
     fast_model: str = os.getenv("FAST_MODEL", "gpt-oss:20b")
     # The models the picker offers, in order ("qwen3.6:35b-a3b,qwen3.8:27b,..."). Empty: every model the endpoint serves.

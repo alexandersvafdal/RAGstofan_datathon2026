@@ -25,6 +25,8 @@ class AskRequest(BaseModel):
     fast: bool = False  # "Answer now": the fast model with thinking off, whatever else is asked
     request_id: str | None = None  # set by a client that may drop the connection (a phone going to sleep): the
                                    # answer is then finished anyway and kept for GET /api/ask/<id>
+    display: str | None = None  # how the user asked to see the answer, from a "how should I show this?" choice:
+                                # number, line, bars, ranking, stacked, map, heatmap or table
 
 
 class TableRef(BaseModel):
@@ -60,6 +62,7 @@ class ChartPoint(BaseModel):
     x: str
     y: float
     series: str | None = None
+    code: str | None = None  # the category's code: a municipality's official number puts the point on the map
 
 
 class ChartSpec(BaseModel):
@@ -67,6 +70,10 @@ class ChartSpec(BaseModel):
 
     type: Literal["kpi", "line", "bar"]
     title: str
+    # the view to open on (line, stacked, bars, lollipop, ranking, map, heatmap, donut, slope, table) when the reader
+    # chose one; empty: the client decides from the data. views: further views the data supports, offered as buttons
+    view: str = ""
+    views: list[str] = []
     x_label: str = ""
     y_label: str = ""
     unit: str = ""
@@ -92,7 +99,8 @@ class AnswerPart(BaseModel):
 
 class ClarifyOption(BaseModel):
     label: str
-    table_id: str
+    table_id: str = ""
+    display: str = ""   # a "how should I show this?" option: the view to answer with
     note: str = ""   # why the table was turned down: what it has and what it lacks for the question
 
 
