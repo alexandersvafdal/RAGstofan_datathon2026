@@ -629,16 +629,84 @@ actor MunicipalityShapes {
 }
 
 /// One shade per municipality, darker for more, on a log scale when the largest is many times the smallest
-/// (Reykjavík against a village); municipalities without a figure stay pale. Tap one to see its figure.
+/// (Reykjavík against a village); municipalities without a figure stay pale. Pinch to zoom, drag to pan once zoomed,
+/// double-tap to zoom in where tapped, the buttons for in, out and the whole country; tap a municipality for its
+/// figure. An answer about a few neighbours (the capital area) opens zoomed in on them.
 struct MunicipalityMap: View {
     @Environment(\.pal) private var pal
     let chart: ChartSpec
     let lang: Lang
     @State private var shapes: [MunicipalityShapes.Shape] = []
     @State private var picked: String?
+    @State private var zoom: CGFloat = 1          // settled zoom
+    @State private var pan: CGSize = .zero        // settled pan, in view points
+    @GestureState private var pinch: CGFloat = 1  // the pinch in progress
+    @GestureState private var drag: CGSize = .zero
+    @State private var focused = false            // the opening zoom on the answer's municipalities is applied once
+
+    private static let maxZoom: CGFloat = 14
 
     private var values: [String: (String, Double)] {
         Dictionary(chart.data.compactMap { p in p.code.map { ($0, (p.x, p.y)) } }, uniquingKeysWith: { a, _ in a })
+    }
+
+    /// Where the map's coordinates fall in a view of this size, before zooming: Iceland fitted and centred.
+    private struct Frame {
+        let minX, maxY, scale, offX, offY: CGFloat
+        func place(_ p: CGPoint) -> CGPoint { CGPoint(x: offX + (p.x - minX) * scale, y: offY + (maxY - p.y) * scale) }
+    }
+
+    private func frame(_ size: CGSize) -> Frame {
+        let all = shapes.flatMap { $0.rings.flatMap { $0 } }
+        let minX = all.map(\.x).min() ?? 0, maxX = all.map(\.x).max() ?? 1
+        let minY = all.map(\.y).min() ?? 0, maxY = all.map(\.y).max() ?? 1
+        let scale = min(size.width / max(maxX - minX, 0.001), size.height / max(maxY - minY, 0.001))
+        return Frame(minX: minX, maxY: maxY, scale: scale,
+                     offX: (size.width - (maxX - minX) * scale) / 2, offY: (size.height - (maxY - minY) * scale) / 2)
+    }
+
+    private func clamp(_ z: CGFloat) -> CGFloat { min(max(z, 1), Self.maxZoom) }
+
+    /// The zoom and pan in effect, gestures in progress included; at the whole-country zoom the map sits centred.
+    private var k: CGFloat { clamp(zoom * pinch) }
+    private var shift: CGSize { k <= 1.001 ? .zero : CGSize(width: pan.width + drag.width, height: pan.height + drag.height) }
+
+    /// A point of the unzoomed map to the view, through the zoom about the view's centre and the pan.
+    private func transform(_ size: CGSize) -> CGAffineTransform {
+        let c = CGPoint(x: size.width / 2, y: size.height / 2)
+        return CGAffineTransform(translationX: c.x + shift.width, y: c.y + shift.height).scaledBy(x: k, y: k)
+            .translatedBy(x: -c.x, y: -c.y)
+    }
+
+    /// Zoom to fit the answer's municipalities when they cover a small part of the country (a few neighbours).
+    private func focus(_ size: CGSize) {
+        guard !focused, !shapes.isEmpty, size.width > 0 else { return }
+        focused = true
+        let f = frame(size), vals = values
+        let pts = shapes.filter { vals[$0.number] != nil }.flatMap { $0.rings.flatMap { $0 } }.map(f.place)
+        guard let minX = pts.map(\.x).min(), let maxX = pts.map(\.x).max(),
+              let minY = pts.map(\.y).min(), let maxY = pts.map(\.y).max() else { return }
+        let w = max(maxX - minX, 1), h = max(maxY - minY, 1)
+        let z = clamp(min(size.width / (w * 1.6), size.height / (h * 1.6)))
+        guard z > 2 else { return }   // the answer covers much of the country: the whole map is the right view
+        let c = CGPoint(x: size.width / 2, y: size.height / 2), mid = CGPoint(x: (minX + maxX) / 2, y: (minY + maxY) / 2)
+        zoom = z
+        pan = CGSize(width: (c.x - mid.x) * z, height: (c.y - mid.y) * z)
+    }
+
+    private func setZoom(_ z: CGFloat, around point: CGPoint? = nil, in size: CGSize) {
+        let new = clamp(z)
+        withAnimation(.spring(duration: 0.35, bounce: 0.15)) {
+            if new <= 1.001 { zoom = 1; pan = .zero; return }
+            if let point {   // keep the tapped place under the finger, then bring it toward the centre
+                let c = CGPoint(x: size.width / 2, y: size.height / 2)
+                let mapPoint = point.applying(transform(size).inverted())
+                pan = CGSize(width: (c.x - mapPoint.x) * new, height: (c.y - mapPoint.y) * new)
+            } else {
+                pan = CGSize(width: pan.width * new / max(zoom, 1), height: pan.height * new / max(zoom, 1))
+            }
+            zoom = new
+        }
     }
 
     var body: some View {
@@ -652,34 +720,55 @@ struct MunicipalityMap: View {
         }
         VStack(alignment: .leading, spacing: 8) {
             GeometryReader { geo in
-                let all = shapes.flatMap { $0.rings.flatMap { $0 } }
-                let minX = all.map(\.x).min() ?? 0, maxX = all.map(\.x).max() ?? 1
-                let minY = all.map(\.y).min() ?? 0, maxY = all.map(\.y).max() ?? 1
-                let scale = min(geo.size.width / max(maxX - minX, 0.001), geo.size.height / max(maxY - minY, 0.001))
-                let offX = (geo.size.width - (maxX - minX) * scale) / 2, offY = (geo.size.height - (maxY - minY) * scale) / 2
-                let place = { (p: CGPoint) in CGPoint(x: offX + (p.x - minX) * scale, y: offY + (maxY - p.y) * scale) }
-                Canvas { ctx, _ in
-                    for s in shapes {
-                        var path = Path()
-                        for ring in s.rings where ring.count > 2 {
-                            path.move(to: place(ring[0]))
-                            for p in ring.dropFirst() { path.addLine(to: place(p)) }
-                            path.closeSubpath()
-                        }
-                        let fill: Color = vals[s.number].map { pal.series1.opacity(0.18 + 0.82 * strength($0.1)) } ?? pal.text.opacity(0.06)
-                        ctx.fill(path, with: .color(fill))
-                        ctx.stroke(path, with: .color(s.number == picked ? pal.text : pal.bg.opacity(0.9)), lineWidth: s.number == picked ? 1.5 : 0.5)
+                let size = geo.size, f = frame(size), t = transform(size)
+                let paths: [(String, Path)] = shapes.map { s in
+                    var path = Path()
+                    for ring in s.rings where ring.count > 2 {
+                        path.move(to: f.place(ring[0]))
+                        for p in ring.dropFirst() { path.addLine(to: f.place(p)) }
+                        path.closeSubpath()
                     }
+                    return (s.number, path)
                 }
-                .contentShape(Rectangle())
-                .onTapGesture { at in
-                    // the municipality under the finger: the one whose outline holds the point
-                    picked = shapes.first { s in s.rings.contains { ring in
-                        var path = Path(); if let f = ring.first { path.move(to: place(f)); ring.dropFirst().forEach { path.addLine(to: place($0)) } }
-                        return path.contains(at) } }?.number
+                ZStack(alignment: .topTrailing) {
+                    Canvas { ctx, _ in
+                        ctx.concatenate(t)
+                        for (number, path) in paths {
+                            let fill: Color = vals[number].map { pal.series1.opacity(0.18 + 0.82 * strength($0.1)) } ?? pal.text.opacity(0.06)
+                            ctx.fill(path, with: .color(fill))
+                            let on = number == picked
+                            ctx.stroke(path, with: .color(on ? pal.text : pal.bg.opacity(0.9)), lineWidth: (on ? 1.6 : 0.5) / k)
+                        }
+                    }
+                    .contentShape(Rectangle())
+                    .clipped()
+                    .gesture(MagnifyGesture()
+                        .updating($pinch) { v, state, _ in state = v.magnification }
+                        .onEnded { v in setZoom(zoom * v.magnification, in: size) })
+                    // dragging pans only when zoomed in; at the whole country the page scrolls as usual
+                    .simultaneousGesture(DragGesture(minimumDistance: 4)
+                        .updating($drag) { v, state, _ in if k > 1.001 { state = v.translation } }
+                        .onEnded { v in if k > 1.001 { pan.width += v.translation.width; pan.height += v.translation.height } },
+                        including: k > 1.001 ? .all : .subviews)
+                    .onTapGesture(count: 2) { at in setZoom(zoom * 2.5, around: at, in: size) }
+                    .onTapGesture { at in
+                        let p = at.applying(t.inverted())   // the municipality under the finger, on the unzoomed map
+                        picked = paths.first { $0.1.contains(p) }?.0
+                    }
+                    VStack(spacing: 6) {
+                        mapButton("plus") { setZoom(zoom * 2, in: size) }
+                        mapButton("minus") { setZoom(zoom / 2, in: size) }
+                        if k > 1.001 { mapButton("arrow.down.right.and.arrow.up.left") { setZoom(1, in: size) } }
+                    }
+                    .padding(6)
                 }
+                .onAppear { focus(size) }
+                .onChange(of: shapes.count) { focus(size) }
             }
-            .frame(height: 240)
+            .frame(height: 300)
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(lang == .is ? "Kort af sveitarfélögum" : "Map of municipalities")
+            .accessibilityHint(lang == .is ? "Klíptu til að þysja, dragðu til að færa" : "Pinch to zoom, drag to move")
             if let n = picked, let s = shapes.first(where: { $0.number == n }) {
                 let v = vals[n]
                 Text("\(v?.0 ?? s.name): \(v.map { fmtNum($0.1, percent: false, lang) + (chart.unit.isEmpty ? "" : " \(chart.unit)") } ?? "–")")
@@ -694,7 +783,14 @@ struct MunicipalityMap: View {
             }
         }
         .task { shapes = await MunicipalityShapes.shared.load() }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(lang == .is ? "Kort af sveitarfélögum" : "Map of municipalities")
+    }
+
+    private func mapButton(_ icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: icon).font(.caption.weight(.bold)).foregroundStyle(pal.text)
+                .frame(width: 32, height: 32)
+                .background(.ultraThinMaterial, in: Circle())
+        }
+        .buttonStyle(.plain)
     }
 }
