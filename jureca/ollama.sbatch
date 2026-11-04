@@ -18,12 +18,33 @@
 
 D=${RAG_DIR:?set by scripts/jureca.sh}
 MODEL=${RAG_MODEL:-qwen3.8:27b}
-export OLLAMA_HOST=127.0.0.1:11434 OLLAMA_MODELS=$D/models OLLAMA_CONTEXT_LENGTH=16384 OLLAMA_KEEP_ALIVE=-1
+ENGINE=${RAG_ENGINE:-ollama}
 
-"$D/ollama/bin/ollama" serve &
-for i in $(seq 1 60); do curl -sf http://127.0.0.1:11434/api/version >/dev/null && break; sleep 2; done
-# Load the model now, so the first question does not wait for it
-curl -sf http://127.0.0.1:11434/api/generate -d "{\"model\":\"$MODEL\",\"keep_alive\":-1}" >/dev/null
+if [ "$ENGINE" = vllm ]; then
+  # vLLM: the official Qwen3.8-27B at full precision (bf16), split over all 4 GPUs (tensor parallel), so every token is
+  # computed by the 4 together. It reuses the start of a prompt it has seen (prefix caching): the app's calls share
+  # long instructions. The weights are on the project disk; compute nodes have no internet.
+  # vLLM 0.32.0 is installed in its own Python in the project folder (no container: those need a separate agreement).
+  export HF_HUB_OFFLINE=1 VLLM_NO_USAGE_STATS=1 HF_HOME=$D/hf/home XDG_CACHE_HOME=$D/vllm/cache
+  "$D/vllm/venv/bin/vllm" serve "$D/hf/Qwen3.8-27B" --served-model-name "$MODEL" --host 127.0.0.1 --port 11434 \
+    --tensor-parallel-size 4 --dtype bfloat16 --max-model-len 16384 --enable-prefix-caching \
+    --gpu-memory-utilization 0.90 &
+  SERVER=$!
+  # loading 54 GB and preparing the GPUs takes a few minutes; a server that stopped ends the job at once
+  for i in $(seq 1 300); do
+    curl -sf http://127.0.0.1:11434/v1/models >/dev/null && break
+    kill -0 $SERVER 2>/dev/null || { echo "vLLM stopped before it was ready"; exit 1; }
+    sleep 3
+  done
+else
+  # Ollama: one request at a time per model (NUM_PARALLEL=1). With 4 at once, two parts of a question asked together
+  # stalled for 60-70 s now and then on the A100s, and batching made answers vary between runs (2 Nov 2026).
+  export OLLAMA_HOST=127.0.0.1:11434 OLLAMA_MODELS=$D/models OLLAMA_CONTEXT_LENGTH=16384 OLLAMA_KEEP_ALIVE=-1 OLLAMA_NUM_PARALLEL=1
+  "$D/ollama/bin/ollama" serve &
+  for i in $(seq 1 60); do curl -sf http://127.0.0.1:11434/api/version >/dev/null && break; sleep 2; done
+  # Load the model now, so the first question does not wait for it
+  curl -sf http://127.0.0.1:11434/api/generate -d "{\"model\":\"$MODEL\",\"keep_alive\":-1}" >/dev/null
+fi
 
 umask 077
 TOKEN=$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')
@@ -80,4 +101,10 @@ asyncio.run(main())
 PY
 
 echo "READY $(hostname) $PORT $MODEL"
+
+# The picker's other models load now, in the background, so the first question on one does not wait 30-90 s for it
+# to come off the disk. They fit on the node's 4 GPUs beside the default. (vLLM serves its one model only.)
+[ "$ENGINE" = ollama ] && for m in ${RAG_PRELOAD//,/ }; do
+  [ "$m" = "$MODEL" ] || curl -sf http://127.0.0.1:11434/api/generate -d "{\"model\":\"$m\",\"keep_alive\":-1}" >/dev/null
+done &
 wait

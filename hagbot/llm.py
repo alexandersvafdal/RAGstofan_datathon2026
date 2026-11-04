@@ -56,7 +56,10 @@ class LLM:
             effort = self.reasoning_effort
             if effort == "none" and "gpt-oss" in self.model:  # gpt-oss only takes low / medium / high
                 effort = "low"
-            body["reasoning_effort"] = effort
+            if effort == "none" and settings.llm_template_kwargs:
+                body["chat_template_kwargs"] = {"enable_thinking": False}
+            else:
+                body["reasoning_effort"] = effort
         if json_mode:
             body["response_format"] = {"type": "json_object"}
         self.calls += 1

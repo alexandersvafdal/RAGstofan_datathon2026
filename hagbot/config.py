@@ -22,6 +22,9 @@ class Settings:
     # Reasoning models think before they answer. "none" turns that off for Qwen3-style models (2-3x faster here);
     # gpt-oss takes "low" / "medium" / "high". Empty: send nothing, the server's default.
     llm_reasoning_effort: str = os.getenv("LLM_REASONING_EFFORT", "none")   # off unless .env says otherwise
+    # vLLM turns a Qwen model's thinking off through its chat template (chat_template_kwargs), not reasoning_effort
+    # "none", which it does not take. 1: send that instead. Ollama (the default) reads reasoning_effort.
+    llm_template_kwargs: bool = os.getenv("LLM_TEMPLATE_KWARGS", "0") == "1"
     # "Answer now": a quick model with thinking off, for when the default is taking too long
     fast_model: str = os.getenv("FAST_MODEL", "gpt-oss:20b")
     # The models the picker offers, in order ("qwen3.6:35b-a3b,qwen3.8:27b,..."). Empty: every model the endpoint serves.
