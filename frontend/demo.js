@@ -110,11 +110,11 @@
     en: { demo: `Static demo: real answers saved from the server, for the example questions. <a href="${REPO}">Run it yourself</a> to ask anything.`,
           ai: "Answers are chosen by an AI and can be wrong. Check the figure against the linked Statistics Iceland table.",
           tag: "Static demo", banner: "No live AI here: this page replays answers saved from the real server, for the example questions only.",
-          run: "Run it yourself" },
+          run: "Run it yourself", close: "Hide this notice" },
     is: { demo: `Kynningarútgáfa: raunveruleg svör vistuð af þjóninum, við tilbúnu spurningunum. <a href="${REPO}">Keyrðu hana sjálf(ur)</a> til að spyrja hvers sem er.`,
           ai: "Gervigreind velur svörin og þau geta verið röng. Berðu töluna saman við töflu Hagstofunnar sem vísað er í.",
           tag: "Kynningarútgáfa", banner: "Engin gervigreind í gangi hér: síðan spilar svör sem voru vistuð af raunverulega þjóninum, aðeins við tilbúnu spurningunum.",
-          run: "Keyra sjálf(ur)" },
+          run: "Keyra sjálf(ur)", close: "Fela þessa tilkynningu" },
   };
   document.addEventListener("DOMContentLoaded", () => {
     const style = document.createElement("style");
@@ -130,7 +130,11 @@
       .demo-banner .tag { font-weight: 800; font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
         border: 1.5px solid currentColor; border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
       .demo-banner a { color: inherit; font-weight: 700; white-space: nowrap; text-underline-offset: 3px; }
-      @media (max-width: 600px) { .demo-banner { font-size: 13px; padding: 8px 16px; } }`;
+      .demo-banner { position: relative; padding-right: 44px; padding-left: 44px; }
+      .demo-banner .close { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px;
+        border: 0; border-radius: 999px; background: transparent; color: inherit; font-size: 16px; line-height: 1; cursor: pointer; }
+      .demo-banner .close:hover { background: rgba(20,17,11,.12); }
+      @media (max-width: 600px) { .demo-banner { font-size: 13px; padding: 8px 40px; } }`;
     document.head.append(style);
     const note = document.createElement("p");
     note.className = "demo-note";
@@ -145,11 +149,18 @@
       const top = document.createElement("div");
       top.className = "demo-top";
       nav.before(top);
-      top.append(banner, nav);
+      let closed = false;
+      try { closed = sessionStorage.getItem("ragstofan-demo-banner") === "closed"; } catch {}
+      top.append(...(closed ? [] : [banner]), nav);
     }
     const render = () => {
       const w = WORDS[document.documentElement.lang === "is" ? "is" : "en"];
-      banner.innerHTML = `<span class="tag">${w.tag}</span><span>${w.banner}</span><a href="${REPO}">${w.run} ↗</a>`;
+      banner.innerHTML = `<span class="tag">${w.tag}</span><span>${w.banner}</span><a href="${REPO}">${w.run} ↗</a>` +
+        `<button type="button" class="close" aria-label="${w.close}">✕</button>`;
+      banner.querySelector(".close").onclick = () => {   // closed for this visit; it is back on the next one
+        banner.remove();
+        try { sessionStorage.setItem("ragstofan-demo-banner", "closed"); } catch {}
+      };
       note.innerHTML = `<span class="ai">⚠ ${w.ai}</span>`;   // the banner says it is a demo
       foot.textContent = w.ai;
     };
