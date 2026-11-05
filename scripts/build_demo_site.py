@@ -35,7 +35,7 @@ def main():
     shutil.copytree(ROOT / "frontend", SITE)
     page = (SITE / "index.html").read_text()
     for old, new in [('<title>RAGstofan</title>\n', f"<title>{TITLE}</title>\n{CARD}"),
-                     ('<script src="app.js', '<script src="demo.js?v=2"></script>\n  <script src="app.js'),
+                     ('<script src="app.js', '<script src="demo.js?v=3"></script>\n  <script src="app.js'),
                      ('href="/"', 'href="./"')]:
         assert old in page, old
         page = page.replace(old, new, 1)

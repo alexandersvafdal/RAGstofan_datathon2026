@@ -3,9 +3,13 @@
 // Loaded before app.js only in the Pages build; it stands in for the server by answering the app's /api calls.
 (() => {
   // The demo's questions: the app's floating examples, and what it suggests after an unrecorded question.
-  // Chosen to show the maps, long line charts and time spans. scripts/record_demo.py asks exactly these.
+  // Chosen to show the maps (the whole country, and regions the map zooms to), long line charts and time spans. scripts/record_demo.py asks exactly these.
   window.RAGSTOFAN_POOL = [
     ["population", "Show a map of the population by municipality", "Sýndu kort af íbúafjölda eftir sveitarfélögum"],
+    ["population", "Show a map of the population of Kópavogur, Hafnarfjörður and Garðabær", "Sýndu á korti íbúafjölda Kópavogs, Hafnarfjarðar og Garðabæjar"],
+    ["population", "Show on a map how many people live in Reykjanesbær, Suðurnesjabær, Grindavík and Vogar", "Sýndu á korti hve margir búa í Reykjanesbæ, Suðurnesjabæ, Grindavík og Vogum"],
+    ["population", "Show a map of the population of Árborg, Hveragerði and Ölfus", "Sýndu á korti hve margir búa í Árborg, Hveragerði og Ölfusi"],
+    ["population", "Show a map of the population of Akureyri, Dalvíkurbyggð and Fjallabyggð in 2026", "Sýndu kort af íbúafjölda Akureyrar, Dalvíkurbyggðar og Fjallabyggðar"],
     ["population", "Which ten municipalities have the most inhabitants?", "Hvaða tíu sveitarfélög eru fjölmennust?"],
     ["population", "How has Iceland's population grown since 1950?", "Hvernig hefur íbúafjöldi Íslands vaxið frá 1950?"],
     ["population", "How many children were born each year since 1950?", "Hve mörg börn fæddust á hverju ári frá 1950?"],
