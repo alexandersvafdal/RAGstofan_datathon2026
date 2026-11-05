@@ -1212,6 +1212,25 @@ td.num { text-align: right; }
   font: inherit; font-size: 14px; font-weight: 500; color: var(--accent); padding: 12px; cursor: pointer; }
 .nav-left { display: flex; align-items: center; gap: 6px; min-width: 0; }
 @media (max-width: 560px) { .model-title { font-size: 15px; } .brand .logo-h { display: none; } }
+/* Phones: the model panel and the theme menu span the screen instead of hanging off its edge. They are fixed to
+   the navigation bar (its backdrop-filter makes it their containing block), so they open just under it. */
+@media (max-width: 560px) {
+  .tpanel { position: fixed; top: calc(100% + 6px); left: 12px; right: 12px; width: auto; transform-origin: top center; }
+  .theme-pop { position: fixed; top: calc(100% + 6px); left: auto; right: 12px; width: min(268px, calc(100vw - 24px)); }
+}
+/* Phones: the navigation fits in one row. The model name gives way (shortened with "…") rather than running under
+   the buttons on the right, and the language switch is more compact. */
+@media (max-width: 560px) {
+  .nav { gap: 8px; padding: 0 12px; }
+  .nav-left { flex: 1 1 auto; gap: 4px; }
+  .nav-right { flex: none; gap: 8px; }
+  .model-pick { min-width: 0; }
+  .model-title { max-width: 100%; min-width: 0; padding: 6px 6px; gap: 3px; }
+  .model-title > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .nav-right .segmented button { padding: 3px 8px; font-size: 12px; }
+}
+/* and nothing makes the page scroll sideways on a phone */
+@media (max-width: 700px) { html, body { overflow-x: clip; } }
 
 /* categories that open one level down */
 .drill { margin-top: 14px; }
