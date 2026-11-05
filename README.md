@@ -5,6 +5,10 @@ back:** its unit, the table it came from (with a link), a chart, and every step 
 
 Built for Gagnaþon 2026 (Track 2: an agentic AI over Statistics Iceland's PX-API).
 
+**[Try the demo](https://alexandersvafdal.github.io/RAGstofan_datathon2026/)**: the web app replaying real saved answers
+(maps, long line charts, a heatmap) for a set of example questions, with no server. To ask anything, run it yourself
+(below). The demo is rebuilt from `frontend/` on every push; `scripts/record_demo.py` re-records its answers.
+
 ## Objectives
 
 1. **Right number, from the right official table.** Statistics Iceland publishes more than 2,000 tables. The hard part of a
