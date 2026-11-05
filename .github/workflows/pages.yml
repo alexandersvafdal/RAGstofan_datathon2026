@@ -5,7 +5,7 @@ name: Demo on GitHub Pages
 on:
   push:
     branches: [main]
-    paths: ["frontend/**", ".github/workflows/pages.yml"]
+    paths: ["frontend/**", "scripts/build_demo_site.py", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -26,12 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build the demo site
-        run: |
-          mkdir _site
-          cp -r frontend/. _site/
-          # demo.js goes in before app.js; links to "/" stay inside the project's Pages folder
-          sed -i 's|<script src="app.js|<script src="demo.js?v=1"></script>\n  <script src="app.js|; s|href="/"|href="./"|' _site/index.html
-          touch _site/.nojekyll
+        run: python3 scripts/build_demo_site.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -88,16 +88,47 @@
   };
   window.RAGSTOFAN_DEMO = true;
 
-  // A line under the greeting saying what this page is
+  // Light mode on a first visit; a mode the visitor picks later is kept (app.js stores it)
+  try {
+    if (!localStorage.getItem("ragstofan-demo-light")) {
+      const t = JSON.parse(localStorage.getItem("ragstofan-theme") || "{}");
+      localStorage.setItem("ragstofan-theme", JSON.stringify({ palette: t.palette || "sterling", mode: "light" }));
+      localStorage.setItem("ragstofan-demo-light", "1");
+    }
+    const mode = JSON.parse(localStorage.getItem("ragstofan-theme") || "{}").mode;
+    if (mode && mode !== "auto") document.documentElement.dataset.theme = mode;
+  } catch { document.documentElement.dataset.theme = "light"; }
+
+  // What this page is, and that an AI answers: under the greeting, and under the question box while chatting.
+  // In the page's language, which app.js sets on <html lang>.
+  const REPO = "https://github.com/alexandersvafdal/RAGstofan_datathon2026";
+  const WORDS = {
+    en: { demo: `Static demo: real answers saved from the server, for the example questions. <a href="${REPO}">Run it yourself</a> to ask anything.`,
+          ai: "Answers are chosen by an AI and can be wrong. Check the figure against the linked Statistics Iceland table." },
+    is: { demo: `Kynningarútgáfa: raunveruleg svör vistuð af þjóninum, við tilbúnu spurningunum. <a href="${REPO}">Keyrðu hana sjálf(ur)</a> til að spyrja hvers sem er.`,
+          ai: "Gervigreind velur svörin og þau geta verið röng. Berðu töluna saman við töflu Hagstofunnar sem vísað er í." },
+  };
   document.addEventListener("DOMContentLoaded", () => {
-    const hero = document.querySelector(".hero .lede");
-    if (!hero) return;
+    const style = document.createElement("style");
+    style.textContent = `.demo-note { font-size: 14px; color: var(--text-2); margin-top: 10px; line-height: 1.45; }
+      .demo-note a { color: var(--accent); }
+      .demo-note .ai { display: block; margin-top: 4px; font-weight: 600; }
+      .ai-disclaimer { text-align: center; font-size: 12px; color: var(--text-3); margin: 6px 12px 0; line-height: 1.35; }
+      .composer.inline .ai-disclaimer { display: none; }`;
+    document.head.append(style);
     const note = document.createElement("p");
     note.className = "demo-note";
-    note.style.cssText = "font-size:14px;opacity:.75;margin-top:8px";
-    note.innerHTML = 'Static demo: real answers saved from the server, for the example questions. ' +
-      '<a href="https://github.com/alexandersvafdal/RAGstofan_datathon2026">Run it yourself</a> to ask anything.';
-    hero.after(note);
+    const foot = document.createElement("p");
+    foot.className = "ai-disclaimer";
+    const render = () => {
+      const w = WORDS[document.documentElement.lang === "is" ? "is" : "en"];
+      note.innerHTML = `${w.demo}<span class="ai">⚠ ${w.ai}</span>`;
+      foot.textContent = w.ai;
+    };
+    render();
+    new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+    document.querySelector(".hero .lede")?.after(note);
+    document.querySelector("#ask .composer-inner")?.after(foot);
     document.getElementById("mic")?.style.setProperty("display", "none");   // voice needs the server
   });
 })();

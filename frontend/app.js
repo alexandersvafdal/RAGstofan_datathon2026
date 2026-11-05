@@ -992,7 +992,86 @@ function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", com
   }, { actions: false, renderer: "svg", tooltip: { theme: "custom" },
        // Icelandic numbers on the axes and labels: 1.149,3, as in the answer text
        ...(L === "is" ? { formatLocale: { decimal: ",", thousands: ".", grouping: [3], currency: ["", " kr."] } } : {}) })
+    .then(r => { if (view === "map") mapZoom(holder, r.view, L); })
     .catch(e => holder.append(el("div", { class: "muted" }, `chart error: ${e.message}`)));
+}
+
+/** Zoom and pan on a drawn map: pinch or Ctrl/⌘ + scroll, drag, double-click, and the + − ⟲ buttons. Only the
+ *  shapes move (the legend stays), clipped to the map's area; outlines keep their width; hover still works. */
+function mapZoom(holder, view, L) {
+  const svg = holder.querySelector("svg");
+  const marks = [...holder.querySelectorAll("g.mark-shape")];
+  if (!svg || !marks.length) return;
+  const parent = marks[0].parentNode;
+  const id = `mapclip-${Math.random().toString(36).slice(2, 8)}`;
+  // the clip is set on the shapes themselves, so it moves with them: its rectangle is moved back the other way
+  const clip = svgEl("rect", {});
+  svg.prepend(svgEl("defs", {}, svgEl("clipPath", { id }, clip)));
+  marks.forEach(m => m.setAttribute("clip-path", `url(#${id})`));
+  svg.classList.add("zoomable");
+  let k = 1, x = 0, y = 0;
+  const MAX = 12;
+  const apply = () => {
+    marks.forEach(m => m.setAttribute("transform", `translate(${x},${y}) scale(${k})`));
+    Object.entries({ x: -x / k, y: -y / k, width: view.width() / k, height: view.height() / k })
+      .forEach(([a, v]) => clip.setAttribute(a, v));
+    reset.disabled = k === 1;
+  };
+  const local = (cx, cy) => {   // a point on screen in the map's own coordinates
+    const pt = svg.createSVGPoint(); pt.x = cx; pt.y = cy;
+    return pt.matrixTransform(parent.getScreenCTM().inverse());
+  };
+  const zoomAt = (p, factor) => {
+    const k2 = Math.min(MAX, Math.max(1, k * factor));
+    x = p.x - (p.x - x) * k2 / k; y = p.y - (p.y - y) * k2 / k; k = k2;
+    if (k === 1) x = y = 0;
+    apply();
+  };
+  const centre = () => ({ x: view.width() / 2, y: view.height() / 2 });
+  const btn = (label, aria, fn) => el("button", { type: "button", class: "mz-btn", "aria-label": aria, onclick: fn }, label);
+  const is = L === "is";
+  const reset = btn("⟲", is ? "Upphafsstaða" : "Reset zoom", () => { k = 1; x = y = 0; apply(); });
+  holder.style.position = "relative";
+  holder.append(el("div", { class: "mz" },
+    btn("+", is ? "Þysja inn" : "Zoom in", () => zoomAt(centre(), 1.6)),
+    btn("−", is ? "Þysja út" : "Zoom out", () => zoomAt(centre(), 1 / 1.6)), reset),
+    el("div", { class: "mz-hint" }, is ? "Klíptu, eða Ctrl/⌘ + skrun, til að þysja · dragðu til að færa" : "Pinch or Ctrl/⌘ + scroll to zoom · drag to move"));
+  apply();
+
+  svg.addEventListener("wheel", e => {
+    if (!e.ctrlKey && !e.metaKey) return;   // plain scrolling still scrolls the page
+    e.preventDefault();
+    zoomAt(local(e.clientX, e.clientY), Math.exp(-e.deltaY * 0.01));
+  }, { passive: false });
+  svg.addEventListener("dblclick", e => { e.preventDefault(); zoomAt(local(e.clientX, e.clientY), e.shiftKey ? 1 / 2 : 2); });
+
+  // drag to pan with one pointer, pinch with two
+  const down = new Map();
+  let last = null;
+  svg.addEventListener("pointerdown", e => {
+    down.set(e.pointerId, local(e.clientX, e.clientY));
+    if (down.size === 1 && k > 1) svg.setPointerCapture(e.pointerId);
+    last = null;
+  });
+  svg.addEventListener("pointermove", e => {
+    if (!down.has(e.pointerId)) return;
+    const p = local(e.clientX, e.clientY);
+    if (down.size === 1 && k > 1) {
+      const q = down.get(e.pointerId);
+      x += p.x - q.x; y += p.y - q.y;
+      svg.classList.add("dragging");
+      apply();
+    } else if (down.size === 2) {
+      const [a, b] = [...down.entries()].map(([pid, q]) => (pid === e.pointerId ? p : q));
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (last) zoomAt({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, d / last);
+      last = d;
+    }
+    down.set(e.pointerId, p);
+  });
+  const up = e => { down.delete(e.pointerId); last = null; svg.classList.remove("dragging"); };
+  svg.addEventListener("pointerup", up);
+  svg.addEventListener("pointercancel", up);
 }
 
 /* ---------- wiring ---------- */
