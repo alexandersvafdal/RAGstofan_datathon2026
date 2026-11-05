@@ -44,7 +44,7 @@ const I18N = {
 };
 
 // Example questions. topic ties them to tables for follow-up suggestions.
-const POOL = [
+const POOL = window.RAGSTOFAN_POOL || [
   ["population", "How many people live in Iceland?", "Hve margir búa á Íslandi?"],
   ["population", "How many people live in Reykjavík?", "Hvað búa margir í Reykjavík?"],
   ["population", "How much did Reykjavík grow from 2025 to 2026?", "Hve mikið fjölgaði í Reykjavík frá 2025 til 2026?"],

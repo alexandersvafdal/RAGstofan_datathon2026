@@ -20,3 +20,4 @@ ios/*.xcodeproj/project.xcworkspace/xcuserdata/
 
 # official boundaries as downloaded (scripts/build_map.py makes frontend/municipalities.geo.json from it)
 data/geo/*_raw.geojson
+_site/
