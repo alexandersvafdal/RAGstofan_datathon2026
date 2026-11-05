@@ -126,7 +126,7 @@
       .demo-top { position: sticky; top: 0; z-index: 10; }
       .demo-top .nav { position: static; }
       .demo-banner { display: flex; align-items: center; justify-content: center; gap: 10px 14px; flex-wrap: wrap;
-        padding: 9px 16px; background: var(--accent); color: var(--accent-ink); font-size: 14px; line-height: 1.35; text-align: center; }
+        padding: 9px 16px; background: #b89660; color: #14110b; font-size: 14px; line-height: 1.35; text-align: center; }
       .demo-banner .tag { font-weight: 800; font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
         border: 1.5px solid currentColor; border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
       .demo-banner a { color: inherit; font-weight: 700; white-space: nowrap; text-underline-offset: 3px; }
