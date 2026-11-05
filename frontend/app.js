@@ -573,7 +573,7 @@ function renderAnswer(card, a) {
   if (a.comparison) card.append(chartBlock({ chart: { ...a.comparison, compare: true }, computation: null }, L));
   for (const p of a.parts) {
     if (a.comparison && p.chart?.type === "line") continue;
-    if (p.chart && p.chart.type !== "kpi" && p.chart.data.length > 1) card.append(chartBlock(p, L));
+    if (p.chart && p.chart.type !== "kpi" && p.chart.data.length > 1) card.append(chartBlock(p, L, a.question));
   }
 
   // chips that ask the same table again: categories that open further (their subcategories), and categories the
@@ -758,9 +758,10 @@ function viewsFor(c, comp) {
   return multi ? ["bars"] : ["bars", "lollipop"];
 }
 
-function chartBlock(p, L) {
+function chartBlock(p, L, question = "") {
   const views = viewsFor(p.chart, p.computation);
   const holder = el("div", { class: "chart" });
+  holder._question = question;   // the map opens on the places it names
   const switcher = views.length > 1 ? el("div", { class: "segmented mini", role: "group", "aria-label": "Chart type" },
     views.map((v, i) => el("button", { type: "button", class: i ? "" : "on", onclick: e => {
       switcher.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === e.currentTarget));
@@ -992,13 +993,42 @@ function drawChart(holder, c, L, view = c.type === "line" ? "line" : "bars", com
   }, { actions: false, renderer: "svg", tooltip: { theme: "custom" },
        // Icelandic numbers on the axes and labels: 1.149,3, as in the answer text
        ...(L === "is" ? { formatLocale: { decimal: ",", thousands: ".", grouping: [3], currency: ["", " kr."] } } : {}) })
-    .then(r => { if (view === "map") mapZoom(holder, r.view, L); })
+    .then(r => { if (view === "map") mapZoom(holder, r.view, L, holder._question); })
     .catch(e => holder.append(el("div", { class: "muted" }, `chart error: ${e.message}`)));
+}
+
+// Place names compared without accents or case: ð d, þ th, æ ae, á a, ö o
+// and fjörður, firði, fjarðar all as "fj", so "Ísafirði" finds Ísafjarðarbær
+const plain = t => (t || "").toLowerCase().replace(/ð/g, "d").replace(/þ/g, "th").replace(/æ/g, "ae")
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/fjord(ur|i)?|fjard(ar)?|firdi/g, "fj");
+// words that name a kind of place, not a place ("sveitarfélag", "hreppur", "bær", "borg", "kaupstaður", "byggð")
+const PLACE_KIND = /^(sveitarf|hrepp|kaupst|byggd$|baer$|borg$|municip|town|city|region|landshl)/;
+const placeWords = q => plain(q).split(/[^a-z]+/).filter(w => w.length >= 4 && !PLACE_KIND.test(w));
+/** The distinctive words of a municipality's names (map and table spellings): "Sveitarfélagið Árborg" gives "arborg". */
+const namesOf = f => [f.properties.name, f.label].filter(Boolean)
+  .flatMap(n => plain(n).split(/[^a-z]+/)).filter(w => w.length >= 4 && !PLACE_KIND.test(w));
+/** How many first letters two words share. */
+const common = (a, b) => { let i = 0; while (i < a.length && i < b.length && a[i] === b[i]) i++; return i; };
+/** The municipalities a question names. Icelandic endings change ("Kópavogi", "Hafnarfirði"), so a word finds the
+ *  names it shares at least five first letters with, and of those only the closest ("reykjavik": Reykjavíkurborg,
+ *  not Reykjanesbær). */
+function namedPlaces(shapes, question) {
+  const out = new Set();
+  for (const w of placeWords(question)) {
+    let best = 0, hits = [];
+    for (const s of shapes) {
+      const n = Math.max(...namesOf(s.f).map(name => common(name, w)), 0);
+      if (n < 5 && !namesOf(s.f).includes(w)) continue;   // a short word only as a whole name ("hver" is not Hveragerði)
+      if (n > best) { best = n; hits = [s]; } else if (n === best) hits.push(s);
+    }
+    hits.forEach(s => out.add(s));
+  }
+  return [...out];
 }
 
 /** Zoom and pan on a drawn map: pinch or Ctrl/⌘ + scroll, drag, double-click, and the + − ⟲ buttons. Only the
  *  shapes move (the legend stays), clipped to the map's area; outlines keep their width; hover still works. */
-function mapZoom(holder, view, L) {
+function mapZoom(holder, view, L, question = "") {
   const svg = holder.querySelector("svg");
   const marks = [...holder.querySelectorAll("g.mark-shape")];
   if (!svg || !marks.length) return;
@@ -1037,6 +1067,34 @@ function mapZoom(holder, view, L) {
     btn("−", is ? "Þysja út" : "Zoom out", () => zoomAt(centre(), 1 / 1.6)), reset),
     el("div", { class: "mz-hint" }, is ? "Klíptu, eða Ctrl/⌘ + skrun, til að þysja · dragðu til að færa" : "Pinch or Ctrl/⌘ + scroll to zoom · drag to move"));
   apply();
+  focusPlaces(question);
+
+  /** The opening view: the municipalities the question names ("Kópavogi og Hafnarfirði" finds Kópavogsbær and
+   *  Hafnarfjarðarkaupstaður); failing that, the answer's municipalities when they lie close together. */
+  function focusPlaces(q) {
+    const shapes = [...marks[marks.length - 1].querySelectorAll("path")]
+      .map(path => ({ path, f: path.__data__?.datum })).filter(s => s.f?.properties);
+    let chosen = namedPlaces(shapes, q);
+    const named = chosen.length > 0;
+    if (!named) chosen = shapes;
+    if (!chosen.length) return;
+    const boxes = chosen.map(s => s.path.getBBox());
+    const x0 = Math.min(...boxes.map(b => b.x)), x1 = Math.max(...boxes.map(b => b.x + b.width));
+    const y0 = Math.min(...boxes.map(b => b.y)), y1 = Math.max(...boxes.map(b => b.y + b.height));
+    const W = view.width(), H = view.height();
+    const k2 = Math.min(named ? 8 : MAX, W / ((x1 - x0) * 1.5 || 1), H / ((y1 - y0) * 1.5 || 1));
+    if (k2 < (named ? 1.3 : 2)) return;   // already most of the country: the whole map is the right view
+    const to = { k: k2, x: W / 2 - (x0 + x1) / 2 * k2, y: H / 2 - (y0 + y1) / 2 * k2 };
+    if (reduceMotion) { ({ k, x, y } = to); apply(); return; }
+    const t0 = performance.now(), from = { k, x, y };
+    const step = now => {
+      const t = Math.min(1, (now - t0) / 900), e = 1 - Math.pow(1 - t, 3);
+      k = from.k + (to.k - from.k) * e; x = from.x + (to.x - from.x) * e; y = from.y + (to.y - from.y) * e;
+      apply();
+      if (t < 1) requestAnimationFrame(step);
+    };
+    setTimeout(() => requestAnimationFrame(step), 350);   // the whole country first, then the places
+  }
 
   svg.addEventListener("wheel", e => {
     if (!e.ctrlKey && !e.metaKey) return;   // plain scrolling still scrolls the page
