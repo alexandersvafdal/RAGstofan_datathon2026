@@ -108,9 +108,13 @@
   const REPO = "https://github.com/alexandersvafdal/RAGstofan_datathon2026";
   const WORDS = {
     en: { demo: `Static demo: real answers saved from the server, for the example questions. <a href="${REPO}">Run it yourself</a> to ask anything.`,
-          ai: "Answers are chosen by an AI and can be wrong. Check the figure against the linked Statistics Iceland table." },
+          ai: "Answers are chosen by an AI and can be wrong. Check the figure against the linked Statistics Iceland table.",
+          tag: "Static demo", banner: "No live AI here: this page replays answers saved from the real server, for the example questions only.",
+          run: "Run it yourself" },
     is: { demo: `Kynningarútgáfa: raunveruleg svör vistuð af þjóninum, við tilbúnu spurningunum. <a href="${REPO}">Keyrðu hana sjálf(ur)</a> til að spyrja hvers sem er.`,
-          ai: "Gervigreind velur svörin og þau geta verið röng. Berðu töluna saman við töflu Hagstofunnar sem vísað er í." },
+          ai: "Gervigreind velur svörin og þau geta verið röng. Berðu töluna saman við töflu Hagstofunnar sem vísað er í.",
+          tag: "Kynningarútgáfa", banner: "Engin gervigreind í gangi hér: síðan spilar svör sem voru vistuð af raunverulega þjóninum, aðeins við tilbúnu spurningunum.",
+          run: "Keyra sjálf(ur)" },
   };
   document.addEventListener("DOMContentLoaded", () => {
     const style = document.createElement("style");
@@ -118,15 +122,35 @@
       .demo-note a { color: var(--accent); }
       .demo-note .ai { display: block; margin-top: 4px; font-weight: 600; }
       .ai-disclaimer { text-align: center; font-size: 12px; color: var(--text-3); margin: 6px 12px 0; line-height: 1.35; }
-      .composer.inline .ai-disclaimer { display: none; }`;
+      .composer.inline .ai-disclaimer { display: none; }
+      .demo-top { position: sticky; top: 0; z-index: 10; }
+      .demo-top .nav { position: static; }
+      .demo-banner { display: flex; align-items: center; justify-content: center; gap: 10px 14px; flex-wrap: wrap;
+        padding: 9px 16px; background: var(--accent); color: var(--accent-ink); font-size: 14px; line-height: 1.35; text-align: center; }
+      .demo-banner .tag { font-weight: 800; font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+        border: 1.5px solid currentColor; border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+      .demo-banner a { color: inherit; font-weight: 700; white-space: nowrap; text-underline-offset: 3px; }
+      @media (max-width: 600px) { .demo-banner { font-size: 13px; padding: 8px 16px; } }`;
     document.head.append(style);
     const note = document.createElement("p");
     note.className = "demo-note";
     const foot = document.createElement("p");
     foot.className = "ai-disclaimer";
+    // a bar above the navigation, staying on screen while scrolling
+    const banner = document.createElement("div");
+    banner.className = "demo-banner";
+    banner.setAttribute("role", "note");
+    const nav = document.querySelector("header.nav");
+    if (nav) {
+      const top = document.createElement("div");
+      top.className = "demo-top";
+      nav.before(top);
+      top.append(banner, nav);
+    }
     const render = () => {
       const w = WORDS[document.documentElement.lang === "is" ? "is" : "en"];
-      note.innerHTML = `${w.demo}<span class="ai">⚠ ${w.ai}</span>`;
+      banner.innerHTML = `<span class="tag">${w.tag}</span><span>${w.banner}</span><a href="${REPO}">${w.run} ↗</a>`;
+      note.innerHTML = `<span class="ai">⚠ ${w.ai}</span>`;   // the banner says it is a demo
       foot.textContent = w.ai;
     };
     render();
