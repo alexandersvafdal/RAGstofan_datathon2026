@@ -120,7 +120,15 @@ since the snapshot, in the snapshot's own format.
 
 ## How a question becomes an answer
 
-The full diagram, with every LLM call marked: [docs/architecture.md](docs/architecture.md).
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/architecture-dark.png">
+  <img src="docs/img/architecture.png" alt="RAGstofan architecture: the iPhone or web app sends a question to the server, which searches the 1,857 Statistics Iceland tables, reads the question once with Qwen3.8 27B on a JURECA GPU, then checks, computes and charts in code before the answer and chart return to the app. Map outlines come from IS 50V; voice runs on Whisper and Piper on the DGX Spark.">
+</picture>
+
+The model reads the question once (gold); code checks every choice, fetches the numbers, computes and draws (gold).
+Interactive versions: [light](docs/architecture.html) · [dark](docs/architecture-dark.html). When no listed table
+fits, the step-by-step pipeline below answers instead. Its full diagram, with every LLM call marked:
+[docs/architecture.md](docs/architecture.md).
 
 1. **Understand.** A follow-up is rewritten into a question that stands alone. A planner (LLM) restates the question
    in English with search words and reads its facts: places, period, breakdown wanted. Code drops any fact that is
